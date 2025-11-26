@@ -5,6 +5,7 @@ export interface FieldType {
   icon: string;
   schema: any;
   uischema: any;
+  isLayout?: boolean;
 }
 
 export interface FormField {
@@ -15,6 +16,9 @@ export interface FormField {
   required?: boolean;
   schema: any;
   uischema: any;
+  children?: FormField[];
+  isLayout?: boolean;
+  parentId?: string;
 }
 
 export interface FormState {
@@ -24,6 +28,45 @@ export interface FormState {
 }
 
 export const defaultFieldTypes: FieldType[] = [
+  // Layout Elements
+  {
+    id: 'vertical-layout',
+    type: 'layout',
+    label: 'Vertical Layout',
+    icon: '📑',
+    isLayout: true,
+    schema: {},
+    uischema: {
+      type: 'VerticalLayout',
+      elements: [],
+    },
+  },
+  {
+    id: 'horizontal-layout',
+    type: 'layout',
+    label: 'Horizontal Layout',
+    icon: '📊',
+    isLayout: true,
+    schema: {},
+    uischema: {
+      type: 'HorizontalLayout',
+      elements: [],
+    },
+  },
+  {
+    id: 'group',
+    type: 'group',
+    label: 'Group',
+    icon: '📦',
+    isLayout: true,
+    schema: {},
+    uischema: {
+      type: 'Group',
+      label: 'Group Section',
+      elements: [],
+    },
+  },
+  // Form Fields
   {
     id: 'text',
     type: 'string',

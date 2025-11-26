@@ -4,17 +4,11 @@ import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
 import FormPreview from './components/FormPreview';
 import FieldPalette from './components/FieldPalette';
 import SchemaEditor from './components/SchemaEditor';
-import FormStructure from './components/FormStructure';
+import LayoutManager from './components/LayoutManager';
 import FieldProperties from './components/FieldProperties';
 import SampleSchemaLoader from './components/SampleSchemaLoader';
 
-import {
-  FormField,
-  FieldType,
-  FormState,
-  generateFieldKey,
-  defaultFieldTypes,
-} from './types';
+import { FormField, FieldType, FormState, defaultFieldTypes } from './types';
 
 const theme = createTheme({
   palette: {
@@ -35,60 +29,173 @@ const App: React.FC = () => {
   const [propertiesDrawerOpen, setPropertiesDrawerOpen] = useState(false);
   const [sampleSchemaLoaderOpen, setSampleSchemaLoaderOpen] = useState(false);
 
+  // Use a counter to generate truly unique IDs that are StrictMode safe
+  const fieldCounter = React.useRef(0);
+  const pendingOperations = React.useRef(new Set<string>());
+
   // Generate form state from fields
-  const formState: FormState = {
-    schema: {
-      type: 'object',
-      properties: fields.reduce((acc, field) => {
-        acc[field.key] = {
+  const buildSchemaFromFields = (fieldsArray: FormField[]): any => {
+    const properties: any = {};
+
+    fieldsArray.forEach((field) => {
+      if (!field.isLayout) {
+        properties[field.key] = {
           ...field.schema,
           title: field.label,
         };
-        return acc;
-      }, {} as any),
-      required: fields.filter((f) => f.required).map((f) => f.key),
+      }
+      // Recursively process children in layouts
+      if (field.children) {
+        const childSchema = buildSchemaFromFields(field.children);
+        Object.assign(properties, childSchema.properties);
+      }
+    });
+
+    return { properties };
+  };
+
+  const buildUISchemaFromFields = (fieldsArray: FormField[]): any[] => {
+    return fieldsArray.map((field) => {
+      if (field.isLayout) {
+        return {
+          ...field.uischema,
+          label: field.label,
+          elements: field.children
+            ? buildUISchemaFromFields(field.children)
+            : [],
+        };
+      } else {
+        return {
+          ...field.uischema,
+          scope: `#/properties/${field.key}`,
+          label: field.label,
+        };
+      }
+    });
+  };
+
+  const getAllRequiredFields = (fieldsArray: FormField[]): string[] => {
+    const required: string[] = [];
+    fieldsArray.forEach((field) => {
+      if (!field.isLayout && field.required) {
+        required.push(field.key);
+      }
+      if (field.children) {
+        required.push(...getAllRequiredFields(field.children));
+      }
+    });
+    return required;
+  };
+
+  const schemaData = buildSchemaFromFields(fields);
+  const formState: FormState = {
+    schema: {
+      type: 'object',
+      properties: schemaData.properties,
+      required: getAllRequiredFields(fields),
     },
     uischema: {
       type: 'VerticalLayout',
-      elements: fields.map((field) => ({
-        ...field.uischema,
-        scope: `#/properties/${field.key}`,
-        label: field.label,
-      })),
+      elements: buildUISchemaFromFields(fields),
     },
     data: formData,
   };
 
-  const addField = useCallback((fieldType: FieldType, index?: number) => {
-    const fieldKey = generateFieldKey(fieldType.id);
-    const newField: FormField = {
-      id: `field_${Date.now()}`,
-      type: fieldType.id,
-      label: `${fieldType.label} Field`,
-      key: fieldKey,
-      required: false,
-      schema: { ...fieldType.schema },
-      uischema: { ...fieldType.uischema },
-    };
+  const addField = useCallback(
+    (fieldType: FieldType, parentId?: string, index?: number) => {
+      // Create a unique operation ID to prevent duplicates
+      const operationId = `${fieldType.id}-${parentId || 'root'}-${Date.now()}`;
 
-    setFields((prev) => {
-      const newFields = [...prev];
-      if (typeof index === 'number') {
-        newFields.splice(index, 0, newField);
-      } else {
-        newFields.push(newField);
+      // Check if this operation is already pending
+      if (pendingOperations.current.has(operationId)) {
+        return; // Skip duplicate execution
       }
-      return newFields;
-    });
 
-    setSelectedField(newField);
-    setPropertiesDrawerOpen(true);
-  }, []);
+      // Mark operation as pending
+      pendingOperations.current.add(operationId);
 
-  const addFieldAtIndex = useCallback(
-    (index?: number) => {
-      const defaultFieldType = defaultFieldTypes[0];
-      addField(defaultFieldType, index);
+      // Clean up after a short delay
+      setTimeout(() => {
+        pendingOperations.current.delete(operationId);
+      }, 100);
+
+      // Use a unique counter to prevent StrictMode duplications
+      fieldCounter.current += 1;
+      const uniqueId = fieldCounter.current;
+
+      const fieldKey = fieldType.isLayout
+        ? `layout_${uniqueId}`
+        : `${fieldType.id}_${uniqueId}`;
+
+      const newField: FormField = {
+        id: `field_${uniqueId}`,
+        type: fieldType.id,
+        label: fieldType.isLayout
+          ? fieldType.label
+          : `${fieldType.label} Field`,
+        key: fieldKey,
+        required: false,
+        schema: { ...fieldType.schema },
+        uischema: { ...fieldType.uischema },
+        isLayout: fieldType.isLayout,
+        children: fieldType.isLayout ? [] : undefined,
+        parentId: parentId,
+      };
+      setFields((prev) => {
+        const newFields = [...prev];
+
+        if (parentId) {
+          // Add to specific parent layout
+          const addToParent = (fieldsArray: FormField[]): boolean => {
+            for (const field of fieldsArray) {
+              if (field.id === parentId && field.isLayout) {
+                if (!field.children) field.children = [];
+                if (typeof index === 'number') {
+                  field.children.splice(index, 0, newField);
+                } else {
+                  field.children.push(newField);
+                }
+                return true;
+              }
+              if (field.children && addToParent(field.children)) {
+                return true;
+              }
+            }
+            return false;
+          };
+          addToParent(newFields);
+        } else {
+          // Add to root level
+          if (typeof index === 'number') {
+            newFields.splice(index, 0, newField);
+          } else {
+            newFields.push(newField);
+          }
+        }
+
+        return newFields;
+      });
+
+      setSelectedField(newField);
+      if (!fieldType.isLayout) {
+        setPropertiesDrawerOpen(true);
+      }
+    },
+    []
+  );
+
+  const addFieldToLayout = useCallback(
+    (parentId: string, index?: number) => {
+      const defaultFieldType =
+        defaultFieldTypes.find((ft) => !ft.isLayout) || defaultFieldTypes[0];
+      addField(defaultFieldType, parentId, index);
+    },
+    [addField]
+  );
+
+  const addLayoutToContainer = useCallback(
+    (parentId: string, layoutType: FieldType, index?: number) => {
+      addField(layoutType, parentId, index);
     },
     [addField]
   );
@@ -308,15 +415,18 @@ const App: React.FC = () => {
               overflow: 'auto',
             }}
           >
-            <FormStructure
+            <LayoutManager
               fields={fields}
               onFieldsChange={setFields}
               onFieldSelect={(field: FormField) => {
                 setSelectedField(field);
-                setPropertiesDrawerOpen(true);
+                if (!field.isLayout) {
+                  setPropertiesDrawerOpen(true);
+                }
               }}
               selectedField={selectedField}
-              onAddFieldClick={addFieldAtIndex}
+              onAddFieldToLayout={addFieldToLayout}
+              onAddLayoutToContainer={addLayoutToContainer}
             />
           </div>
         </div>

@@ -75,40 +75,113 @@ const FieldProperties: React.FC<FieldPropertiesProps> = ({
   };
 
   const hasEnumOptions = ['select', 'radio'].includes(localField.type);
+  const isGroup = localField.type === 'group';
+  const isLayout = localField.isLayout && !isGroup;
 
   return (
     <Box p={2}>
       <Typography variant="h6" gutterBottom>
-        Field Properties
+        {isGroup
+          ? 'Group Properties'
+          : isLayout
+          ? 'Layout Properties'
+          : 'Field Properties'}
       </Typography>
 
       <Box mb={3}>
         <TextField
-          label="Label"
+          label={isGroup ? 'Group Title' : 'Label'}
           fullWidth
           value={localField.label}
-          onChange={(e) => handleUpdate({ label: e.target.value })}
+          onChange={(e) => {
+            const newLabel = e.target.value;
+            if (isGroup) {
+              // Update both field label and UI schema label for groups
+              const updatedUISchema = {
+                ...localField.uischema,
+                label: newLabel,
+              };
+              handleUpdate({
+                label: newLabel,
+                uischema: updatedUISchema,
+              });
+            } else {
+              handleUpdate({ label: newLabel });
+            }
+          }}
           margin="normal"
+          helperText={isGroup ? 'Displayed as the group header' : ''}
         />
 
-        <TextField
-          label="Field Key"
-          fullWidth
-          value={localField.key}
-          onChange={(e) => handleUpdate({ key: e.target.value })}
-          margin="normal"
-          helperText="Unique identifier for this field"
-        />
-
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={localField.required || false}
-              onChange={(e) => handleUpdate({ required: e.target.checked })}
+        {!isLayout && !isGroup && (
+          <>
+            <TextField
+              label="Field Key"
+              fullWidth
+              value={localField.key}
+              onChange={(e) => handleUpdate({ key: e.target.value })}
+              margin="normal"
+              helperText="Unique identifier for this field"
             />
-          }
-          label="Required"
-        />
+
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={localField.required || false}
+                  onChange={(e) => handleUpdate({ required: e.target.checked })}
+                />
+              }
+              label="Required"
+            />
+          </>
+        )}
+
+        {isGroup && (
+          <>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={localField.uischema?.options?.collapsed || false}
+                  onChange={(e) => {
+                    const updatedUISchema = {
+                      ...localField.uischema,
+                      options: {
+                        ...localField.uischema?.options,
+                        collapsed: e.target.checked,
+                      },
+                    };
+                    handleUpdate({ uischema: updatedUISchema });
+                  }}
+                />
+              }
+              label="Collapsible"
+            />
+
+            {localField.uischema?.options?.collapsed && (
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={
+                      localField.uischema?.options?.showUnfocusedDescription ||
+                      false
+                    }
+                    onChange={(e) => {
+                      const updatedUISchema = {
+                        ...localField.uischema,
+                        options: {
+                          ...localField.uischema?.options,
+                          showUnfocusedDescription: e.target.checked,
+                        },
+                      };
+                      handleUpdate({ uischema: updatedUISchema });
+                    }}
+                  />
+                }
+                label="Start Collapsed"
+              />
+            )}
+          </>
+        )}
       </Box>
 
       {hasEnumOptions && (
@@ -150,12 +223,34 @@ const FieldProperties: React.FC<FieldPropertiesProps> = ({
 
       <Box>
         <Typography variant="subtitle2" gutterBottom>
-          Field Type: {localField.type}
+          {isGroup
+            ? 'Group Container'
+            : isLayout
+            ? 'Layout Container'
+            : `Field Type: ${localField.type}`}
         </Typography>
 
-        {localField.type === 'string' && localField.schema.format && (
-          <Typography variant="caption" color="textSecondary">
-            Format: {localField.schema.format}
+        {!isGroup &&
+          !isLayout &&
+          localField.type === 'string' &&
+          localField.schema.format && (
+            <Typography variant="caption" color="textSecondary">
+              Format: {localField.schema.format}
+            </Typography>
+          )}
+
+        {isGroup && (
+          <Typography variant="caption" color="textSecondary" display="block">
+            Groups provide visual separation and can contain any fields or
+            layouts
+          </Typography>
+        )}
+
+        {isLayout && (
+          <Typography variant="caption" color="textSecondary" display="block">
+            {localField.type === 'vertical-layout'
+              ? 'Stacks elements vertically'
+              : 'Arranges elements horizontally'}
           </Typography>
         )}
       </Box>
