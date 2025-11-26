@@ -4,7 +4,7 @@ import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
 import FormPreview from './components/FormPreview';
 import FieldPalette from './components/FieldPalette';
 import SchemaEditor from './components/SchemaEditor';
-import LayoutManager from './components/LayoutManager';
+import FormStructure from './components/FormStructure';
 import FieldProperties from './components/FieldProperties';
 import SampleSchemaLoader from './components/SampleSchemaLoader';
 
@@ -25,6 +25,7 @@ const App: React.FC = () => {
   const [fields, setFields] = useState<FormField[]>([]);
   const [selectedField, setSelectedField] = useState<FormField | null>(null);
   const [showSchemaEditor, setShowSchemaEditor] = useState(false);
+  const [showFormPreview, setShowFormPreview] = useState(true);
   const [formData, setFormData] = useState<any>({});
   const [propertiesDrawerOpen, setPropertiesDrawerOpen] = useState(false);
   const [sampleSchemaLoaderOpen, setSampleSchemaLoaderOpen] = useState(false);
@@ -267,6 +268,21 @@ const App: React.FC = () => {
           <h1 style={{ margin: 0, fontSize: '24px' }}>🔨 Form Builder</h1>
           <div style={{ display: 'flex', gap: '10px' }}>
             <button
+              onClick={() => setShowFormPreview(!showFormPreview)}
+              style={{
+                padding: '10px 20px',
+                fontSize: '14px',
+                background: showFormPreview ? '#4caf50' : 'white',
+                color: showFormPreview ? 'white' : '#2196f3',
+                border: '2px solid white',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontWeight: 'bold',
+              }}
+            >
+              {showFormPreview ? '👁️ Hide' : '👁️ Show'} Preview
+            </button>
+            <button
               onClick={() => setShowSchemaEditor(!showSchemaEditor)}
               style={{
                 padding: '10px 20px',
@@ -316,14 +332,22 @@ const App: React.FC = () => {
         {/* Debug Status */}
         <div
           style={{
-            background: showSchemaEditor ? '#4caf50' : '#f44336',
+            background: '#666',
             color: 'white',
             padding: '8px 20px',
             fontSize: '14px',
             fontWeight: 'bold',
+            display: 'flex',
+            gap: '20px',
           }}
         >
-          🔍 Schema Editor: {showSchemaEditor ? 'VISIBLE' : 'HIDDEN'}
+          <span>
+            🎯 Current View:{' '}
+            {showFormPreview ? 'FORM PREVIEW' : 'FORM STRUCTURE'}
+          </span>
+          <span>
+            🔍 Schema Editor: {showSchemaEditor ? 'VISIBLE' : 'HIDDEN'}
+          </span>
         </div>
 
         {/* Main Content */}
@@ -334,7 +358,7 @@ const App: React.FC = () => {
             overflow: 'hidden',
           }}
         >
-          {/* Left Sidebar - Field Palette Only */}
+          {/* Left Sidebar - Field Palette */}
           <div
             style={{
               width: '280px',
@@ -348,86 +372,58 @@ const App: React.FC = () => {
             <FieldPalette onFieldSelect={handleFieldSelect} />
           </div>
 
-          {/* Center Content - Form Preview and Schema Editor */}
+          {/* Center Content - Toggle between Form Structure and Form Preview */}
           <div
             style={{
               flex: 1,
               display: 'flex',
               flexDirection: 'column',
               overflow: 'auto',
-              padding: '20px',
+              background: showFormPreview ? '#f9f9f9' : 'white',
             }}
           >
-            {/* Schema Editor */}
+            {/* Schema Editor (when enabled) */}
             {showSchemaEditor && (
-              <div
-                style={{
-                  background: '#fff3e0',
-                  border: '3px solid #ff9800',
-                  borderRadius: '8px',
-                  marginBottom: '20px',
-                  minHeight: '400px',
-                }}
-              >
-                <div
-                  style={{
-                    background: '#ff9800',
-                    color: 'white',
-                    padding: '15px',
-                    fontSize: '18px',
-                    fontWeight: 'bold',
-                    borderRadius: '5px 5px 0 0',
-                  }}
-                >
-                  ✅ SCHEMA EDITOR IS NOW VISIBLE!
-                </div>
-                <SchemaEditor
-                  formState={formState}
-                  onFormStateChange={(newFormState) =>
-                    setFormData(newFormState.data)
-                  }
-                />
-              </div>
+              <SchemaEditor
+                formState={formState}
+                onFormStateChange={(newFormState) =>
+                  setFormData(newFormState.data)
+                }
+              />
             )}
 
-            {/* Form Preview */}
-            <div
-              style={{
-                background: 'white',
-                border: '1px solid #e0e0e0',
-                borderRadius: '8px',
-                flex: 1,
-                minHeight: '400px',
-              }}
-            >
-              <FormPreview formState={formState} onDataChange={setFormData} />
-            </div>
-          </div>
-
-          {/* Right Sidebar - Form Structure */}
-          <div
-            style={{
-              width: '320px',
-              background: 'white',
-              borderLeft: '1px solid #e0e0e0',
-              display: 'flex',
-              flexDirection: 'column',
-              overflow: 'auto',
-            }}
-          >
-            <LayoutManager
-              fields={fields}
-              onFieldsChange={setFields}
-              onFieldSelect={(field: FormField) => {
-                setSelectedField(field);
-                if (!field.isLayout) {
-                  setPropertiesDrawerOpen(true);
-                }
-              }}
-              selectedField={selectedField}
-              onAddFieldToLayout={addFieldToLayout}
-              onAddLayoutToContainer={addLayoutToContainer}
-            />
+            {/* Content Area - Either Form Structure or Form Preview */}
+            {!showSchemaEditor && (
+              <div
+                style={{
+                  flex: 1,
+                  overflow: 'auto',
+                }}
+              >
+                {showFormPreview ? (
+                  /* Form Preview Mode */
+                  <FormPreview
+                    formState={formState}
+                    onDataChange={setFormData}
+                  />
+                ) : (
+                  /* Form Structure Mode */
+                  <FormStructure
+                    fields={fields}
+                    onFieldsChange={setFields}
+                    onFieldSelect={(field: FormField) => {
+                      setSelectedField(field);
+                      if (!field.isLayout) {
+                        setPropertiesDrawerOpen(true);
+                      }
+                    }}
+                    selectedField={selectedField}
+                    onAddFieldToLayout={addFieldToLayout}
+                    onAddLayoutToContainer={addLayoutToContainer}
+                  />
+                )}
+              </div>
+            )}
           </div>
         </div>
 

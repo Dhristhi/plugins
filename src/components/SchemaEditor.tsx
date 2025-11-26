@@ -38,16 +38,27 @@ const SchemaEditor: React.FC<SchemaEditorProps> = ({
   };
 
   return (
-    <div className="schema-editor">
-      <Box p={2} sx={{ height: '100%' }}>
-        <Typography variant="h6" gutterBottom color="primary">
-          📝 Schema Editor
+    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <Box sx={{ p: 2, borderBottom: '1px solid #e0e0e0' }}>
+        <Typography variant="h6" gutterBottom>
+          Schema Editor
         </Typography>
+        <Typography variant="body2" color="textSecondary">
+          Edit the JSON schemas directly and click Apply to see changes
+        </Typography>
+      </Box>
 
-        {error && <div className="error-message">{error}</div>}
+      <Box sx={{ p: 2, flex: 1, display: 'flex', flexDirection: 'column' }}>
+        {error && (
+          <Box sx={{ mb: 2, p: 2, bgcolor: '#ffebee', borderRadius: 1 }}>
+            <Typography variant="body2" color="error">
+              {error}
+            </Typography>
+          </Box>
+        )}
 
-        <Box display="flex" gap={2} sx={{ height: 'calc(100% - 100px)' }}>
-          <Box flex={1}>
+        <Box display="flex" gap={2} sx={{ flex: 1, mb: 2 }}>
+          <Box flex={1} sx={{ display: 'flex', flexDirection: 'column' }}>
             <Typography variant="subtitle2" gutterBottom>
               JSON Schema
             </Typography>
@@ -58,7 +69,7 @@ const SchemaEditor: React.FC<SchemaEditorProps> = ({
               value={schemaText}
               onChange={(e) => setSchemaText(e.target.value)}
               sx={{
-                height: '100%',
+                flex: 1,
                 '& .MuiInputBase-root': {
                   height: '100%',
                   alignItems: 'flex-start',
@@ -74,7 +85,7 @@ const SchemaEditor: React.FC<SchemaEditorProps> = ({
             />
           </Box>
 
-          <Box flex={1}>
+          <Box flex={1} sx={{ display: 'flex', flexDirection: 'column' }}>
             <Typography variant="subtitle2" gutterBottom>
               UI Schema
             </Typography>
@@ -85,7 +96,7 @@ const SchemaEditor: React.FC<SchemaEditorProps> = ({
               value={uischemaText}
               onChange={(e) => setUischemaText(e.target.value)}
               sx={{
-                height: '100%',
+                flex: 1,
                 '& .MuiInputBase-root': {
                   height: '100%',
                   alignItems: 'flex-start',
@@ -102,20 +113,13 @@ const SchemaEditor: React.FC<SchemaEditorProps> = ({
           </Box>
         </Box>
 
-        <Box mt={2} display="flex" gap={2}>
+        <Box display="flex" gap={2} alignItems="center">
           <Button variant="contained" onClick={handleApply}>
             Apply Changes
           </Button>
-          <Typography
-            variant="caption"
-            color="textSecondary"
-            sx={{ alignSelf: 'center' }}
-          >
-            Edit the JSON schemas directly and click Apply to see changes
-          </Typography>
         </Box>
       </Box>
-    </div>
+    </Box>
   );
 };
 

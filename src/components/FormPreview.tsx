@@ -5,7 +5,7 @@ import {
   materialCells,
 } from '@jsonforms/material-renderers';
 import { FormState } from '../types';
-import { Typography, Paper } from '@mui/material';
+import { Typography, Box } from '@mui/material';
 
 interface FormPreviewProps {
   formState: FormState;
@@ -17,14 +17,19 @@ const FormPreview: React.FC<FormPreviewProps> = ({
   onDataChange,
 }) => {
   return (
-    <div className="form-preview">
-      <Typography variant="h6" gutterBottom>
-        Form Preview
-      </Typography>
+    <Box>
+      <Box sx={{ p: 2, borderBottom: '1px solid #e0e0e0' }}>
+        <Typography variant="h6" gutterBottom>
+          Form Preview
+        </Typography>
+        <Typography variant="body2" color="textSecondary">
+          Test and interact with your form
+        </Typography>
+      </Box>
 
-      {formState.schema.properties &&
-      Object.keys(formState.schema.properties).length > 0 ? (
-        <Paper style={{ padding: '20px' }}>
+      <Box sx={{ p: 2 }}>
+        {formState.schema.properties &&
+        Object.keys(formState.schema.properties).length > 0 ? (
           <JsonForms
             schema={formState.schema}
             uischema={formState.uischema}
@@ -33,15 +38,13 @@ const FormPreview: React.FC<FormPreviewProps> = ({
             cells={materialCells}
             onChange={({ data }) => onDataChange(data)}
           />
-        </Paper>
-      ) : (
-        <Paper style={{ padding: '40px', textAlign: 'center' }}>
-          <Typography variant="body1" color="textSecondary">
-            Add fields to see the form preview
+        ) : (
+          <Typography variant="body2" color="textSecondary">
+            No fields added yet. Start by adding fields from the palette.
           </Typography>
-        </Paper>
-      )}
-    </div>
+        )}
+      </Box>
+    </Box>
   );
 };
 
