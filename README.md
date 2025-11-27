@@ -1,61 +1,179 @@
-# Form Builder - JavaScript + Yarn Project
+# React Form Builder
 
-A React form builder using JSON Forms with drag and drop functionality, powered by JavaScript and Yarn.
+A powerful, modern drag-and-drop form builder library built with React 19, Material-UI, and JSON Forms. Create complex, nested form structures with an intuitive visual interface.
+
+[![React](https://img.shields.io/badge/React-19-blue.svg)](https://reactjs.org/)
+[![Material-UI](https://img.shields.io/badge/Material--UI-6-blue.svg)](https://mui.com/)
+[![JSON Forms](https://img.shields.io/badge/JSON%20Forms-3.0-green.svg)](https://jsonforms.io/)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
+## ✨ Features
+
+- 🎯 **Drag & Drop Interface** - Intuitive visual form building
+- 🔧 **Multi-level Nesting** - Unlimited layout depth and complexity
+- 📱 **Responsive Design** - Works seamlessly across all devices
+- 🎨 **Modern UI/UX** - Clean Material Design interface
+- ⚡ **Real-time Preview** - See your forms as you build them
+- 📊 **JSON Schema Export** - Standards-compliant output
+- 🚀 **Performance Optimized** - Efficient rendering and updates
 
 ## 🚀 Quick Start
+
+```bash
+# Install dependencies
+npm install
+# or
+yarn install
+
+# Start development server
+npm run dev
+# or
+yarn dev
+
+# Open http://localhost:3000
+```
+
+## 📦 Installation
 
 ### Prerequisites
 
 - Node.js (v16 or higher)
-- Yarn package manager
+- Package manager: npm or yarn
 
-### Installation
-
-1. Clone or access this project directory
-2. Install dependencies:
+### Option 1: Clone Repository
 
 ```bash
-yarn install
+git clone [repository-url]
+cd react-form-builder
+npm install
+npm run dev
 ```
 
-### Development
-
-Start the development server:
+### Option 2: NPM Package (Future)
 
 ```bash
-yarn dev
-# or
-yarn start
+npm install @your-org/react-form-builder
 ```
 
-Visit `http://localhost:3000` to see the form builder in action.
+## 🏗️ Architecture
 
-### Build for Production
-
-```bash
-yarn build
-```
-
-### Preview Production Build
-
-```bash
-yarn preview
-```
-
-## 📂 Project Structure
+### Core Components
 
 ```
 src/
-├── components/         # React components
-│   ├── FieldPalette.jsx       # Field selection sidebar
-│   ├── FieldProperties.jsx    # Field property editor
-│   ├── FormPreview.jsx        # Live form preview
-│   ├── FormStructure.jsx      # Form structure editor
-│   └── SchemaEditor.jsx       # JSON schema editor
-├── App.jsx            # Main application component
-├── main.jsx           # Application entry point
-├── types.js           # Type definitions and constants
-└── index.css          # Global styles
+├── components/           # React components library
+│   ├── FieldPalette/     # Draggable field palette
+│   ├── FormStructure/    # Visual form builder
+│   ├── FormPreview/      # Live form renderer
+│   ├── SchemaEditor/     # JSON schema editor
+│   └── FieldProperties/  # Property configuration
+├── hooks/               # Custom React hooks
+├── utils/              # Utility functions
+└── types/             # Type definitions
+```
+
+### Technology Stack
+
+- **React 19** - Modern UI framework with concurrent features
+- **Material-UI v6** - Complete component library and theming
+- **JSON Forms** - Schema-based form generation and validation
+- **@dnd-kit** - Accessible drag-and-drop toolkit
+- **Vite** - Fast build tool and development server
+
+## 🎯 Core Features
+
+### Drag & Drop System
+
+- Multi-level nesting with unlimited depth
+- Smart drop zones with visual feedback
+- Cross-container item movement
+- Sortable lists at every level
+
+### Form Elements
+
+- **Input Fields**: Text, Number, Email, Date, TextArea
+- **Selection**: Checkbox, Radio, Select, Multi-select
+- **Layouts**: Groups, Vertical/Horizontal layouts
+- **Advanced**: Conditional fields, validation rules
+
+### Visual Interface
+
+- Real-time form preview
+- Property panel for field configuration
+- Context menus for quick actions
+- Responsive design for all devices
+
+## 📖 API Reference
+
+### FormBuilder Component
+
+```javascript
+import { FormBuilder } from 'react-form-builder';
+
+<FormBuilder
+  initialSchema={schema} // Optional: JSON schema to load
+  onSchemaChange={handleChange} // Callback for schema updates
+  onExport={handleExport} // Export handler
+  templates={customTemplates} // Optional: custom templates
+/>;
+```
+
+### Props
+
+| Prop             | Type       | Default | Description                        |
+| ---------------- | ---------- | ------- | ---------------------------------- |
+| `initialSchema`  | `Object`   | `{}`    | Initial JSON schema to load        |
+| `onSchemaChange` | `Function` | -       | Called when form structure changes |
+| `onExport`       | `Function` | -       | Called when user exports form      |
+| `templates`      | `Array`    | `[]`    | Custom form templates              |
+| `theme`          | `Object`   | -       | Custom Material-UI theme           |
+
+### Hooks
+
+```javascript
+// Custom hooks for form building
+import { useFormBuilder, useDragDrop } from 'react-form-builder';
+
+const { schema, addField, removeField } = useFormBuilder();
+const { isDragging, draggedItem } = useDragDrop();
+```
+
+## 🔧 Configuration
+
+### Custom Field Types
+
+```javascript
+const customField = {
+  id: 'custom-input',
+  type: 'string',
+  label: 'Custom Input',
+  icon: CustomIcon,
+  schema: {
+    type: 'string',
+    title: 'Custom Field',
+  },
+  uischema: {
+    type: 'Control',
+    scope: '#/properties/custom',
+  },
+};
+```
+
+### Theming
+
+```javascript
+import { ThemeProvider } from '@mui/material';
+
+const customTheme = createTheme({
+  palette: {
+    primary: { main: '#1976d2' },
+    // ... custom theme
+  },
+});
+
+<ThemeProvider theme={customTheme}>
+  <FormBuilder />
+</ThemeProvider>;
 ```
 
 ## ✨ Features
@@ -68,117 +186,160 @@ src/
 - **Export/Import**: Save and load your form configurations
 - **Real-time Editing**: Edit field properties and see immediate results
 
-### 🔥 Drag & Drop Capabilities
+## 📚 Examples
 
-- **Multi-level Nesting**: Drop layouts into layouts, fields into groups, unlimited nesting depth
-- **Smart Drop Zones**: Visual indicators show where items can be dropped
-- **Cross-container Movement**: Drag fields between different layouts and containers
-- **Intelligent Reordering**: Drag items to reorder within their containers
-- **Context Menus**: Right-click for quick actions (add, edit, copy, delete)
-- **Visual Feedback**: Real-time drag overlays and hover effects
+### Basic Usage
 
-### 📝 Field Types
+```javascript
+import React from 'react';
+import { FormBuilder } from 'react-form-builder';
 
-- **Text, Number, Email, Date** - Standard input controls
-- **Checkbox, Radio, Select** - Selection controls
-- **Textarea** - Multi-line text input
+function App() {
+  const handleSchemaChange = (newSchema) => {
+    console.log('Form updated:', newSchema);
+  };
 
-### 🏗️ Layout Controls
+  return (
+    <FormBuilder
+      onSchemaChange={handleSchemaChange}
+      templates={[
+        {
+          id: 'contact',
+          name: 'Contact Form',
+          schema: {
+            /* schema definition */
+          },
+        },
+      ]}
+    />
+  );
+}
+```
 
-- **Groups** - Visual containers with borders and titles
-- **Vertical Layouts** - Stack elements vertically
-- **Horizontal Layouts** - Arrange elements side-by-side
-- **Nested Layouts** - Unlimited nesting for complex structures
+### Advanced Integration
 
-### 🎨 Advanced Features
+```javascript
+import { FormBuilder, useFormBuilder } from 'react-form-builder';
 
-- **Sample Schemas** - Pre-built form templates to get started quickly
-- **Schema Editor** - Direct JSON editing for advanced users
-- **Properties Panel** - Comprehensive field configuration
-- **Debug Mode** - Visual hierarchy and drag status indicators
+function CustomFormBuilder() {
+  const { schema, addField, removeField, updateField, exportSchema } =
+    useFormBuilder({
+      initialSchema: mySchema,
+      validation: true,
+    });
 
-## 🛠 Technology Stack
+  return (
+    <div>
+      <FormBuilder
+        schema={schema}
+        onFieldAdd={addField}
+        onFieldUpdate={updateField}
+      />
+      <button onClick={() => exportSchema('json')}>Export as JSON</button>
+    </div>
+  );
+}
+```
 
-- **React 19** - UI framework
-- **Material-UI v6** - Component library
-- **JSON Forms** - Schema-based form generation
-- **@dnd-kit** - Modern drag and drop for React
-  - `@dnd-kit/core` - Core drag and drop functionality
-  - `@dnd-kit/sortable` - Sortable list support
-  - `@dnd-kit/utilities` - CSS utilities and transforms
-  - `@dnd-kit/modifiers` - Drag constraints and modifiers
-- **Vite 7** - Build tool and dev server
-- **Yarn** - Package manager
-- **JavaScript** - Programming language (ES6+)
+## 🎨 Customization
 
-## 🎯 Usage
+### Custom Templates
 
-### 🚀 Getting Started
+Create reusable form templates for common use cases:
 
-1. **Drag Fields**: Drag field types from the left palette to the form structure
-2. **Create Layouts**: Add groups and layouts to organize your form
-3. **Nest Structures**: Drop layouts into other layouts for complex hierarchies
-4. **Configure Properties**: Click any field to edit its properties in the right panel
-5. **Reorder Elements**: Drag fields within containers to reorder them
-6. **Use Context Menus**: Right-click for quick actions and options
-7. **Preview Your Form**: Toggle preview mode to test form functionality
-8. **Export Configuration**: Download your form as JSON for later use
+```javascript
+const templates = [
+  {
+    id: 'registration',
+    name: 'User Registration',
+    description: 'Complete user signup form',
+    schema: {
+      type: 'object',
+      properties: {
+        firstName: { type: 'string', title: 'First Name' },
+        lastName: { type: 'string', title: 'Last Name' },
+        email: { type: 'string', format: 'email', title: 'Email' },
+      },
+      required: ['firstName', 'lastName', 'email'],
+    },
+  },
+];
+```
 
-### 🎨 Advanced Drag & Drop Operations
+### Event Handling
 
-- **Field to Layout**: Drag any field from palette directly into layouts
-- **Layout to Layout**: Create nested structures by dropping layouts into other layouts
-- **Field to Group**: Add form fields directly to group containers
-- **Cross-container**: Move fields between different containers
-- **Multi-level**: Create unlimited nesting depth for complex forms
-- **Quick Add**: Use + buttons on layouts for fast field addition
-- **Context Actions**: Right-click for copy, cut, delete, and quick field additions
+```javascript
+<FormBuilder
+  onSchemaChange={(schema) => console.log('Schema updated:', schema)}
+  onFieldSelect={(field) => console.log('Field selected:', field)}
+  onExport={(format, data) => downloadFile(format, data)}
+  onImport={(schema) => validateAndLoadSchema(schema)}
+/>
+```
 
-### 💡 Pro Tips
+## 📋 Form Templates
 
-- Start with groups to create main form sections
-- Use horizontal layouts for side-by-side fields (name, address)
-- Use vertical layouts for stacking related fields
-- Right-click on layouts for quick field addition options
-- Keep nesting levels manageable (3-4 levels max recommended)
+Built-in templates for common form types:
 
-## 🔧 Package Scripts
-
-- `yarn dev` - Start development server
-- `yarn start` - Alternative start command
-- `yarn build` - Build for production
-- `yarn preview` - Preview production build
-
-## 📋 Sample Schemas
-
-The application includes several pre-built sample schemas:
-
-- User Registration Form
-- Job Application Form
-- Event Registration
-- Customer Feedback Survey
-- Product Order Form
+- **User Registration Form** - Complete user registration with personal details
+- **Job Application Form** - Professional job application form
+- **Event Registration** - Event registration with preferences
+- **Customer Feedback Survey** - Customer satisfaction survey
+- **Product Order Form** - E-commerce order form
+- **Organization Onboarding** - Comprehensive onboarding form
 
 ## 🤝 Contributing
 
-This is a JavaScript + Yarn project. To contribute:
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
 
-1. Ensure you have Yarn installed
-2. Run `yarn install` to install dependencies
-3. Use `yarn start` for development
-4. Follow the existing JavaScript/JSX patterns
-5. Test your changes with `yarn build`
+### Development Setup
 
-## 📝 Migration Notes
+```bash
+# Fork and clone the repository
+git clone https://github.com/your-username/react-form-builder.git
+cd react-form-builder
 
-This project was converted from TypeScript to JavaScript:
+# Install dependencies
+npm install
 
-- All `.tsx`/`.ts` files converted to `.jsx`/`.js`
-- TypeScript type annotations removed
-- Package manager switched to Yarn
-- Build process optimized for JavaScript
-- All functionality preserved
+# Start development server
+npm run dev
+
+# Run tests
+npm test
+
+# Build for production
+npm run build
+```
+
+### Pull Request Process
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/new-feature`
+3. Commit your changes: `git commit -m 'Add new feature'`
+4. Push to the branch: `git push origin feature/new-feature`
+5. Submit a pull request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+Built with these amazing technologies:
+
+- [React](https://reactjs.org/) - UI Framework
+- [Material-UI](https://mui.com/) - Component Library
+- [JSON Forms](https://jsonforms.io/) - Schema-based Forms
+- [@dnd-kit](https://dndkit.com/) - Drag and Drop Toolkit
+
+## 📞 Support
+
+- 📧 **Email**: support@react-form-builder.com
+- 💬 **Discord**: [Join our community](https://discord.gg/react-form-builder)
+- 🐛 **Issues**: [GitHub Issues](https://github.com/your-org/react-form-builder/issues)
+- 📖 **Docs**: [Full Documentation](https://docs.react-form-builder.com)
 
 ---
 
-Built with ❤️ using React, Material-UI, and JSON Forms
+**Made with ❤️ by the React Form Builder Team**
