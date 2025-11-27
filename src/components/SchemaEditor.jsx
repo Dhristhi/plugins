@@ -1,7 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Typography, TextField, Button, Box } from '@mui/material';
+import { IconCode } from '@tabler/icons-react';
+import CommonHeader from './CommonHeader';
 
-const SchemaEditor = ({ formState, onFormStateChange }) => {
+const SchemaEditor = ({
+  formState,
+  onFormStateChange,
+  showFormPreview,
+  setShowFormPreview,
+  showSchemaEditor,
+  setShowSchemaEditor,
+  exportForm,
+}) => {
   const [schemaText, setSchemaText] = useState('');
   const [uischemaText, setUischemaText] = useState('');
   const [error, setError] = useState(null);
@@ -30,18 +40,20 @@ const SchemaEditor = ({ formState, onFormStateChange }) => {
 
   return (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <Box sx={{ p: 2, borderBottom: '1px solid #e0e0e0' }}>
-        <Typography variant="h6" gutterBottom>
-          Schema Editor
-        </Typography>
-        <Typography variant="body2" color="textSecondary">
-          Edit the JSON schemas directly and click Apply to see changes
-        </Typography>
-      </Box>
+      <CommonHeader
+        title="Schema Editor"
+        description="View and edit the JSON schema and UI schema"
+        icon={IconCode}
+        showFormPreview={showFormPreview}
+        setShowFormPreview={setShowFormPreview}
+        showSchemaEditor={showSchemaEditor}
+        setShowSchemaEditor={setShowSchemaEditor}
+        exportForm={exportForm}
+      />
 
       <Box sx={{ p: 2, flex: 1, display: 'flex', flexDirection: 'column' }}>
         {error && (
-          <Box sx={{ mb: 2, p: 2, bgcolor: '#ffebee', borderRadius: 1 }}>
+          <Box sx={{ mb: 2, p: 2, bgcolor: 'error.light', borderRadius: 1 }}>
             <Typography variant="body2" color="error">
               {error}
             </Typography>

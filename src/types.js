@@ -1,10 +1,26 @@
+import {
+  IconLayoutRows,
+  IconLayoutColumns,
+  IconBox,
+  IconEdit,
+  IconFileText,
+  IconHash,
+  IconMail,
+  IconCalendar,
+  IconSquareCheck,
+  IconChevronDown,
+  IconCircleDot,
+  IconCube,
+  IconList,
+} from '@tabler/icons-react';
+
 export const defaultFieldTypes = [
   // Layout Elements
   {
     id: 'vertical-layout',
     type: 'layout',
     label: 'Vertical Layout',
-    icon: '📑',
+    icon: IconLayoutRows,
     isLayout: true,
     schema: {},
     uischema: {
@@ -16,7 +32,7 @@ export const defaultFieldTypes = [
     id: 'horizontal-layout',
     type: 'layout',
     label: 'Horizontal Layout',
-    icon: '📊',
+    icon: IconLayoutColumns,
     isLayout: true,
     schema: {},
     uischema: {
@@ -28,7 +44,7 @@ export const defaultFieldTypes = [
     id: 'group',
     type: 'group',
     label: 'Group',
-    icon: '📦',
+    icon: IconBox,
     isLayout: true,
     schema: {},
     uischema: {
@@ -42,7 +58,7 @@ export const defaultFieldTypes = [
     id: 'text',
     type: 'string',
     label: 'Text Input',
-    icon: '📝',
+    icon: IconEdit,
     schema: {
       type: 'string',
     },
@@ -55,7 +71,7 @@ export const defaultFieldTypes = [
     id: 'textarea',
     type: 'string',
     label: 'Textarea',
-    icon: '📄',
+    icon: IconFileText,
     schema: {
       type: 'string',
     },
@@ -71,7 +87,7 @@ export const defaultFieldTypes = [
     id: 'number',
     type: 'number',
     label: 'Number',
-    icon: '🔢',
+    icon: IconHash,
     schema: {
       type: 'number',
     },
@@ -84,7 +100,7 @@ export const defaultFieldTypes = [
     id: 'email',
     type: 'string',
     label: 'Email',
-    icon: '📧',
+    icon: IconMail,
     schema: {
       type: 'string',
       format: 'email',
@@ -98,7 +114,7 @@ export const defaultFieldTypes = [
     id: 'date',
     type: 'string',
     label: 'Date',
-    icon: '📅',
+    icon: IconCalendar,
     schema: {
       type: 'string',
       format: 'date',
@@ -112,7 +128,7 @@ export const defaultFieldTypes = [
     id: 'checkbox',
     type: 'boolean',
     label: 'Checkbox',
-    icon: '☑️',
+    icon: IconSquareCheck,
     schema: {
       type: 'boolean',
     },
@@ -125,7 +141,7 @@ export const defaultFieldTypes = [
     id: 'select',
     type: 'string',
     label: 'Select',
-    icon: '📋',
+    icon: IconChevronDown,
     schema: {
       type: 'string',
       enum: ['Option 1', 'Option 2', 'Option 3'],
@@ -139,7 +155,7 @@ export const defaultFieldTypes = [
     id: 'radio',
     type: 'string',
     label: 'Radio Group',
-    icon: '🔘',
+    icon: IconCircleDot,
     schema: {
       type: 'string',
       enum: ['Option 1', 'Option 2', 'Option 3'],
@@ -149,6 +165,44 @@ export const defaultFieldTypes = [
       scope: '#/properties/field',
       options: {
         format: 'radio',
+      },
+    },
+  },
+  {
+    id: 'object',
+    type: 'object',
+    label: 'Object',
+    icon: IconCube,
+    isLayout: true,
+    schema: {
+      type: 'object',
+      properties: {},
+    },
+    uischema: {
+      type: 'Group',
+      label: 'Object',
+      elements: [],
+    },
+  },
+  {
+    id: 'array',
+    type: 'array',
+    label: 'Array',
+    icon: IconList,
+    schema: {
+      type: 'array',
+      items: {
+        type: 'string',
+      },
+    },
+    uischema: {
+      type: 'Control',
+      scope: '#/properties/field',
+      options: {
+        detail: {
+          type: 'VerticalLayout',
+          elements: [],
+        },
       },
     },
   },

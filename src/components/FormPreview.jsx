@@ -5,18 +5,30 @@ import {
   materialCells,
 } from '@jsonforms/material-renderers';
 import { Typography, Box } from '@mui/material';
+import { IconEye } from '@tabler/icons-react';
+import CommonHeader from './CommonHeader';
 
-const FormPreview = ({ formState, onDataChange }) => {
+const FormPreview = ({
+  formState,
+  onDataChange,
+  showFormPreview,
+  setShowFormPreview,
+  showSchemaEditor,
+  setShowSchemaEditor,
+  exportForm,
+}) => {
   return (
     <Box>
-      <Box sx={{ p: 2, borderBottom: '1px solid #e0e0e0' }}>
-        <Typography variant="h6" gutterBottom>
-          Form Preview
-        </Typography>
-        <Typography variant="body2" color="textSecondary">
-          Test and interact with your form
-        </Typography>
-      </Box>
+      <CommonHeader
+        title="Form Preview"
+        description="Test your form and see how it will look to users"
+        icon={IconEye}
+        showFormPreview={showFormPreview}
+        setShowFormPreview={setShowFormPreview}
+        showSchemaEditor={showSchemaEditor}
+        setShowSchemaEditor={setShowSchemaEditor}
+        exportForm={exportForm}
+      />
 
       <Box sx={{ p: 2 }}>
         {formState.schema.properties &&

@@ -1,26 +1,403 @@
 import React, { useState } from 'react';
+import { Box, Paper, Typography, Chip, useTheme } from '@mui/material';
 import {
-  Box,
-  Typography,
-  IconButton,
-  Paper,
-  Tooltip,
-  Chip,
-  Menu,
-  MenuItem,
-  ListItemIcon,
-  ListItemText,
-  Divider,
-} from '@mui/material';
+  useSortable,
+  SortableContext,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { useDroppable } from '@dnd-kit/core';
 import {
-  Add as AddIcon,
-  ArrowUpward as ArrowUpIcon,
-  ArrowDownward as ArrowDownIcon,
-  Delete as DeleteIcon,
-  Edit as EditIcon,
-  ExpandMore as ExpandMoreIcon,
-} from '@mui/icons-material';
-import { defaultFieldTypes } from '../types';
+  IconGripVertical,
+  IconBox,
+  IconCube,
+  IconLayoutRows,
+  IconLayoutColumns,
+  IconList,
+  IconEdit,
+  IconTarget,
+  IconPlus,
+  IconForms,
+} from '@tabler/icons-react';
+import ActionButtons from './ActionButtons';
+import ContextMenu from './ContextMenu';
+import CommonHeader from './CommonHeader';
+
+// Sortable field component
+const SortableFieldItem = ({
+  field,
+  level = 0,
+  parentId,
+  onFieldSelect,
+  onAddFieldToLayout,
+  onAddLayoutToContainer,
+  moveField,
+  deleteField,
+  selectedField,
+}) => {
+  const [contextMenu, setContextMenu] = useState(null);
+
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
+    id: field.id,
+    data: {
+      type: 'structure-item',
+      field: field,
+      parentId: parentId,
+    },
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  const isSelected = selectedField?.id === field.id;
+  const isLayout = field.isLayout;
+  const isGroup = field.type === 'group';
+
+  const handleContextMenu = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setContextMenu({
+      mouseX: event.clientX - 2,
+      mouseY: event.clientY - 4,
+    });
+  };
+
+  const handleCloseContextMenu = () => {
+    setContextMenu(null);
+  };
+
+  const getFieldIcon = (theme) => {
+    const iconProps = { size: 18, color: theme.palette.grey[600] };
+    if (isGroup) return <IconBox {...iconProps} />;
+    if (field.type === 'object') return <IconCube {...iconProps} />;
+    if (field.type === 'vertical-layout')
+      return <IconLayoutRows {...iconProps} />;
+    if (field.type === 'horizontal-layout')
+      return <IconLayoutColumns {...iconProps} />;
+    if (field.type === 'array') return <IconList {...iconProps} />;
+    return <IconEdit {...iconProps} />;
+  };
+
+  return (
+    <div ref={setNodeRef} style={style}>
+      <Paper
+        elevation={isSelected ? 2 : 0}
+        sx={{
+          p: 2.5,
+          mb: 1.5,
+          ml: level * 2,
+          cursor: 'pointer',
+          border: (theme) =>
+            isSelected
+              ? `2px solid ${theme.palette.primary.main}`
+              : isGroup
+              ? `2px solid ${theme.palette.warning.main}`
+              : `1px solid ${theme.palette.grey[200]}`,
+          borderRadius: 2,
+          transition: 'all 0.2s ease',
+          '&:hover': {
+            transform: 'translateY(-1px)',
+            boxShadow:
+              '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
+          },
+        }}
+        onClick={() => onFieldSelect(field)}
+        onContextMenu={handleContextMenu}
+      >
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            minWidth: 0,
+            gap: 1,
+          }}
+        >
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+              flex: 1,
+              minWidth: 0,
+              overflow: 'hidden',
+            }}
+          >
+            <Box
+              {...attributes}
+              {...listeners}
+              sx={{
+                cursor: 'grab',
+                display: 'flex',
+                alignItems: 'center',
+                color: 'grey.400',
+                '&:hover': { color: 'grey.500' },
+                '&:active': { cursor: 'grabbing' },
+              }}
+            >
+              <IconGripVertical size={16} />
+            </Box>
+            <Box
+              sx={{ minWidth: '20px', display: 'flex', alignItems: 'center' }}
+            >
+              {getFieldIcon(useTheme())}
+            </Box>
+            <Typography
+              variant="subtitle2"
+              sx={{
+                fontWeight: isLayout ? 'bold' : 'normal',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                minWidth: 0,
+                flex: 1,
+              }}
+            >
+              {field.label}
+            </Typography>
+            {isLayout && (
+              <Chip
+                label={
+                  isGroup
+                    ? 'Group'
+                    : field.type === 'object'
+                    ? 'Object'
+                    : field.uischema?.type || 'Layout'
+                }
+                size="small"
+                color={
+                  isGroup
+                    ? 'warning'
+                    : field.type === 'object'
+                    ? 'success'
+                    : 'primary'
+                }
+                variant="outlined"
+                sx={{
+                  fontSize: level > 2 ? '10px' : '12px',
+                  height: level > 2 ? 20 : 24,
+                  '& .MuiChip-label': {
+                    px: level > 2 ? 0.5 : 1,
+                  },
+                }}
+              />
+            )}
+            {field.required && (
+              <Typography variant="caption" color="error">
+                *
+              </Typography>
+            )}
+            {level > 0 && level <= 3 && (
+              <Chip
+                label={`L${level}`}
+                size="small"
+                variant="outlined"
+                sx={{
+                  fontSize: '9px',
+                  height: 16,
+                  minWidth: 20,
+                  '& .MuiChip-label': {
+                    px: 0.5,
+                  },
+                }}
+              />
+            )}
+          </Box>
+
+          <ActionButtons
+            field={field}
+            level={level}
+            parentId={parentId}
+            onFieldSelect={onFieldSelect}
+            onAddFieldToLayout={onAddFieldToLayout}
+            onAddLayoutToContainer={onAddLayoutToContainer}
+            moveField={moveField}
+            deleteField={deleteField}
+          />
+        </Box>
+
+        {/* Render children for layouts */}
+        {isLayout && field.children && field.children.length > 0 && (
+          <Box sx={{ mt: 2, pl: 2, borderLeft: 2, borderColor: 'grey.300' }}>
+            <SortableContext
+              items={field.children.map((child) => child.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              <DropZone
+                parentId={field.id}
+                index={0}
+                accepts={['field', 'layout']}
+              />
+              {field.children.map((child, index) => (
+                <React.Fragment key={child.id}>
+                  <SortableFieldItem
+                    field={child}
+                    level={level + 1}
+                    parentId={field.id}
+                    onFieldSelect={onFieldSelect}
+                    onAddFieldToLayout={onAddFieldToLayout}
+                    onAddLayoutToContainer={onAddLayoutToContainer}
+                    moveField={moveField}
+                    deleteField={deleteField}
+                    selectedField={selectedField}
+                  />
+                  <DropZone
+                    parentId={field.id}
+                    index={index + 1}
+                    accepts={['field', 'layout']}
+                  />
+                </React.Fragment>
+              ))}
+            </SortableContext>
+          </Box>
+        )}
+
+        {/* Show empty state for layouts without children */}
+        {isLayout && (!field.children || field.children.length === 0) && (
+          <DropZone
+            parentId={field.id}
+            index={0}
+            accepts={['field', 'layout']}
+            isEmpty={true}
+            onAddField={() => onAddFieldToLayout(field.id)}
+          />
+        )}
+      </Paper>
+
+      <ContextMenu
+        contextMenu={contextMenu}
+        onClose={handleCloseContextMenu}
+        field={field}
+        parentId={parentId}
+        onFieldSelect={onFieldSelect}
+        onAddFieldToLayout={onAddFieldToLayout}
+        onAddLayoutToContainer={onAddLayoutToContainer}
+        moveField={moveField}
+        deleteField={deleteField}
+      />
+    </div>
+  );
+};
+
+// Drop zone component
+const DropZone = ({
+  parentId,
+  index,
+  accepts,
+  isEmpty = false,
+  onAddField,
+}) => {
+  const { isOver, setNodeRef } = useDroppable({
+    id: `drop-${parentId || 'root'}-${index}`,
+    data: {
+      parentId: parentId,
+      index: index,
+      accepts: [...accepts, 'structure-item'], // Accept both palette items and existing structure items
+    },
+  });
+
+  if (isEmpty) {
+    return (
+      <Box
+        ref={setNodeRef}
+        sx={{
+          mt: 2,
+          p: 4,
+          border: isOver ? 2 : '2px dashed',
+          borderColor: isOver ? 'primary.main' : 'grey.300',
+          borderRadius: 3,
+          textAlign: 'center',
+          color: isOver ? 'primary.main' : 'grey.500',
+          cursor: 'pointer',
+          transition: 'all 0.2s ease',
+          minHeight: 100,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          '&:hover': {
+            borderColor: 'primary.main',
+            transform: 'translateY(-1px)',
+          },
+        }}
+        onClick={onAddField}
+      >
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+          {isOver ? <IconTarget size={20} /> : <IconPlus size={20} />}
+          <Typography variant="body2" sx={{ fontWeight: 500 }}>
+            {isOver ? 'Drop here!' : 'No fields yet'}
+          </Typography>
+        </Box>
+        <Typography variant="caption" color="textSecondary">
+          {isOver
+            ? 'Release to add item'
+            : 'Drag fields from the palette or click to add'}
+        </Typography>
+      </Box>
+    );
+  }
+
+  return (
+    <Box
+      ref={setNodeRef}
+      sx={{
+        minHeight: isOver ? 50 : 24,
+        borderRadius: 1,
+        transition: 'all 0.2s ease',
+        margin: '8px 0',
+        opacity: isOver ? 1 : 0.7,
+        border: (theme) =>
+          isOver
+            ? `2px solid ${theme.palette.primary.main}`
+            : `2px dashed ${theme.palette.grey[300]}`,
+        borderColor: isOver ? 'primary.main' : 'grey.300',
+        position: 'relative',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        cursor: 'pointer',
+        '&:hover': {
+          opacity: 1,
+          minHeight: 36,
+          borderColor: 'primary.main',
+        },
+      }}
+    >
+      <Typography
+        variant="caption"
+        sx={{
+          color: isOver ? 'white' : 'grey.500',
+          fontWeight: 500,
+          fontSize: '11px',
+          textAlign: 'center',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 0.5,
+        }}
+      >
+        {isOver ? (
+          <>
+            <IconTarget size={14} /> DROP HERE
+          </>
+        ) : (
+          <>
+            <IconPlus size={14} /> Drop items here
+          </>
+        )}
+      </Typography>
+    </Box>
+  );
+};
 
 const FormStructure = ({
   fields,
@@ -29,38 +406,12 @@ const FormStructure = ({
   selectedField,
   onAddFieldToLayout,
   onAddLayoutToContainer,
+  showFormPreview,
+  setShowFormPreview,
+  showSchemaEditor,
+  setShowSchemaEditor,
+  exportForm,
 }) => {
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [selectedLayoutId, setSelectedLayoutId] = useState(null);
-
-  const layoutTypes = defaultFieldTypes.filter((ft) => ft.isLayout);
-  const fieldTypes = defaultFieldTypes.filter((ft) => !ft.isLayout);
-
-  const handleAddMenuClick = (event, layoutId) => {
-    event.stopPropagation();
-    setAnchorEl(event.currentTarget);
-    setSelectedLayoutId(layoutId);
-  };
-
-  const handleAddMenuClose = () => {
-    setAnchorEl(null);
-    setSelectedLayoutId(null);
-  };
-
-  const handleAddField = () => {
-    if (selectedLayoutId) {
-      onAddFieldToLayout(selectedLayoutId);
-    }
-    handleAddMenuClose();
-  };
-
-  const handleAddLayout = (layoutType) => {
-    if (selectedLayoutId) {
-      onAddLayoutToContainer(selectedLayoutId, layoutType);
-    }
-    handleAddMenuClose();
-  };
-
   const moveField = (fieldId, direction, parentId) => {
     const newFields = [...fields];
 
@@ -132,259 +483,60 @@ const FormStructure = ({
     onFieldsChange(newFields);
   };
 
-  const renderField = (field, level = 0, parentId) => {
-    const isSelected = selectedField?.id === field.id;
-    const isLayout = field.isLayout;
-    const isGroup = field.type === 'group';
-
-    // Choose appropriate icon
-    const getFieldIcon = () => {
-      if (isGroup) return '📦';
-      if (field.type === 'vertical-layout') return '📑';
-      if (field.type === 'horizontal-layout') return '📊';
-      return '📝';
-    };
-
-    const getBackgroundColor = () => {
-      if (isGroup) return '#fff8e1'; // Light orange for groups
-      if (isLayout) return '#f8f9fa'; // Light gray for layouts
-      return 'white';
-    };
-
-    return (
-      <Paper
-        key={field.id}
-        elevation={isSelected ? 3 : 1}
-        sx={{
-          p: 2,
-          mb: 1,
-          ml: level * 2,
-          cursor: 'pointer',
-          border: isSelected
-            ? '2px solid #2196f3'
-            : isGroup
-            ? '2px solid #ff9800'
-            : '1px solid #e0e0e0',
-          backgroundColor: getBackgroundColor(),
-          '&:hover': {
-            backgroundColor: isGroup
-              ? '#fff3e0'
-              : isLayout
-              ? '#e9ecef'
-              : '#f5f5f5',
-          },
-        }}
-        onClick={() => onFieldSelect(field)}
-      >
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}
-        >
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flex: 1 }}>
-            <Typography variant="body2" sx={{ minWidth: '20px' }}>
-              {getFieldIcon()}
-            </Typography>
-            <Typography
-              variant="subtitle2"
-              sx={{ fontWeight: isLayout ? 'bold' : 'normal' }}
-            >
-              {field.label}
-            </Typography>
-            {isLayout && (
-              <Chip
-                label={isGroup ? 'Group' : field.uischema.type}
-                size="small"
-                color={isGroup ? 'warning' : 'primary'}
-                variant="outlined"
-              />
-            )}
-            {field.required && (
-              <Typography variant="caption" color="error">
-                *
-              </Typography>
-            )}
-          </Box>
-
-          <Box sx={{ display: 'flex', gap: 0.5 }}>
-            {isLayout && (
-              <Tooltip title="Add field or layout">
-                <IconButton
-                  size="small"
-                  onClick={(e) => handleAddMenuClick(e, field.id)}
-                >
-                  <AddIcon fontSize="small" />
-                  <ExpandMoreIcon fontSize="small" sx={{ ml: -0.5 }} />
-                </IconButton>
-              </Tooltip>
-            )}
-
-            <Tooltip title="Edit field">
-              <IconButton
-                size="small"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onFieldSelect(field);
-                }}
-              >
-                <EditIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
-
-            <Tooltip title="Move up">
-              <IconButton
-                size="small"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  moveField(field.id, 'up', parentId);
-                }}
-              >
-                <ArrowUpIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
-
-            <Tooltip title="Move down">
-              <IconButton
-                size="small"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  moveField(field.id, 'down', parentId);
-                }}
-              >
-                <ArrowDownIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
-
-            <Tooltip title="Delete">
-              <IconButton
-                size="small"
-                color="error"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  deleteField(field.id, parentId);
-                }}
-              >
-                <DeleteIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
-          </Box>
-        </Box>
-
-        {/* Render children for layouts */}
-        {isLayout && field.children && field.children.length > 0 && (
-          <Box sx={{ mt: 2, pl: 2, borderLeft: '2px solid #e0e0e0' }}>
-            {field.children.map((child) =>
-              renderField(child, level + 1, field.id)
-            )}
-          </Box>
-        )}
-
-        {/* Show empty state for layouts without children */}
-        {isLayout && (!field.children || field.children.length === 0) && (
-          <Box
-            sx={{
-              mt: 2,
-              p: 2,
-              border: '2px dashed #ccc',
-              borderRadius: 1,
-              textAlign: 'center',
-              color: '#666',
-            }}
-            onClick={(e) => {
-              e.stopPropagation();
-              onAddFieldToLayout(field.id);
-            }}
-          >
-            <Typography variant="body2">Click + or drop fields here</Typography>
-          </Box>
-        )}
-      </Paper>
-    );
-  };
-
   return (
     <Box>
-      <Box sx={{ p: 2, borderBottom: '1px solid #e0e0e0' }}>
-        <Typography variant="h6" gutterBottom>
-          Form Structure
-        </Typography>
-        <Typography variant="body2" color="textSecondary">
-          Drag fields and layouts to organize your form
-        </Typography>
-      </Box>
+      <CommonHeader
+        title="Form Design"
+        description="Drag fields and layouts to organize your form"
+        icon={IconForms}
+        showFormPreview={showFormPreview}
+        setShowFormPreview={setShowFormPreview}
+        showSchemaEditor={showSchemaEditor}
+        setShowSchemaEditor={setShowSchemaEditor}
+        exportForm={exportForm}
+      />
 
-      <Box sx={{ p: 2 }}>
+      <Box sx={{ p: { xs: 1, sm: 2 } }}>
         {fields.length === 0 ? (
-          <Paper
-            sx={{
-              p: 3,
-              textAlign: 'center',
-              border: '2px dashed #ccc',
-              backgroundColor: '#f9f9f9',
+          <DropZone
+            parentId={null}
+            index={0}
+            accepts={['field', 'layout']}
+            isEmpty={true}
+            onAddField={() => {
+              // Could add a default field here if needed
+              console.log('Add field to empty form');
             }}
-          >
-            <Typography variant="body2" color="textSecondary">
-              No fields added yet. Start by adding fields from the palette.
-            </Typography>
-          </Paper>
+          />
         ) : (
-          fields.map((field) => renderField(field))
+          <SortableContext
+            items={fields.map((field) => field.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            <DropZone parentId={null} index={0} accepts={['field', 'layout']} />
+            {fields.map((field, index) => (
+              <React.Fragment key={field.id}>
+                <SortableFieldItem
+                  field={field}
+                  level={0}
+                  parentId={null}
+                  onFieldSelect={onFieldSelect}
+                  onAddFieldToLayout={onAddFieldToLayout}
+                  onAddLayoutToContainer={onAddLayoutToContainer}
+                  moveField={moveField}
+                  deleteField={deleteField}
+                  selectedField={selectedField}
+                />
+                <DropZone
+                  parentId={null}
+                  index={index + 1}
+                  accepts={['field', 'layout']}
+                />
+              </React.Fragment>
+            ))}
+          </SortableContext>
         )}
       </Box>
-
-      {/* Add Menu */}
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleAddMenuClose}
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'left',
-        }}
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'left',
-        }}
-      >
-        <MenuItem onClick={handleAddField}>
-          <ListItemIcon>
-            <Typography>📝</Typography>
-          </ListItemIcon>
-          <ListItemText
-            primary="Add Field"
-            secondary="Add a form input field"
-          />
-        </MenuItem>
-
-        <Divider />
-
-        <MenuItem disabled>
-          <ListItemText primary="Add Layout" secondary="Choose a layout type" />
-        </MenuItem>
-
-        {layoutTypes.map((layoutType) => (
-          <MenuItem
-            key={layoutType.id}
-            onClick={() => handleAddLayout(layoutType)}
-          >
-            <ListItemIcon>
-              <Typography>{layoutType.icon}</Typography>
-            </ListItemIcon>
-            <ListItemText
-              primary={layoutType.label}
-              secondary={
-                layoutType.id === 'group'
-                  ? 'Visual container with border'
-                  : layoutType.id === 'vertical-layout'
-                  ? 'Stack elements vertically'
-                  : 'Arrange elements horizontally'
-              }
-            />
-          </MenuItem>
-        ))}
-      </Menu>
     </Box>
   );
 };

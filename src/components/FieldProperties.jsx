@@ -7,9 +7,9 @@ import {
   Box,
   Chip,
   IconButton,
+  Divider,
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import DeleteIcon from '@mui/icons-material/Delete';
+import { IconPlus, IconTrash, IconSettings } from '@tabler/icons-react';
 
 const FieldProperties = ({ field, onFieldUpdate }) => {
   const [localField, setLocalField] = useState(null);
@@ -29,9 +29,21 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
 
   if (!localField) {
     return (
-      <Box p={2}>
-        <Typography variant="h6" color="textSecondary">
-          Select a field to edit its properties
+      <Box sx={{ p: 3, textAlign: 'center' }}>
+        <IconSettings
+          size={48}
+          style={{ marginBottom: '16px' }}
+          color="currentColor"
+        />
+        <Typography
+          variant="h6"
+          color="textSecondary"
+          sx={{ fontWeight: 500, color: 'grey.400' }}
+        >
+          Select a field to edit
+        </Typography>
+        <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>
+          Click on any field in the form structure to configure its properties
         </Typography>
       </Box>
     );
@@ -70,8 +82,15 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
   const isLayout = localField.isLayout && !isGroup;
 
   return (
-    <Box p={2}>
-      <Typography variant="h6" gutterBottom>
+    <Box>
+      <Typography
+        variant="h6"
+        sx={{
+          fontWeight: 600,
+          color: 'grey.800',
+          mb: 3,
+        }}
+      >
         {isGroup
           ? 'Group Properties'
           : isLayout
@@ -79,7 +98,7 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
           : 'Field Properties'}
       </Typography>
 
-      <Box mb={3}>
+      <Box sx={{ mb: 3 }}>
         <TextField
           label={isGroup ? 'Group Title' : 'Label'}
           fullWidth
@@ -101,7 +120,13 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
             }
           }}
           margin="normal"
+          variant="outlined"
           helperText={isGroup ? 'Displayed as the group header' : ''}
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              borderRadius: 2,
+            },
+          }}
         />
 
         {!isLayout && !isGroup && (
@@ -112,7 +137,13 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
               value={localField.key}
               onChange={(e) => handleUpdate({ key: e.target.value })}
               margin="normal"
+              variant="outlined"
               helperText="Unique identifier for this field"
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 2,
+                },
+              }}
             />
 
             <FormControlLabel
@@ -181,7 +212,7 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
             Options
           </Typography>
 
-          <Box display="flex" gap={1} mb={2}>
+          <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
             <TextField
               label="New Option"
               size="small"
@@ -192,20 +223,47 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                   handleAddOption();
                 }
               }}
+              variant="outlined"
+              sx={{
+                flex: 1,
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 1.5,
+                },
+              }}
             />
-            <IconButton onClick={handleAddOption} color="primary">
-              <AddIcon />
+            <IconButton
+              onClick={handleAddOption}
+              sx={{
+                color: 'success.main',
+                backgroundColor: 'success.light',
+                borderRadius: 1.5,
+                '&:hover': {
+                  backgroundColor: (theme) => theme.palette.success.light,
+                  color: 'success.dark',
+                },
+              }}
+            >
+              <IconPlus size={20} />
             </IconButton>
           </Box>
 
-          <Box display="flex" flexWrap="wrap" gap={1}>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
             {enumOptions.map((option, index) => (
               <Chip
                 key={index}
                 label={option}
                 onDelete={() => handleRemoveOption(index)}
-                deleteIcon={<DeleteIcon />}
+                deleteIcon={<IconTrash size={16} />}
                 variant="outlined"
+                sx={{
+                  borderRadius: 1.5,
+                  '& .MuiChip-deleteIcon': {
+                    color: 'error.main',
+                    '&:hover': {
+                      color: 'error.dark',
+                    },
+                  },
+                }}
               />
             ))}
           </Box>
@@ -225,20 +283,42 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
           !isLayout &&
           localField.type === 'string' &&
           localField.schema.format && (
-            <Typography variant="caption" color="textSecondary">
+            <Typography
+              variant="caption"
+              sx={{
+                color: 'grey.600',
+                backgroundColor: 'grey.100',
+                px: 1.5,
+                py: 0.5,
+                borderRadius: 1,
+                display: 'inline-block',
+              }}
+            >
               Format: {localField.schema.format}
             </Typography>
           )}
 
         {isGroup && (
-          <Typography variant="caption" color="textSecondary" display="block">
+          <Typography
+            variant="body2"
+            sx={{
+              color: 'grey.500',
+              fontStyle: 'italic',
+            }}
+          >
             Groups provide visual separation and can contain any fields or
             layouts
           </Typography>
         )}
 
         {isLayout && (
-          <Typography variant="caption" color="textSecondary" display="block">
+          <Typography
+            variant="body2"
+            sx={{
+              color: 'grey.500',
+              fontStyle: 'italic',
+            }}
+          >
             {localField.type === 'vertical-layout'
               ? 'Stacks elements vertically'
               : 'Arranges elements horizontally'}

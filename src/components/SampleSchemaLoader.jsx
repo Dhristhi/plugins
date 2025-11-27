@@ -300,6 +300,641 @@ const sampleSchemas = [
       ],
     },
   },
+  {
+    id: 'organization-onboarding',
+    name: 'Organization Onboarding Form',
+    description:
+      'Comprehensive onboarding form for new organizations with multiple departments and contacts',
+    tags: ['Onboarding', 'Organization', 'Multi-department'],
+    schema: {
+      type: 'object',
+      properties: {
+        personal_info: {
+          type: 'object',
+          properties: {
+            first_name: {
+              type: 'string',
+              isTitle: true,
+              tableView: true,
+              showAvatar: true,
+              picturePath: 'personal_info.profile_picture',
+              title: 'First Name',
+            },
+            middle_name: {
+              type: 'string',
+              title: 'Middle Name',
+            },
+            last_name: {
+              type: 'string',
+              isTitle: true,
+              tableView: true,
+              title: 'Last Name',
+            },
+            blood_group: {
+              type: 'string',
+              title: 'Blood Group',
+              enum: [
+                'A+',
+                'A-',
+                'B+',
+                'B-',
+                'AB+',
+                'AB-',
+                'O+',
+                'O-',
+                'Prefer not to say',
+              ],
+            },
+            date_of_birth: {
+              type: 'string',
+              format: 'date',
+              title: 'Date of Birth',
+            },
+            gender: {
+              type: 'string',
+              enum: ['Male', 'Female', 'Other', 'Prefer not to say'],
+            },
+            marital_status: {
+              type: 'string',
+              enum: [
+                'Single',
+                'Married',
+                'Divorced',
+                'Widowed',
+                'Prefer not to say',
+              ],
+            },
+            nationality: {
+              type: 'string',
+            },
+            profile_picture: {
+              type: 'string',
+            },
+          },
+          required: [
+            'first_name',
+            'last_name',
+            'date_of_birth',
+            'gender',
+            'nationality',
+          ],
+        },
+        contact_info: {
+          type: 'object',
+          properties: {
+            contact_number: {
+              type: 'string',
+              title: 'Contact Number',
+            },
+            email: {
+              type: 'string',
+              title: 'Email',
+            },
+            current_address: {
+              type: 'object',
+              properties: {
+                address_line_1: {
+                  type: 'string',
+                },
+                address_line_2: {
+                  type: 'string',
+                },
+                city: {
+                  type: 'string',
+                },
+                state: {
+                  type: 'string',
+                },
+                country: {
+                  type: 'string',
+                },
+                zipcode: {
+                  type: 'string',
+                },
+              },
+              required: [
+                'address_line_1',
+                'address_line_2',
+                'city',
+                'state',
+                'country',
+                'zipcode',
+              ],
+            },
+            permanent_address: {
+              type: 'object',
+              properties: {
+                address_line_1: {
+                  type: 'string',
+                },
+                address_line_2: {
+                  type: 'string',
+                },
+                city: {
+                  type: 'string',
+                },
+                state: {
+                  type: 'string',
+                },
+                country: {
+                  type: 'string',
+                },
+                zipcode: {
+                  type: 'string',
+                },
+              },
+              required: [
+                'address_line_1',
+                'address_line_2',
+                'city',
+                'state',
+                'country',
+                'zipcode',
+              ],
+            },
+          },
+          required: ['contact_number', 'email'],
+        },
+        education: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              degree: {
+                type: 'string',
+                enum: [
+                  'High School',
+                  'Associate',
+                  'Bachelor',
+                  'Master',
+                  'Doctorate',
+                ],
+              },
+              field_of_study: {
+                type: 'string',
+              },
+              institution_name: {
+                type: 'string',
+              },
+              start_year: {
+                type: 'number',
+              },
+              end_year: {
+                type: 'number',
+              },
+            },
+            required: [
+              'degree',
+              'field_of_study',
+              'institution_name',
+              'start_year',
+            ],
+          },
+          minItems: 1,
+          uniqueItems: true,
+        },
+        emergency_contacts: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              first_name: {
+                type: 'string',
+              },
+              middle_name: {
+                type: 'string',
+              },
+              last_name: {
+                type: 'string',
+              },
+              contact_number: {
+                type: 'string',
+              },
+              email: {
+                type: 'string',
+              },
+              relation: {
+                type: 'string',
+              },
+            },
+            required: ['first_name', 'last_name', 'contact_number', 'relation'],
+          },
+          minItems: 1,
+          uniqueItems: true,
+        },
+        experience: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              organisation: {
+                type: 'string',
+              },
+              experience_years: {
+                type: 'number',
+              },
+              startDate: {
+                type: 'string',
+                format: 'date',
+                title: 'Start Date',
+              },
+              endDate: {
+                type: 'string',
+                format: 'date',
+                title: 'End Date',
+              },
+              address: {
+                type: 'string',
+              },
+              contact: {
+                type: 'string',
+              },
+            },
+            required: [
+              'organisation',
+              'experience_years',
+              'startDate',
+              'endDate',
+              'address',
+              'contact',
+            ],
+          },
+        },
+        certifications: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              issuer: {
+                type: 'string',
+              },
+              number: {
+                type: 'string',
+              },
+              level: {
+                type: 'string',
+              },
+              name: {
+                type: 'string',
+              },
+              issue_date: {
+                type: 'string',
+                format: 'date',
+              },
+              expiry_date: {
+                type: 'string',
+                format: 'date',
+              },
+            },
+            required: [
+              'issuer',
+              'number',
+              'level',
+              'name',
+              'issue_date',
+              'expiry_date',
+            ],
+          },
+        },
+        passport: {
+          type: 'object',
+          properties: {
+            number: {
+              type: 'string',
+            },
+            nationality: {
+              type: 'string',
+            },
+            expiry_date: {
+              type: 'string',
+              format: 'date',
+            },
+            full_name: {
+              type: 'string',
+            },
+          },
+          required: ['number', 'nationality', 'expiry_date', 'full_name'],
+        },
+        visa: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              visa_number: {
+                type: 'string',
+              },
+              name: {
+                type: 'string',
+              },
+              nationality: {
+                type: 'string',
+              },
+              date_of_birth: {
+                type: 'string',
+                format: 'date',
+              },
+              issue_date: {
+                type: 'string',
+                format: 'date',
+              },
+              expiry_date: {
+                type: 'string',
+                format: 'date',
+              },
+              visa_type: {
+                type: 'string',
+                enum: ['Tourist', 'Business', 'Work', 'Student', 'Transit'],
+              },
+            },
+            required: [
+              'visa_number',
+              'name',
+              'nationality',
+              'date_of_birth',
+              'issue_date',
+              'expiry_date',
+              'visa_type',
+            ],
+          },
+          uniqueItems: true,
+        },
+        documents: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              id: {
+                type: 'string',
+              },
+              type: {
+                type: 'string',
+              },
+              description: {
+                type: 'string',
+              },
+              status: {
+                type: 'string',
+                enum: [
+                  'UPLOAD-PENDING',
+                  'REVIEW-PENDING',
+                  'ACCEPTED',
+                  'REJECTED',
+                ],
+              },
+              comments: {
+                type: 'string',
+              },
+            },
+            required: ['id', 'type', 'description', 'status'],
+          },
+        },
+        documents_issued: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              id: {
+                type: 'string',
+              },
+              type: {
+                type: 'string',
+              },
+              description: {
+                type: 'string',
+              },
+            },
+            required: ['id', 'type', 'description'],
+          },
+        },
+        employment_info: {
+          type: 'object',
+          properties: {
+            employeeid: {
+              type: 'string',
+              title: 'Employee Id',
+              tableView: true,
+              isSubTitle: true,
+            },
+            joining_date: {
+              type: 'string',
+              format: 'date',
+            },
+            email: {
+              type: 'string',
+              title: 'Email',
+            },
+            employee_level: {
+              type: 'string',
+              enum: [
+                'Junior',
+                'Mid',
+                'Senior',
+                'Lead',
+                'Manager',
+                'Director',
+                'VP',
+                'C-Level',
+              ],
+            },
+            job_role: {
+              type: 'object',
+              properties: {
+                code: {
+                  type: 'string',
+                },
+                title: {
+                  type: 'string',
+                  tableView: true,
+                  title: 'Job Role',
+                },
+              },
+              required: ['code', 'title'],
+            },
+            designation: {
+              type: 'string',
+              title: 'Designation',
+              tableView: true,
+            },
+            office_location: {
+              type: 'string',
+              title: 'Office Location',
+              tableView: true,
+              isSubTitle: true,
+            },
+            salary: {
+              type: 'object',
+              tableView: true,
+              title: 'Salary Details',
+              properties: {
+                currency: {
+                  type: 'string',
+                  title: 'Currency',
+                },
+                currency_icon: {
+                  type: 'string',
+                  title: 'Currency Icon',
+                },
+                basic_salary: {
+                  type: 'number',
+                  title: 'Basic Salary',
+                },
+                allowances: {
+                  type: 'number',
+                  title: 'Allowances',
+                },
+                deductions: {
+                  type: 'number',
+                  title: 'Deductions',
+                },
+                net_salary: {
+                  type: 'number',
+                  title: 'Net Salary',
+                },
+              },
+              required: [
+                'currency',
+                'currency_icon',
+                'basic_salary',
+                'allowances',
+                'deductions',
+                'net_salary',
+              ],
+            },
+            hr_partner: {
+              type: 'object',
+              properties: {
+                name: {
+                  type: 'string',
+                  title: 'HR Partner',
+                },
+                employeeid: {
+                  type: 'string',
+                },
+              },
+              required: ['name', 'employeeid'],
+            },
+            reporting_manager: {
+              type: 'object',
+              properties: {
+                name: {
+                  type: 'string',
+                },
+                employeeid: {
+                  type: 'string',
+                },
+              },
+              required: ['name', 'employeeid'],
+            },
+
+            accounts: {
+              type: 'array',
+              title: 'Accounts',
+              items: {
+                type: 'object',
+                properties: {
+                  id: {
+                    type: 'string',
+                    title: 'Account ID',
+                  },
+                  name: {
+                    type: 'string',
+                    title: 'Account Name',
+                    tableView: true,
+                    isSubTitle: true,
+                  },
+                  start_date: {
+                    type: 'string',
+                    format: 'date',
+                    title: 'Start Date',
+                  },
+                  end_date: {
+                    type: 'string',
+                    format: 'date',
+                    title: 'End Date',
+                  },
+                  projects: {
+                    type: 'array',
+                    title: 'Projects',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        id: {
+                          type: 'string',
+                          title: 'Project ID',
+                        },
+                        name: {
+                          type: 'string',
+                          title: 'Project Name',
+                          tableView: true,
+                        },
+                        start_date: {
+                          type: 'string',
+                          format: 'date',
+                          title: 'Start Date',
+                        },
+                        end_date: {
+                          type: 'string',
+                          format: 'date',
+                          title: 'End Date',
+                        },
+                      },
+                      required: ['id', 'name', 'start_date', 'end_date'],
+                    },
+                  },
+                },
+                required: ['id', 'name', 'start_date', 'end_date'],
+              },
+            },
+          },
+          required: [
+            'salary',
+            'job_role',
+            'employeeid',
+            'designation',
+            'joining_date',
+            'hr_partner',
+            'employee_level',
+            'office_location',
+            'reporting_manager',
+          ],
+        },
+        skills: {
+          type: 'array',
+          title: 'Skills',
+          tableView: true,
+          items: {
+            type: 'object',
+            properties: {
+              skill: {
+                type: 'string',
+                title: 'Skills',
+                tableView: true,
+              },
+              self: {
+                type: 'number',
+                title: 'Self Rating',
+              },
+              system: {
+                type: 'number',
+                title: 'System Rating',
+              },
+            },
+            required: ['skill'],
+          },
+        },
+      },
+      required: [
+        'personal_info',
+        'contact_info',
+        'education',
+        'emergency_contacts',
+        'skills',
+        'documents',
+        'documents_issued',
+        'employment_info',
+      ],
+    },
+  },
 ];
 
 const SchemaImporter = ({ open, onClose, onImportSchema }) => {
@@ -381,60 +1016,145 @@ const SchemaImporter = ({ open, onClose, onImportSchema }) => {
       throw new Error('Invalid schema: missing properties object');
     }
 
-    const fields = [];
-    const existingKeys = [];
-    const requiredFields = schema.required || [];
+    const convertPropertiesToFields = (
+      properties,
+      requiredFields = [],
+      parentKey = ''
+    ) => {
+      const fields = [];
+      const usedKeys = new Set();
 
-    Object.entries(schema.properties).forEach(
-      ([propertyKey, propertyValue]) => {
-        const fieldType = mapSchemaPropertyToFieldType(propertyValue);
-        const fieldKey = generateFieldKey(propertyKey, existingKeys);
-        existingKeys.push(fieldKey);
+      Object.entries(properties).forEach(([propertyKey, propertyValue]) => {
+        // Keep original property key without modification
+        let fieldKey = propertyKey;
+        let counter = 1;
 
-        // Extract UI schema information if available
-        let uiSchemaElement = null;
-        if (uiSchema && uiSchema.elements) {
-          uiSchemaElement = uiSchema.elements.find(
-            (element) => element.scope === `#/properties/${propertyKey}`
-          );
+        // Only add suffix if there's a duplicate (which shouldn't happen with proper schema)
+        while (usedKeys.has(fieldKey)) {
+          fieldKey = `${propertyKey}_${counter}`;
+          counter++;
         }
+        usedKeys.add(fieldKey);
 
-        // Use a unique counter to prevent StrictMode duplications
         fieldCounter.current += 1;
         const uniqueId = fieldCounter.current;
 
-        const newField = {
-          id: `field_${uniqueId}`,
-          type: fieldType.id,
-          label:
-            propertyValue.title ||
-            propertyKey.charAt(0).toUpperCase() + propertyKey.slice(1),
-          key: fieldKey,
-          required: requiredFields.includes(propertyKey),
-          schema: {
-            ...fieldType.schema,
-            ...propertyValue,
-          },
-          uischema: {
-            ...fieldType.uischema,
-            ...(uiSchemaElement || {}),
-            scope: `#/properties/${fieldKey}`,
-          },
-        };
+        // Handle different property types
+        if (propertyValue.type === 'object' && propertyValue.properties) {
+          // Object field type
+          const childFields = convertPropertiesToFields(
+            propertyValue.properties,
+            propertyValue.required || [],
+            fieldKey // Pass the actual property key, not a concatenated one
+          );
 
-        // Handle enum values for select/radio fields
-        if (propertyValue.enum) {
-          newField.schema.enum = propertyValue.enum;
-          if (propertyValue.enumNames) {
-            newField.schema.enumNames = propertyValue.enumNames;
+          const objectField = {
+            id: `field_${uniqueId}`,
+            type: 'object',
+            label:
+              propertyValue.title ||
+              propertyKey.charAt(0).toUpperCase() +
+                propertyKey.slice(1).replace(/_/g, ' '),
+            key: fieldKey,
+            required: requiredFields.includes(propertyKey),
+            isLayout: true,
+            schema: {
+              type: 'object',
+              properties: {},
+              ...(propertyValue.required && {
+                required: propertyValue.required,
+              }),
+            },
+            uischema: {
+              type: 'Group',
+              label:
+                propertyValue.title ||
+                propertyKey.charAt(0).toUpperCase() +
+                  propertyKey.slice(1).replace(/_/g, ' '),
+              elements: [],
+            },
+            children: childFields,
+          };
+
+          fields.push(objectField);
+        } else if (propertyValue.type === 'array') {
+          // Array field type
+          const arrayField = {
+            id: `field_${uniqueId}`,
+            type: 'array',
+            label:
+              propertyValue.title ||
+              propertyKey.charAt(0).toUpperCase() +
+                propertyKey.slice(1).replace(/_/g, ' '),
+            key: fieldKey,
+            required: requiredFields.includes(propertyKey),
+            isLayout: false,
+            schema: {
+              type: 'array',
+              items: propertyValue.items || { type: 'string' },
+              ...(propertyValue.minItems && {
+                minItems: propertyValue.minItems,
+              }),
+              ...(propertyValue.maxItems && {
+                maxItems: propertyValue.maxItems,
+              }),
+              ...(propertyValue.uniqueItems && {
+                uniqueItems: propertyValue.uniqueItems,
+              }),
+            },
+            uischema: {
+              type: 'Control',
+              scope: `#/properties/${fieldKey}`,
+              options: {
+                detail: {
+                  type: 'VerticalLayout',
+                  elements: [],
+                },
+              },
+            },
+          };
+
+          fields.push(arrayField);
+        } else {
+          // Regular field
+          const fieldType = mapSchemaPropertyToFieldType(propertyValue);
+
+          const newField = {
+            id: `field_${uniqueId}`,
+            type: fieldType.id,
+            label:
+              propertyValue.title ||
+              propertyKey.charAt(0).toUpperCase() +
+                propertyKey.slice(1).replace(/_/g, ' '),
+            key: fieldKey,
+            required: requiredFields.includes(propertyKey),
+            isLayout: false,
+            schema: {
+              ...fieldType.schema,
+              ...propertyValue,
+            },
+            uischema: {
+              ...fieldType.uischema,
+              scope: `#/properties/${fieldKey}`,
+            },
+          };
+
+          // Handle enum values for select/radio fields
+          if (propertyValue.enum) {
+            newField.schema.enum = propertyValue.enum;
+            if (propertyValue.enumNames) {
+              newField.schema.enumNames = propertyValue.enumNames;
+            }
           }
+
+          fields.push(newField);
         }
+      });
 
-        fields.push(newField);
-      }
-    );
+      return fields;
+    };
 
-    return fields;
+    return convertPropertiesToFields(schema.properties, schema.required || []);
   };
 
   const handleLoadSchema = () => {

@@ -51,7 +51,6 @@ src/
 │   ├── FieldProperties.jsx    # Field property editor
 │   ├── FormPreview.jsx        # Live form preview
 │   ├── FormStructure.jsx      # Form structure editor
-│   ├── SampleSchemaLoader.jsx # Sample schema loader
 │   └── SchemaEditor.jsx       # JSON schema editor
 ├── App.jsx            # Main application component
 ├── main.jsx           # Application entry point
@@ -61,31 +60,87 @@ src/
 
 ## ✨ Features
 
-- **Drag & Drop Form Builder**: Create forms visually with intuitive drag and drop
+### 🎯 Core Functionality
+
+- **Advanced Drag & Drop Form Builder**: Create complex forms with intuitive drag and drop
 - **Live Preview**: See your form in action as you build it
 - **JSON Schema Support**: Full JSON Schema and UI Schema support
-- **Field Types**: Text, Number, Email, Date, Checkbox, Select, Radio, Textarea
-- **Layout Controls**: Groups, Vertical/Horizontal layouts
-- **Sample Schemas**: Pre-built form templates to get started quickly
 - **Export/Import**: Save and load your form configurations
 - **Real-time Editing**: Edit field properties and see immediate results
 
+### 🔥 Drag & Drop Capabilities
+
+- **Multi-level Nesting**: Drop layouts into layouts, fields into groups, unlimited nesting depth
+- **Smart Drop Zones**: Visual indicators show where items can be dropped
+- **Cross-container Movement**: Drag fields between different layouts and containers
+- **Intelligent Reordering**: Drag items to reorder within their containers
+- **Context Menus**: Right-click for quick actions (add, edit, copy, delete)
+- **Visual Feedback**: Real-time drag overlays and hover effects
+
+### 📝 Field Types
+
+- **Text, Number, Email, Date** - Standard input controls
+- **Checkbox, Radio, Select** - Selection controls
+- **Textarea** - Multi-line text input
+
+### 🏗️ Layout Controls
+
+- **Groups** - Visual containers with borders and titles
+- **Vertical Layouts** - Stack elements vertically
+- **Horizontal Layouts** - Arrange elements side-by-side
+- **Nested Layouts** - Unlimited nesting for complex structures
+
+### 🎨 Advanced Features
+
+- **Sample Schemas** - Pre-built form templates to get started quickly
+- **Schema Editor** - Direct JSON editing for advanced users
+- **Properties Panel** - Comprehensive field configuration
+- **Debug Mode** - Visual hierarchy and drag status indicators
+
 ## 🛠 Technology Stack
 
-- **React** - UI framework
-- **Material-UI** - Component library
+- **React 19** - UI framework
+- **Material-UI v6** - Component library
 - **JSON Forms** - Schema-based form generation
-- **Vite** - Build tool and dev server
+- **@dnd-kit** - Modern drag and drop for React
+  - `@dnd-kit/core` - Core drag and drop functionality
+  - `@dnd-kit/sortable` - Sortable list support
+  - `@dnd-kit/utilities` - CSS utilities and transforms
+  - `@dnd-kit/modifiers` - Drag constraints and modifiers
+- **Vite 7** - Build tool and dev server
 - **Yarn** - Package manager
 - **JavaScript** - Programming language (ES6+)
 
 ## 🎯 Usage
 
-1. **Add Fields**: Select field types from the left palette
-2. **Configure Properties**: Click any field to edit its properties
-3. **Organize Layout**: Use groups and layouts to structure your form
-4. **Preview**: Toggle preview mode to test your form
-5. **Export**: Download your form configuration as JSON
+### 🚀 Getting Started
+
+1. **Drag Fields**: Drag field types from the left palette to the form structure
+2. **Create Layouts**: Add groups and layouts to organize your form
+3. **Nest Structures**: Drop layouts into other layouts for complex hierarchies
+4. **Configure Properties**: Click any field to edit its properties in the right panel
+5. **Reorder Elements**: Drag fields within containers to reorder them
+6. **Use Context Menus**: Right-click for quick actions and options
+7. **Preview Your Form**: Toggle preview mode to test form functionality
+8. **Export Configuration**: Download your form as JSON for later use
+
+### 🎨 Advanced Drag & Drop Operations
+
+- **Field to Layout**: Drag any field from palette directly into layouts
+- **Layout to Layout**: Create nested structures by dropping layouts into other layouts
+- **Field to Group**: Add form fields directly to group containers
+- **Cross-container**: Move fields between different containers
+- **Multi-level**: Create unlimited nesting depth for complex forms
+- **Quick Add**: Use + buttons on layouts for fast field addition
+- **Context Actions**: Right-click for copy, cut, delete, and quick field additions
+
+### 💡 Pro Tips
+
+- Start with groups to create main form sections
+- Use horizontal layouts for side-by-side fields (name, address)
+- Use vertical layouts for stacking related fields
+- Right-click on layouts for quick field addition options
+- Keep nesting levels manageable (3-4 levels max recommended)
 
 ## 🔧 Package Scripts
 
