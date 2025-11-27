@@ -1,33 +1,4 @@
-export interface FieldType {
-  id: string;
-  type: string;
-  label: string;
-  icon: string;
-  schema: any;
-  uischema: any;
-  isLayout?: boolean;
-}
-
-export interface FormField {
-  id: string;
-  type: string;
-  label: string;
-  key: string;
-  required?: boolean;
-  schema: any;
-  uischema: any;
-  children?: FormField[];
-  isLayout?: boolean;
-  parentId?: string;
-}
-
-export interface FormState {
-  schema: any;
-  uischema: any;
-  data: any;
-}
-
-export const defaultFieldTypes: FieldType[] = [
+export const defaultFieldTypes = [
   // Layout Elements
   {
     id: 'vertical-layout',
@@ -183,7 +154,7 @@ export const defaultFieldTypes: FieldType[] = [
   },
 ];
 
-export const generateFieldKey = (type: string): string => {
+export const generateFieldKey = (type) => {
   const timestamp = Date.now();
   return `${type}_${timestamp}`;
 };

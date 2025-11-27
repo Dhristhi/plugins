@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { FormField } from '../types';
 import {
   Typography,
   TextField,
@@ -12,17 +11,9 @@ import {
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 
-interface FieldPropertiesProps {
-  field: FormField | null;
-  onFieldUpdate: (field: FormField) => void;
-}
-
-const FieldProperties: React.FC<FieldPropertiesProps> = ({
-  field,
-  onFieldUpdate,
-}) => {
-  const [localField, setLocalField] = useState<FormField | null>(null);
-  const [enumOptions, setEnumOptions] = useState<string[]>([]);
+const FieldProperties = ({ field, onFieldUpdate }) => {
+  const [localField, setLocalField] = useState(null);
+  const [enumOptions, setEnumOptions] = useState([]);
   const [newOption, setNewOption] = useState('');
 
   useEffect(() => {
@@ -46,13 +37,13 @@ const FieldProperties: React.FC<FieldPropertiesProps> = ({
     );
   }
 
-  const handleUpdate = (updates: Partial<FormField>) => {
+  const handleUpdate = (updates) => {
     const updatedField = { ...localField, ...updates };
     setLocalField(updatedField);
     onFieldUpdate(updatedField);
   };
 
-  const handleSchemaUpdate = (schemaUpdates: any) => {
+  const handleSchemaUpdate = (schemaUpdates) => {
     const updatedSchema = { ...localField.schema, ...schemaUpdates };
     handleUpdate({ schema: updatedSchema });
   };
@@ -66,7 +57,7 @@ const FieldProperties: React.FC<FieldPropertiesProps> = ({
     }
   };
 
-  const handleRemoveOption = (index: number) => {
+  const handleRemoveOption = (index) => {
     const newOptions = enumOptions.filter((_, i) => i !== index);
     setEnumOptions(newOptions);
     handleSchemaUpdate({

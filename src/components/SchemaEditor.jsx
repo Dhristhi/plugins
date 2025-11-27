@@ -1,19 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { FormState } from '../types';
 import { Typography, TextField, Button, Box } from '@mui/material';
 
-interface SchemaEditorProps {
-  formState: FormState;
-  onFormStateChange: (formState: FormState) => void;
-}
-
-const SchemaEditor: React.FC<SchemaEditorProps> = ({
-  formState,
-  onFormStateChange,
-}) => {
+const SchemaEditor = ({ formState, onFormStateChange }) => {
   const [schemaText, setSchemaText] = useState('');
   const [uischemaText, setUischemaText] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     setSchemaText(JSON.stringify(formState.schema, null, 2));

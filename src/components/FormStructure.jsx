@@ -20,22 +20,9 @@ import {
   Edit as EditIcon,
   ExpandMore as ExpandMoreIcon,
 } from '@mui/icons-material';
-import { FormField, FieldType, defaultFieldTypes } from '../types';
+import { defaultFieldTypes } from '../types';
 
-interface LayoutManagerProps {
-  fields: FormField[];
-  onFieldsChange: (fields: FormField[]) => void;
-  onFieldSelect: (field: FormField) => void;
-  selectedField: FormField | null;
-  onAddFieldToLayout: (parentId: string, index?: number) => void;
-  onAddLayoutToContainer: (
-    parentId: string,
-    layoutType: FieldType,
-    index?: number
-  ) => void;
-}
-
-const FormStructure: React.FC<LayoutManagerProps> = ({
+const FormStructure = ({
   fields,
   onFieldsChange,
   onFieldSelect,
@@ -43,16 +30,13 @@ const FormStructure: React.FC<LayoutManagerProps> = ({
   onAddFieldToLayout,
   onAddLayoutToContainer,
 }) => {
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [selectedLayoutId, setSelectedLayoutId] = useState<string | null>(null);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [selectedLayoutId, setSelectedLayoutId] = useState(null);
 
   const layoutTypes = defaultFieldTypes.filter((ft) => ft.isLayout);
   const fieldTypes = defaultFieldTypes.filter((ft) => !ft.isLayout);
 
-  const handleAddMenuClick = (
-    event: React.MouseEvent<HTMLElement>,
-    layoutId: string
-  ) => {
+  const handleAddMenuClick = (event, layoutId) => {
     event.stopPropagation();
     setAnchorEl(event.currentTarget);
     setSelectedLayoutId(layoutId);
@@ -70,21 +54,17 @@ const FormStructure: React.FC<LayoutManagerProps> = ({
     handleAddMenuClose();
   };
 
-  const handleAddLayout = (layoutType: FieldType) => {
+  const handleAddLayout = (layoutType) => {
     if (selectedLayoutId) {
       onAddLayoutToContainer(selectedLayoutId, layoutType);
     }
     handleAddMenuClose();
   };
 
-  const moveField = (
-    fieldId: string,
-    direction: 'up' | 'down',
-    parentId?: string
-  ) => {
+  const moveField = (fieldId, direction, parentId) => {
     const newFields = [...fields];
 
-    const moveInArray = (array: FormField[], targetId: string) => {
+    const moveInArray = (array, targetId) => {
       const index = array.findIndex((f) => f.id === targetId);
       if (index === -1) return false;
 
@@ -98,7 +78,7 @@ const FormStructure: React.FC<LayoutManagerProps> = ({
 
     if (parentId) {
       // Find parent and move within its children
-      const findAndMoveInChildren = (fieldsArray: FormField[]): boolean => {
+      const findAndMoveInChildren = (fieldsArray) => {
         for (const field of fieldsArray) {
           if (field.id === parentId && field.children) {
             return moveInArray(field.children, fieldId);
@@ -118,10 +98,10 @@ const FormStructure: React.FC<LayoutManagerProps> = ({
     onFieldsChange(newFields);
   };
 
-  const deleteField = (fieldId: string, parentId?: string) => {
+  const deleteField = (fieldId, parentId) => {
     const newFields = [...fields];
 
-    const deleteFromArray = (array: FormField[], targetId: string) => {
+    const deleteFromArray = (array, targetId) => {
       const index = array.findIndex((f) => f.id === targetId);
       if (index !== -1) {
         array.splice(index, 1);
@@ -132,7 +112,7 @@ const FormStructure: React.FC<LayoutManagerProps> = ({
 
     if (parentId) {
       // Delete from parent's children
-      const findAndDeleteFromChildren = (fieldsArray: FormField[]): boolean => {
+      const findAndDeleteFromChildren = (fieldsArray) => {
         for (const field of fieldsArray) {
           if (field.id === parentId && field.children) {
             return deleteFromArray(field.children, fieldId);
@@ -152,11 +132,7 @@ const FormStructure: React.FC<LayoutManagerProps> = ({
     onFieldsChange(newFields);
   };
 
-  const renderField = (
-    field: FormField,
-    level: number = 0,
-    parentId?: string
-  ): React.ReactNode => {
+  const renderField = (field, level = 0, parentId) => {
     const isSelected = selectedField?.id === field.id;
     const isLayout = field.isLayout;
     const isGroup = field.type === 'group';

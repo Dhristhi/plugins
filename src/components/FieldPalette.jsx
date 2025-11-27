@@ -1,16 +1,12 @@
 import React from 'react';
-import { defaultFieldTypes, FieldType } from '../types';
+import { defaultFieldTypes } from '../types';
 import { Typography, Box, Divider, Paper } from '@mui/material';
 
-interface FieldPaletteProps {
-  onFieldSelect: (fieldType: FieldType) => void;
-}
-
-const FieldPalette: React.FC<FieldPaletteProps> = ({ onFieldSelect }) => {
+const FieldPalette = ({ onFieldSelect }) => {
   const layoutTypes = defaultFieldTypes.filter((ft) => ft.isLayout);
   const fieldTypes = defaultFieldTypes.filter((ft) => !ft.isLayout);
 
-  const renderFieldItem = (fieldType: FieldType) => (
+  const renderFieldItem = (fieldType) => (
     <Paper
       key={fieldType.id}
       elevation={1}

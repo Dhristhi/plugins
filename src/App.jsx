@@ -8,7 +8,7 @@ import FormStructure from './components/FormStructure';
 import FieldProperties from './components/FieldProperties';
 import SampleSchemaLoader from './components/SampleSchemaLoader';
 
-import { FormField, FieldType, FormState, defaultFieldTypes } from './types';
+import { defaultFieldTypes } from './types';
 
 const theme = createTheme({
   palette: {
@@ -21,22 +21,22 @@ const theme = createTheme({
   },
 });
 
-const App: React.FC = () => {
-  const [fields, setFields] = useState<FormField[]>([]);
-  const [selectedField, setSelectedField] = useState<FormField | null>(null);
+const App = () => {
+  const [fields, setFields] = useState([]);
+  const [selectedField, setSelectedField] = useState(null);
   const [showSchemaEditor, setShowSchemaEditor] = useState(false);
-  const [showFormPreview, setShowFormPreview] = useState(true);
-  const [formData, setFormData] = useState<any>({});
+  const [showFormPreview, setShowFormPreview] = useState(false);
+  const [formData, setFormData] = useState({});
   const [propertiesDrawerOpen, setPropertiesDrawerOpen] = useState(false);
   const [sampleSchemaLoaderOpen, setSampleSchemaLoaderOpen] = useState(false);
 
   // Use a counter to generate truly unique IDs that are StrictMode safe
   const fieldCounter = React.useRef(0);
-  const pendingOperations = React.useRef(new Set<string>());
+  const pendingOperations = React.useRef(new Set());
 
   // Generate form state from fields
-  const buildSchemaFromFields = (fieldsArray: FormField[]): any => {
-    const properties: any = {};
+  const buildSchemaFromFields = (fieldsArray) => {
+    const properties = {};
 
     fieldsArray.forEach((field) => {
       if (!field.isLayout) {
@@ -55,7 +55,7 @@ const App: React.FC = () => {
     return { properties };
   };
 
-  const buildUISchemaFromFields = (fieldsArray: FormField[]): any[] => {
+  const buildUISchemaFromFields = (fieldsArray) => {
     return fieldsArray.map((field) => {
       if (field.isLayout) {
         return {
@@ -75,8 +75,8 @@ const App: React.FC = () => {
     });
   };
 
-  const getAllRequiredFields = (fieldsArray: FormField[]): string[] => {
-    const required: string[] = [];
+  const getAllRequiredFields = (fieldsArray) => {
+    const required = [];
     fieldsArray.forEach((field) => {
       if (!field.isLayout && field.required) {
         required.push(field.key);
@@ -89,7 +89,7 @@ const App: React.FC = () => {
   };
 
   const schemaData = buildSchemaFromFields(fields);
-  const formState: FormState = {
+  const formState = {
     schema: {
       type: 'object',
       properties: schemaData.properties,
@@ -102,91 +102,86 @@ const App: React.FC = () => {
     data: formData,
   };
 
-  const addField = useCallback(
-    (fieldType: FieldType, parentId?: string, index?: number) => {
-      // Create a unique operation ID to prevent duplicates
-      const operationId = `${fieldType.id}-${parentId || 'root'}-${Date.now()}`;
+  const addField = useCallback((fieldType, parentId, index) => {
+    // Create a unique operation ID to prevent duplicates
+    const operationId = `${fieldType.id}-${parentId || 'root'}-${Date.now()}`;
 
-      // Check if this operation is already pending
-      if (pendingOperations.current.has(operationId)) {
-        return; // Skip duplicate execution
-      }
+    // Check if this operation is already pending
+    if (pendingOperations.current.has(operationId)) {
+      return; // Skip duplicate execution
+    }
 
-      // Mark operation as pending
-      pendingOperations.current.add(operationId);
+    // Mark operation as pending
+    pendingOperations.current.add(operationId);
 
-      // Clean up after a short delay
-      setTimeout(() => {
-        pendingOperations.current.delete(operationId);
-      }, 100);
+    // Clean up after a short delay
+    setTimeout(() => {
+      pendingOperations.current.delete(operationId);
+    }, 100);
 
-      // Use a unique counter to prevent StrictMode duplications
-      fieldCounter.current += 1;
-      const uniqueId = fieldCounter.current;
+    // Use a unique counter to prevent StrictMode duplications
+    fieldCounter.current += 1;
+    const uniqueId = fieldCounter.current;
 
-      const fieldKey = fieldType.isLayout
-        ? `layout_${uniqueId}`
-        : `${fieldType.id}_${uniqueId}`;
+    const fieldKey = fieldType.isLayout
+      ? `layout_${uniqueId}`
+      : `${fieldType.id}_${uniqueId}`;
 
-      const newField: FormField = {
-        id: `field_${uniqueId}`,
-        type: fieldType.id,
-        label: fieldType.isLayout
-          ? fieldType.label
-          : `${fieldType.label} Field`,
-        key: fieldKey,
-        required: false,
-        schema: { ...fieldType.schema },
-        uischema: { ...fieldType.uischema },
-        isLayout: fieldType.isLayout,
-        children: fieldType.isLayout ? [] : undefined,
-        parentId: parentId,
-      };
-      setFields((prev) => {
-        const newFields = [...prev];
+    const newField = {
+      id: `field_${uniqueId}`,
+      type: fieldType.id,
+      label: fieldType.isLayout ? fieldType.label : `${fieldType.label} Field`,
+      key: fieldKey,
+      required: false,
+      schema: { ...fieldType.schema },
+      uischema: { ...fieldType.uischema },
+      isLayout: fieldType.isLayout,
+      children: fieldType.isLayout ? [] : undefined,
+      parentId: parentId,
+    };
+    setFields((prev) => {
+      const newFields = [...prev];
 
-        if (parentId) {
-          // Add to specific parent layout
-          const addToParent = (fieldsArray: FormField[]): boolean => {
-            for (const field of fieldsArray) {
-              if (field.id === parentId && field.isLayout) {
-                if (!field.children) field.children = [];
-                if (typeof index === 'number') {
-                  field.children.splice(index, 0, newField);
-                } else {
-                  field.children.push(newField);
-                }
-                return true;
+      if (parentId) {
+        // Add to specific parent layout
+        const addToParent = (fieldsArray) => {
+          for (const field of fieldsArray) {
+            if (field.id === parentId && field.isLayout) {
+              if (!field.children) field.children = [];
+              if (typeof index === 'number') {
+                field.children.splice(index, 0, newField);
+              } else {
+                field.children.push(newField);
               }
-              if (field.children && addToParent(field.children)) {
-                return true;
-              }
+              return true;
             }
-            return false;
-          };
-          addToParent(newFields);
-        } else {
-          // Add to root level
-          if (typeof index === 'number') {
-            newFields.splice(index, 0, newField);
-          } else {
-            newFields.push(newField);
+            if (field.children && addToParent(field.children)) {
+              return true;
+            }
           }
+          return false;
+        };
+        addToParent(newFields);
+      } else {
+        // Add to root level
+        if (typeof index === 'number') {
+          newFields.splice(index, 0, newField);
+        } else {
+          newFields.push(newField);
         }
-
-        return newFields;
-      });
-
-      setSelectedField(newField);
-      if (!fieldType.isLayout) {
-        setPropertiesDrawerOpen(true);
       }
-    },
-    []
-  );
+
+      return newFields;
+    });
+
+    setSelectedField(newField);
+    if (!fieldType.isLayout) {
+      setPropertiesDrawerOpen(true);
+    }
+  }, []);
 
   const addFieldToLayout = useCallback(
-    (parentId: string, index?: number) => {
+    (parentId, index) => {
       const defaultFieldType =
         defaultFieldTypes.find((ft) => !ft.isLayout) || defaultFieldTypes[0];
       addField(defaultFieldType, parentId, index);
@@ -195,27 +190,27 @@ const App: React.FC = () => {
   );
 
   const addLayoutToContainer = useCallback(
-    (parentId: string, layoutType: FieldType, index?: number) => {
+    (parentId, layoutType, index) => {
       addField(layoutType, parentId, index);
     },
     [addField]
   );
 
   const handleFieldSelect = useCallback(
-    (fieldType: FieldType) => {
+    (fieldType) => {
       addField(fieldType);
     },
     [addField]
   );
 
-  const handleFieldUpdate = useCallback((updatedField: FormField) => {
+  const handleFieldUpdate = useCallback((updatedField) => {
     setFields((prev) =>
       prev.map((field) => (field.id === updatedField.id ? updatedField : field))
     );
     setSelectedField(updatedField);
   }, []);
 
-  const handleImportSchema = useCallback((importedFields: FormField[]) => {
+  const handleImportSchema = useCallback((importedFields) => {
     setFields(importedFields);
     setSelectedField(null);
     setPropertiesDrawerOpen(false);
@@ -411,7 +406,7 @@ const App: React.FC = () => {
                   <FormStructure
                     fields={fields}
                     onFieldsChange={setFields}
-                    onFieldSelect={(field: FormField) => {
+                    onFieldSelect={(field) => {
                       setSelectedField(field);
                       if (!field.isLayout) {
                         setPropertiesDrawerOpen(true);

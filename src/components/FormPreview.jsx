@@ -4,18 +4,9 @@ import {
   materialRenderers,
   materialCells,
 } from '@jsonforms/material-renderers';
-import { FormState } from '../types';
 import { Typography, Box } from '@mui/material';
 
-interface FormPreviewProps {
-  formState: FormState;
-  onDataChange: (data: any) => void;
-}
-
-const FormPreview: React.FC<FormPreviewProps> = ({
-  formState,
-  onDataChange,
-}) => {
+const FormPreview = ({ formState, onDataChange }) => {
   return (
     <Box>
       <Box sx={{ p: 2, borderBottom: '1px solid #e0e0e0' }}>
