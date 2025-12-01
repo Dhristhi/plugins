@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
-import { Box, Paper, Typography, Chip, useTheme } from '@mui/material';
+import React, { useState } from "react";
+import { Box, Paper, Typography, Chip, useTheme } from "@mui/material";
 import {
   useSortable,
   SortableContext,
   verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import { useDroppable } from '@dnd-kit/core';
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { useDroppable } from "@dnd-kit/core";
 import {
   IconGripVertical,
   IconBox,
@@ -18,10 +18,10 @@ import {
   IconTarget,
   IconPlus,
   IconForms,
-} from '@tabler/icons-react';
-import ActionButtons from './ActionButtons';
-import ContextMenu from './ContextMenu';
-import CommonHeader from './CommonHeader';
+} from "@tabler/icons-react";
+import ActionButtons from "./ActionButtons";
+import ContextMenu from "./ContextMenu";
+import CommonHeader from "./CommonHeader";
 
 // Sortable field component
 const SortableFieldItem = ({
@@ -47,7 +47,7 @@ const SortableFieldItem = ({
   } = useSortable({
     id: field.id,
     data: {
-      type: 'structure-item',
+      type: "structure-item",
       field: field,
       parentId: parentId,
     },
@@ -61,7 +61,7 @@ const SortableFieldItem = ({
 
   const isSelected = selectedField?.id === field.id;
   const isLayout = field.isLayout;
-  const isGroup = field.type === 'group';
+  const isGroup = field.type === "group";
 
   const handleContextMenu = (event) => {
     event.preventDefault();
@@ -79,12 +79,12 @@ const SortableFieldItem = ({
   const getFieldIcon = (theme) => {
     const iconProps = { size: 18, color: theme.palette.grey[600] };
     if (isGroup) return <IconBox {...iconProps} />;
-    if (field.type === 'object') return <IconCube {...iconProps} />;
-    if (field.type === 'vertical-layout')
+    if (field.type === "object") return <IconCube {...iconProps} />;
+    if (field.type === "vertical-layout")
       return <IconLayoutRows {...iconProps} />;
-    if (field.type === 'horizontal-layout')
+    if (field.type === "horizontal-layout")
       return <IconLayoutColumns {...iconProps} />;
-    if (field.type === 'array') return <IconList {...iconProps} />;
+    if (field.type === "array") return <IconList {...iconProps} />;
     return <IconEdit {...iconProps} />;
   };
 
@@ -96,7 +96,7 @@ const SortableFieldItem = ({
           p: 2.5,
           mb: 1.5,
           ml: level * 2,
-          cursor: 'pointer',
+          cursor: "pointer",
           border: (theme) =>
             isSelected
               ? `2px solid ${theme.palette.primary.main}`
@@ -104,11 +104,11 @@ const SortableFieldItem = ({
               ? `2px solid ${theme.palette.warning.main}`
               : `1px solid ${theme.palette.grey[200]}`,
           borderRadius: 2,
-          transition: 'all 0.2s ease',
-          '&:hover': {
-            transform: 'translateY(-1px)',
+          transition: "all 0.2s ease",
+          "&:hover": {
+            transform: "translateY(-1px)",
             boxShadow:
-              '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
+              "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
           },
         }}
         onClick={() => onFieldSelect(field)}
@@ -116,49 +116,49 @@ const SortableFieldItem = ({
       >
         <Box
           sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
             minWidth: 0,
             gap: 1,
           }}
         >
           <Box
             sx={{
-              display: 'flex',
-              alignItems: 'center',
+              display: "flex",
+              alignItems: "center",
               gap: 1,
               flex: 1,
               minWidth: 0,
-              overflow: 'hidden',
+              overflow: "hidden",
             }}
           >
             <Box
               {...attributes}
               {...listeners}
               sx={{
-                cursor: 'grab',
-                display: 'flex',
-                alignItems: 'center',
-                color: 'grey.400',
-                '&:hover': { color: 'grey.500' },
-                '&:active': { cursor: 'grabbing' },
+                cursor: "grab",
+                display: "flex",
+                alignItems: "center",
+                color: "grey.400",
+                "&:hover": { color: "grey.500" },
+                "&:active": { cursor: "grabbing" },
               }}
             >
               <IconGripVertical size={16} />
             </Box>
             <Box
-              sx={{ minWidth: '20px', display: 'flex', alignItems: 'center' }}
+              sx={{ minWidth: "20px", display: "flex", alignItems: "center" }}
             >
               {getFieldIcon(useTheme())}
             </Box>
             <Typography
               variant="subtitle2"
               sx={{
-                fontWeight: isLayout ? 'bold' : 'normal',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
+                fontWeight: isLayout ? "bold" : "normal",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
                 minWidth: 0,
                 flex: 1,
               }}
@@ -169,24 +169,24 @@ const SortableFieldItem = ({
               <Chip
                 label={
                   isGroup
-                    ? 'Group'
-                    : field.type === 'object'
-                    ? 'Object'
-                    : field.uischema?.type || 'Layout'
+                    ? "Group"
+                    : field.type === "object"
+                    ? "Object"
+                    : field.uischema?.type || "Layout"
                 }
                 size="small"
                 color={
                   isGroup
-                    ? 'warning'
-                    : field.type === 'object'
-                    ? 'success'
-                    : 'primary'
+                    ? "warning"
+                    : field.type === "object"
+                    ? "success"
+                    : "primary"
                 }
                 variant="outlined"
                 sx={{
-                  fontSize: level > 2 ? '10px' : '12px',
+                  fontSize: level > 2 ? "10px" : "12px",
                   height: level > 2 ? 20 : 24,
-                  '& .MuiChip-label': {
+                  "& .MuiChip-label": {
                     px: level > 2 ? 0.5 : 1,
                   },
                 }}
@@ -197,16 +197,32 @@ const SortableFieldItem = ({
                 *
               </Typography>
             )}
+            {field.uischema?.options?.hidden && (
+              <Chip
+                label="Hidden"
+                size="small"
+                color="secondary"
+                variant="outlined"
+                sx={{
+                  fontSize: "10px",
+                  height: 18,
+                  opacity: 0.7,
+                  "& .MuiChip-label": {
+                    px: 0.5,
+                  },
+                }}
+              />
+            )}
             {level > 0 && level <= 3 && (
               <Chip
                 label={`L${level}`}
                 size="small"
                 variant="outlined"
                 sx={{
-                  fontSize: '9px',
+                  fontSize: "9px",
                   height: 16,
                   minWidth: 20,
-                  '& .MuiChip-label': {
+                  "& .MuiChip-label": {
                     px: 0.5,
                   },
                 }}
@@ -228,7 +244,7 @@ const SortableFieldItem = ({
 
         {/* Render children for layouts */}
         {isLayout && field.children && field.children.length > 0 && (
-          <Box sx={{ mt: 2, pl: 2, borderLeft: 2, borderColor: 'grey.300' }}>
+          <Box sx={{ mt: 2, pl: 2, borderLeft: 2, borderColor: "grey.300" }}>
             <SortableContext
               items={field.children.map((child) => child.id)}
               strategy={verticalListSortingStrategy}
@@ -236,7 +252,7 @@ const SortableFieldItem = ({
               <DropZone
                 parentId={field.id}
                 index={0}
-                accepts={['field', 'layout']}
+                accepts={["field", "layout"]}
               />
               {field.children.map((child, index) => (
                 <React.Fragment key={child.id}>
@@ -254,7 +270,7 @@ const SortableFieldItem = ({
                   <DropZone
                     parentId={field.id}
                     index={index + 1}
-                    accepts={['field', 'layout']}
+                    accepts={["field", "layout"]}
                   />
                 </React.Fragment>
               ))}
@@ -267,7 +283,7 @@ const SortableFieldItem = ({
           <DropZone
             parentId={field.id}
             index={0}
-            accepts={['field', 'layout']}
+            accepts={["field", "layout"]}
             isEmpty={true}
             onAddField={() => onAddFieldToLayout(field.id)}
           />
@@ -298,11 +314,11 @@ const DropZone = ({
   onAddField,
 }) => {
   const { isOver, setNodeRef } = useDroppable({
-    id: `drop-${parentId || 'root'}-${index}`,
+    id: `drop-${parentId || "root"}-${index}`,
     data: {
       parentId: parentId,
       index: index,
-      accepts: [...accepts, 'structure-item'], // Accept both palette items and existing structure items
+      accepts: [...accepts, "structure-item"], // Accept both palette items and existing structure items
     },
   });
 
@@ -313,35 +329,35 @@ const DropZone = ({
         sx={{
           mt: 2,
           p: 4,
-          border: isOver ? 2 : '2px dashed',
-          borderColor: isOver ? 'primary.main' : 'grey.300',
+          border: isOver ? 2 : "2px dashed",
+          borderColor: isOver ? "primary.main" : "grey.300",
           borderRadius: 3,
-          textAlign: 'center',
-          color: isOver ? 'primary.main' : 'grey.500',
-          cursor: 'pointer',
-          transition: 'all 0.2s ease',
+          textAlign: "center",
+          color: isOver ? "primary.main" : "grey.500",
+          cursor: "pointer",
+          transition: "all 0.2s ease",
           minHeight: 100,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          '&:hover': {
-            borderColor: 'primary.main',
-            transform: 'translateY(-1px)',
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          "&:hover": {
+            borderColor: "primary.main",
+            transform: "translateY(-1px)",
           },
         }}
         onClick={onAddField}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
           {isOver ? <IconTarget size={20} /> : <IconPlus size={20} />}
           <Typography variant="body2" sx={{ fontWeight: 500 }}>
-            {isOver ? 'Drop here!' : 'No fields yet'}
+            {isOver ? "Drop here!" : "No fields yet"}
           </Typography>
         </Box>
         <Typography variant="caption" color="textSecondary">
           {isOver
-            ? 'Release to add item'
-            : 'Drag fields from the palette or click to add'}
+            ? "Release to add item"
+            : "Drag fields from the palette or click to add"}
         </Typography>
       </Box>
     );
@@ -353,35 +369,35 @@ const DropZone = ({
       sx={{
         minHeight: isOver ? 50 : 24,
         borderRadius: 1,
-        transition: 'all 0.2s ease',
-        margin: '8px 0',
+        transition: "all 0.2s ease",
+        margin: "8px 0",
         opacity: isOver ? 1 : 0.7,
         border: (theme) =>
           isOver
             ? `2px solid ${theme.palette.primary.main}`
             : `2px dashed ${theme.palette.grey[300]}`,
-        borderColor: isOver ? 'primary.main' : 'grey.300',
-        position: 'relative',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        cursor: 'pointer',
-        '&:hover': {
+        borderColor: isOver ? "primary.main" : "grey.300",
+        position: "relative",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        cursor: "pointer",
+        "&:hover": {
           opacity: 1,
           minHeight: 36,
-          borderColor: 'primary.main',
+          borderColor: "primary.main",
         },
       }}
     >
       <Typography
         variant="caption"
         sx={{
-          color: isOver ? 'white' : 'grey.500',
+          color: isOver ? "white" : "grey.500",
           fontWeight: 500,
-          fontSize: '11px',
-          textAlign: 'center',
-          display: 'flex',
-          alignItems: 'center',
+          fontSize: "11px",
+          textAlign: "center",
+          display: "flex",
+          alignItems: "center",
           gap: 0.5,
         }}
       >
@@ -419,7 +435,7 @@ const FormStructure = ({
       const index = array.findIndex((f) => f.id === targetId);
       if (index === -1) return false;
 
-      const newIndex = direction === 'up' ? index - 1 : index + 1;
+      const newIndex = direction === "up" ? index - 1 : index + 1;
       if (newIndex < 0 || newIndex >= array.length) return false;
 
       // Swap elements
@@ -501,11 +517,11 @@ const FormStructure = ({
           <DropZone
             parentId={null}
             index={0}
-            accepts={['field', 'layout']}
+            accepts={["field", "layout"]}
             isEmpty={true}
             onAddField={() => {
               // Could add a default field here if needed
-              console.log('Add field to empty form');
+              console.log("Add field to empty form");
             }}
           />
         ) : (
@@ -513,7 +529,7 @@ const FormStructure = ({
             items={fields.map((field) => field.id)}
             strategy={verticalListSortingStrategy}
           >
-            <DropZone parentId={null} index={0} accepts={['field', 'layout']} />
+            <DropZone parentId={null} index={0} accepts={["field", "layout"]} />
             {fields.map((field, index) => (
               <React.Fragment key={field.id}>
                 <SortableFieldItem
@@ -530,7 +546,7 @@ const FormStructure = ({
                 <DropZone
                   parentId={null}
                   index={index + 1}
-                  accepts={['field', 'layout']}
+                  accepts={["field", "layout"]}
                 />
               </React.Fragment>
             ))}

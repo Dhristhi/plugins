@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Typography,
   TextField,
@@ -8,13 +8,38 @@ import {
   Chip,
   IconButton,
   Divider,
-} from '@mui/material';
-import { IconPlus, IconTrash, IconSettings } from '@tabler/icons-react';
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Button,
+  Switch,
+  Grid,
+  Slider,
+} from "@mui/material";
+import {
+  IconPlus,
+  IconTrash,
+  IconSettings,
+  IconChevronDown,
+  IconEdit,
+  IconFileText,
+  IconHash,
+  IconMail,
+  IconCalendar,
+  IconSquareCheck,
+  IconChevronDown as IconSelect,
+  IconCircleDot,
+} from "@tabler/icons-react";
+import { defaultFieldTypes } from "../types";
 
 const FieldProperties = ({ field, onFieldUpdate }) => {
   const [localField, setLocalField] = useState(null);
   const [enumOptions, setEnumOptions] = useState([]);
-  const [newOption, setNewOption] = useState('');
+  const [newOption, setNewOption] = useState("");
 
   useEffect(() => {
     if (field) {
@@ -29,16 +54,16 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
 
   if (!localField) {
     return (
-      <Box sx={{ p: 3, textAlign: 'center' }}>
+      <Box sx={{ p: 3, textAlign: "center" }}>
         <IconSettings
           size={48}
-          style={{ marginBottom: '16px' }}
+          style={{ marginBottom: "16px" }}
           color="currentColor"
         />
         <Typography
           variant="h6"
           color="textSecondary"
-          sx={{ fontWeight: 500, color: 'grey.400' }}
+          sx={{ fontWeight: 500, color: "grey.400" }}
         >
           Select a field to edit
         </Typography>
@@ -65,7 +90,7 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
       const newOptions = [...enumOptions, newOption.trim()];
       setEnumOptions(newOptions);
       handleSchemaUpdate({ enum: newOptions });
-      setNewOption('');
+      setNewOption("");
     }
   };
 
@@ -77,8 +102,44 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
     });
   };
 
-  const hasEnumOptions = ['select', 'radio'].includes(localField.type);
-  const isGroup = localField.type === 'group';
+  const handleFieldTypeChange = (newTypeId) => {
+    const newFieldType = defaultFieldTypes.find((ft) => ft.id === newTypeId);
+    if (newFieldType && !newFieldType.isLayout) {
+      const updatedField = {
+        ...localField,
+        type: newFieldType.id,
+        schema: { ...newFieldType.schema, title: localField.label },
+        uischema: {
+          ...newFieldType.uischema,
+          scope: `#/properties/${localField.key}`,
+        },
+      };
+
+      // Preserve enum options if switching to/from select/radio
+      if (hasEnumOptions && ["select", "radio"].includes(newTypeId)) {
+        updatedField.schema.enum = enumOptions;
+      }
+
+      setLocalField(updatedField);
+      onFieldUpdate(updatedField);
+
+      // Update enum options state for new type
+      if (newFieldType.schema.enum) {
+        setEnumOptions([...newFieldType.schema.enum]);
+      } else if (!["select", "radio"].includes(newTypeId)) {
+        setEnumOptions([]);
+      }
+    }
+  };
+
+  const getFieldTypeIcon = (typeId) => {
+    const fieldType = defaultFieldTypes.find((ft) => ft.id === typeId);
+    return fieldType?.icon || IconEdit;
+  };
+
+  const availableFieldTypes = defaultFieldTypes.filter((ft) => !ft.isLayout);
+  const hasEnumOptions = ["select", "radio"].includes(localField.type);
+  const isGroup = localField.type === "group";
   const isLayout = localField.isLayout && !isGroup;
 
   return (
@@ -87,243 +148,550 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
         variant="h6"
         sx={{
           fontWeight: 600,
-          color: 'grey.800',
+          color: "grey.800",
           mb: 3,
         }}
       >
         {isGroup
-          ? 'Group Properties'
+          ? "Group Properties"
           : isLayout
-          ? 'Layout Properties'
-          : 'Field Properties'}
+          ? "Layout Properties"
+          : "Field Properties"}
       </Typography>
 
-      <Box sx={{ mb: 3 }}>
-        <TextField
-          label={isGroup ? 'Group Title' : 'Label'}
-          fullWidth
-          value={localField.label}
-          onChange={(e) => {
-            const newLabel = e.target.value;
-            if (isGroup) {
-              // Update both field label and UI schema label for groups
-              const updatedUISchema = {
-                ...localField.uischema,
-                label: newLabel,
-              };
-              handleUpdate({
-                label: newLabel,
-                uischema: updatedUISchema,
-              });
-            } else {
-              handleUpdate({ label: newLabel });
-            }
-          }}
-          margin="normal"
-          variant="outlined"
-          helperText={isGroup ? 'Displayed as the group header' : ''}
-          sx={{
-            '& .MuiOutlinedInput-root': {
-              borderRadius: 2,
-            },
-          }}
-        />
-
-        {!isLayout && !isGroup && (
-          <>
+      {/* Basic Properties */}
+      <Accordion defaultExpanded sx={{ mb: 2, boxShadow: 1 }}>
+        <AccordionSummary expandIcon={<IconChevronDown />}>
+          <Typography variant="subtitle1" fontWeight={600}>
+            Basic Properties
+          </Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <Box>
             <TextField
-              label="Field Key"
+              label={isGroup ? "Group Title" : "Label"}
               fullWidth
-              value={localField.key}
-              onChange={(e) => handleUpdate({ key: e.target.value })}
+              value={localField.label}
+              onChange={(e) => {
+                const newLabel = e.target.value;
+                if (isGroup) {
+                  const updatedUISchema = {
+                    ...localField.uischema,
+                    label: newLabel,
+                  };
+                  handleUpdate({
+                    label: newLabel,
+                    uischema: updatedUISchema,
+                  });
+                } else {
+                  handleUpdate({ label: newLabel });
+                }
+              }}
               margin="normal"
               variant="outlined"
-              helperText="Unique identifier for this field"
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 2,
-                },
-              }}
-            />
-
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={localField.required || false}
-                  onChange={(e) => handleUpdate({ required: e.target.checked })}
-                />
+              helperText={
+                isGroup
+                  ? "Displayed as the group header"
+                  : "The display label for this field"
               }
-              label="Required"
+              sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
             />
-          </>
-        )}
 
-        {isGroup && (
-          <>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={localField.uischema?.options?.collapsed || false}
-                  onChange={(e) => {
-                    const updatedUISchema = {
-                      ...localField.uischema,
-                      options: {
-                        ...localField.uischema?.options,
-                        collapsed: e.target.checked,
-                      },
-                    };
-                    handleUpdate({ uischema: updatedUISchema });
+            {!isLayout && !isGroup && (
+              <>
+                <TextField
+                  label="Field Key"
+                  fullWidth
+                  value={localField.key}
+                  onChange={(e) => handleUpdate({ key: e.target.value })}
+                  margin="normal"
+                  variant="outlined"
+                  helperText="Unique identifier for this field"
+                  sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+                />
+
+                <FormControl fullWidth margin="normal">
+                  <InputLabel>Field Type</InputLabel>
+                  <Select
+                    value={localField.type}
+                    label="Field Type"
+                    onChange={(e) => handleFieldTypeChange(e.target.value)}
+                    sx={{ borderRadius: 2 }}
+                  >
+                    {availableFieldTypes.map((fieldType) => {
+                      const IconComponent = fieldType.icon;
+                      return (
+                        <MenuItem key={fieldType.id} value={fieldType.id}>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 1,
+                            }}
+                          >
+                            <IconComponent size={18} />
+                            <Typography>{fieldType.label}</Typography>
+                          </Box>
+                        </MenuItem>
+                      );
+                    })}
+                  </Select>
+                </FormControl>
+
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={localField.required || false}
+                      onChange={(e) =>
+                        handleUpdate({ required: e.target.checked })
+                      }
+                      color="primary"
+                    />
+                  }
+                  label="Required Field"
+                  sx={{ mt: 1 }}
+                />
+              </>
+            )}
+
+            {isGroup && (
+              <>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={localField.uischema?.options?.collapsed || false}
+                      onChange={(e) => {
+                        const updatedUISchema = {
+                          ...localField.uischema,
+                          options: {
+                            ...localField.uischema?.options,
+                            collapsed: e.target.checked,
+                          },
+                        };
+                        handleUpdate({ uischema: updatedUISchema });
+                      }}
+                      color="primary"
+                    />
+                  }
+                  label="Collapsible Group"
+                />
+
+                {localField.uischema?.options?.collapsed && (
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={
+                          localField.uischema?.options
+                            ?.showUnfocusedDescription || false
+                        }
+                        onChange={(e) => {
+                          const updatedUISchema = {
+                            ...localField.uischema,
+                            options: {
+                              ...localField.uischema?.options,
+                              showUnfocusedDescription: e.target.checked,
+                            },
+                          };
+                          handleUpdate({ uischema: updatedUISchema });
+                        }}
+                        color="primary"
+                      />
+                    }
+                    label="Start Collapsed"
+                  />
+                )}
+              </>
+            )}
+          </Box>
+        </AccordionDetails>
+      </Accordion>
+
+      {/* Display Options */}
+      {!isLayout && !isGroup && (
+        <Accordion sx={{ mb: 2, boxShadow: 1 }}>
+          <AccordionSummary expandIcon={<IconChevronDown />}>
+            <Typography variant="subtitle1" fontWeight={600}>
+              Display Options
+            </Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            <Box>
+              <TextField
+                label="Placeholder Text"
+                fullWidth
+                value={localField.uischema?.options?.placeholder || ""}
+                onChange={(e) => {
+                  const updatedUISchema = {
+                    ...localField.uischema,
+                    options: {
+                      ...localField.uischema?.options,
+                      placeholder: e.target.value,
+                    },
+                  };
+                  handleUpdate({ uischema: updatedUISchema });
+                }}
+                margin="normal"
+                variant="outlined"
+                helperText="Hint text shown when field is empty"
+                sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+              />
+
+              <TextField
+                label="Help Text"
+                fullWidth
+                multiline
+                rows={2}
+                value={localField.schema?.description || ""}
+                onChange={(e) =>
+                  handleSchemaUpdate({ description: e.target.value })
+                }
+                margin="normal"
+                variant="outlined"
+                helperText="Additional help text displayed below the field"
+                sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+              />
+
+              <TextField
+                label="Default Value"
+                fullWidth
+                value={localField.schema?.default || ""}
+                onChange={(e) => {
+                  let defaultValue = e.target.value;
+
+                  // Convert to appropriate type
+                  if (localField.type === "number") {
+                    defaultValue = defaultValue
+                      ? Number(defaultValue)
+                      : undefined;
+                  } else if (localField.type === "checkbox") {
+                    defaultValue = defaultValue.toLowerCase() === "true";
+                  }
+
+                  handleSchemaUpdate({ default: defaultValue });
+                }}
+                margin="normal"
+                variant="outlined"
+                helperText="Initial value for this field"
+                sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+              />
+            </Box>
+          </AccordionDetails>
+        </Accordion>
+      )}
+
+      {/* Validation Rules */}
+      {!isLayout && !isGroup && (
+        <Accordion sx={{ mb: 2, boxShadow: 1 }}>
+          <AccordionSummary expandIcon={<IconChevronDown />}>
+            <Typography variant="subtitle1" fontWeight={600}>
+              Validation Rules
+            </Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            <Box>
+              {(localField.type === "text" ||
+                localField.type === "textarea" ||
+                localField.type === "email") && (
+                <>
+                  <Grid container spacing={2}>
+                    <Grid item xs={6}>
+                      <TextField
+                        label="Min Length"
+                        type="number"
+                        fullWidth
+                        value={localField.schema?.minLength || ""}
+                        onChange={(e) =>
+                          handleSchemaUpdate({
+                            minLength: e.target.value
+                              ? Number(e.target.value)
+                              : undefined,
+                          })
+                        }
+                        margin="normal"
+                        variant="outlined"
+                        sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+                      />
+                    </Grid>
+                    <Grid item xs={6}>
+                      <TextField
+                        label="Max Length"
+                        type="number"
+                        fullWidth
+                        value={localField.schema?.maxLength || ""}
+                        onChange={(e) =>
+                          handleSchemaUpdate({
+                            maxLength: e.target.value
+                              ? Number(e.target.value)
+                              : undefined,
+                          })
+                        }
+                        margin="normal"
+                        variant="outlined"
+                        sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+                      />
+                    </Grid>
+                  </Grid>
+
+                  <TextField
+                    label="Pattern (RegEx)"
+                    fullWidth
+                    value={localField.schema?.pattern || ""}
+                    onChange={(e) =>
+                      handleSchemaUpdate({
+                        pattern: e.target.value || undefined,
+                      })
+                    }
+                    margin="normal"
+                    variant="outlined"
+                    helperText="Regular expression for validation (e.g., ^[A-Za-z]+$ for letters only)"
+                    sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+                  />
+                </>
+              )}
+
+              {localField.type === "number" && (
+                <Grid container spacing={2}>
+                  <Grid item xs={6}>
+                    <TextField
+                      label="Minimum Value"
+                      type="number"
+                      fullWidth
+                      value={localField.schema?.minimum || ""}
+                      onChange={(e) =>
+                        handleSchemaUpdate({
+                          minimum: e.target.value
+                            ? Number(e.target.value)
+                            : undefined,
+                        })
+                      }
+                      margin="normal"
+                      variant="outlined"
+                      sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+                    />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <TextField
+                      label="Maximum Value"
+                      type="number"
+                      fullWidth
+                      value={localField.schema?.maximum || ""}
+                      onChange={(e) =>
+                        handleSchemaUpdate({
+                          maximum: e.target.value
+                            ? Number(e.target.value)
+                            : undefined,
+                        })
+                      }
+                      margin="normal"
+                      variant="outlined"
+                      sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+                    />
+                  </Grid>
+                </Grid>
+              )}
+            </Box>
+          </AccordionDetails>
+        </Accordion>
+      )}
+
+      {/* Options for Select/Radio Fields */}
+      {hasEnumOptions && (
+        <Accordion defaultExpanded sx={{ mb: 2, boxShadow: 1 }}>
+          <AccordionSummary expandIcon={<IconChevronDown />}>
+            <Typography variant="subtitle1" fontWeight={600}>
+              Options
+            </Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            <Box>
+              <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
+                <TextField
+                  label="New Option"
+                  size="small"
+                  value={newOption}
+                  onChange={(e) => setNewOption(e.target.value)}
+                  onKeyPress={(e) => {
+                    if (e.key === "Enter") {
+                      handleAddOption();
+                    }
+                  }}
+                  variant="outlined"
+                  sx={{
+                    flex: 1,
+                    "& .MuiOutlinedInput-root": { borderRadius: 1.5 },
                   }}
                 />
-              }
-              label="Collapsible"
-            />
+                <IconButton
+                  onClick={handleAddOption}
+                  sx={{
+                    color: "success.main",
+                    backgroundColor: "success.light",
+                    borderRadius: 1.5,
+                    "&:hover": {
+                      backgroundColor: (theme) => theme.palette.success.light,
+                      color: "success.dark",
+                    },
+                  }}
+                >
+                  <IconPlus size={20} />
+                </IconButton>
+              </Box>
 
-            {localField.uischema?.options?.collapsed && (
+              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+                {enumOptions.map((option, index) => (
+                  <Chip
+                    key={index}
+                    label={option}
+                    onDelete={() => handleRemoveOption(index)}
+                    deleteIcon={<IconTrash size={16} />}
+                    variant="outlined"
+                    sx={{
+                      borderRadius: 1.5,
+                      "& .MuiChip-deleteIcon": {
+                        color: "error.main",
+                        "&:hover": { color: "error.dark" },
+                      },
+                    }}
+                  />
+                ))}
+              </Box>
+            </Box>
+          </AccordionDetails>
+        </Accordion>
+      )}
+
+      {/* Advanced Options */}
+      {!isLayout && !isGroup && (
+        <Accordion sx={{ mb: 2, boxShadow: 1 }}>
+          <AccordionSummary expandIcon={<IconChevronDown />}>
+            <Typography variant="subtitle1" fontWeight={600}>
+              Advanced Options
+            </Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            <Box>
               <FormControlLabel
                 control={
-                  <Checkbox
-                    checked={
-                      localField.uischema?.options?.showUnfocusedDescription ||
-                      false
-                    }
+                  <Switch
+                    checked={localField.uischema?.options?.readonly || false}
                     onChange={(e) => {
                       const updatedUISchema = {
                         ...localField.uischema,
                         options: {
                           ...localField.uischema?.options,
-                          showUnfocusedDescription: e.target.checked,
+                          readonly: e.target.checked,
                         },
                       };
                       handleUpdate({ uischema: updatedUISchema });
                     }}
+                    color="primary"
                   />
                 }
-                label="Start Collapsed"
+                label="Read Only"
+                sx={{ mb: 1 }}
               />
-            )}
-          </>
-        )}
-      </Box>
 
-      {hasEnumOptions && (
-        <Box mb={3}>
-          <Typography variant="subtitle2" gutterBottom>
-            Options
-          </Typography>
-
-          <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
-            <TextField
-              label="New Option"
-              size="small"
-              value={newOption}
-              onChange={(e) => setNewOption(e.target.value)}
-              onKeyPress={(e) => {
-                if (e.key === 'Enter') {
-                  handleAddOption();
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={localField.uischema?.options?.hidden || false}
+                    onChange={(e) => {
+                      const updatedUISchema = {
+                        ...localField.uischema,
+                        options: {
+                          ...localField.uischema?.options,
+                          hidden: e.target.checked,
+                        },
+                      };
+                      handleUpdate({ uischema: updatedUISchema });
+                    }}
+                    color="primary"
+                  />
                 }
-              }}
-              variant="outlined"
-              sx={{
-                flex: 1,
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 1.5,
-                },
-              }}
-            />
-            <IconButton
-              onClick={handleAddOption}
-              sx={{
-                color: 'success.main',
-                backgroundColor: 'success.light',
-                borderRadius: 1.5,
-                '&:hover': {
-                  backgroundColor: (theme) => theme.palette.success.light,
-                  color: 'success.dark',
-                },
-              }}
-            >
-              <IconPlus size={20} />
-            </IconButton>
-          </Box>
-
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-            {enumOptions.map((option, index) => (
-              <Chip
-                key={index}
-                label={option}
-                onDelete={() => handleRemoveOption(index)}
-                deleteIcon={<IconTrash size={16} />}
-                variant="outlined"
-                sx={{
-                  borderRadius: 1.5,
-                  '& .MuiChip-deleteIcon': {
-                    color: 'error.main',
-                    '&:hover': {
-                      color: 'error.dark',
-                    },
-                  },
-                }}
+                label="Hidden Field"
+                sx={{ mb: 1 }}
               />
-            ))}
-          </Box>
-        </Box>
+
+              {localField.type === "textarea" && (
+                <Box sx={{ mt: 2 }}>
+                  <Typography variant="body2" gutterBottom>
+                    Rows: {localField.uischema?.options?.rows || 3}
+                  </Typography>
+                  <Slider
+                    value={localField.uischema?.options?.rows || 3}
+                    onChange={(e, value) => {
+                      const updatedUISchema = {
+                        ...localField.uischema,
+                        options: {
+                          ...localField.uischema?.options,
+                          rows: value,
+                        },
+                      };
+                      handleUpdate({ uischema: updatedUISchema });
+                    }}
+                    min={1}
+                    max={10}
+                    step={1}
+                    marks
+                    valueLabelDisplay="auto"
+                  />
+                </Box>
+              )}
+            </Box>
+          </AccordionDetails>
+        </Accordion>
       )}
 
-      <Box>
-        <Typography variant="subtitle2" gutterBottom>
+      {/* Field Info */}
+      <Box
+        sx={{
+          mt: 3,
+          p: 2,
+          backgroundColor: "grey.50",
+          borderRadius: 2,
+          border: "1px solid",
+          borderColor: "grey.200",
+        }}
+      >
+        <Typography variant="subtitle2" gutterBottom color="grey.700">
           {isGroup
-            ? 'Group Container'
+            ? "Group Container"
             : isLayout
-            ? 'Layout Container'
-            : `Field Type: ${localField.type}`}
+            ? "Layout Container"
+            : "Field Information"}
         </Typography>
 
-        {!isGroup &&
-          !isLayout &&
-          localField.type === 'string' &&
-          localField.schema.format && (
-            <Typography
-              variant="caption"
-              sx={{
-                color: 'grey.600',
-                backgroundColor: 'grey.100',
-                px: 1.5,
-                py: 0.5,
-                borderRadius: 1,
-                display: 'inline-block',
-              }}
-            >
-              Format: {localField.schema.format}
+        {!isGroup && !isLayout && (
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+            {React.createElement(getFieldTypeIcon(localField.type), {
+              size: 16,
+              color: "#666",
+            })}
+            <Typography variant="body2" color="grey.600">
+              Type: {localField.type}
             </Typography>
-          )}
+          </Box>
+        )}
 
-        {isGroup && (
-          <Typography
-            variant="body2"
-            sx={{
-              color: 'grey.500',
-              fontStyle: 'italic',
-            }}
-          >
-            Groups provide visual separation and can contain any fields or
-            layouts
+        {!isGroup && !isLayout && localField.schema.format && (
+          <Typography variant="body2" color="grey.600" sx={{ mb: 1 }}>
+            Format: {localField.schema.format}
           </Typography>
         )}
 
-        {isLayout && (
-          <Typography
-            variant="body2"
-            sx={{
-              color: 'grey.500',
-              fontStyle: 'italic',
-            }}
-          >
-            {localField.type === 'vertical-layout'
-              ? 'Stacks elements vertically'
-              : 'Arranges elements horizontally'}
-          </Typography>
-        )}
+        <Typography
+          variant="body2"
+          color="grey.500"
+          sx={{ fontStyle: "italic" }}
+        >
+          {isGroup
+            ? "Groups provide visual separation and can contain any fields or layouts"
+            : isLayout
+            ? localField.type === "vertical-layout"
+              ? "Stacks elements vertically"
+              : "Arranges elements horizontally"
+            : `Key: ${localField.key}`}
+        </Typography>
       </Box>
     </Box>
   );
