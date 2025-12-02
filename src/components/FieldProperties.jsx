@@ -317,41 +317,6 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
           <AccordionDetails>
             <Box>
               <TextField
-                label="Placeholder Text"
-                fullWidth
-                value={localField.uischema?.options?.placeholder || ""}
-                onChange={(e) => {
-                  const updatedUISchema = {
-                    ...localField.uischema,
-                    options: {
-                      ...localField.uischema?.options,
-                      placeholder: e.target.value,
-                    },
-                  };
-                  handleUpdate({ uischema: updatedUISchema });
-                }}
-                margin="normal"
-                variant="outlined"
-                helperText="Hint text shown when field is empty"
-                sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
-              />
-
-              <TextField
-                label="Help Text"
-                fullWidth
-                multiline
-                rows={2}
-                value={localField.schema?.description || ""}
-                onChange={(e) =>
-                  handleSchemaUpdate({ description: e.target.value })
-                }
-                margin="normal"
-                variant="outlined"
-                helperText="Additional help text displayed below the field"
-                sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
-              />
-
-              <TextField
                 label="Default Value"
                 fullWidth
                 value={localField.schema?.default || ""}
@@ -596,13 +561,30 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                   <Switch
                     checked={localField.uischema?.options?.hidden || false}
                     onChange={(e) => {
-                      const updatedUISchema = {
-                        ...localField.uischema,
-                        options: {
-                          ...localField.uischema?.options,
-                          hidden: e.target.checked,
-                        },
-                      };
+                      const isHidden = e.target.checked;
+                      const updatedUISchema = { ...localField.uischema };
+
+                      if (isHidden) {
+                        // Add hidden property when true
+                        updatedUISchema.options = {
+                          ...updatedUISchema.options,
+                          hidden: true,
+                        };
+                      } else {
+                        // Remove hidden property when false
+                        if (updatedUISchema.options) {
+                          const { hidden, ...otherOptions } =
+                            updatedUISchema.options;
+                          updatedUISchema.options = otherOptions;
+                          // If options object is empty after removing hidden, remove it entirely
+                          if (
+                            Object.keys(updatedUISchema.options).length === 0
+                          ) {
+                            delete updatedUISchema.options;
+                          }
+                        }
+                      }
+
                       handleUpdate({ uischema: updatedUISchema });
                     }}
                     color="primary"
