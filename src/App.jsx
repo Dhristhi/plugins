@@ -1637,28 +1637,88 @@ const App = () => {
     }
   }, []);
 
-  // Convert schema to fields format (simplified version)
+  // Convert schema to fields format (recursive) so nested object/array-of-object
+  // properties become layout fields with children and show up in the designer.
   const convertSchemaToFields = (schema) => {
     if (!schema || !schema.properties) return [];
 
     const fields = [];
-    let fieldCounter = 0;
 
     Object.entries(schema.properties).forEach(([key, property]) => {
-      fieldCounter += 1;
+      // Use the shared ref counter so ids are unique across the app
+      fieldCounter.current += 1;
+      const uniqueId = fieldCounter.current;
 
+      // Helper label
+      const label =
+        property.title ||
+        key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, " ");
+
+      // Object (nested) properties -> create an object layout with children
+      if (property.type === "object" && property.properties) {
+        const objectType =
+          defaultFieldTypes.find((ft) => ft.id === "object") ||
+          defaultFieldTypes[0];
+        const children = convertSchemaToFields(property);
+
+        const newField = {
+          id: `field_${uniqueId}`,
+          type: objectType.id,
+          label,
+          key,
+          required: schema.required?.includes(key) || false,
+          isLayout: true,
+          schema: { ...objectType.schema, ...property },
+          uischema: { ...objectType.uischema, label },
+          children,
+          parentId: null,
+        };
+
+        fields.push(newField);
+        return;
+      }
+
+      // Array of objects -> create an array field whose item detail contains children
+      if (
+        property.type === "array" &&
+        property.items &&
+        property.items.type === "object"
+      ) {
+        const arrayType =
+          defaultFieldTypes.find((ft) => ft.id === "array") ||
+          defaultFieldTypes[0];
+        const children = convertSchemaToFields(property.items);
+
+        // keep the original items schema but attach children for designer
+        const newField = {
+          id: `field_${uniqueId}`,
+          type: arrayType.id,
+          label,
+          key,
+          required: schema.required?.includes(key) || false,
+          isLayout: false, // array itself is a control but will have nested detail
+          schema: { ...arrayType.schema, ...property },
+          uischema: { ...arrayType.uischema, scope: `#/properties/${key}` },
+          children,
+          parentId: null,
+        };
+
+        fields.push(newField);
+        return;
+      }
+
+      // Regular scalar or enum fields
       const fieldType = mapSchemaPropertyToFieldType(property);
       const newField = {
-        id: `field_${fieldCounter}`,
+        id: `field_${uniqueId}`,
         type: fieldType.id,
-        label:
-          property.title ||
-          key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, " "),
-        key: key,
+        label,
+        key,
         required: schema.required?.includes(key) || false,
-        isLayout: false,
+        isLayout: fieldType.isLayout || false,
         schema: { ...fieldType.schema, ...property },
         uischema: { ...fieldType.uischema, scope: `#/properties/${key}` },
+        parentId: null,
       };
 
       if (property.enum) {
