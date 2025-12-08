@@ -419,10 +419,25 @@ const App = () => {
     [addField]
   );
 
+  // Recursively update a field by id inside the nested fields tree
+  const updateFieldById = (fieldsArray, updatedField) => {
+    return fieldsArray.map((field) => {
+      if (field.id === updatedField.id) {
+        // Replace with updated field (shallow copy to avoid accidental refs)
+        return { ...updatedField };
+      }
+      if (field.children && field.children.length > 0) {
+        const newChildren = updateFieldById(field.children, updatedField);
+        // Only create a new parent object if children changed
+        const childrenChanged = newChildren !== field.children;
+        return childrenChanged ? { ...field, children: newChildren } : field;
+      }
+      return field;
+    });
+  };
+
   const handleFieldUpdate = useCallback((updatedField) => {
-    setFields((prev) =>
-      prev.map((field) => (field.id === updatedField.id ? updatedField : field))
-    );
+    setFields((prev) => updateFieldById(prev, updatedField));
     setSelectedField(updatedField);
   }, []);
 
@@ -1659,7 +1674,12 @@ const App = () => {
         const objectType =
           defaultFieldTypes.find((ft) => ft.id === "object") ||
           defaultFieldTypes[0];
-        const children = convertSchemaToFields(property);
+        let children = convertSchemaToFields(property);
+        // assign parentId for each child so the designer knows their parent
+        children = children.map((c) => ({
+          ...c,
+          parentId: `field_${uniqueId}`,
+        }));
 
         const newField = {
           id: `field_${uniqueId}`,
@@ -1687,7 +1707,12 @@ const App = () => {
         const arrayType =
           defaultFieldTypes.find((ft) => ft.id === "array") ||
           defaultFieldTypes[0];
-        const children = convertSchemaToFields(property.items);
+        let children = convertSchemaToFields(property.items);
+        // children belong to this array field (set parentId to this array field's id)
+        children = children.map((c) => ({
+          ...c,
+          parentId: `field_${uniqueId}`,
+        }));
 
         // keep the original items schema but attach children for designer
         const newField = {
