@@ -40,6 +40,31 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
   const [localField, setLocalField] = useState(null);
   const [enumOptions, setEnumOptions] = useState([]);
   const [newOption, setNewOption] = useState("");
+  const [selectedAccess, setSelectedAccess] = useState([]);
+
+  const ALL_ROLE_CODES = [
+    "OWNER",
+    "HR",
+    "EXE",
+    "MGM",
+    "SAL",
+    "FIN",
+    "OPR",
+    "USER",
+    "ADM",
+  ];
+
+  const getRoleDisplayName = (code) => ALL_ROLE_CODES[code] || code;
+  const handleAccessChipClick = (roleCode) => {
+    const exists = selectedAccess.includes(roleCode);
+    const newSelected = exists
+      ? selectedAccess.filter((r) => r !== roleCode)
+      : [...selectedAccess, roleCode];
+    setSelectedAccess(newSelected);
+    handleSchemaUpdate({
+      allowedAccess: newSelected.length > 0 ? newSelected : undefined,
+    });
+  };
 
   useEffect(() => {
     if (field) {
@@ -49,6 +74,7 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
       } else {
         setEnumOptions([]);
       }
+      setSelectedAccess(field.schema?.allowedAccess || []);
     }
   }, [field]);
 
@@ -141,6 +167,22 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
   const hasEnumOptions = ["select", "radio"].includes(localField.type);
   const isGroup = localField.type === "group";
   const isLayout = localField.isLayout && !isGroup;
+
+  const handleUiOptionsUpdate = (updates) => {
+    const existingUiOptions =
+      localField.uischema?.options?.["ui:options"] || {};
+    const updatedUiSchema = {
+      ...localField.uischema,
+      options: {
+        ...localField.uischema?.options,
+        "ui:options": {
+          ...existingUiOptions,
+          ...updates,
+        },
+      },
+    };
+    handleUpdate({ uischema: updatedUiSchema });
+  };
 
   return (
     <Box>
@@ -344,6 +386,37 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
         </Accordion>
       )}
 
+      {/* File Upload Options */}
+      {localField.type === "file" && (
+        <Accordion sx={{ mb: 2, boxShadow: 1 }}>
+          <AccordionSummary expandIcon={<IconChevronDown />}>
+            <Typography variant="subtitle1" fontWeight={600}>
+              File Upload Options
+            </Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            <Box>
+              <TextField
+                label="Allowed File Types"
+                fullWidth
+                value={
+                  localField.uischema?.options?.["ui:options"]?.accept || ""
+                }
+                onChange={(e) =>
+                  handleUiOptionsUpdate({
+                    accept: e.target.value || undefined,
+                  })
+                }
+                margin="normal"
+                variant="outlined"
+                helperText="Comma-separated list of allowed file types (e.g., .jpg, .png, .pdf)"
+                sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+              />
+            </Box>
+          </AccordionDetails>
+        </Accordion>
+      )}
+
       {/* Validation Rules */}
       {!isLayout && !isGroup && (
         <Accordion sx={{ mb: 2, boxShadow: 1 }}>
@@ -534,6 +607,33 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
             </Typography>
           </AccordionSummary>
           <AccordionDetails>
+            {/* Allowed Access */}
+            <Box sx={{ mb: 2 }}>
+              <Typography
+                variant="caption"
+                sx={{ color: "text.secondary", fontWeight: 600 }}
+              >
+                Allowed Access
+              </Typography>
+              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mt: 1 }}>
+                {ALL_ROLE_CODES.map((roleCode) => (
+                  <Chip
+                    key={roleCode}
+                    size="small"
+                    variant={
+                      selectedAccess.includes(roleCode) ? "filled" : "outlined"
+                    }
+                    color={
+                      selectedAccess.includes(roleCode) ? "primary" : "default"
+                    }
+                    label={getRoleDisplayName(roleCode)}
+                    clickable
+                    onClick={() => handleAccessChipClick(roleCode)}
+                  />
+                ))}
+              </Box>
+            </Box>
+
             <Box>
               <FormControlLabel
                 control={
@@ -565,18 +665,15 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                       const updatedUISchema = { ...localField.uischema };
 
                       if (isHidden) {
-                        // Add hidden property when true
                         updatedUISchema.options = {
                           ...updatedUISchema.options,
                           hidden: true,
                         };
                       } else {
-                        // Remove hidden property when false
                         if (updatedUISchema.options) {
                           const { hidden, ...otherOptions } =
                             updatedUISchema.options;
                           updatedUISchema.options = otherOptions;
-                          // If options object is empty after removing hidden, remove it entirely
                           if (
                             Object.keys(updatedUISchema.options).length === 0
                           ) {
