@@ -2033,7 +2033,7 @@ const App = () => {
                   variant="h6"
                   sx={{ margin: 0, fontWeight: 600, color: "grey.800" }}
                 >
-                  Field Properties
+                  Edit
                 </Typography>
                 <Button
                   onClick={() => setPropertiesDrawerOpen(false)}
