@@ -195,7 +195,7 @@ const ActionButtons = ({
           size="small"
           onClick={(e) => {
             e.stopPropagation();
-            onFieldSelect(field);
+            onFieldSelect(field, true);
           }}
           sx={{
             p: level > 1 ? 0.25 : 0.5,

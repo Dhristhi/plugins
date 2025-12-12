@@ -165,8 +165,10 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
 
   const availableFieldTypes = defaultFieldTypes.filter((ft) => !ft.isLayout);
   const hasEnumOptions = ["select", "radio"].includes(localField.type);
-  const isGroup = localField.type === "group";
-  const isLayout = localField.isLayout && !isGroup;
+  // const isGroup = localField.type === "group";
+  // const isLayout = localField.isLayout && !isGroup;
+  const isGroup = localField.uischema?.type === "Group";
+  const isLayout = localField.isLayout && localField.uischema?.type !== "Group";
 
   const handleUiOptionsUpdate = (updates) => {
     const existingUiOptions =
