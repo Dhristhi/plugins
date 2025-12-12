@@ -1944,9 +1944,10 @@ const App = () => {
                       <FormStructure
                         fields={fields}
                         onFieldsChange={setFields}
-                        onFieldSelect={(field) => {
+                        onFieldSelect={(field, openDrawer = false) => {
                           setSelectedField(field);
-                          if (!field.isLayout) {
+
+                          if (openDrawer) {
                             setPropertiesDrawerOpen(true);
                           }
                         }}
