@@ -90,7 +90,7 @@ const ActionButtons = ({
           <MenuItem
             onClick={(e) => {
               e.stopPropagation();
-              onFieldSelect(field);
+              onFieldSelect(field, true);
               handleClose();
             }}
           >
