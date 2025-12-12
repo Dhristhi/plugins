@@ -41,6 +41,7 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
   const [enumOptions, setEnumOptions] = useState([]);
   const [newOption, setNewOption] = useState("");
   const [selectedAccess, setSelectedAccess] = useState([]);
+  const [layout, setLayout] = useState("");
 
   const ALL_ROLE_CODES = [
     "OWNER",
@@ -66,9 +67,38 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
     });
   };
 
+  const handleLayoutChange = (event) => {
+    const newLayoutType = event.target.value;
+    setLayout(newLayoutType);
+
+    const uischemaType =
+      newLayoutType === "horizontal-layout"
+        ? "HorizontalLayout"
+        : "VerticalLayout";
+
+    const updatedField = {
+      ...localField,
+      label:
+        newLayoutType === "horizontal-layout"
+          ? "Horizontal Layout"
+          : "Vertical Layout",
+      type: newLayoutType,
+      uischema: {
+        ...localField.uischema,
+        type: uischemaType,
+      },
+    };
+
+    setLocalField(updatedField); 
+    onFieldUpdate(updatedField); 
+  };
+
   useEffect(() => {
     if (field) {
       setLocalField({ ...field });
+      if (field.isLayout) {
+        setLayout(field.type);
+      }
       if (field.schema.enum) {
         setEnumOptions([...field.schema.enum]);
       } else {
@@ -774,6 +804,22 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
             : `Key: ${localField.key}`}
         </Typography>
       </Box>
+      {isLayout && (
+        <Box sx={{ mt: 2 }}>
+          <FormControl fullWidth>
+            <InputLabel id="layout-select-label">Layout</InputLabel>
+            <Select
+              labelId="layout-select-label"
+              value={layout}
+              label="Layout"
+              onChange={handleLayoutChange}
+            >
+              <MenuItem value="vertical-layout">Vertical Layout</MenuItem>
+              <MenuItem value="horizontal-layout">Horizontal Layout</MenuItem>
+            </Select>
+          </FormControl>
+        </Box>
+      )}
     </Box>
   );
 };
