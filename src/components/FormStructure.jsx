@@ -19,7 +19,7 @@ import {
   IconPlus,
   IconForms,
 } from "@tabler/icons-react";
-import { iconChoices } from "../types";
+import * as TablerIcons from "@tabler/icons-react"; // Add this import at the top
 import ActionButtons from "./ActionButtons";
 import ContextMenu from "./ContextMenu";
 import CommonHeader from "./CommonHeader";
@@ -79,6 +79,15 @@ const SortableFieldItem = ({
 
   const getFieldIcon = (theme) => {
     const iconProps = { size: 18, color: theme.palette.grey[600] };
+    if (isGroup) {
+      // If a custom group icon is set, use it
+      if (field.uischema?.options?.groupIcon) {
+        const IconComponent = TablerIcons[field.uischema.options.groupIcon];
+        if (IconComponent) return <IconComponent {...iconProps} />;
+      }
+      // Otherwise, use the default group icon
+      return <IconBox {...iconProps} />;
+    }
     if (isGroup) {
       const chosen = field.uischema?.options?.icon;
       if (chosen && iconChoices[chosen]) {

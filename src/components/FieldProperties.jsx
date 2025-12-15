@@ -35,6 +35,21 @@ import {
   IconCircleDot,
 } from "@tabler/icons-react";
 import { defaultFieldTypes } from "../types";
+import * as TablerIcons from "@tabler/icons-react";
+
+const TABLER_ICON_OPTIONS = Object.entries(TablerIcons)
+  .filter(
+    ([name, Component]) =>
+      name.startsWith("Icon") &&
+      Component &&
+      (typeof Component === "function" || typeof Component === "object")
+  )
+  .slice(0, 150)
+  .map(([name, Component]) => ({
+    value: name,
+    label: name.replace(/^Icon/, ""),
+    Icon: Component,
+  }));
 import { iconChoices } from "../types";
 
 const FieldProperties = ({ field, onFieldUpdate }) => {
@@ -283,6 +298,51 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
               sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
             />
 
+            {isGroup && (
+              <FormControl fullWidth margin="normal">
+                <InputLabel id="group-icon-label">Group Icon</InputLabel>
+                <Select
+                  labelId="group-icon-label"
+                  label="Group Icon"
+                  value={localField.uischema?.options?.groupIcon || ""}
+                  onChange={(e) => {
+                    // Update the groupIcon in uischema.options and propagate to parent
+                    const newIcon = e.target.value;
+                    const updatedField = {
+                      ...localField,
+                      uischema: {
+                        ...localField.uischema,
+                        options: {
+                          ...localField.uischema?.options,
+                          groupIcon: newIcon || undefined,
+                        },
+                      },
+                    };
+                    setLocalField(updatedField);
+                    onFieldUpdate(updatedField); // <-- This updates the main form state!
+                  }}
+                  sx={{ borderRadius: 2 }}
+                >
+                  <MenuItem value="">
+                    <em>None</em>
+                  </MenuItem>
+
+                  {TABLER_ICON_OPTIONS.map(({ value, label, Icon }) =>
+                    Icon ? (
+                      <MenuItem key={value} value={value}>
+                        <Box
+                          sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                        >
+                          <Icon size={18} />
+                          <Typography>{label}</Typography>
+                        </Box>
+                      </MenuItem>
+                    ) : null
+                  )}
+                </Select>
+              </FormControl>
+            )}
+
             {!isLayout && !isGroup && (
               <>
                 <TextField
@@ -386,48 +446,6 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                     label="Start Collapsed"
                   />
                 )}
-                {/* Icon selector for group */}
-                <Box sx={{ mt: 2 }}>
-                  <InputLabel sx={{ mb: 1 }}>Group Icon</InputLabel>
-                  <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-                    <FormControl sx={{ minWidth: 160 }}>
-                      <Select
-                        value={localField.uischema?.options?.icon || "box"}
-                        onChange={(e) => handleIconChange(e.target.value)}
-                        size="small"
-                      >
-                        {Object.keys(iconChoices).map((iconId) => {
-                          const IconComp = iconChoices[iconId];
-                          return (
-                            <MenuItem key={iconId} value={iconId}>
-                              <Box
-                                sx={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  gap: 1,
-                                }}
-                              >
-                                <IconComp size={16} />
-                                <Typography
-                                  sx={{ textTransform: "capitalize" }}
-                                >
-                                  {iconId}
-                                </Typography>
-                              </Box>
-                            </MenuItem>
-                          );
-                        })}
-                      </Select>
-                    </FormControl>
-                    <Box sx={{ display: "flex", alignItems: "center", px: 1 }}>
-                      {(() => {
-                        const sel = localField.uischema?.options?.icon || "box";
-                        const IconPreview = iconChoices[sel] || iconChoices.box;
-                        return <IconPreview size={20} color="#666" />;
-                      })()}
-                    </Box>
-                  </Box>
-                </Box>
               </>
             )}
           </Box>
