@@ -1689,7 +1689,14 @@ const App = () => {
           required: schema.required?.includes(key) || false,
           isLayout: true,
           schema: { ...objectType.schema, ...property },
-          uischema: { ...objectType.uischema, label },
+          uischema: {
+            ...objectType.uischema,
+            label,
+            options: {
+              ...objectType.uischema?.options,
+              ...(property.uischema?.options || {}),
+            },
+          },
           children,
           parentId: null,
         };
@@ -1742,7 +1749,14 @@ const App = () => {
         required: schema.required?.includes(key) || false,
         isLayout: fieldType.isLayout || false,
         schema: { ...fieldType.schema, ...property },
-        uischema: { ...fieldType.uischema, scope: `#/properties/${key}` },
+        uischema: {
+          ...fieldType.uischema,
+          scope: `#/properties/${key}`,
+          options: {
+            ...fieldType.uischema?.options,
+            ...(property.uischema?.options || {}),
+          },
+        },
         parentId: null,
       };
 

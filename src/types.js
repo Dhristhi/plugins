@@ -233,3 +233,13 @@ export const generateFieldKey = (type) => {
   const timestamp = Date.now();
   return `${type}_${timestamp}`;
 };
+
+// Export a small icon map for group icon choices (id -> component)
+export const iconChoices = {
+  box: IconBox,
+  cube: IconCube,
+  list: IconList,
+  edit: IconEdit,
+  rows: IconLayoutRows,
+  columns: IconLayoutColumns,
+};

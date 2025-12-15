@@ -19,6 +19,7 @@ import {
   IconPlus,
   IconForms,
 } from "@tabler/icons-react";
+import { iconChoices } from "../types";
 import ActionButtons from "./ActionButtons";
 import ContextMenu from "./ContextMenu";
 import CommonHeader from "./CommonHeader";
@@ -61,7 +62,7 @@ const SortableFieldItem = ({
 
   const isSelected = selectedField?.id === field.id;
   const isLayout = field.isLayout;
-  const isGroup = field.type === "group";
+  const isGroup = field.type === "group" || field.uischema?.type === "Group";
 
   const handleContextMenu = (event) => {
     event.preventDefault();
@@ -78,7 +79,14 @@ const SortableFieldItem = ({
 
   const getFieldIcon = (theme) => {
     const iconProps = { size: 18, color: theme.palette.grey[600] };
-    if (isGroup) return <IconBox {...iconProps} />;
+    if (isGroup) {
+      const chosen = field.uischema?.options?.icon;
+      if (chosen && iconChoices[chosen]) {
+        const IconComp = iconChoices[chosen];
+        return <IconComp {...iconProps} />;
+      }
+      return <IconBox {...iconProps} />;
+    }
     if (field.type === "object") return <IconCube {...iconProps} />;
     if (field.type === "vertical-layout")
       return <IconLayoutRows {...iconProps} />;
