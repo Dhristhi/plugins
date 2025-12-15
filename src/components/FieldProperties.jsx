@@ -3,11 +3,9 @@ import {
   Typography,
   TextField,
   FormControlLabel,
-  Checkbox,
   Box,
   Chip,
   IconButton,
-  Divider,
   Select,
   MenuItem,
   FormControl,
@@ -15,7 +13,6 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
-  Button,
   Switch,
   Grid,
   Slider,
@@ -26,13 +23,7 @@ import {
   IconSettings,
   IconChevronDown,
   IconEdit,
-  IconFileText,
-  IconHash,
-  IconMail,
-  IconCalendar,
-  IconSquareCheck,
   IconChevronDown as IconSelect,
-  IconCircleDot,
 } from "@tabler/icons-react";
 import { defaultFieldTypes } from "../types";
 import * as TablerIcons from "@tabler/icons-react";
@@ -44,13 +35,11 @@ const TABLER_ICON_OPTIONS = Object.entries(TablerIcons)
       Component &&
       (typeof Component === "function" || typeof Component === "object")
   )
-  .slice(0, 150)
   .map(([name, Component]) => ({
     value: name,
     label: name.replace(/^Icon/, ""),
     Icon: Component,
   }));
-import { iconChoices } from "../types";
 
 const FieldProperties = ({ field, onFieldUpdate }) => {
   const [localField, setLocalField] = useState(null);
@@ -58,6 +47,8 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
   const [newOption, setNewOption] = useState("");
   const [selectedAccess, setSelectedAccess] = useState([]);
   const [layout, setLayout] = useState("");
+  // Add state for icon search
+  const [iconSearch, setIconSearch] = useState("");
 
   const ALL_ROLE_CODES = [
     "OWNER",
@@ -243,6 +234,11 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
     handleUpdate({ uischema: updatedUISchema });
   };
 
+  // Filter icons based on search
+  const filteredTablerIcons = TABLER_ICON_OPTIONS.filter(({ label }) =>
+    label.toLowerCase().includes(iconSearch.toLowerCase())
+  );
+
   return (
     <Box>
       <Typography
@@ -319,15 +315,55 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                       },
                     };
                     setLocalField(updatedField);
-                    onFieldUpdate(updatedField); // <-- This updates the main form state!
+                    onFieldUpdate(updatedField);
                   }}
                   sx={{ borderRadius: 2 }}
+                  MenuProps={{
+                    PaperProps: {
+                      style: { maxHeight: 350 },
+                    },
+                    disableAutoFocusItem: true,
+                  }}
+                  renderValue={(selected) => {
+                    if (!selected) return <em>None</em>;
+                    const found = TABLER_ICON_OPTIONS.find(
+                      (i) => i.value === selected
+                    );
+                    return (
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                      >
+                        {found?.Icon && <found.Icon size={18} />}
+                        <Typography>{found?.label}</Typography>
+                      </Box>
+                    );
+                  }}
                 >
+                  {/* Search input inside dropdown */}
+                  <MenuItem disableRipple>
+                    <TextField
+                      autoFocus
+                      size="small"
+                      placeholder="Search icons..."
+                      value={iconSearch}
+                      onChange={(e) => setIconSearch(e.target.value)}
+                      sx={{ width: "100%", mb: 1 }}
+                      onClick={(e) => e.stopPropagation()}
+                      onKeyDown={(e) => e.stopPropagation()}
+                      fullWidth
+                    />
+                  </MenuItem>
                   <MenuItem value="">
                     <em>None</em>
                   </MenuItem>
-
-                  {TABLER_ICON_OPTIONS.map(({ value, label, Icon }) =>
+                  {filteredTablerIcons.length === 0 && (
+                    <MenuItem disabled>
+                      <Typography variant="body2" color="text.secondary">
+                        No icons found
+                      </Typography>
+                    </MenuItem>
+                  )}
+                  {filteredTablerIcons.map(({ value, label, Icon }) =>
                     Icon ? (
                       <MenuItem key={value} value={value}>
                         <Box
