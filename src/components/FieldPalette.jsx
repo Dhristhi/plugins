@@ -139,7 +139,7 @@ const FieldPalette = ({ onFieldSelect, onLoadSchema }) => {
     }
   };
 
-  const layoutTypes = defaultFieldTypes.filter((ft) => ft.isLayout);
+  const layoutTypes = defaultFieldTypes.filter((ft) => ft.isLayout && ft.id !== "object");
   const fieldTypes = defaultFieldTypes.filter((ft) => !ft.isLayout);
 
   return (

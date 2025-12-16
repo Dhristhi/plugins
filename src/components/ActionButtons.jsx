@@ -34,7 +34,7 @@ const ActionButtons = ({
   const [addMenuAnchor, setAddMenuAnchor] = useState(null);
 
   const isLayout = field.isLayout;
-  const layoutTypes = defaultFieldTypes.filter((ft) => ft.isLayout);
+  const layoutTypes = defaultFieldTypes.filter((ft) => ft.isLayout && ft.id !== "object");
 
   const handleMoreClick = (event) => {
     event.stopPropagation();

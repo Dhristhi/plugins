@@ -242,34 +242,54 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
         </AccordionSummary>
         <AccordionDetails>
           <Box>
-            <TextField
-              label={isGroup ? "Group Title" : "Label"}
-              fullWidth
-              value={localField.label}
-              onChange={(e) => {
-                const newLabel = e.target.value;
-                if (isGroup) {
-                  const updatedUISchema = {
-                    ...localField.uischema,
-                    label: newLabel,
-                  };
-                  handleUpdate({
-                    label: newLabel,
-                    uischema: updatedUISchema,
-                  });
-                } else {
-                  handleUpdate({ label: newLabel });
+            {/* Show label field only for groups and non-layout fields */}
+            {!isLayout && (
+              <TextField
+                label={isGroup ? "Group Title" : "Label"}
+                fullWidth
+                value={localField.label}
+                onChange={(e) => {
+                  const newLabel = e.target.value;
+                  if (isGroup) {
+                    const updatedUISchema = {
+                      ...localField.uischema,
+                      label: newLabel,
+                    };
+                    handleUpdate({
+                      label: newLabel,
+                      uischema: updatedUISchema,
+                    });
+                  } else {
+                    handleUpdate({ label: newLabel });
+                  }
+                }}
+                margin="normal"
+                variant="outlined"
+                helperText={
+                  isGroup
+                    ? "Displayed as the group header"
+                    : "The display label for this field"
                 }
-              }}
-              margin="normal"
-              variant="outlined"
-              helperText={
-                isGroup
-                  ? "Displayed as the group header"
-                  : "The display label for this field"
-              }
-              sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
-            />
+                sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+              />
+            )}
+
+            {/* Layout selector for vertical/horizontal layouts */}
+            {isLayout && (
+              <FormControl fullWidth margin="normal">
+                <InputLabel id="layout-select-label">Layout Type</InputLabel>
+                <Select
+                  labelId="layout-select-label"
+                  value={layout}
+                  label="Layout Type"
+                  onChange={handleLayoutChange}
+                  sx={{ borderRadius: 2 }}
+                >
+                  <MenuItem value="vertical-layout">Vertical Layout</MenuItem>
+                  <MenuItem value="horizontal-layout">Horizontal Layout</MenuItem>
+                </Select>
+              </FormControl>
+            )}
 
             {!isLayout && !isGroup && (
               <>
@@ -804,22 +824,6 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
             : `Key: ${localField.key}`}
         </Typography>
       </Box>
-      {isLayout && (
-        <Box sx={{ mt: 2 }}>
-          <FormControl fullWidth>
-            <InputLabel id="layout-select-label">Layout</InputLabel>
-            <Select
-              labelId="layout-select-label"
-              value={layout}
-              label="Layout"
-              onChange={handleLayoutChange}
-            >
-              <MenuItem value="vertical-layout">Vertical Layout</MenuItem>
-              <MenuItem value="horizontal-layout">Horizontal Layout</MenuItem>
-            </Select>
-          </FormControl>
-        </Box>
-      )}
     </Box>
   );
 };
