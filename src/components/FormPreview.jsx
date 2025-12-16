@@ -134,6 +134,7 @@ const FormPreview = ({
             renderers={renderersWithFile}
             cells={materialCells}
             onChange={({ data }) => onDataChange(data)}
+            validationMode="ValidateAndHide"
           />
         ) : (
           <Typography variant="body2" color="textSecondary">
