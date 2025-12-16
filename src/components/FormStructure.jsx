@@ -88,14 +88,7 @@ const SortableFieldItem = ({
       // Otherwise, use the default group icon
       return <IconBox {...iconProps} />;
     }
-    if (isGroup) {
-      const chosen = field.uischema?.options?.icon;
-      if (chosen && iconChoices[chosen]) {
-        const IconComp = iconChoices[chosen];
-        return <IconComp {...iconProps} />;
-      }
-      return <IconBox {...iconProps} />;
-    }
+
     if (field.type === "object") return <IconCube {...iconProps} />;
     if (field.type === "vertical-layout")
       return <IconLayoutRows {...iconProps} />;
