@@ -89,8 +89,8 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
       },
     };
 
-    setLocalField(updatedField); 
-    onFieldUpdate(updatedField); 
+    setLocalField(updatedField);
+    onFieldUpdate(updatedField);
   };
 
   useEffect(() => {
@@ -685,41 +685,6 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                   />
                 }
                 label="Read Only"
-                sx={{ mb: 1 }}
-              />
-
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={localField.uischema?.options?.hidden || false}
-                    onChange={(e) => {
-                      const isHidden = e.target.checked;
-                      const updatedUISchema = { ...localField.uischema };
-
-                      if (isHidden) {
-                        updatedUISchema.options = {
-                          ...updatedUISchema.options,
-                          hidden: true,
-                        };
-                      } else {
-                        if (updatedUISchema.options) {
-                          const { hidden, ...otherOptions } =
-                            updatedUISchema.options;
-                          updatedUISchema.options = otherOptions;
-                          if (
-                            Object.keys(updatedUISchema.options).length === 0
-                          ) {
-                            delete updatedUISchema.options;
-                          }
-                        }
-                      }
-
-                      handleUpdate({ uischema: updatedUISchema });
-                    }}
-                    color="primary"
-                  />
-                }
-                label="Hidden Field"
                 sx={{ mb: 1 }}
               />
 
