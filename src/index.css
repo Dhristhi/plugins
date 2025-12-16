@@ -43,3 +43,7 @@ body {
   outline: 2px solid #3b82f6;
   outline-offset: 2px;
 }
+
+.MuiIconButton-root svg[data-testid="CloseIcon"] {
+  display: none;
+}
