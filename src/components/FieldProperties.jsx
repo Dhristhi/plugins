@@ -89,8 +89,8 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
       },
     };
 
-    setLocalField(updatedField); 
-    onFieldUpdate(updatedField); 
+    setLocalField(updatedField);
+    onFieldUpdate(updatedField);
   };
 
   useEffect(() => {
@@ -195,8 +195,6 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
 
   const availableFieldTypes = defaultFieldTypes.filter((ft) => !ft.isLayout);
   const hasEnumOptions = ["select", "radio"].includes(localField.type);
-  // const isGroup = localField.type === "group";
-  // const isLayout = localField.isLayout && !isGroup;
   const isGroup = localField.uischema?.type === "Group";
   const isLayout = localField.isLayout && localField.uischema?.type !== "Group";
 
@@ -218,21 +216,6 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
 
   return (
     <Box>
-      <Typography
-        variant="h6"
-        sx={{
-          fontWeight: 600,
-          color: "grey.800",
-          mb: 3,
-        }}
-      >
-        {isGroup
-          ? "Group Properties"
-          : isLayout
-          ? "Layout Properties"
-          : "Field Properties"}
-      </Typography>
-
       {/* Basic Properties */}
       <Accordion defaultExpanded sx={{ mb: 2, boxShadow: 1 }}>
         <AccordionSummary expandIcon={<IconChevronDown />}>
@@ -286,7 +269,9 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                   sx={{ borderRadius: 2 }}
                 >
                   <MenuItem value="vertical-layout">Vertical Layout</MenuItem>
-                  <MenuItem value="horizontal-layout">Horizontal Layout</MenuItem>
+                  <MenuItem value="horizontal-layout">
+                    Horizontal Layout
+                  </MenuItem>
                 </Select>
               </FormControl>
             )}
@@ -399,7 +384,6 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
           </Box>
         </AccordionDetails>
       </Accordion>
-
       {/* Display Options */}
       {!isLayout && !isGroup && (
         <Accordion sx={{ mb: 2, boxShadow: 1 }}>
@@ -437,7 +421,6 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
           </AccordionDetails>
         </Accordion>
       )}
-
       {/* File Upload Options */}
       {localField.type === "file" && (
         <Accordion sx={{ mb: 2, boxShadow: 1 }}>
@@ -468,7 +451,6 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
           </AccordionDetails>
         </Accordion>
       )}
-
       {/* Validation Rules */}
       {!isLayout && !isGroup && (
         <Accordion sx={{ mb: 2, boxShadow: 1 }}>
@@ -583,7 +565,6 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
           </AccordionDetails>
         </Accordion>
       )}
-
       {/* Options for Select/Radio Fields */}
       {hasEnumOptions && (
         <Accordion defaultExpanded sx={{ mb: 2, boxShadow: 1 }}>
@@ -649,7 +630,6 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
           </AccordionDetails>
         </Accordion>
       )}
-
       {/* Advanced Options */}
       {!isLayout && !isGroup && (
         <Accordion sx={{ mb: 2, boxShadow: 1 }}>

@@ -190,15 +190,15 @@ const App = () => {
                 }),
             },
             ...(field.schema.minItems && { minItems: field.schema.minItems }),
-            ...(field. schema.maxItems && { maxItems: field.schema.maxItems }),
+            ...(field.schema.maxItems && { maxItems: field.schema.maxItems }),
             ...(field.schema.uniqueItems && {
-              uniqueItems: field. schema.uniqueItems,
+              uniqueItems: field.schema.uniqueItems,
             }),
           };
         } else {
           // Simple array without children (fallback to original schema)
           properties[field.key] = {
-            ... field.schema,
+            ...field.schema,
             title: field.label,
           };
         }
@@ -225,10 +225,9 @@ const App = () => {
 
   const buildUISchemaForArrayItems = (fieldsArray) => {
     return fieldsArray
-      .filter((field) => !field.uischema?. options?.hidden)
+      .filter((field) => !field.uischema?.options?.hidden)
       .map((field) => {
         if (field.isLayout && field.type !== "array") {
-
           return {
             ...field.uischema,
             label: field.label,
@@ -239,7 +238,7 @@ const App = () => {
         } else if (field.type === "array") {
           // Nested array inside array
           let nestedDetailElements = [];
-          if (field. children && field.children.length > 0) {
+          if (field.children && field.children.length > 0) {
             nestedDetailElements = buildUISchemaForArrayItems(field.children);
           }
           return {
@@ -247,12 +246,12 @@ const App = () => {
             scope: `#/properties/${field.key}`,
             label: field.label,
             options: {
-              ... field.uischema?. options,
+              ...field.uischema?.options,
               showSortButtons: true,
               ...(nestedDetailElements.length > 0 && {
                 detail: {
                   type: "VerticalLayout",
-                  elements:  nestedDetailElements,
+                  elements: nestedDetailElements,
                 },
               }),
             },
@@ -261,7 +260,7 @@ const App = () => {
           // Regular field inside array - scope is relative to item
           return {
             type: "Control",
-            scope:  `#/properties/${field.key}`,
+            scope: `#/properties/${field.key}`,
             label: field.label,
             options: field.uischema?.options,
           };
@@ -323,7 +322,7 @@ const App = () => {
                 ...(detailElements.length > 0 && {
                   detail: {
                     type: "VerticalLayout",
-                    elements:  detailElements,
+                    elements: detailElements,
                   },
                 }),
               },
@@ -351,14 +350,14 @@ const App = () => {
   const createDefaultArrayItem = (children) => {
     const item = {};
     children.forEach((child) => {
-      if (! child.isLayout) {
+      if (!child.isLayout) {
         // Initialize field with default value
         if (child.schema.type === "boolean") {
-          item[child. key] = false;
+          item[child.key] = false;
         } else if (child.schema.type === "number") {
           item[child.key] = 0;
         } else if (child.schema.type === "array") {
-          item[child. key] = [];
+          item[child.key] = [];
         } else {
           item[child.key] = "";
         }
@@ -369,7 +368,7 @@ const App = () => {
           : {};
       } else if (child.type === "array") {
         // Nested array
-        item[child. key] = [];
+        item[child.key] = [];
       } else if (child.children) {
         // Layout fields - merge their children into current level
         const layoutData = createDefaultArrayItem(child.children);
@@ -425,7 +424,7 @@ const App = () => {
           } else {
             data[field.key] = [];
           }
-        } else if (Array.isArray(data[field. key])) {
+        } else if (Array.isArray(data[field.key])) {
           // If array exists but is empty and has children, add a sample item
           if (
             data[field.key].length === 0 &&
@@ -521,11 +520,11 @@ const App = () => {
               field.id === parentId &&
               (field.isLayout || field.type === "array")
             ) {
-              if (! field.children) field.children = [];
+              if (!field.children) field.children = [];
               if (typeof index === "number") {
                 field.children.splice(index, 0, newField);
               } else {
-                field.children. push(newField);
+                field.children.push(newField);
               }
               return true;
             }
@@ -1976,6 +1975,17 @@ const App = () => {
     }
   };
 
+  const isGroup = selectedField?.uischema?.type === "Group";
+
+  const isLayout =
+    selectedField?.isLayout && selectedField?.uischema?.type !== "Group";
+
+  const formTitle = isGroup
+    ? "Group Properties"
+    : isLayout
+    ? "Layout Properties"
+    : "Field Properties";
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
@@ -2049,67 +2059,35 @@ const App = () => {
                   borderColor: { md: "grey.200" },
                   borderBottom: { xs: 1, md: "none" },
                   display: "flex",
-                  flexDirection: "column",overflow: "auto", boxShadow: { md: 1 }, }} > <FieldPalette onFieldSelect={handleFieldSelect} onLoadSchema={handleLoadSchemaFromPalette} /> </Box>
-
-          {/* Center Content - Toggle between Form Structure and Form Preview */}
-          <Box
-            sx={{
-              flex: 1,
-              display: "flex",
-              flexDirection: "column",
-              overflow: "auto",
-              minHeight: { xs: "60vh", md: "auto" },
-            }}
-          >
-            {/* Schema Editor (when enabled) */}
-            {showSchemaEditor && (
-              <SchemaEditor
-                formState={formState}
-                onFormStateChange={(newFormState) =>
-                  setFormData(newFormState.data)
-                }
-                showFormPreview={showFormPreview}
-                setShowFormPreview={setShowFormPreview}
-                showSchemaEditor={showSchemaEditor}
-                setShowSchemaEditor={setShowSchemaEditor}
-                exportForm={exportForm}
-              />
-            )}
-
-            {/* Content Area - Either Form Structure or Form Preview */}
-            {!showSchemaEditor && (
-              <div
-                style={{
-                  flex: 1,
+                  flexDirection: "column",
                   overflow: "auto",
+                  boxShadow: { md: 1 },
                 }}
               >
-                {showFormPreview ? (
-                  /* Form Preview Mode */
-                  <FormPreview
-                    formState={formState}
-                    onDataChange={handleFormDataChange}
-                    showFormPreview={showFormPreview}
-                    setShowFormPreview={setShowFormPreview}
-                    showSchemaEditor={showSchemaEditor}
-                    setShowSchemaEditor={setShowSchemaEditor}
-                    exportForm={exportForm}
-                  />
-                ) : (
-                  /* Form Structure Mode */
-                  <FormStructure
-                    fields={fields}
-                    onFieldsChange={setFields}
-                    onFieldSelect={(field, openDrawer = false) => {
-                      setSelectedField(field);
+                {" "}
+                <FieldPalette
+                  onFieldSelect={handleFieldSelect}
+                  onLoadSchema={handleLoadSchemaFromPalette}
+                />{" "}
+              </Box>
 
-                      if (openDrawer) {
-                        setPropertiesDrawerOpen(true);
-                      }
-                    }}
-                    selectedField={selectedField}
-                    onAddFieldToLayout={addFieldToLayout}
-                    onAddLayoutToContainer={addLayoutToContainer}
+              {/* Center Content - Toggle between Form Structure and Form Preview */}
+              <Box
+                sx={{
+                  flex: 1,
+                  display: "flex",
+                  flexDirection: "column",
+                  overflow: "auto",
+                  minHeight: { xs: "60vh", md: "auto" },
+                }}
+              >
+                {/* Schema Editor (when enabled) */}
+                {showSchemaEditor && (
+                  <SchemaEditor
+                    formState={formState}
+                    onFormStateChange={(newFormState) =>
+                      setFormData(newFormState.data)
+                    }
                     showFormPreview={showFormPreview}
                     setShowFormPreview={setShowFormPreview}
                     showSchemaEditor={showSchemaEditor}
@@ -2117,110 +2095,152 @@ const App = () => {
                     exportForm={exportForm}
                   />
                 )}
-              </div>
-            )}
-          </Box>
-        </Box>
 
-        {/* Drag Overlay */}
-        <DragOverlay>
-          {activeId && draggedItem ? (
+                {/* Content Area - Either Form Structure or Form Preview */}
+                {!showSchemaEditor && (
+                  <div
+                    style={{
+                      flex: 1,
+                      overflow: "auto",
+                    }}
+                  >
+                    {showFormPreview ? (
+                      /* Form Preview Mode */
+                      <FormPreview
+                        formState={formState}
+                        onDataChange={handleFormDataChange}
+                        showFormPreview={showFormPreview}
+                        setShowFormPreview={setShowFormPreview}
+                        showSchemaEditor={showSchemaEditor}
+                        setShowSchemaEditor={setShowSchemaEditor}
+                        exportForm={exportForm}
+                      />
+                    ) : (
+                      /* Form Structure Mode */
+                      <FormStructure
+                        fields={fields}
+                        onFieldsChange={setFields}
+                        onFieldSelect={(field, openDrawer = false) => {
+                          setSelectedField(field);
+
+                          if (openDrawer) {
+                            setPropertiesDrawerOpen(true);
+                          }
+                        }}
+                        selectedField={selectedField}
+                        onAddFieldToLayout={addFieldToLayout}
+                        onAddLayoutToContainer={addLayoutToContainer}
+                        showFormPreview={showFormPreview}
+                        setShowFormPreview={setShowFormPreview}
+                        showSchemaEditor={showSchemaEditor}
+                        setShowSchemaEditor={setShowSchemaEditor}
+                        exportForm={exportForm}
+                      />
+                    )}
+                  </div>
+                )}
+              </Box>
+            </Box>
+
+            {/* Drag Overlay */}
+            <DragOverlay>
+              {activeId && draggedItem ? (
+                <Box
+                  sx={{
+                    backgroundColor: (theme) => theme.palette.primary.main,
+                    color: "primary.contrastText",
+                    p: "8px 12px",
+                    borderRadius: 1,
+                    fontSize: "14px",
+                    fontWeight: "bold",
+                    boxShadow: 2,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1,
+                  }}
+                >
+                  <span>
+                    {draggedItem.type === "palette-item"
+                      ? draggedItem.fieldType?.icon &&
+                        React.createElement(draggedItem.fieldType.icon, {
+                          size: 16,
+                        })
+                      : "📝"}
+                  </span>
+                  <span>
+                    {draggedItem.type === "palette-item"
+                      ? draggedItem.fieldType?.label
+                      : draggedItem.field?.label || "Field"}
+                  </span>
+                </Box>
+              ) : null}
+            </DragOverlay>
+          </Box>
+
+          {/* Properties Panel */}
+          {propertiesDrawerOpen && selectedField && (
             <Box
               sx={{
-                backgroundColor: (theme) => theme.palette.primary.main,
-                color: "primary.contrastText",
-                p: "8px 12px",
-                borderRadius: 1,
-                fontSize: "14px",
-                fontWeight: "bold",
-                boxShadow: 2,
-                display: "flex",
-                alignItems: "center",
-                gap: 1,
+                position: "fixed",
+                right: 0,
+                top: 0,
+                width: { xs: "100vw", sm: "400px", md: "380px" },
+                height: "100vh",
+                background: "white",
+                boxShadow:
+                  "-4px 0 25px -5px rgb(0 0 0 / 0.1), -2px 0 10px -5px rgb(0 0 0 / 0.04)",
+                zIndex: 1000,
+                overflow: "auto",
+                borderLeft: 1,
+                borderColor: "grey.200",
               }}
             >
-              <span>
-                {draggedItem.type === "palette-item"
-                  ? draggedItem.fieldType?.icon &&
-                    React.createElement(draggedItem.fieldType.icon, {
-                      size: 16,
-                    })
-                  : "📝"}
-              </span>
-              <span>
-                {draggedItem.type === "palette-item"
-                  ? draggedItem.fieldType?.label
-                  : draggedItem.field?.label || "Field"}
-              </span>
+              <Box
+                sx={{
+                  p: 3,
+                  borderBottom: 1,
+                  borderColor: "grey.200",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  backgroundColor: "grey.50",
+                }}
+              >
+                <Typography
+                  variant="h6"
+                  sx={{ margin: 0, fontWeight: 600, color: "grey.800" }}
+                >
+                  {formTitle}
+                </Typography>
+                <Button
+                  onClick={() => setPropertiesDrawerOpen(false)}
+                  size="small"
+                  sx={{
+                    minWidth: "auto",
+                    p: 1,
+                    borderRadius: 1.5,
+                    color: "grey.500",
+                    "&:hover": {
+                      backgroundColor: "grey.200",
+                      color: "grey.600",
+                    },
+                  }}
+                >
+                  <IconX size={20} />
+                </Button>
+              </Box>
+              <Box sx={{ p: 3 }}>
+                <FieldProperties
+                  field={selectedField}
+                  onFieldUpdate={handleFieldUpdate}
+                />
+              </Box>
             </Box>
-          ) : null}
-        </DragOverlay>
-      </Box>
-
-      {/* Properties Panel */}
-      {propertiesDrawerOpen && selectedField && (
-        <Box
-          sx={{
-            position: "fixed",
-            right: 0,
-            top: 0,
-            width: { xs: "100vw", sm: "400px", md: "380px" },
-            height: "100vh",
-            background: "white",
-            boxShadow: 
-              "-4px 0 25px -5px rgb(0 0 0 / 0.1), -2px 0 10px -5px rgb(0 0 0 / 0.04)",
-            zIndex: 1000,
-            overflow: "auto",
-            borderLeft: 1,
-            borderColor: "grey.200",
-          }}
-        >
-          <Box
-            sx={{
-              p: 3,
-              borderBottom: 1,
-              borderColor: "grey.200",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              backgroundColor: "grey.50",
-            }}
-          >
-            <Typography
-              variant="h6"
-              sx={{ margin: 0, fontWeight: 600, color: "grey.800" }}
-            >
-          Edit
-            </Typography>
-            <Button
-              onClick={() => setPropertiesDrawerOpen(false)}
-              size="small"
-              sx={{
-                minWidth: "auto",
-                p: 1,
-                borderRadius: 1.5,
-                color: "grey.500",
-                "&:hover": {
-                  backgroundColor: "grey.200",
-                  color: "grey.600",
-                },
-              }}
-            >
-              <IconX size={20} />
-            </Button>
-          </Box>
-          <Box sx={{ p: 3 }}>
-            <FieldProperties
-              field={selectedField}
-              onFieldUpdate={handleFieldUpdate}
-            />
-          </Box>
-        </Box>
-      )}
-    </SortableContext>
-  </DndContext>
-</ThemeProvider>
-);
+          )}
+        </SortableContext>
+      </DndContext>
+    </ThemeProvider>
+  );
 };
 
 export default App;
