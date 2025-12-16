@@ -195,8 +195,6 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
 
   const availableFieldTypes = defaultFieldTypes.filter((ft) => !ft.isLayout);
   const hasEnumOptions = ["select", "radio"].includes(localField.type);
-  // const isGroup = localField.type === "group";
-  // const isLayout = localField.isLayout && !isGroup;
   const isGroup = localField.uischema?.type === "Group";
   const isLayout = localField.isLayout && localField.uischema?.type !== "Group";
 
@@ -218,21 +216,6 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
 
   return (
     <Box>
-      <Typography
-        variant="h6"
-        sx={{
-          fontWeight: 600,
-          color: "grey.800",
-          mb: 3,
-        }}
-      >
-        {isGroup
-          ? "Group Properties"
-          : isLayout
-          ? "Layout Properties"
-          : "Field Properties"}
-      </Typography>
-
       {/* Basic Properties */}
       <Accordion defaultExpanded sx={{ mb: 2, boxShadow: 1 }}>
         <AccordionSummary expandIcon={<IconChevronDown />}>
@@ -242,34 +225,56 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
         </AccordionSummary>
         <AccordionDetails>
           <Box>
-            <TextField
-              label={isGroup ? "Group Title" : "Label"}
-              fullWidth
-              value={localField.label}
-              onChange={(e) => {
-                const newLabel = e.target.value;
-                if (isGroup) {
-                  const updatedUISchema = {
-                    ...localField.uischema,
-                    label: newLabel,
-                  };
-                  handleUpdate({
-                    label: newLabel,
-                    uischema: updatedUISchema,
-                  });
-                } else {
-                  handleUpdate({ label: newLabel });
+            {/* Show label field only for groups and non-layout fields */}
+            {!isLayout && (
+              <TextField
+                label={isGroup ? "Group Title" : "Label"}
+                fullWidth
+                value={localField.label}
+                onChange={(e) => {
+                  const newLabel = e.target.value;
+                  if (isGroup) {
+                    const updatedUISchema = {
+                      ...localField.uischema,
+                      label: newLabel,
+                    };
+                    handleUpdate({
+                      label: newLabel,
+                      uischema: updatedUISchema,
+                    });
+                  } else {
+                    handleUpdate({ label: newLabel });
+                  }
+                }}
+                margin="normal"
+                variant="outlined"
+                helperText={
+                  isGroup
+                    ? "Displayed as the group header"
+                    : "The display label for this field"
                 }
-              }}
-              margin="normal"
-              variant="outlined"
-              helperText={
-                isGroup
-                  ? "Displayed as the group header"
-                  : "The display label for this field"
-              }
-              sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
-            />
+                sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+              />
+            )}
+
+            {/* Layout selector for vertical/horizontal layouts */}
+            {isLayout && (
+              <FormControl fullWidth margin="normal">
+                <InputLabel id="layout-select-label">Layout Type</InputLabel>
+                <Select
+                  labelId="layout-select-label"
+                  value={layout}
+                  label="Layout Type"
+                  onChange={handleLayoutChange}
+                  sx={{ borderRadius: 2 }}
+                >
+                  <MenuItem value="vertical-layout">Vertical Layout</MenuItem>
+                  <MenuItem value="horizontal-layout">
+                    Horizontal Layout
+                  </MenuItem>
+                </Select>
+              </FormControl>
+            )}
 
             {!isLayout && !isGroup && (
               <>
@@ -379,7 +384,6 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
           </Box>
         </AccordionDetails>
       </Accordion>
-
       {/* Display Options */}
       {!isLayout && !isGroup && (
         <Accordion sx={{ mb: 2, boxShadow: 1 }}>
@@ -417,7 +421,6 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
           </AccordionDetails>
         </Accordion>
       )}
-
       {/* File Upload Options */}
       {localField.type === "file" && (
         <Accordion sx={{ mb: 2, boxShadow: 1 }}>
@@ -448,7 +451,6 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
           </AccordionDetails>
         </Accordion>
       )}
-
       {/* Validation Rules */}
       {!isLayout && !isGroup && (
         <Accordion sx={{ mb: 2, boxShadow: 1 }}>
@@ -563,7 +565,6 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
           </AccordionDetails>
         </Accordion>
       )}
-
       {/* Options for Select/Radio Fields */}
       {hasEnumOptions && (
         <Accordion defaultExpanded sx={{ mb: 2, boxShadow: 1 }}>
@@ -629,7 +630,6 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
           </AccordionDetails>
         </Accordion>
       )}
-
       {/* Advanced Options */}
       {!isLayout && !isGroup && (
         <Accordion sx={{ mb: 2, boxShadow: 1 }}>
@@ -769,22 +769,6 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
             : `Key: ${localField.key}`}
         </Typography>
       </Box>
-      {isLayout && (
-        <Box sx={{ mt: 2 }}>
-          <FormControl fullWidth>
-            <InputLabel id="layout-select-label">Layout</InputLabel>
-            <Select
-              labelId="layout-select-label"
-              value={layout}
-              label="Layout"
-              onChange={handleLayoutChange}
-            >
-              <MenuItem value="vertical-layout">Vertical Layout</MenuItem>
-              <MenuItem value="horizontal-layout">Horizontal Layout</MenuItem>
-            </Select>
-          </FormControl>
-        </Box>
-      )}
     </Box>
   );
 };

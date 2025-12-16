@@ -62,6 +62,7 @@ const SortableFieldItem = ({
   const isSelected = selectedField?.id === field.id;
   const isLayout = field.isLayout;
   const isGroup = field.type === "group";
+  const isArray = field.type === "array";
 
   const handleContextMenu = (event) => {
     event.preventDefault();
@@ -102,6 +103,8 @@ const SortableFieldItem = ({
               ? `2px solid ${theme.palette.primary.main}`
               : isGroup
               ? `2px solid ${theme.palette.warning.main}`
+              : isArray
+              ? `2px solid ${theme.palette.info.main}`
               : `1px solid ${theme.palette.grey[200]}`,
           borderRadius: 2,
           transition: "all 0.2s ease",
@@ -155,7 +158,7 @@ const SortableFieldItem = ({
             <Typography
               variant="subtitle2"
               sx={{
-                fontWeight: isLayout ? "bold" : "normal",
+                fontWeight: isLayout || isArray ? "bold" : "normal",
                 overflow: "hidden",
                 textOverflow: "ellipsis",
                 whiteSpace: "nowrap",
@@ -165,13 +168,15 @@ const SortableFieldItem = ({
             >
               {field.label}
             </Typography>
-            {isLayout && (
+            {(isLayout || isArray) && (
               <Chip
                 label={
                   isGroup
                     ? "Group"
                     : field.type === "object"
                     ? "Object"
+                    : field.type === "array"
+                    ? "Array"
                     : field.uischema?.type || "Layout"
                 }
                 size="small"
@@ -180,6 +185,8 @@ const SortableFieldItem = ({
                     ? "warning"
                     : field.type === "object"
                     ? "success"
+                    : field.type === "array"
+                    ? "info"
                     : "primary"
                 }
                 variant="outlined"
@@ -242,52 +249,62 @@ const SortableFieldItem = ({
           />
         </Box>
 
-        {/* Render children for layouts */}
-        {isLayout && field.children && field.children.length > 0 && (
-          <Box sx={{ mt: 2, pl: 2, borderLeft: 2, borderColor: "grey.300" }}>
-            <SortableContext
-              items={field.children.map((child) => child.id)}
-              strategy={verticalListSortingStrategy}
+        {/* Render children for layouts AND arrays */}
+        {(isLayout || isArray) &&
+          field.children &&
+          field.children.length > 0 && (
+            <Box
+              sx={{
+                mt: 2,
+                pl: 2,
+                borderLeft: 2,
+                borderColor:"grey.300",
+              }}
             >
-              <DropZone
-                parentId={field.id}
-                index={0}
-                accepts={["field", "layout"]}
-              />
-              {field.children.map((child, index) => (
-                <React.Fragment key={child.id}>
-                  <SortableFieldItem
-                    field={child}
-                    level={level + 1}
-                    parentId={field.id}
-                    onFieldSelect={onFieldSelect}
-                    onAddFieldToLayout={onAddFieldToLayout}
-                    onAddLayoutToContainer={onAddLayoutToContainer}
-                    moveField={moveField}
-                    deleteField={deleteField}
-                    selectedField={selectedField}
-                  />
-                  <DropZone
-                    parentId={field.id}
-                    index={index + 1}
-                    accepts={["field", "layout"]}
-                  />
-                </React.Fragment>
-              ))}
-            </SortableContext>
-          </Box>
-        )}
+              <SortableContext
+                items={field.children.map((child) => child.id)}
+                strategy={verticalListSortingStrategy}
+              >
+                <DropZone
+                  parentId={field.id}
+                  index={0}
+                  accepts={["field", "layout"]}
+                />
+                {field.children.map((child, index) => (
+                  <React.Fragment key={child.id}>
+                    <SortableFieldItem
+                      field={child}
+                      level={level + 1}
+                      parentId={field.id}
+                      onFieldSelect={onFieldSelect}
+                      onAddFieldToLayout={onAddFieldToLayout}
+                      onAddLayoutToContainer={onAddLayoutToContainer}
+                      moveField={moveField}
+                      deleteField={deleteField}
+                      selectedField={selectedField}
+                    />
+                    <DropZone
+                      parentId={field.id}
+                      index={index + 1}
+                      accepts={["field", "layout"]}
+                    />
+                  </React.Fragment>
+                ))}
+              </SortableContext>
+            </Box>
+          )}
 
-        {/* Show empty state for layouts without children */}
-        {isLayout && (!field.children || field.children.length === 0) && (
-          <DropZone
-            parentId={field.id}
-            index={0}
-            accepts={["field", "layout"]}
-            isEmpty={true}
-            onAddField={() => onAddFieldToLayout(field.id)}
-          />
-        )}
+        {/* Show empty state for layouts/arrays without children */}
+        {(isLayout || isArray) &&
+          (!field.children || field.children.length === 0) && (
+            <DropZone
+              parentId={field.id}
+              index={0}
+              accepts={["field", "layout"]}
+              isEmpty={true}
+              onAddField={() => onAddFieldToLayout(field.id)}
+            />
+          )}
       </Paper>
 
       <ContextMenu
