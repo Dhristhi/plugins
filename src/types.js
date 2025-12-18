@@ -124,8 +124,7 @@ export const defaultFieldTypes = [
       options: {
         "ui:options": {
           dateTimeFormat: "DD-MM-YYYY",
-          showTime: false,
-          invalidPlaceholder: "N/A",
+          showTime: false
         },
       },
     },
