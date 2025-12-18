@@ -1,10 +1,4 @@
-import React, {
-  useState,
-  useEffect,
-  useRef,
-  useMemo,
-  useCallback,
-} from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import PropTypes from "prop-types";
 import { withJsonFormsControlProps } from "@jsonforms/react";
 import {
@@ -31,27 +25,26 @@ const CustomDateRendererBase = ({
 }) => {
   if (!visible) return null;
 
-  const uiOptions = useMemo(
-    () => uischema?.options?.["ui:options"] || {},
-    [uischema]
-  );
-  const dateTimeFormat = uiOptions.dateTimeFormat || "DD-MM-YYYY";
-  const showTime = uiOptions.showTime || false;
-  const invalidPlaceholder = uiOptions.invalidPlaceholder || "N/A";
-  const readonly = uischema?.options?.readonly || false;
+  // Extract options directly from uischema.options (not ui:options)
+  const options = uischema?.options || {};
+  const dateTimeFormat = options.dateTimeFormat || "DD-MM-YYYY";
+  const showTime = options.showTime || false;
+  const invalidPlaceholder = options.invalidPlaceholder || "N/A";
+  const readonly = options.readonly || false;
 
   const [inputValue, setInputValue] = useState("");
   const hiddenDateInputRef = useRef(null);
-  const lastDataRef = useRef(data);
+  const prevFormatRef = useRef(dateTimeFormat);
+  const prevShowTimeRef = useRef(showTime);
 
-  // Format the date whenever data changes from external source
+  // Update input value when data or format changes
   useEffect(() => {
-    // Only update if data actually changed
-    if (lastDataRef.current === data) {
-      return;
-    }
+    const formatChanged =
+      prevFormatRef.current !== dateTimeFormat ||
+      prevShowTimeRef.current !== showTime;
 
-    lastDataRef.current = data;
+    prevFormatRef.current = dateTimeFormat;
+    prevShowTimeRef.current = showTime;
 
     if (data && isValidDateString(data)) {
       try {
@@ -81,31 +74,24 @@ const CustomDateRendererBase = ({
         let isoString;
 
         if (showTime) {
-          // For datetime-local, value is already in "YYYY-MM-DDTHH:mm" format
           const date = new Date(value);
           isoString = date.toISOString();
         } else {
-          // For date, add time to create proper date
           const date = new Date(value + "T00:00:00");
           isoString = date.toISOString();
         }
 
-        if (lastDataRef.current !== isoString) {
-          lastDataRef.current = isoString;
-          handleChange(path, isoString);
+        handleChange(path, isoString);
 
-          // Format and update the visible input immediately
-          try {
-            const formatted = showTime
-              ? formatTime(isoString, dateTimeFormat)
-              : formatDate(isoString, dateTimeFormat);
-            setInputValue(formatted);
-          } catch (error) {
-            console.error("Date formatting error:", error);
-          }
+        try {
+          const formatted = showTime
+            ? formatTime(isoString, dateTimeFormat)
+            : formatDate(isoString, dateTimeFormat);
+          setInputValue(formatted);
+        } catch (error) {
+          console.error("Date formatting error:", error);
         }
       } else {
-        lastDataRef.current = undefined;
         handleChange(path, undefined);
         setInputValue("");
       }
@@ -113,7 +99,7 @@ const CustomDateRendererBase = ({
     [handleChange, path, showTime, dateTimeFormat]
   );
 
-  const hiddenInputValue = useMemo(() => {
+  const hiddenInputValue = (() => {
     if (data && isValidDateString(data)) {
       try {
         const date = new Date(data);
@@ -133,9 +119,9 @@ const CustomDateRendererBase = ({
       }
     }
     return "";
-  }, [data, showTime]);
+  })();
 
-  const displayValue = useMemo(() => {
+  const displayValue = (() => {
     if (data && isValidDateString(data)) {
       try {
         return showTime
@@ -146,7 +132,7 @@ const CustomDateRendererBase = ({
       }
     }
     return invalidPlaceholder;
-  }, [data, showTime, dateTimeFormat, invalidPlaceholder]);
+  })();
 
   if (readonly) {
     return (

@@ -193,43 +193,25 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
   const isGroup = localField.uischema?.type === "Group";
   const isLayout = localField.isLayout && localField.uischema?.type !== "Group";
 
-  const handleUiOptionsUpdate = (updates) => {
-    const currentOptions = localField.uischema?.options || {};
-    const currentUiOptions = currentOptions["ui:options"] || {};
-
-    const updatedUiSchema = {
-      ...localField.uischema,
-      options: {
-        ...currentOptions,
-        "ui:options": {
-          ...currentUiOptions,
-          ...updates,
-        },
-      },
-    };
-    handleUpdate({ uischema: updatedUiSchema });
-  };
-
   const getDateFormatMenuItems = () => {
-    const showTime =
-      localField.uischema?.options?.["ui:options"]?.showTime || false;
+    const showTime = localField.uischema?.options?.showTime || false;
 
     if (showTime) {
       return [
         <MenuItem key="DD-MM-YYYY HH:mm" value="DD-MM-YYYY HH:mm">
-          DD-MM-YYYY HH: mm
+          DD-MM-YYYY HH:mm
         </MenuItem>,
-        <MenuItem key="MM-DD-YYYY HH: mm" value="MM-DD-YYYY HH:mm">
+        <MenuItem key="MM-DD-YYYY HH:mm" value="MM-DD-YYYY HH:mm">
           MM-DD-YYYY HH:mm
         </MenuItem>,
         <MenuItem key="YYYY-MM-DD HH:mm" value="YYYY-MM-DD HH:mm">
-          YYYY-MM-DD HH: mm
+          YYYY-MM-DD HH:mm
         </MenuItem>,
-        <MenuItem key="DD-MM-YYYY HH:mm: ss" value="DD-MM-YYYY HH:mm:ss">
+        <MenuItem key="DD-MM-YYYY HH:mm:ss" value="DD-MM-YYYY HH:mm:ss">
           DD-MM-YYYY HH:mm:ss
         </MenuItem>,
-        <MenuItem key="YYYY-MM-DD HH: mm:ss" value="YYYY-MM-DD HH:mm:ss">
-          YYYY-MM-DD HH:mm: ss
+        <MenuItem key="YYYY-MM-DD HH:mm:ss" value="YYYY-MM-DD HH:mm:ss">
+          YYYY-MM-DD HH:mm:ss
         </MenuItem>,
         <MenuItem key="DD MMM YYYY HH:mm" value="DD MMM YYYY HH:mm">
           DD MMM YYYY HH:mm
@@ -489,15 +471,28 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                     <InputLabel>Date Display Format</InputLabel>
                     <Select
                       value={
-                        localField.uischema?.options?.["ui:options"]
-                          ?.dateTimeFormat || "DD-MM-YYYY"
+                        localField.uischema?.options?.dateTimeFormat ||
+                        "DD-MM-YYYY"
                       }
                       label="Date Display Format"
                       onChange={(e) => {
-                        console.log("Date format changed to:", e.target.value);
-                        handleUiOptionsUpdate({
-                          dateTimeFormat: e.target.value,
-                        });
+                        const newFormat = e.target.value;
+                        // Create completely new uischema object
+                        const updatedUiSchema = {
+                          ...localField.uischema,
+                          options: {
+                            ...localField.uischema?.options,
+                            dateTimeFormat: newFormat,
+                          },
+                        };
+
+                        const updatedField = {
+                          ...localField,
+                          uischema: updatedUiSchema,
+                        };
+
+                        setLocalField(updatedField);
+                        onFieldUpdate(updatedField);
                       }}
                       sx={{ borderRadius: 2 }}
                     >
@@ -509,8 +504,8 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                       sx={{ mt: 1, display: "block" }}
                     >
                       Current format:{" "}
-                      {localField.uischema?.options?.["ui:options"]
-                        ?.dateTimeFormat || "DD-MM-YYYY"}
+                      {localField.uischema?.options?.dateTimeFormat ||
+                        "DD-MM-YYYY"}
                     </Typography>
                   </FormControl>
 
@@ -518,20 +513,30 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                     control={
                       <Switch
                         checked={
-                          localField.uischema?.options?.["ui:options"]
-                            ?.showTime || false
+                          localField.uischema?.options?.showTime || false
                         }
                         onChange={(e) => {
                           const showTime = e.target.checked;
-                          const updates = { showTime };
 
-                          if (showTime) {
-                            updates.dateTimeFormat = "DD-MM-YYYY HH:mm";
-                          } else {
-                            updates.dateTimeFormat = "DD-MM-YYYY";
-                          }
+                          // Create completely new objects
+                          const updatedUiSchema = {
+                            ...localField.uischema,
+                            options: {
+                              ...localField.uischema?.options,
+                              showTime: showTime,
+                              dateTimeFormat: showTime
+                                ? "DD-MM-YYYY HH:mm"
+                                : "DD-MM-YYYY",
+                            },
+                          };
 
-                          handleUiOptionsUpdate(updates);
+                          const updatedField = {
+                            ...localField,
+                            uischema: updatedUiSchema,
+                          };
+
+                          setLocalField(updatedField);
+                          onFieldUpdate(updatedField);
                         }}
                         color="primary"
                       />
@@ -561,11 +566,22 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                 value={
                   localField.uischema?.options?.["ui:options"]?.accept || ""
                 }
-                onChange={(e) =>
-                  handleUiOptionsUpdate({
-                    accept: e.target.value || undefined,
-                  })
-                }
+                onChange={(e) => {
+                  const currentOptions = localField.uischema?.options || {};
+                  const currentUiOptions = currentOptions["ui:options"] || {};
+
+                  const updatedUiSchema = {
+                    ...localField.uischema,
+                    options: {
+                      ...currentOptions,
+                      "ui:options": {
+                        ...currentUiOptions,
+                        accept: e.target.value || undefined,
+                      },
+                    },
+                  };
+                  handleUpdate({ uischema: updatedUiSchema });
+                }}
                 margin="normal"
                 variant="outlined"
                 helperText="Comma-separated list of allowed file types (e.g., .jpg, .png, .pdf)"

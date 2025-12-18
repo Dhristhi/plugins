@@ -122,10 +122,8 @@ export const defaultFieldTypes = [
       type: "Control",
       scope: "#/properties/date",
       options: {
-        "ui:options": {
-          dateTimeFormat: "DD-MM-YYYY",
-          showTime: false
-        },
+        dateTimeFormat: "DD-MM-YYYY",
+        showTime: false,
       },
     },
   },
