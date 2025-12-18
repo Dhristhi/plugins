@@ -112,7 +112,6 @@ export const defaultFieldTypes = [
   },
   {
     id: "date",
-    type: "string",
     label: "Date",
     icon: IconCalendar,
     schema: {
@@ -121,7 +120,14 @@ export const defaultFieldTypes = [
     },
     uischema: {
       type: "Control",
-      scope: "#/properties/field",
+      scope: "#/properties/date",
+      options: {
+        "ui:options": {
+          dateTimeFormat: "DD-MM-YYYY",
+          showTime: false,
+          invalidPlaceholder: "N/A",
+        },
+      },
     },
   },
   {

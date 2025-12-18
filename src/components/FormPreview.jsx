@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useCallback, useMemo } from "react";
 import { JsonForms } from "@jsonforms/react";
 import {
   materialRenderers,
@@ -21,29 +21,66 @@ const FormPreview = ({
   setShowSchemaEditor,
   exportForm,
 }) => {
-  return (
-    <Box>
-      <CommonHeader
-        title="Form Preview"
-        description="Test your form and see how it will look to users"
-        icon={IconEye}
-        showFormPreview={showFormPreview}
-        setShowFormPreview={setShowFormPreview}
-        showSchemaEditor={showSchemaEditor}
-        setShowSchemaEditor={setShowSchemaEditor}
-        exportForm={exportForm}
-      />
+  const lastDataRef = useRef(formState.data);
 
-      <Box sx={{ p: 2 }}>
-        {formState.schema.properties &&
-        Object.keys(formState.schema.properties).length > 0 ? (
+  const handleChange = useCallback(
+    ({ data }) => {
+      const lastDataStr = JSON.stringify(lastDataRef.current);
+      const newDataStr = JSON.stringify(data);
+
+      if (lastDataStr !== newDataStr) {
+        lastDataRef.current = data;
+        if (onDataChange) {
+          onDataChange(data);
+        }
+      }
+    },
+    [onDataChange]
+  );
+
+  const schema = useMemo(() => formState.schema, [formState.schema]);
+  const uischema = useMemo(() => formState.uischema, [formState.uischema]);
+  const data = useMemo(() => formState.data, [formState.data]);
+
+  return (
+    <Box
+      sx={{
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+      }}
+    >
+      <Box sx={{ flexShrink: 0 }}>
+        <CommonHeader
+          title="Form Preview"
+          description="Test your form and see how it will look to users"
+          icon={IconEye}
+          showFormPreview={showFormPreview}
+          setShowFormPreview={setShowFormPreview}
+          showSchemaEditor={showSchemaEditor}
+          setShowSchemaEditor={setShowSchemaEditor}
+          exportForm={exportForm}
+        />
+      </Box>
+
+      <Box
+        sx={{
+          p: 2,
+          flex: 1,
+          overflowY: "auto",
+          overflowX: "hidden",
+          minHeight: 0,
+        }}
+      >
+        {schema.properties && Object.keys(schema.properties).length > 0 ? (
           <JsonForms
-            schema={formState.schema}
-            uischema={formState.uischema}
-            data={formState.data}
+            schema={schema}
+            uischema={uischema}
+            data={data}
             renderers={renderersWithCustom}
             cells={materialCells}
-            onChange={({ data }) => onDataChange(data)}
+            onChange={handleChange}
           />
         ) : (
           <Typography variant="body2" color="textSecondary">

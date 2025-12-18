@@ -194,19 +194,78 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
   const isLayout = localField.isLayout && localField.uischema?.type !== "Group";
 
   const handleUiOptionsUpdate = (updates) => {
-    const existingUiOptions =
-      localField.uischema?.options?.["ui:options"] || {};
+    const currentOptions = localField.uischema?.options || {};
+    const currentUiOptions = currentOptions["ui:options"] || {};
+
     const updatedUiSchema = {
       ...localField.uischema,
       options: {
-        ...localField.uischema?.options,
+        ...currentOptions,
         "ui:options": {
-          ...existingUiOptions,
+          ...currentUiOptions,
           ...updates,
         },
       },
     };
     handleUpdate({ uischema: updatedUiSchema });
+  };
+
+  const getDateFormatMenuItems = () => {
+    const showTime =
+      localField.uischema?.options?.["ui:options"]?.showTime || false;
+
+    if (showTime) {
+      return [
+        <MenuItem key="DD-MM-YYYY HH:mm" value="DD-MM-YYYY HH:mm">
+          DD-MM-YYYY HH: mm
+        </MenuItem>,
+        <MenuItem key="MM-DD-YYYY HH: mm" value="MM-DD-YYYY HH:mm">
+          MM-DD-YYYY HH:mm
+        </MenuItem>,
+        <MenuItem key="YYYY-MM-DD HH:mm" value="YYYY-MM-DD HH:mm">
+          YYYY-MM-DD HH: mm
+        </MenuItem>,
+        <MenuItem key="DD-MM-YYYY HH:mm: ss" value="DD-MM-YYYY HH:mm:ss">
+          DD-MM-YYYY HH:mm:ss
+        </MenuItem>,
+        <MenuItem key="YYYY-MM-DD HH: mm:ss" value="YYYY-MM-DD HH:mm:ss">
+          YYYY-MM-DD HH:mm: ss
+        </MenuItem>,
+        <MenuItem key="DD MMM YYYY HH:mm" value="DD MMM YYYY HH:mm">
+          DD MMM YYYY HH:mm
+        </MenuItem>,
+        <MenuItem key="MMM DD, YYYY HH:mm" value="MMM DD, YYYY HH:mm">
+          MMM DD, YYYY HH:mm
+        </MenuItem>,
+      ];
+    } else {
+      return [
+        <MenuItem key="DD-MM-YYYY" value="DD-MM-YYYY">
+          DD-MM-YYYY
+        </MenuItem>,
+        <MenuItem key="MM-DD-YYYY" value="MM-DD-YYYY">
+          MM-DD-YYYY
+        </MenuItem>,
+        <MenuItem key="YYYY-MM-DD" value="YYYY-MM-DD">
+          YYYY-MM-DD
+        </MenuItem>,
+        <MenuItem key="DD/MM/YYYY" value="DD/MM/YYYY">
+          DD/MM/YYYY
+        </MenuItem>,
+        <MenuItem key="MM/DD/YYYY" value="MM/DD/YYYY">
+          MM/DD/YYYY
+        </MenuItem>,
+        <MenuItem key="DD MMM YYYY" value="DD MMM YYYY">
+          DD MMM YYYY
+        </MenuItem>,
+        <MenuItem key="MMM DD, YYYY" value="MMM DD, YYYY">
+          MMM DD, YYYY
+        </MenuItem>,
+        <MenuItem key="MMMM DD, YYYY" value="MMMM DD, YYYY">
+          MMMM DD, YYYY
+        </MenuItem>,
+      ];
+    }
   };
 
   return (
@@ -423,6 +482,65 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                 helperText="Initial value for this field"
                 sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
               />
+
+              {localField.schema?.format === "date" && (
+                <>
+                  <FormControl fullWidth margin="normal">
+                    <InputLabel>Date Display Format</InputLabel>
+                    <Select
+                      value={
+                        localField.uischema?.options?.["ui:options"]
+                          ?.dateTimeFormat || "DD-MM-YYYY"
+                      }
+                      label="Date Display Format"
+                      onChange={(e) => {
+                        console.log("Date format changed to:", e.target.value);
+                        handleUiOptionsUpdate({
+                          dateTimeFormat: e.target.value,
+                        });
+                      }}
+                      sx={{ borderRadius: 2 }}
+                    >
+                      {getDateFormatMenuItems()}
+                    </Select>
+                    <Typography
+                      variant="caption"
+                      color="textSecondary"
+                      sx={{ mt: 1, display: "block" }}
+                    >
+                      Current format:{" "}
+                      {localField.uischema?.options?.["ui:options"]
+                        ?.dateTimeFormat || "DD-MM-YYYY"}
+                    </Typography>
+                  </FormControl>
+
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={
+                          localField.uischema?.options?.["ui:options"]
+                            ?.showTime || false
+                        }
+                        onChange={(e) => {
+                          const showTime = e.target.checked;
+                          const updates = { showTime };
+
+                          if (showTime) {
+                            updates.dateTimeFormat = "DD-MM-YYYY HH:mm";
+                          } else {
+                            updates.dateTimeFormat = "DD-MM-YYYY";
+                          }
+
+                          handleUiOptionsUpdate(updates);
+                        }}
+                        color="primary"
+                      />
+                    }
+                    label="Include Time"
+                    sx={{ mt: 1 }}
+                  />
+                </>
+              )}
             </Box>
           </AccordionDetails>
         </Accordion>
