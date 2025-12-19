@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Box,
   IconButton,
@@ -8,7 +8,11 @@ import {
   ListItemIcon,
   ListItemText,
   Divider,
-} from '@mui/material';
+  Dialog,
+  DialogTitle,
+  DialogActions,
+  Button,
+} from "@mui/material";
 import {
   IconPlus,
   IconEdit,
@@ -17,8 +21,8 @@ import {
   IconChevronDown,
   IconArrowUp,
   IconArrowDown,
-} from '@tabler/icons-react';
-import { defaultFieldTypes } from '../types';
+} from "@tabler/icons-react";
+import { defaultFieldTypes } from "../types";
 
 const ActionButtons = ({
   field,
@@ -32,9 +36,12 @@ const ActionButtons = ({
 }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [addMenuAnchor, setAddMenuAnchor] = useState(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const isLayout = field.isLayout;
-  const layoutTypes = defaultFieldTypes.filter((ft) => ft.isLayout && ft.id !== "object");
+  const layoutTypes = defaultFieldTypes.filter(
+    (ft) => ft.isLayout && ft.id !== "object"
+  );
 
   const handleMoreClick = (event) => {
     event.stopPropagation();
@@ -60,19 +67,33 @@ const ActionButtons = ({
     onAddLayoutToContainer(field.id, layoutType);
     handleClose();
   };
+  const openDeleteConfirm = (e) => {
+    e.stopPropagation();
+    setConfirmOpen(true);
+  };
+
+  const closeDeleteConfirm = () => {
+    setConfirmOpen(false);
+  };
+
+  const confirmDelete = () => {
+    deleteField(field.id, parentId);
+    setConfirmOpen(false);
+    handleClose();
+  };
 
   // For deep nesting (level > 2), show minimal buttons
   if (level > 2) {
     return (
-      <Box sx={{ display: 'flex', gap: 0.25, flexShrink: 0 }}>
+      <Box sx={{ display: "flex", gap: 0.25, flexShrink: 0 }}>
         <Tooltip title="More options">
           <IconButton
             size="small"
             onClick={handleMoreClick}
             sx={{
               p: 0.25,
-              color: 'grey.500',
-              '&:hover': { color: 'primary.main', backgroundColor: 'grey.100' },
+              color: "grey.500",
+              "&:hover": { color: "primary.main", backgroundColor: "grey.100" },
             }}
           >
             <IconDotsVertical size={16} />
@@ -112,7 +133,7 @@ const ActionButtons = ({
           <MenuItem
             onClick={(e) => {
               e.stopPropagation();
-              moveField(field.id, 'up', parentId);
+              moveField(field.id, "up", parentId);
               handleClose();
             }}
           >
@@ -125,7 +146,7 @@ const ActionButtons = ({
           <MenuItem
             onClick={(e) => {
               e.stopPropagation();
-              moveField(field.id, 'down', parentId);
+              moveField(field.id, "down", parentId);
               handleClose();
             }}
           >
@@ -137,14 +158,7 @@ const ActionButtons = ({
 
           <Divider />
 
-          <MenuItem
-            onClick={(e) => {
-              e.stopPropagation();
-              deleteField(field.id, parentId);
-              handleClose();
-            }}
-            sx={{ color: 'error.main' }}
-          >
+          <MenuItem onClick={openDeleteConfirm} sx={{ color: "error.main" }}>
             <ListItemIcon>
               <IconTrash
                 size={18}
@@ -162,10 +176,10 @@ const ActionButtons = ({
   return (
     <Box
       sx={{
-        display: 'flex',
+        display: "flex",
         gap: level > 1 ? 0.25 : 0.5,
         flexShrink: 0,
-        alignItems: 'center',
+        alignItems: "center",
       }}
     >
       {isLayout && (
@@ -175,14 +189,14 @@ const ActionButtons = ({
             onClick={handleAddClick}
             sx={{
               p: level > 1 ? 0.25 : 0.5,
-              color: 'success.main',
-              '&:hover': {
-                color: 'success.dark',
-                backgroundColor: 'success.light',
+              color: "success.main",
+              "&:hover": {
+                color: "success.dark",
+                backgroundColor: "success.light",
               },
             }}
           >
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Box sx={{ display: "flex", alignItems: "center" }}>
               <IconPlus size={level > 1 ? 16 : 18} />
               <IconChevronDown size={level > 1 ? 12 : 14} />
             </Box>
@@ -199,10 +213,10 @@ const ActionButtons = ({
           }}
           sx={{
             p: level > 1 ? 0.25 : 0.5,
-            color: 'primary.main',
-            '&:hover': {
-              color: 'primary.dark',
-              backgroundColor: 'primary.light',
+            color: "primary.main",
+            "&:hover": {
+              color: "primary.dark",
+              backgroundColor: "primary.light",
             },
           }}
         >
@@ -216,10 +230,10 @@ const ActionButtons = ({
           onClick={handleMoreClick}
           sx={{
             p: level > 1 ? 0.25 : 0.5,
-            color: 'grey.500',
-            '&:hover': {
-              color: 'grey.600',
-              backgroundColor: 'grey.100',
+            color: "grey.500",
+            "&:hover": {
+              color: "grey.600",
+              backgroundColor: "grey.100",
             },
           }}
         >
@@ -230,16 +244,13 @@ const ActionButtons = ({
       <Tooltip title="Delete">
         <IconButton
           size="small"
-          onClick={(e) => {
-            e.stopPropagation();
-            deleteField(field.id, parentId);
-          }}
+          onClick={openDeleteConfirm}
           sx={{
             p: level > 1 ? 0.25 : 0.5,
-            color: 'error.main',
-            '&:hover': {
-              color: 'error.dark',
-              backgroundColor: 'error.light',
+            color: "error.main",
+            "&:hover": {
+              color: "error.dark",
+              backgroundColor: "error.light",
             },
           }}
         >
@@ -279,11 +290,11 @@ const ActionButtons = ({
             <ListItemText
               primary={layoutType.label}
               secondary={
-                layoutType.id === 'group'
-                  ? 'Container with border'
-                  : layoutType.id === 'vertical-layout'
-                  ? 'Stack vertically'
-                  : 'Arrange horizontally'
+                layoutType.id === "group"
+                  ? "Container with border"
+                  : layoutType.id === "vertical-layout"
+                  ? "Stack vertically"
+                  : "Arrange horizontally"
               }
             />
           </MenuItem>
@@ -302,7 +313,7 @@ const ActionButtons = ({
         <MenuItem
           onClick={(e) => {
             e.stopPropagation();
-            moveField(field.id, 'up', parentId);
+            moveField(field.id, "up", parentId);
             handleClose();
           }}
         >
@@ -315,7 +326,7 @@ const ActionButtons = ({
         <MenuItem
           onClick={(e) => {
             e.stopPropagation();
-            moveField(field.id, 'down', parentId);
+            moveField(field.id, "down", parentId);
             handleClose();
           }}
         >
@@ -325,6 +336,22 @@ const ActionButtons = ({
           <ListItemText primary="Move Down" />
         </MenuItem>
       </Menu>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={confirmOpen}
+        onClose={closeDeleteConfirm}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>Are you sure you want to delete this item?</DialogTitle>
+        <DialogActions>
+          <Button onClick={closeDeleteConfirm}>Cancel</Button>
+          <Button variant="contained" color="error" onClick={confirmDelete}>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
