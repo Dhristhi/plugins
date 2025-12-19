@@ -1,6 +1,9 @@
 import { rankWith, and, schemaMatches, uiTypeIs } from "@jsonforms/core";
 import CustomGroupRenderer from "./CustomGroupRenderer";
 import FileUploadControl from "./FileUploadControl";
+import CustomHorizontalLayout, {
+  customHorizontalLayoutTester,
+} from "./CustomHorizontalLayout";
 
 // Tester for file upload control
 export const fileUploadTester = rankWith(
@@ -19,7 +22,8 @@ export const customGroupTester = rankWith(10, uiTypeIs("Group"));
 export const customRenderers = [
   { tester: fileUploadTester, renderer: FileUploadControl },
   { tester: customGroupTester, renderer: CustomGroupRenderer },
+  { tester: customHorizontalLayoutTester, renderer: CustomHorizontalLayout },
 ];
 
 // Export individual components for direct use if needed
-export { CustomGroupRenderer, FileUploadControl };
+export { CustomGroupRenderer, FileUploadControl, CustomHorizontalLayout };
