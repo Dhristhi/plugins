@@ -139,7 +139,7 @@ export const defaultFieldTypes = [
   },
   {
     id: "select",
-    type: "string",
+    type: "array",
     label: "Select",
     icon: IconChevronDown,
     schema: {

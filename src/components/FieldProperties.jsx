@@ -312,6 +312,58 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                   </Select>
                 </FormControl>
 
+                {/* Toggle only for Select field type */}
+                {localField.type === "select" && (
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={localField.uischema?.options?.multi === true}
+                        onChange={(e) => {
+                          const isMulti = e.target.checked;
+
+                          const enumValues =
+                            localField.schema?.items?.enum ??
+                            localField.schema?.enum ??
+                            [];
+
+                          handleUpdate({
+                            data: isMulti ? [] : "",
+
+                            uischema: {
+                              ...localField.uischema,
+                              ...(isMulti
+                                ? {
+                                    options: {
+                                      format: "dynamicselect",
+                                      multi: true,
+                                    },
+                                  }
+                                : {
+                                    options: undefined,
+                                  }),
+                            },
+
+                            schema: isMulti
+                              ? {
+                                  type: "array",
+                                  enum: enumValues,
+                                  items: {
+                                    type: "string",
+                                    enum: enumValues,
+                                  },
+                                }
+                              : {
+                                  type: "string",
+                                  enum: enumValues,
+                                },
+                          });
+                        }}
+                      />
+                    }
+                    label="Multi-Select"
+                  />
+                )}
+
                 <FormControlLabel
                   control={
                     <Switch
