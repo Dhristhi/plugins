@@ -376,7 +376,7 @@ const DropZone = ({
         <Typography variant="caption" color="textSecondary">
           {isOver
             ? "Release to add item"
-            : "Drag fields from the palette or click to add"}
+            : "Drag fields from the palette "}
         </Typography>
       </Box>
     );
