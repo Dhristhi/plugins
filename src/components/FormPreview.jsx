@@ -9,7 +9,7 @@ import { IconEye } from "@tabler/icons-react";
 import CommonHeader from "./CommonHeader";
 import { customRenderers } from "../controls/renderers";
 
-// Combine material renderers with custom renderers
+// Combine material renderers with custom renderers (custom renderers have higher rank to override)
 const renderersWithCustom = [...materialRenderers, ...customRenderers];
 
 const FormPreview = ({
@@ -44,6 +44,7 @@ const FormPreview = ({
             renderers={renderersWithCustom}
             cells={materialCells}
             onChange={({ data }) => onDataChange(data)}
+            validationMode="ValidateAndHide"
           />
         ) : (
           <Typography variant="body2" color="textSecondary">
