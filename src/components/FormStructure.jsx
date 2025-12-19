@@ -80,14 +80,13 @@ const SortableFieldItem = ({
 
   const getFieldIcon = (theme) => {
     const iconProps = { size: 18, color: theme.palette.grey[600] };
-    if (isGroup) {
+    if (isGroup || field.type === "object") {
       if (field.icon && TablerIcons[`Icon${field.icon}`]) {
         const CustomIcon = TablerIcons[`Icon${field.icon}`];
         return <CustomIcon {...iconProps} />;
       }
-      return <IconBox {...iconProps} />;
+      return field.type === "object" ? <IconCube {...iconProps} /> : <IconBox {...iconProps} />;
     }
-    if (field.type === "object") return <IconCube {...iconProps} />;
     if (field.type === "vertical-layout")
       return <IconLayoutRows {...iconProps} />;
     if (field.type === "horizontal-layout")
@@ -178,20 +177,16 @@ const SortableFieldItem = ({
             {(isLayout || isArray) && (
               <Chip
                 label={
-                  isGroup
+                  isGroup || field.type === "object"
                     ? "Group"
-                    : field.type === "object"
-                    ? "Object"
                     : field.type === "array"
                     ? "Array"
                     : field.uischema?.type || "Layout"
                 }
                 size="small"
                 color={
-                  isGroup
+                  isGroup || field.type === "object"
                     ? "warning"
-                    : field.type === "object"
-                    ? "success"
                     : field.type === "array"
                     ? "info"
                     : "primary"

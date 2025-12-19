@@ -249,7 +249,14 @@ CustomDateRendererBase.propTypes = {
   enabled: PropTypes.bool,
   required: PropTypes.bool,
 };
-
+export const customDateTester = rankWith(
+  5,
+  and(
+    schemaMatches(
+      (schema) => schema?.type === "string" && schema?.format === "date"
+    )
+  )
+);
 const CustomDateRenderer = withJsonFormsControlProps(CustomDateRendererBase);
 
 export default CustomDateRenderer;

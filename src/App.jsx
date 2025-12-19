@@ -278,18 +278,21 @@ const App = () => {
         if (field.isLayout) {
           if (field.type === "object") {
             // Object field creates a Group to visually group related fields
-            return {
-              type: "Group",
-              label: field.label,
-              elements: field.children
-                ? buildUISchemaFromFields(
-                    field.children,
-                    parentKey
-                      ? `${parentKey}/properties/${field.key}`
-                      : field.key
-                  )
-                : [],
-            };
+            const uischema = {};
+            if (field.icon) {
+              uischema.icon = `Icon${field.icon}`;
+            }
+            uischema.type = "Group";
+            uischema.label = field.label;
+            uischema.elements = field.children
+              ? buildUISchemaFromFields(
+                  field.children,
+                  parentKey
+                    ? `${parentKey}/properties/${field.key}`
+                    : field.key
+                )
+              : [];
+            return uischema;
           } else {
             // Regular layout (group, vertical, horizontal)
             const uischema = {};
