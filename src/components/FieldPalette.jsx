@@ -18,7 +18,7 @@ import {
   IconClipboard,
 } from "@tabler/icons-react";
 
-const DraggableFieldItem = ({ fieldType, onFieldSelect }) => {
+const DraggableFieldItem = ({ fieldType }) => {
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useDraggable({
       id: fieldType.id,
@@ -64,7 +64,6 @@ const DraggableFieldItem = ({ fieldType, onFieldSelect }) => {
           boxShadow: (theme) => `0 4px 12px ${theme.palette.primary.main}30`,
         }),
       }}
-      onClick={() => onFieldSelect(fieldType)}
     >
       <Box
         sx={{
@@ -95,7 +94,7 @@ const DraggableFieldItem = ({ fieldType, onFieldSelect }) => {
   );
 };
 
-const FieldPalette = ({ onFieldSelect, onLoadSchema }) => {
+const FieldPalette = ({ onLoadSchema }) => {
   const [selectedSchema, setSelectedSchema] = useState("");
 
   const sampleSchemas = [
@@ -144,7 +143,9 @@ const FieldPalette = ({ onFieldSelect, onLoadSchema }) => {
     }
   };
 
-  const layoutTypes = defaultFieldTypes.filter((ft) => ft.isLayout && ft.id !== "object");
+  const layoutTypes = defaultFieldTypes.filter(
+    (ft) => ft.isLayout && ft.id !== "object"
+  );
   const fieldTypes = defaultFieldTypes.filter((ft) => !ft.isLayout);
 
   return (
@@ -244,11 +245,7 @@ const FieldPalette = ({ onFieldSelect, onLoadSchema }) => {
       </Typography>
       <Box sx={{ mb: 3 }}>
         {layoutTypes.map((fieldType) => (
-          <DraggableFieldItem
-            key={fieldType.id}
-            fieldType={fieldType}
-            onFieldSelect={onFieldSelect}
-          />
+          <DraggableFieldItem key={fieldType.id} fieldType={fieldType} />
         ))}
       </Box>
 
@@ -284,11 +281,7 @@ const FieldPalette = ({ onFieldSelect, onLoadSchema }) => {
       </Typography>
       <Box>
         {fieldTypes.map((fieldType) => (
-          <DraggableFieldItem
-            key={fieldType.id}
-            fieldType={fieldType}
-            onFieldSelect={onFieldSelect}
-          />
+          <DraggableFieldItem key={fieldType.id} fieldType={fieldType} />
         ))}
       </Box>
     </Box>
