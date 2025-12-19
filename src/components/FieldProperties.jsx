@@ -15,7 +15,6 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
-  Button,
   Switch,
   Grid,
   Slider,
@@ -26,15 +25,9 @@ import {
   IconSettings,
   IconChevronDown,
   IconEdit,
-  IconFileText,
-  IconHash,
-  IconMail,
-  IconCalendar,
-  IconSquareCheck,
-  IconChevronDown as IconSelect,
-  IconCircleDot,
 } from "@tabler/icons-react";
 import { defaultFieldTypes } from "../types";
+import IconSelector from "../utils/IconSelector";
 
 const FieldProperties = ({ field, onFieldUpdate }) => {
   const [localField, setLocalField] = useState(null);
@@ -42,6 +35,7 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
   const [newOption, setNewOption] = useState("");
   const [selectedAccess, setSelectedAccess] = useState([]);
   const [layout, setLayout] = useState("");
+  const [selectedIcon, setSelectedIcon] = useState("");
 
   const ALL_ROLE_CODES = [
     "OWNER",
@@ -105,6 +99,7 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
         setEnumOptions([]);
       }
       setSelectedAccess(field.schema?.allowedAccess || []);
+      setSelectedIcon(field.icon || "");
     }
   }, [field]);
 
@@ -335,6 +330,16 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
 
             {isGroup && (
               <>
+                <Box sx={{ mt: 2 }}>
+                  <IconSelector
+                    value={selectedIcon}
+                    onChange={(iconName) => {
+                      setSelectedIcon(iconName);
+                      handleUpdate({ icon: iconName });
+                    }}
+                  />
+                </Box>
+
                 <FormControlLabel
                   control={
                     <Switch
@@ -353,6 +358,7 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                     />
                   }
                   label="Collapsible Group"
+                  sx={{ mt: 1 }}
                 />
 
                 {localField.uischema?.options?.collapsed && (

@@ -129,6 +129,11 @@ const FieldPalette = ({ onFieldSelect, onLoadSchema }) => {
       name: "Organization Onboarding",
       description: "Comprehensive onboarding form",
     },
+    {
+      id: "test-with-icons",
+      name: "Test Form with Icons",
+      description: "Test schema with group icons",
+    },
   ];
 
   const handleSchemaChange = (event) => {
