@@ -1146,6 +1146,195 @@ const App = () => {
         },
       },
       {
+        id: "all-field-types",
+        name: "All Field Types Demo",
+        description: "Demonstration form with all available field types",
+        tags: ["Demo", "All Fields", "Reference"],
+        schema: {
+          type: "object",
+          properties: {
+            text_field: {
+              type: "string",
+              title: "Text Field",
+            },
+            textarea_field: {
+              type: "string",
+              title: "Text Area Field",
+              maxLength: 500,
+            },
+            email_field: {
+              type: "string",
+              format: "email",
+              title: "Email Field",
+            },
+            checkbox_field: {
+              type: "boolean",
+              title: "Checkbox Field",
+            },
+            radio_field: {
+              type: "string",
+              title: "Radio Button Field",
+              enum: ["Option 1", "Option 2", "Option 3"],
+            },
+            number_field: {
+              type: "number",
+              title: "Number Field",
+            },
+            date_field: {
+              type: "string",
+              format: "date",
+              title: "Date Field",
+            },
+            select_single: {
+              type: "string",
+              title: "Select (Single Selection)",
+              enum: [
+                "Choice A",
+                "Choice B",
+                "Choice C",
+                "Choice D",
+                "Choice E",
+              ],
+            },
+            select_multiple: {
+              type: "array",
+              title: "Select (Multiple Selection)",
+              items: {
+                type: "string",
+                enum: ["Item 1", "Item 2", "Item 3", "Item 4", "Item 5"],
+              },
+              uniqueItems: true,
+            },
+          },
+          required: ["text_field", "email_field"],
+        },
+      },
+      {
+        id: "company-profile",
+        name: "Company Profile Form",
+        description:
+          "Company profile with grouped sections for basic info, contact details, and business information",
+        tags: ["Company", "Profile", "Business"],
+        schema: {
+          type: "object",
+          properties: {
+            company_details: {
+              type: "object",
+              title: "Company Details",
+              properties: {
+                company_name: {
+                  type: "string",
+                  title: "Company Name",
+                },
+                registration_number: {
+                  type: "string",
+                  title: "Registration Number",
+                },
+                industry: {
+                  type: "string",
+                  title: "Industry",
+                  enum: [
+                    "Technology",
+                    "Finance",
+                    "Healthcare",
+                    "Manufacturing",
+                    "Retail",
+                    "Other",
+                  ],
+                },
+                founded_year: {
+                  type: "number",
+                  title: "Founded Year",
+                  minimum: 1800,
+                  maximum: 2024,
+                },
+              },
+              required: ["company_name", "registration_number", "industry"],
+            },
+            contact_information: {
+              type: "object",
+              title: "Contact Information",
+              properties: {
+                email: {
+                  type: "string",
+                  format: "email",
+                  title: "Business Email",
+                },
+                phone: {
+                  type: "string",
+                  title: "Phone Number",
+                },
+                website: {
+                  type: "string",
+                  title: "Website URL",
+                },
+                address: {
+                  type: "object",
+                  title: "Business Address",
+                  properties: {
+                    street: {
+                      type: "string",
+                      title: "Street Address",
+                    },
+                    city: {
+                      type: "string",
+                      title: "City",
+                    },
+                    state: {
+                      type: "string",
+                      title: "State/Province",
+                    },
+                    postal_code: {
+                      type: "string",
+                      title: "Postal Code",
+                    },
+                    country: {
+                      type: "string",
+                      title: "Country",
+                    },
+                  },
+                  required: ["street", "city", "country"],
+                },
+              },
+              required: ["email", "phone"],
+            },
+            business_info: {
+              type: "object",
+              title: "Business Information",
+              properties: {
+                employee_count: {
+                  type: "string",
+                  title: "Number of Employees",
+                  enum: ["1-10", "11-50", "51-200", "201-500", "500+"],
+                },
+                annual_revenue: {
+                  type: "string",
+                  title: "Annual Revenue Range",
+                  enum: [
+                    "< $1M",
+                    "$1M - $10M",
+                    "$10M - $50M",
+                    "$50M - $100M",
+                    "> $100M",
+                  ],
+                },
+                description: {
+                  type: "string",
+                  title: "Company Description",
+                  maxLength: 1000,
+                },
+                public_company: {
+                  type: "boolean",
+                  title: "Publicly Traded Company",
+                },
+              },
+              required: ["employee_count"],
+            },
+          },
+          required: ["company_details", "contact_information", "business_info"],
+        },
+      },
+      {
         id: "organization-onboarding",
         name: "Organization Onboarding Form",
         description:

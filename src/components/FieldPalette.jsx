@@ -124,6 +124,16 @@ const FieldPalette = ({ onLoadSchema }) => {
       description: "E-commerce order form",
     },
     {
+      id: "all-field-types",
+      name: "All Field Types Demo",
+      description: "Demo with all available field types",
+    },
+    {
+      id: "company-profile",
+      name: "Company Profile Form",
+      description: "Company profile with grouped sections",
+    },
+    {
       id: "organization-onboarding",
       name: "Organization Onboarding",
       description: "Comprehensive onboarding form",
