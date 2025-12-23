@@ -91,7 +91,9 @@ const CustomSelectControl = (props) => {
         }
       } else {
         const newOptions =
-          schema.enum?.map((r) => ({ label: r, value: r, raw: r })) || [];
+          schema.enum?.map((r) => ({ label: r, value: r, raw: r })) ||
+          schema.items?.enum?.map((r) => ({ label: r, value: r, raw: r })) ||
+          [];
         setOptions(newOptions);
       }
     };

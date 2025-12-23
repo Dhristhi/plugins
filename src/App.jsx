@@ -145,15 +145,17 @@ const App = () => {
         const childSchema = field.children
           ? buildSchemaFromFields(field.children, field.key)
           : { properties: {}, required: [] };
-        properties[field.key] = {
+        const objectSchema = {
           type: "object",
           title: field.label,
           properties: childSchema.properties,
-          ...(childSchema.required &&
-            childSchema.required.length > 0 && {
-              required: childSchema.required,
-            }),
         };
+
+        if (childSchema.required && childSchema.required.length > 0) {
+          objectSchema.required = childSchema.required;
+        }
+
+        properties[field.key] = objectSchema;
         // Add to required array if marked as required
         if (field.required) {
           required.push(field.key);
@@ -161,34 +163,44 @@ const App = () => {
         // Merge any nested objects from children
         Object.assign(nestedObjects, childSchema.nestedObjects || {});
       } else if (field.type === "array") {
-        // Array field - FIXED:  Process children into items structure
+        // Array field - Process children into items structure
         if (field.children && field.children.length > 0) {
           // Build schema for array items from children
           const childSchema = buildSchemaFromFields(field.children, null);
 
-          properties[field.key] = {
-            type: "array",
-            title: field.label,
-            items: {
-              type: "object",
-              properties: childSchema.properties,
-              ...(childSchema.required &&
-                childSchema.required.length > 0 && {
-                  required: childSchema.required,
-                }),
-            },
-            ...(field.schema.minItems && { minItems: field.schema.minItems }),
-            ...(field.schema.maxItems && { maxItems: field.schema.maxItems }),
-            ...(field.schema.uniqueItems && {
-              uniqueItems: field.schema.uniqueItems,
-            }),
+          // Build array schema with explicit property order
+          properties[field.key] = {};
+          properties[field.key].type = "array";
+          properties[field.key].title = field.label;
+          properties[field.key].items = {
+            type: "object",
+            properties: childSchema.properties,
           };
+
+          if (childSchema.required && childSchema.required.length > 0) {
+            properties[field.key].items.required = childSchema.required;
+          }
+
+          // Add optional properties after items
+          if (field.schema.minItems)
+            properties[field.key].minItems = field.schema.minItems;
+          if (field.schema.maxItems)
+            properties[field.key].maxItems = field.schema.maxItems;
+          if (field.schema.uniqueItems)
+            properties[field.key].uniqueItems = field.schema.uniqueItems;
+          if (field.schema.tableView)
+            properties[field.key].tableView = field.schema.tableView;
         } else {
-          // Simple array without children (fallback to original schema)
-          properties[field.key] = {
-            ...field.schema,
-            title: field.label,
-          };
+          // Simple array without children
+          properties[field.key] = {};
+          properties[field.key].type = "array";
+          properties[field.key].title = field.label;
+          // Copy other properties from field.schema except type
+          Object.keys(field.schema).forEach((key) => {
+            if (key !== "type") {
+              properties[field.key][key] = field.schema[key];
+            }
+          });
         }
 
         if (field.required) {
@@ -307,20 +319,26 @@ const App = () => {
               detailElements = buildUISchemaForArrayItems(field.children);
             }
 
+            // Wrap array control in a Group to show title like objects
             return {
-              type: "Control",
-              scope: scope,
+              type: "Group",
               label: field.label,
-              options: {
-                ...field.uischema?.options,
-                showSortButtons: true,
-                ...(detailElements.length > 0 && {
-                  detail: {
-                    type: "VerticalLayout",
-                    elements: detailElements,
+              elements: [
+                {
+                  type: "Control",
+                  scope: scope,
+                  options: {
+                    ...field.uischema?.options,
+                    showSortButtons: true,
+                    ...(detailElements.length > 0 && {
+                      detail: {
+                        type: "VerticalLayout",
+                        elements: detailElements,
+                      },
+                    }),
                   },
-                }),
-              },
+                },
+              ],
             };
           } else {
             // Regular field
@@ -1491,6 +1509,7 @@ const App = () => {
             },
             education: {
               type: "array",
+              title: "Education",
               items: {
                 type: "object",
                 properties: {
@@ -2070,10 +2089,51 @@ const App = () => {
           label,
           key,
           required: schema.required?.includes(key) || false,
-          isLayout: false, // array itself is a control but will have nested detail
-          schema: { ...arrayType.schema, ...property },
+          isLayout: false,
+          schema: {},
           uischema: { ...arrayType.uischema, scope: `#/properties/${key}` },
           children,
+          parentId: null,
+        };
+
+        // Build schema with correct property order
+        newField.schema.type = "array";
+        if (property.title) newField.schema.title = property.title;
+        if (property.items) newField.schema.items = property.items;
+        if (property.minItems) newField.schema.minItems = property.minItems;
+        if (property.maxItems) newField.schema.maxItems = property.maxItems;
+        if (property.uniqueItems)
+          newField.schema.uniqueItems = property.uniqueItems;
+        if (property.tableView) newField.schema.tableView = property.tableView;
+
+        fields.push(newField);
+        return;
+      }
+
+      // Array with enum items (multi-select) -> set multi in uischema options
+      if (
+        property.type === "array" &&
+        property.items &&
+        property.items.enum
+      ) {
+        const fieldType = mapSchemaPropertyToFieldType(property);
+        const newField = {
+          id: `field_${uniqueId}`,
+          type: fieldType.id,
+          label,
+          key,
+          required: schema.required?.includes(key) || false,
+          isLayout: false,
+          schema: { ...property },
+          uischema: {
+            ...fieldType.uischema,
+            scope: `#/properties/${key}`,
+            options: {
+              ...fieldType.uischema.options,
+              multi: true,
+              format: "dynamicselect",
+            },
+          },
           parentId: null,
         };
 
