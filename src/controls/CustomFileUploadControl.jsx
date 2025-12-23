@@ -1,24 +1,34 @@
 import { useState, useCallback, useRef } from 'react';
 import { Box, Typography, Alert } from '@mui/material';
 import { IconUpload, IconFile } from '@tabler/icons-react';
-import { rankWith, and, schemaMatches } from '@jsonforms/core';
+import { and, isControl, optionIs, rankWith } from '@jsonforms/core';
 import { withJsonFormsControlProps } from '@jsonforms/react';
+import { useTranslation } from 'react-i18next';
 
 const CustomFileUploadControl = (props) => {
-  const { data, handleChange, path, errors, uischema, label, visible, enabled } = props;
+  const { t } = useTranslation();
+
+  const { data, handleChange, path, errors, uischema } = props;
 
   const [isDragOver, setIsDragOver] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [localError, setLocalError] = useState(null);
 
-  const acceptedFileTypes = uischema?.options?.accept || 'image/*';
-  const inputRef = useRef(null);
+  // Accept images by default; allow override via uischema.options.accept
+  const acceptedFileTypes = (uischema?.options && uischema.options.accept) || t('common.image');
+  const placeholder = (uischema?.options && uischema.options.placeholder) || 'Choose an image';
 
-  if (visible === false) return null;
+  const inputRef = useRef(null);
 
   const handleFileSelect = useCallback(
     async (file) => {
       if (!file) return;
+
+      // Validate MIME type; accept is only a hint in browsers
+      if (!file.type || !file.type.startsWith('image/')) {
+        setLocalError(`Selected file "${file.name}" is not an image.`);
+        return;
+      }
 
       setLocalError(null);
       setIsUploading(true);
@@ -31,12 +41,12 @@ const CustomFileUploadControl = (props) => {
         };
         reader.onerror = () => {
           setIsUploading(false);
-          setLocalError('Failed to read the file.');
+          setLocalError('Failed to read the image file.');
         };
         reader.readAsDataURL(file);
       } catch (e) {
         setIsUploading(false);
-        setLocalError('Unexpected error while processing the file.');
+        setLocalError('Unexpected error while processing the image.');
       }
     },
     [handleChange, path]
@@ -68,18 +78,15 @@ const CustomFileUploadControl = (props) => {
     }
   };
 
+  // JSON Forms provides `errors` as a string; use it directly
   const jsonFormsError = typeof errors === 'string' ? errors : '';
   const hasError = Boolean(jsonFormsError) || Boolean(localError);
-  const hasFile = typeof data === 'string' && data.startsWith('data:');
+
+  // Consider a data URL present if it starts with an image data prefix
+  const hasFile = typeof data === 'string' && data.startsWith('data:image');
 
   return (
     <Box sx={{ mb: 2 }}>
-      {label && (
-        <Typography variant="subtitle2" sx={{ mb: 1 }}>
-          {label}
-        </Typography>
-      )}
-      
       <Box
         sx={{
           'border': 2,
@@ -99,17 +106,17 @@ const CustomFileUploadControl = (props) => {
               : 'background.paper',
           'p': 3,
           'textAlign': 'center',
-          'cursor': enabled ? 'pointer' : 'not-allowed',
+          'cursor': 'pointer',
           'transition': 'all 0.2s ease-in-out',
-          '&:hover': enabled ? {
+          '&:hover': {
             borderColor: 'primary.main',
             backgroundColor: 'action.hover',
-          } : {},
+          },
         }}
-        onDragOver={enabled ? handleDragOver : undefined}
-        onDragLeave={enabled ? handleDragLeave : undefined}
-        onDrop={enabled ? handleDrop : undefined}
-        onClick={enabled ? () => inputRef.current?.click() : undefined}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        onClick={() => inputRef.current?.click()}
       >
         <input
           ref={inputRef}
@@ -117,31 +124,32 @@ const CustomFileUploadControl = (props) => {
           accept={acceptedFileTypes}
           onChange={handleFileInputChange}
           style={{ display: 'none' }}
-          disabled={!enabled || isUploading}
+          disabled={isUploading}
         />
 
         {hasFile ? (
           <Box>
             <IconFile size={32} color='currentColor' />
             <Typography variant='body2' sx={{ mt: 1, color: 'success.main' }}>
-              File uploaded successfully
+              {t('common.file_uploaded_successfully')}
             </Typography>
             <Typography variant='caption' sx={{ color: 'text.secondary' }}>
-              Click to change file
+              {t('common.click_to_change_file')}
             </Typography>
           </Box>
         ) : (
           <Box>
             <IconUpload size={32} color='currentColor' />
             <Typography variant='body2' sx={{ mt: 1, color: 'text.primary' }}>
-              {isUploading ? 'Uploading...' : 'Upload file'}
+              {isUploading ? t('common.uploading_logo') : t('common.upload_logo')}
             </Typography>
             <Typography variant='caption' sx={{ color: 'text.secondary' }}>
-              Drag and drop or click to select
+              {/* Drag and drop or click to select */}
+              {t('common.drag_and_drop')}
             </Typography>
             {acceptedFileTypes && (
               <Typography variant='caption' sx={{ display: 'block', color: 'text.secondary' }}>
-                Accepted formats: {acceptedFileTypes}
+                {t('common.accepted_formats')} {acceptedFileTypes}
               </Typography>
             )}
           </Box>
@@ -157,13 +165,7 @@ const CustomFileUploadControl = (props) => {
   );
 };
 
-export const customFileUploadTester = rankWith(
-  5,
-  and(
-    schemaMatches(
-      (schema) => schema?.type === "string" && schema?.format === "data-url"
-    )
-  )
-);
+// Use when ui:widget is 'file'
+export const customFileUploadTester = rankWith(10, and(isControl, optionIs('ui:widget', 'file')));
 
 export default withJsonFormsControlProps(CustomFileUploadControl);

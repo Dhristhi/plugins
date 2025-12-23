@@ -1,64 +1,52 @@
-import { Box, Grid, Stack, Typography } from "@mui/material";
-import { JsonFormsDispatch, withJsonFormsLayoutProps } from "@jsonforms/react";
+import * as icons from "@tabler/icons-react";
+import { JsonFormsDispatch } from "@jsonforms/react";
 import { rankWith, uiTypeIs } from "@jsonforms/core";
-import * as TablerIcons from "@tabler/icons-react";
+import { withJsonFormsLayoutProps } from "@jsonforms/react";
+import { Box, Grid, Stack, Typography } from "@mui/material";
+
+import { Icon } from "../components/extended/Icon";
 
 const CustomGroupLayoutRenderer = (props) => {
-  const { uischema, schema, path, renderers, cells, label } = props;
-  const elements = uischema.elements;
-  const iconName = uischema.icon;
+  const { label, uischema } = props;
 
-  const IconComponent =
-    iconName && TablerIcons[iconName] ? TablerIcons[iconName] : null;
+  const margin = uischema?.elements[0]?.elements?.[0]?.options?.detail ? 0 : 2;
+  const removeExtraMargin =
+    uischema?.elements[0]?.elements?.[0]?.options?.removeExtraMargin;
 
   return (
-    <Box
-      sx={{
-        mb: 3,
-        p: 2,
-        border: '1px solid',
-        borderColor: 'divider',
-        borderRadius: 1,
-        backgroundColor: 'background.paper',
-      }}
-    >
-      {(label || IconComponent) && (
-        <Stack
-          direction="row"
-          spacing={1}
-          alignItems="center"
-          sx={{
-            mb: 2,
-            pb: 1,
-            borderBottom: '1px solid',
-            borderColor: 'divider',
-          }}
-        >
-          {IconComponent && <IconComponent size={20} />}
-          {label && (
-            <Typography variant="subtitle1" fontWeight="medium">
+    <Grid container>
+      <Grid item xs={12}>
+        <Box bgcolor="background.paper" borderRadius={1}>
+          <Stack
+            alignItems="flex-end"
+            direction="row"
+            mb={removeExtraMargin ? 0 : margin}
+            padding={2}
+          >
+            {uischema.icon && <Icon icon={icons[uischema.icon]} />}
+            <Typography variant="h4" sx={{ marginLeft: 1, fontWeight: 500 }}>
               {label}
             </Typography>
-          )}
-        </Stack>
-      )}
-      <Grid container spacing={2}>
-        {elements?.map((element, index) => (
-          <Grid item xs={12} key={`${path}-${index}`}>
-            <JsonFormsDispatch
-              path={path}
-              cells={cells}
-              schema={schema}
-              uischema={element}
-              renderers={renderers}
-            />
-          </Grid>
-        ))}
+          </Stack>
+          {uischema?.elements?.map((element, index) => (
+            <Grid item xs={12} key={index} sx={{ mx: 6, mb: 0 }}>
+              <JsonFormsDispatch
+                {...props}
+                uischema={element}
+                type={"Group"}
+                key={index}
+              />
+            </Grid>
+          ))}
+        </Box>
       </Grid>
-    </Box>
+    </Grid>
   );
 };
 
-export const customGroupTester = rankWith(4, uiTypeIs("Group"));
+// eslint-disable-next-line react-refresh/only-export-components
+export const customGroupLayoutTester = rankWith(4, uiTypeIs("GroupWithIcon"));
 
-export default withJsonFormsLayoutProps(CustomGroupLayoutRenderer);
+const CustomGroupLayout = withJsonFormsLayoutProps(CustomGroupLayoutRenderer);
+
+export default CustomGroupLayout;

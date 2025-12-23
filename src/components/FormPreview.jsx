@@ -1,16 +1,11 @@
-import React from "react";
+import { createAjv } from "@jsonforms/core";
 import { JsonForms } from "@jsonforms/react";
-import {
-  materialRenderers,
-  materialCells,
-} from "@jsonforms/material-renderers";
-import { Typography, Box } from "@mui/material";
 import { IconEye } from "@tabler/icons-react";
-import CommonHeader from "./CommonHeader";
-import { customRenderers } from "../controls/renderers";
+import { Typography, Box } from "@mui/material";
 
-// Combine material renderers with custom renderers (custom renderers have higher rank to override)
-const renderersWithCustom = [...materialRenderers, ...customRenderers];
+import { useState } from "react";
+import CommonHeader from "./CommonHeader";
+import { renderers, cells, config } from "../controls/renders";
 
 const FormPreview = ({
   formState,
@@ -21,6 +16,11 @@ const FormPreview = ({
   setShowSchemaEditor,
   exportForm,
 }) => {
+  const ajv = createAjv({ useDefaults: true });
+
+  const [hasValidated, setHasValidated] = useState(false);
+  const [validationErrors, setValidationErrors] = useState([]);
+
   return (
     <Box>
       <CommonHeader
@@ -38,13 +38,21 @@ const FormPreview = ({
         {formState.schema.properties &&
         Object.keys(formState.schema.properties).length > 0 ? (
           <JsonForms
+            ajv={ajv}
+            data={formState.data}
+            cells={cells}
+            config={config}
+            renderers={renderers}
             schema={formState.schema}
             uischema={formState.uischema}
-            data={formState.data}
-            renderers={renderersWithCustom}
-            cells={materialCells}
+            validationMode={hasValidated ? "ValidateAndShow" : "NoValidation"}
+            additionalErrors={validationErrors}
             onChange={({ data }) => onDataChange(data)}
-            validationMode="ValidateAndHide"
+            // readonly={isLoading}
+            // i18n={{
+            //   locale: i18n.language,
+            //   translate: (key, defaultMessage) => getTranslation(key, 'label', defaultMessage),
+            // }}
           />
         ) : (
           <Typography variant="body2" color="textSecondary">

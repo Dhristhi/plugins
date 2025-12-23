@@ -11,7 +11,6 @@ import {
   DndContext,
   DragOverlay,
   closestCenter,
-  closestCorners,
   rectIntersection,
   KeyboardSensor,
   PointerSensor,
@@ -22,19 +21,8 @@ import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import {
-  restrictToVerticalAxis,
-  restrictToWindowEdges,
-} from "@dnd-kit/modifiers";
-import {
-  IconHammer,
-  IconEye,
-  IconEyeOff,
-  IconCode,
-  IconClipboard,
-  IconDownload,
-  IconX,
-} from "@tabler/icons-react";
+import { IconHammer, IconX } from "@tabler/icons-react";
+import { restrictToWindowEdges } from "@dnd-kit/modifiers";
 
 import FormPreview from "./components/FormPreview";
 import FieldPalette from "./components/FieldPalette";
@@ -276,44 +264,37 @@ const App = () => {
       })
       .map((field) => {
         if (field.isLayout) {
-          if (field.type === "object") {
-            // Object field creates a Group to visually group related fields
-            const uischema = {};
-            if (field.icon) {
-              uischema.icon = `Icon${field.icon}`;
-            }
-            uischema.type = "Group";
-            uischema.label = field.label;
-            uischema.elements = field.children
-              ? buildUISchemaFromFields(
-                  field.children,
-                  parentKey ? `${parentKey}/properties/${field.key}` : field.key
-                )
-              : [];
-            return uischema;
-          } else {
-            // Regular layout (group, vertical, horizontal)
-            const uischema = {};
+          // All layout types (object, group, vertical, horizontal) - preserve structure
+          const uischema = {};
 
-            // Add icon first if it exists (for groups)
-            if (field.icon) {
-              uischema.icon = `Icon${field.icon}`; // Store as full icon name like IconStars
-            }
-
-            // Then add type, label, and elements
-            uischema.type = field.uischema.type;
-            uischema.label = field.label;
-            uischema.elements = field.children
-              ? buildUISchemaFromFields(field.children, parentKey)
-              : [];
-
-            // Add any other uischema properties
-            if (field.uischema.options) {
-              uischema.options = field.uischema.options;
-            }
-
-            return uischema;
+          // Add icon first if it exists (for groups)
+          if (field.icon) {
+            uischema.icon = `Icon${field.icon}`; // Store as full icon name like IconStars
           }
+
+          // Determine type - object fields become Groups
+          uischema.type =
+            field.type === "object" ? "Group" : field.uischema.type;
+          uischema.label = field.label;
+
+          // Process children with appropriate parentKey
+          const newParentKey =
+            field.type === "object"
+              ? parentKey
+                ? `${parentKey}/properties/${field.key}`
+                : field.key
+              : parentKey;
+
+          uischema.elements = field.children
+            ? buildUISchemaFromFields(field.children, newParentKey)
+            : [];
+
+          // Add any other uischema properties
+          if (field.uischema.options) {
+            uischema.options = field.uischema.options;
+          }
+
+          return uischema;
         } else {
           // Check if it's an array field
           if (field.type === "array") {
@@ -1804,50 +1785,12 @@ const App = () => {
           ],
         },
       },
-      {
-        id: "test-with-icons",
-        name: "Test Form with Icons",
-        description: "Test schema with group icons",
-        tags: ["Test"],
-        schema: {
-          type: "object",
-          properties: {
-            name: { type: "string", title: "Name" },
-            email: { type: "string", title: "Email" },
-            age: { type: "number", title: "Age" },
-          },
-          required: ["name", "email"],
-        },
-        uischema: {
-          type: "VerticalLayout",
-          elements: [
-            {
-              icon: "IconUser",
-              type: "Group",
-              label: "Personal Info",
-              elements: [
-                { type: "Control", scope: "#/properties/name" },
-                { type: "Control", scope: "#/properties/email" },
-              ],
-            },
-            {
-              icon: "IconCalendar",
-              type: "Group",
-              label: "Additional Info",
-              elements: [{ type: "Control", scope: "#/properties/age" }],
-            },
-          ],
-        },
-      },
     ];
 
     const selectedSchema = sampleSchemas.find((s) => s.id === schemaId);
     if (selectedSchema && selectedSchema.schema) {
       // Convert schema to fields format
-      const convertedFields = convertSchemaToFields(
-        selectedSchema.schema,
-        selectedSchema.uischema
-      );
+      const convertedFields = convertSchemaToFields(selectedSchema.schema);
       setFields(convertedFields);
       setFormData({});
       setSelectedField(null);
@@ -1857,89 +1800,8 @@ const App = () => {
 
   // Convert schema to fields format (recursive) so nested object/array-of-object
   // properties become layout fields with children and show up in the designer.
-  const convertSchemaToFields = (schema, uischema = null) => {
+  const convertSchemaToFields = (schema) => {
     if (!schema || !schema.properties) return [];
-
-    // If uischema has groups, create fields based on uischema structure
-    if (uischema && uischema.elements) {
-      const fields = [];
-      const processedKeys = new Set();
-
-      uischema.elements.forEach((element) => {
-        if (element.type === "Group" && element.elements) {
-          fieldCounter.current += 1;
-          const groupId = fieldCounter.current;
-
-          // Create group field
-          const groupField = {
-            id: `field_${groupId}`,
-            type: "group",
-            label: element.label || "Group",
-            key: `group_${groupId}`,
-            isLayout: true,
-            icon: element.icon ? element.icon.replace("Icon", "") : "",
-            schema: {},
-            uischema: { type: "Group", label: element.label },
-            children: [],
-            parentId: null,
-          };
-
-          // Process children controls
-          element.elements.forEach((control) => {
-            if (control.type === "Control" && control.scope) {
-              const propKey = control.scope.replace("#/properties/", "");
-              const property = schema.properties[propKey];
-              if (property) {
-                processedKeys.add(propKey);
-                fieldCounter.current += 1;
-                const fieldId = fieldCounter.current;
-
-                const fieldType = mapSchemaPropertyToFieldType(property);
-                const childField = {
-                  id: `field_${fieldId}`,
-                  type: fieldType.id,
-                  label: property.title || propKey,
-                  key: propKey,
-                  required: schema.required?.includes(propKey) || false,
-                  isLayout: false,
-                  schema: { ...fieldType.schema, ...property },
-                  uischema: {
-                    ...fieldType.uischema,
-                    scope: `#/properties/${propKey}`,
-                  },
-                  parentId: `field_${groupId}`,
-                };
-                groupField.children.push(childField);
-              }
-            }
-          });
-
-          fields.push(groupField);
-        }
-      });
-
-      // Add any remaining fields not in groups
-      Object.entries(schema.properties).forEach(([key, property]) => {
-        if (!processedKeys.has(key)) {
-          fieldCounter.current += 1;
-          const fieldId = fieldCounter.current;
-          const fieldType = mapSchemaPropertyToFieldType(property);
-          fields.push({
-            id: `field_${fieldId}`,
-            type: fieldType.id,
-            label: property.title || key,
-            key,
-            required: schema.required?.includes(key) || false,
-            isLayout: false,
-            schema: { ...fieldType.schema, ...property },
-            uischema: { ...fieldType.uischema, scope: `#/properties/${key}` },
-            parentId: null,
-          });
-        }
-      });
-
-      return fields;
-    }
 
     const fields = [];
 
@@ -1958,12 +1820,25 @@ const App = () => {
         const objectType =
           defaultFieldTypes.find((ft) => ft.id === "object") ||
           defaultFieldTypes[0];
-        let children = convertSchemaToFields(property, uischema);
-        // assign parentId for each child so the designer knows their parent
-        children = children.map((c) => ({
-          ...c,
+        let children = convertSchemaToFields(property);
+
+        // Wrap children in a VerticalLayout for proper export structure
+        fieldCounter.current += 1;
+        const layoutId = fieldCounter.current;
+        const verticalLayout = {
+          id: `field_${layoutId}`,
+          type: "vertical-layout",
+          label: "Vertical Layout",
+          key: `layout_${layoutId}`,
+          isLayout: true,
+          schema: {},
+          uischema: { type: "VerticalLayout" },
+          children: children.map((c) => ({
+            ...c,
+            parentId: `field_${layoutId}`,
+          })),
           parentId: `field_${uniqueId}`,
-        }));
+        };
 
         const newField = {
           id: `field_${uniqueId}`,
@@ -1974,7 +1849,7 @@ const App = () => {
           isLayout: true,
           schema: { ...objectType.schema, ...property },
           uischema: { ...objectType.uischema, label },
-          children,
+          children: [verticalLayout],
           parentId: null,
           icon: "",
         };
@@ -1992,7 +1867,7 @@ const App = () => {
         const arrayType =
           defaultFieldTypes.find((ft) => ft.id === "array") ||
           defaultFieldTypes[0];
-        let children = convertSchemaToFields(property.items, uischema);
+        let children = convertSchemaToFields(property.items);
         // children belong to this array field (set parentId to this array field's id)
         children = children.map((c) => ({
           ...c,
