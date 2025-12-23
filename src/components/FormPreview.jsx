@@ -7,20 +7,22 @@ import {
 import { Typography, Box } from "@mui/material";
 import { IconEye } from "@tabler/icons-react";
 import CommonHeader from "./CommonHeader";
-import { customRenderers } from "../controls/renderers";
-
-// Combine material renderers with custom renderers (custom renderers have higher rank to override)
-const renderersWithCustom = [...materialRenderers, ...customRenderers];
 
 const FormPreview = ({
   formState,
   onDataChange,
+  customRenderers,
   showFormPreview,
   setShowFormPreview,
   showSchemaEditor,
   setShowSchemaEditor,
   exportForm,
 }) => {
+  const renderersWithCustom = [
+    ...materialRenderers,
+    ...(customRenderers || []),
+  ];
+
   return (
     <Box>
       <CommonHeader
@@ -33,7 +35,6 @@ const FormPreview = ({
         setShowSchemaEditor={setShowSchemaEditor}
         exportForm={exportForm}
       />
-
       <Box sx={{ p: 2 }}>
         {formState.schema.properties &&
         Object.keys(formState.schema.properties).length > 0 ? (

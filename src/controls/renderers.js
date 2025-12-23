@@ -8,6 +8,7 @@ import CustomGroupLayout, { customGroupTester } from "./CustomGroupLayout";
 import CustomHorizontalLayout, {
   customHorizontalLayoutTester,
 } from "./CustomHorizontalLayout";
+import CustomTextControl, { customTextTester } from "./CustomTextControl";
 
 // Export all custom renderers with their testers
 export const customRenderers = [
@@ -15,6 +16,7 @@ export const customRenderers = [
   { tester: customGroupTester, renderer: CustomGroupLayout },
   { tester: customVerticalLayoutTester, renderer: CustomVerticalLayout },
   { tester: customHorizontalLayoutTester, renderer: CustomHorizontalLayout },
+  { tester: customTextTester, renderer: CustomTextControl },
 ];
 
 // Export individual components for direct use if needed
@@ -23,4 +25,5 @@ export {
   CustomVerticalLayout,
   CustomGroupLayout,
   CustomHorizontalLayout,
+  CustomTextControl,
 };

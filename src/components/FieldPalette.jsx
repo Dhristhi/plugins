@@ -133,6 +133,11 @@ const FieldPalette = ({ onLoadSchema }) => {
       name: "Test Form with Icons",
       description: "Test schema with group icons",
     },
+    {
+      id: "salary-information",
+      name: "Salary Information Form",
+      description: "Comprehensive salary details",
+    },
   ];
 
   const handleSchemaChange = (event) => {

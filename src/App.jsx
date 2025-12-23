@@ -41,6 +41,10 @@ import FieldPalette from "./components/FieldPalette";
 import SchemaEditor from "./components/SchemaEditor";
 import FormStructure from "./components/FormStructure";
 import FieldProperties from "./components/FieldProperties";
+import CustomTextControl, {
+  customTextTester,
+  customCurrencyTester,
+} from "../src/controls/CustomTextControl";
 
 import { defaultFieldTypes } from "./types";
 
@@ -133,7 +137,13 @@ const App = () => {
     }),
     useSensor(KeyboardSensor)
   );
-
+  const customRenderers = React.useMemo(
+    () => [
+      { tester: customCurrencyTester, renderer: CustomTextControl },
+      { tester: customTextTester, renderer: CustomTextControl },
+    ],
+    []
+  );
   // Generate form state from fields
   const buildSchemaFromFields = (fieldsArray, parentKey = null) => {
     const properties = {};
@@ -1839,6 +1849,92 @@ const App = () => {
           ],
         },
       },
+      {
+        id: "salary-information",
+        name: "Salary Information Form",
+        description:
+          "Comprehensive salary details form with currency, basic salary, allowances, deductions, and net salary calculation",
+        tags: ["Salary", "Compensation", "Finance"],
+        schema: {
+          type: "object",
+          properties: {
+            currency: {
+              type: "string",
+              title: "Currency",
+              enum: ["USD", "EUR", "GBP", "INR", "JPY", "AUD", "CAD", "CNY"],
+            },
+            basic_salary: {
+              type: "number",
+              title: "Basic Salary",
+              minimum: 0,
+            },
+            allowances: {
+              type: "number",
+              title: "Allowances",
+              minimum: 0,
+            },
+            deductions: {
+              type: "number",
+              title: "Deductions",
+              minimum: 0,
+            },
+            net_salary: {
+              type: "number",
+              title: "Net Salary",
+              minimum: 0,
+            },
+          },
+          required: [
+            "currency",
+            "basic_salary",
+            "allowances",
+            "deductions",
+            "net_salary",
+          ],
+        },
+        uischema: {
+          type: "VerticalLayout",
+          elements: [
+            {
+              type: "Control",
+              scope: "#/properties/currency",
+              label: "Currency",
+            },
+            {
+              type: "Control",
+              scope: "#/properties/basic_salary",
+              label: "Basic Salary",
+              options: {
+                format: "currency",
+              },
+            },
+            {
+              type: "Control",
+              scope: "#/properties/allowances",
+              label: "Allowances",
+              options: {
+                format: "currency",
+              },
+            },
+            {
+              type: "Control",
+              scope: "#/properties/deductions",
+              label: "Deductions",
+              options: {
+                format: "currency",
+              },
+            },
+            {
+              type: "Control",
+              scope: "#/properties/net_salary",
+              label: "Net Salary",
+              options: {
+                format: "currency",
+              },
+            },
+          ],
+        },
+      },
     ];
 
     const selectedSchema = sampleSchemas.find((s) => s.id === schemaId);
@@ -1917,6 +2013,45 @@ const App = () => {
           fields.push(groupField);
         }
       });
+      uischema.elements.forEach((element) => {
+        if (element.type === "Control" && element.scope) {
+          const propKey = element.scope.replace("#/properties/", "");
+          const property = schema.properties[propKey];
+
+          if (property) {
+            processedKeys.add(propKey);
+            fieldCounter.current += 1;
+            const fieldId = fieldCounter.current;
+
+            const fieldType = mapSchemaPropertyToFieldType(property);
+
+            // IMPORTANT: Preserve the options from uischema
+            const fieldUischema = {
+              type: "Control",
+              scope: `#/properties/${propKey}`,
+            };
+
+            // Copy options if they exist (including format: "currency")
+            if (element.options) {
+              fieldUischema.options = { ...element.options };
+            }
+
+            const childField = {
+              id: `field_${fieldId}`,
+              type: fieldType.id,
+              label: element.label || property.title || propKey,
+              key: propKey,
+              required: schema.required?.includes(propKey) || false,
+              isLayout: false,
+              schema: { ...fieldType.schema, ...property },
+              uischema: fieldUischema, // Use the uischema with preserved options
+              parentId: null,
+            };
+
+            fields.push(childField);
+          }
+        }
+      });
 
       // Add any remaining fields not in groups
       Object.entries(schema.properties).forEach(([key, property]) => {
@@ -1972,12 +2107,25 @@ const App = () => {
           key,
           required: schema.required?.includes(key) || false,
           isLayout: true,
-          schema: { ...objectType.schema, ...property },
-          uischema: { ...objectType.uischema, label },
+
+          schema: {
+            ...objectType.schema,
+            ...property,
+          },
+          uischema: {
+            ...objectType.uischema,
+            label,
+            type: "Control",
+            scope: `#/properties/${key}`,
+          },
+
           children,
           parentId: null,
           icon: "",
         };
+        if (property.enum) {
+          newField.schema.enum = property.enum;
+        }
 
         fields.push(newField);
         return;
@@ -2213,6 +2361,7 @@ const App = () => {
                       setFormData(newFormState.data)
                     }
                     showFormPreview={showFormPreview}
+                    customRenderers={customRenderers}
                     setShowFormPreview={setShowFormPreview}
                     showSchemaEditor={showSchemaEditor}
                     setShowSchemaEditor={setShowSchemaEditor}
@@ -2234,6 +2383,7 @@ const App = () => {
                         formState={formState}
                         onDataChange={handleFormDataChange}
                         showFormPreview={showFormPreview}
+                        customRenderers={customRenderers}
                         setShowFormPreview={setShowFormPreview}
                         showSchemaEditor={showSchemaEditor}
                         setShowSchemaEditor={setShowSchemaEditor}
