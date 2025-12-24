@@ -49,7 +49,7 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
     "ADM",
   ];
 
-  const getRoleDisplayName = (code) => ALL_ROLE_CODES[code] || code;
+  const getRoleDisplayName = (code) => code.toLowerCase();
   const handleAccessChipClick = (roleCode) => {
     const exists = selectedAccess.includes(roleCode);
     const newSelected = exists
@@ -690,6 +690,7 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                     variant="outlined"
                     sx={{
                       borderRadius: 1.5,
+                      textTransform: "capitalize",
                       "& .MuiChip-deleteIcon": {
                         color: "error.main",
                         "&:hover": { color: "error.dark" },
@@ -731,6 +732,7 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                       selectedAccess.includes(roleCode) ? "primary" : "default"
                     }
                     label={getRoleDisplayName(roleCode)}
+                    sx={{ textTransform: "capitalize" }}
                     clickable
                     onClick={() => handleAccessChipClick(roleCode)}
                   />
@@ -816,14 +818,20 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
               color: "#666",
             })}
             <Typography variant="body2" color="grey.600">
-              Type: {localField.type}
+              Type:{" "}
+              <span style={{ textTransform: "capitalize" }}>
+                {localField.type}
+              </span>
             </Typography>
           </Box>
         )}
 
         {!isGroup && !isLayout && localField.schema.format && (
           <Typography variant="body2" color="grey.600" sx={{ mb: 1 }}>
-            Format: {localField.schema.format}
+            Format:{" "}
+            <span style={{ textTransform: "capitalize" }}>
+              {localField.schema.format}
+            </span>
           </Typography>
         )}
 

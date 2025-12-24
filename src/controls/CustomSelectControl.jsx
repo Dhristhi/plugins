@@ -91,8 +91,16 @@ const CustomSelectControl = (props) => {
         }
       } else {
         const newOptions =
-          schema.enum?.map((r) => ({ label: r, value: r, raw: r })) ||
-          schema.items?.enum?.map((r) => ({ label: r, value: r, raw: r })) ||
+          schema.enum?.map((r) => ({
+            label: r,
+            value: r,
+            raw: r,
+          })) ||
+          schema.items?.enum?.map((r) => ({
+            label: r,
+            value: r,
+            raw: r,
+          })) ||
           [];
         setOptions(newOptions);
       }
@@ -169,13 +177,23 @@ const CustomSelectControl = (props) => {
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
             {selected.map((val) => {
               const opt = options.find((o) => o.value === val);
-              return <Chip key={val} label={opt ? opt.label : val} />;
+              return (
+                <Chip
+                  key={val}
+                  label={opt ? opt.label : val}
+                  sx={{ textTransform: "capitalize" }}
+                />
+              );
             })}
           </Box>
         )}
       >
         {options.map((opt) => (
-          <MenuItem key={opt.value} value={opt.value}>
+          <MenuItem
+            key={opt.value}
+            value={opt.value}
+            sx={{ textTransform: "capitalize" }}
+          >
             {opt.label}
           </MenuItem>
         ))}
