@@ -95,6 +95,8 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
       }
       if (field.schema.enum) {
         setEnumOptions([...field.schema.enum]);
+      } else if (field.schema.items?.enum) {
+        setEnumOptions([...field.schema.items.enum]);
       } else {
         setEnumOptions([]);
       }
@@ -140,7 +142,16 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
     if (newOption.trim()) {
       const newOptions = [...enumOptions, newOption.trim()];
       setEnumOptions(newOptions);
-      handleSchemaUpdate({ enum: newOptions });
+      if (localField.schema?.type === "array" && localField.schema?.items) {
+        handleSchemaUpdate({
+          items: {
+            ...localField.schema.items,
+            enum: newOptions,
+          },
+        });
+      } else {
+        handleSchemaUpdate({ enum: newOptions });
+      }
       setNewOption("");
     }
   };
@@ -148,9 +159,18 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
   const handleRemoveOption = (index) => {
     const newOptions = enumOptions.filter((_, i) => i !== index);
     setEnumOptions(newOptions);
-    handleSchemaUpdate({
-      enum: newOptions.length > 0 ? newOptions : undefined,
-    });
+    if (localField.schema?.type === "array" && localField.schema?.items) {
+      handleSchemaUpdate({
+        items:
+          newOptions.length > 0
+            ? { ...localField.schema.items, enum: newOptions }
+            : { type: "string" },
+      });
+    } else {
+      handleSchemaUpdate({
+        enum: newOptions.length > 0 ? newOptions : undefined,
+      });
+    }
   };
 
   const handleFieldTypeChange = (newTypeId) => {
@@ -166,9 +186,24 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
         },
       };
 
-      // Preserve enum options if switching to/from select/radio
-      if (hasEnumOptions && ["select", "radio"].includes(newTypeId)) {
-        updatedField.schema.enum = enumOptions;
+      // Preserve enum options and uischema options
+      if (hasEnumOptions && ["select", "radio", "multiselect"].includes(newTypeId)) {
+        if (newTypeId === "multiselect") {
+          updatedField.schema.items = {
+            type: "string",
+            enum: enumOptions,
+          };
+          delete updatedField.schema.enum;
+          // Preserve existing uischema options for multiselect
+          if (localField.uischema?.options) {
+            updatedField.uischema.options = {
+              ...updatedField.uischema.options,
+              ...localField.uischema.options,
+            };
+          }
+        } else {
+          updatedField.schema.enum = enumOptions;
+        }
       }
 
       setLocalField(updatedField);
@@ -177,10 +212,40 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
       // Update enum options state for new type
       if (newFieldType.schema.enum) {
         setEnumOptions([...newFieldType.schema.enum]);
-      } else if (!["select", "radio"].includes(newTypeId)) {
+      } else if (newFieldType.schema.items?.enum) {
+        setEnumOptions([...newFieldType.schema.items.enum]);
+      } else if (!["select", "radio", "multiselect"].includes(newTypeId)) {
         setEnumOptions([]);
       }
     }
+  };
+
+  const getCompatibleFieldTypes = () => {
+    const currentSchemaType = localField.schema?.type;
+
+    // Array fields with enum items (multiselect) can only remain as multiselect
+    if (currentSchemaType === 'array' && localField.schema?.items?.enum) {
+      return availableFieldTypes.filter((ft) => ft.id === 'multiselect');
+    }
+
+    // Array fields without enum (regular arrays) can only remain as array
+    if (currentSchemaType === 'array') {
+      return availableFieldTypes.filter((ft) => ft.id === 'array');
+    }
+
+    return availableFieldTypes.filter((ft) => {
+      // Don't allow converting to array types from other types
+      if (ft.id === 'array' || ft.id === 'multiselect') return false;
+      
+      const targetSchemaType = ft.schema?.type;
+
+      // Allow switching within same schema type
+      if (currentSchemaType === targetSchemaType) {
+        return true;
+      }
+
+      return false;
+    });
   };
 
   const getFieldTypeIcon = (typeId) => {
@@ -189,7 +254,8 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
   };
 
   const availableFieldTypes = defaultFieldTypes.filter((ft) => !ft.isLayout);
-  const hasEnumOptions = ["select", "radio"].includes(localField.type);
+  const hasEnumOptions = ["select", "radio", "multiselect"].includes(localField.type) ||
+    (localField.schema?.type === "array" && localField.schema?.items?.enum);
   const isGroup = localField.uischema?.type === "Group";
   const isLayout = localField.isLayout && localField.uischema?.type !== "Group";
 
@@ -292,7 +358,7 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                     onChange={(e) => handleFieldTypeChange(e.target.value)}
                     sx={{ borderRadius: 2 }}
                   >
-                    {availableFieldTypes.map((fieldType) => {
+                    {getCompatibleFieldTypes().map((fieldType) => {
                       const IconComponent = fieldType.icon;
                       return (
                         <MenuItem key={fieldType.id} value={fieldType.id}>

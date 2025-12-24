@@ -152,6 +152,24 @@ export const defaultFieldTypes = [
     },
   },
   {
+    id: "multiselect",
+    type: "array",
+    label: "Multi-Select",
+    icon: IconChevronDown,
+    schema: {
+      type: "array",
+      items: {
+        type: "string",
+        enum: ["Option 1", "Option 2", "Option 3"],
+      },
+      uniqueItems: true,
+    },
+    uischema: {
+      type: "Control",
+      scope: "#/properties/field",
+    },
+  },
+  {
     id: "radio",
     type: "string",
     label: "Radio Group",
