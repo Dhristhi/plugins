@@ -49,7 +49,7 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
     "ADM",
   ];
 
-  const getRoleDisplayName = (code) => code.toLowerCase();
+  const getRoleDisplayName = (code) => ALL_ROLE_CODES[code] || code;
   const handleAccessChipClick = (roleCode) => {
     const exists = selectedAccess.includes(roleCode);
     const newSelected = exists
@@ -187,7 +187,10 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
       };
 
       // Preserve enum options and uischema options
-      if (hasEnumOptions && ["select", "radio", "multiselect"].includes(newTypeId)) {
+      if (
+        hasEnumOptions &&
+        ["select", "radio", "multiselect"].includes(newTypeId)
+      ) {
         if (newTypeId === "multiselect") {
           updatedField.schema.items = {
             type: "string",
@@ -224,19 +227,19 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
     const currentSchemaType = localField.schema?.type;
 
     // Array fields with enum items (multiselect) can only remain as multiselect
-    if (currentSchemaType === 'array' && localField.schema?.items?.enum) {
-      return availableFieldTypes.filter((ft) => ft.id === 'multiselect');
+    if (currentSchemaType === "array" && localField.schema?.items?.enum) {
+      return availableFieldTypes.filter((ft) => ft.id === "multiselect");
     }
 
     // Array fields without enum (regular arrays) can only remain as array
-    if (currentSchemaType === 'array') {
-      return availableFieldTypes.filter((ft) => ft.id === 'array');
+    if (currentSchemaType === "array") {
+      return availableFieldTypes.filter((ft) => ft.id === "array");
     }
 
     return availableFieldTypes.filter((ft) => {
       // Don't allow converting to array types from other types
-      if (ft.id === 'array' || ft.id === 'multiselect') return false;
-      
+      if (ft.id === "array" || ft.id === "multiselect") return false;
+
       const targetSchemaType = ft.schema?.type;
 
       // Allow switching within same schema type
@@ -254,7 +257,8 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
   };
 
   const availableFieldTypes = defaultFieldTypes.filter((ft) => !ft.isLayout);
-  const hasEnumOptions = ["select", "radio", "multiselect"].includes(localField.type) ||
+  const hasEnumOptions =
+    ["select", "radio", "multiselect"].includes(localField.type) ||
     (localField.schema?.type === "array" && localField.schema?.items?.enum);
   const isGroup = localField.uischema?.type === "Group";
   const isLayout = localField.isLayout && localField.uischema?.type !== "Group";
