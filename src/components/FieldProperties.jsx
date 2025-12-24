@@ -187,7 +187,10 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
       };
 
       // Preserve enum options and uischema options
-      if (hasEnumOptions && ["select", "radio", "multiselect"].includes(newTypeId)) {
+      if (
+        hasEnumOptions &&
+        ["select", "radio", "multiselect"].includes(newTypeId)
+      ) {
         if (newTypeId === "multiselect") {
           updatedField.schema.items = {
             type: "string",
@@ -224,19 +227,19 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
     const currentSchemaType = localField.schema?.type;
 
     // Array fields with enum items (multiselect) can only remain as multiselect
-    if (currentSchemaType === 'array' && localField.schema?.items?.enum) {
-      return availableFieldTypes.filter((ft) => ft.id === 'multiselect');
+    if (currentSchemaType === "array" && localField.schema?.items?.enum) {
+      return availableFieldTypes.filter((ft) => ft.id === "multiselect");
     }
 
     // Array fields without enum (regular arrays) can only remain as array
-    if (currentSchemaType === 'array') {
-      return availableFieldTypes.filter((ft) => ft.id === 'array');
+    if (currentSchemaType === "array") {
+      return availableFieldTypes.filter((ft) => ft.id === "array");
     }
 
     return availableFieldTypes.filter((ft) => {
       // Don't allow converting to array types from other types
-      if (ft.id === 'array' || ft.id === 'multiselect') return false;
-      
+      if (ft.id === "array" || ft.id === "multiselect") return false;
+
       const targetSchemaType = ft.schema?.type;
 
       // Allow switching within same schema type
@@ -254,7 +257,8 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
   };
 
   const availableFieldTypes = defaultFieldTypes.filter((ft) => !ft.isLayout);
-  const hasEnumOptions = ["select", "radio", "multiselect"].includes(localField.type) ||
+  const hasEnumOptions =
+    ["select", "radio", "multiselect"].includes(localField.type) ||
     (localField.schema?.type === "array" && localField.schema?.items?.enum);
   const isGroup = localField.uischema?.type === "Group";
   const isLayout = localField.isLayout && localField.uischema?.type !== "Group";
@@ -690,6 +694,7 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                     variant="outlined"
                     sx={{
                       borderRadius: 1.5,
+                      textTransform: "capitalize",
                       "& .MuiChip-deleteIcon": {
                         color: "error.main",
                         "&:hover": { color: "error.dark" },
@@ -731,6 +736,7 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                       selectedAccess.includes(roleCode) ? "primary" : "default"
                     }
                     label={getRoleDisplayName(roleCode)}
+                    sx={{ textTransform: "capitalize" }}
                     clickable
                     onClick={() => handleAccessChipClick(roleCode)}
                   />
@@ -816,14 +822,20 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
               color: "#666",
             })}
             <Typography variant="body2" color="grey.600">
-              Type: {localField.type}
+              Type:{" "}
+              <span style={{ textTransform: "capitalize" }}>
+                {localField.type}
+              </span>
             </Typography>
           </Box>
         )}
 
         {!isGroup && !isLayout && localField.schema.format && (
           <Typography variant="body2" color="grey.600" sx={{ mb: 1 }}>
-            Format: {localField.schema.format}
+            Format:{" "}
+            <span style={{ textTransform: "capitalize" }}>
+              {localField.schema.format}
+            </span>
           </Typography>
         )}
 

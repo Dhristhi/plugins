@@ -1219,7 +1219,7 @@ const App = () => {
               title: "Select (Multiple Selection)",
               items: {
                 type: "string",
-                enum: ["Item 1", "Item 2", "Item 3", "Item 4", "Item 5"],
+                enum: ["item 1", "item 2", "item 3", "item 4", "item 5"],
               },
               uniqueItems: true,
             },
@@ -2111,11 +2111,7 @@ const App = () => {
       }
 
       // Array with enum items (multi-select) -> set multi in uischema options
-      if (
-        property.type === "array" &&
-        property.items &&
-        property.items.enum
-      ) {
+      if (property.type === "array" && property.items && property.items.enum) {
         const fieldType = mapSchemaPropertyToFieldType(property);
         const newField = {
           id: `field_${uniqueId}`,
