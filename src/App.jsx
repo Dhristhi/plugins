@@ -236,25 +236,30 @@ const App = () => {
               : [],
           };
         } else if (field.type === "array") {
-          // Nested array inside array
+          // Nested array inside array - wrap in Group to show title
           let nestedDetailElements = [];
           if (field.children && field.children.length > 0) {
             nestedDetailElements = buildUISchemaForArrayItems(field.children);
           }
           return {
-            type: "Control",
-            scope: `#/properties/${field.key}`,
+            type: "Group",
             label: field.label,
-            options: {
-              ...field.uischema?.options,
-              showSortButtons: true,
-              ...(nestedDetailElements.length > 0 && {
-                detail: {
-                  type: "VerticalLayout",
-                  elements: nestedDetailElements,
+            elements: [
+              {
+                type: "Control",
+                scope: `#/properties/${field.key}`,
+                options: {
+                  ...field.uischema?.options,
+                  showSortButtons: true,
+                  ...(nestedDetailElements.length > 0 && {
+                    detail: {
+                      type: "VerticalLayout",
+                      elements: nestedDetailElements,
+                    },
+                  }),
                 },
-              }),
-            },
+              },
+            ],
           };
         } else {
           // Regular field inside array - scope is relative to item
