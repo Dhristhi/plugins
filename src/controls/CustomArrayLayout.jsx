@@ -130,7 +130,7 @@ export const ArrayLayoutRenderer = (props) => {
     const elements = uischema.options?.['detail'];
     const defaultItem = createDefaultValue(schema.default);
     return (
-      <Box alignItems='center' sx={{ mt: 0, ml: 0 }}>
+      <Box alignItems='center' sx={{ mt: 0, ml: 0, backgroundColor: '#ffffff', p: 2, borderRadius: 1 }}>
         <Grid
           container
           justify='center'
@@ -157,7 +157,7 @@ export const ArrayLayoutRenderer = (props) => {
   if (!data?.length && emptyValue) {
     const elements = uischema.options?.['detail'];
     return (
-      <Box alignItems='center' sx={{ mt: 0, ml: 0 }}>
+      <Box alignItems='center' sx={{ mt: 0, ml: 0, backgroundColor: '#ffffff', p: 2, borderRadius: 1 }}>
         <Grid
           container
           justify='center'
@@ -206,7 +206,7 @@ export const ArrayLayoutRenderer = (props) => {
       );
     });
   return (
-    <Box alignItems='center' sx={{ mt: 0, ml: 0 }}>
+    <Box alignItems='center' sx={{ mt: 0, ml: 0, backgroundColor: '#ffffff', p: 2, borderRadius: 1 }}>
       {enabled && isAddable && (
         <Box display='flex' alignItems='center' justifyContent='flex-end'>
           <Tooltip title={t('common.tooltip_add')}>
