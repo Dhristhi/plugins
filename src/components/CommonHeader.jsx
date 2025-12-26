@@ -2,10 +2,7 @@ import React from 'react';
 import { Box, Typography, Button, ButtonGroup } from '@mui/material';
 import {
   IconEye,
-  IconEyeOff,
   IconCode,
-  IconClipboard,
-  IconDownload,
 } from '@tabler/icons-react';
 
 const CommonHeader = ({
@@ -88,7 +85,9 @@ const CommonHeader = ({
             }}
           >
             <Button
-              onClick={() => {
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
                 const newShowPreview = !showFormPreview;
                 setShowFormPreview(newShowPreview);
                 if (newShowPreview) {
@@ -101,7 +100,9 @@ const CommonHeader = ({
               Preview
             </Button>
             <Button
-              onClick={() => {
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
                 const newShowSchema = !showSchemaEditor;
                 setShowSchemaEditor(newShowSchema);
                 if (newShowSchema) {

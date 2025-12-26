@@ -643,69 +643,117 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
       )}
       {/* Options for Select/Radio Fields */}
       {hasEnumOptions && (
-        <Accordion defaultExpanded sx={{ mb: 2, boxShadow: 1 }}>
-          <AccordionSummary expandIcon={<IconChevronDown />}>
-            <Typography variant="subtitle1" fontWeight={600}>
-              Options
-            </Typography>
-          </AccordionSummary>
-          <AccordionDetails>
-            <Box>
-              <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
-                <TextField
-                  label="New Option"
-                  size="small"
-                  value={newOption}
-                  onChange={(e) => setNewOption(e.target.value)}
-                  onKeyPress={(e) => {
-                    if (e.key === "Enter") {
-                      handleAddOption();
-                    }
-                  }}
-                  variant="outlined"
-                  sx={{
-                    flex: 1,
-                    "& .MuiOutlinedInput-root": { borderRadius: 1.5 },
-                  }}
-                />
-                <IconButton
-                  onClick={handleAddOption}
-                  sx={{
-                    color: "success.main",
-                    backgroundColor: "success.light",
-                    borderRadius: 1.5,
-                    "&:hover": {
-                      backgroundColor: (theme) => theme.palette.success.light,
-                      color: "success.dark",
-                    },
-                  }}
-                >
-                  <IconPlus size={20} />
-                </IconButton>
-              </Box>
-
-              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-                {enumOptions.map((option, index) => (
-                  <Chip
-                    key={index}
-                    label={option}
-                    onDelete={() => handleRemoveOption(index)}
-                    deleteIcon={<IconTrash size={16} />}
-                    variant="outlined"
-                    sx={{
-                      borderRadius: 1.5,
-                      textTransform: "capitalize",
-                      "& .MuiChip-deleteIcon": {
-                        color: "error.main",
-                        "&:hover": { color: "error.dark" },
+        <>
+          <Box sx={{ mb: 2, p: 2, backgroundColor: "grey.50", borderRadius: 2 }}>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={localField.uischema?.options?.format === "dynamicselect"}
+                  onChange={(e) => {
+                    const updatedUISchema = {
+                      ...localField.uischema,
+                      options: {
+                        ...localField.uischema?.options,
+                        format: e.target.checked ? "dynamicselect" : undefined,
+                        entity: e.target.checked ? localField.uischema?.options?.entity || "" : undefined,
                       },
-                    }}
-                  />
-                ))}
-              </Box>
-            </Box>
-          </AccordionDetails>
-        </Accordion>
+                    };
+                    handleUpdate({ uischema: updatedUISchema });
+                  }}
+                  color="primary"
+                />
+              }
+              label="Use Dynamic Options (API)"
+            />
+            {localField.uischema?.options?.format === "dynamicselect" && (
+              <TextField
+                label="Lookup Context"
+                fullWidth
+                value={localField.uischema?.options?.entity || ""}
+                onChange={(e) => {
+                  const updatedUISchema = {
+                    ...localField.uischema,
+                    options: {
+                      ...localField.uischema?.options,
+                      entity: e.target.value,
+                    },
+                  };
+                  handleUpdate({ uischema: updatedUISchema });
+                }}
+                margin="normal"
+                variant="outlined"
+                placeholder="e.g., countries"
+                helperText="Enter the lookup context to fetch options from API"
+                sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+              />
+            )}
+          </Box>
+          {localField.uischema?.options?.format !== "dynamicselect" && (
+            <Accordion defaultExpanded sx={{ mb: 2, boxShadow: 1 }}>
+              <AccordionSummary expandIcon={<IconChevronDown />}>
+                <Typography variant="subtitle1" fontWeight={600}>
+                  Options
+                </Typography>
+              </AccordionSummary>
+              <AccordionDetails>
+                <Box>
+                  <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
+                    <TextField
+                      label="New Option"
+                      size="small"
+                      value={newOption}
+                      onChange={(e) => setNewOption(e.target.value)}
+                      onKeyPress={(e) => {
+                        if (e.key === "Enter") {
+                          handleAddOption();
+                        }
+                      }}
+                      variant="outlined"
+                      sx={{
+                        flex: 1,
+                        "& .MuiOutlinedInput-root": { borderRadius: 1.5 },
+                      }}
+                    />
+                    <IconButton
+                      onClick={handleAddOption}
+                      sx={{
+                        color: "success.main",
+                        backgroundColor: "success.light",
+                        borderRadius: 1.5,
+                        "&:hover": {
+                          backgroundColor: (theme) => theme.palette.success.light,
+                          color: "success.dark",
+                        },
+                      }}
+                    >
+                      <IconPlus size={20} />
+                    </IconButton>
+                  </Box>
+
+                  <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+                    {enumOptions.map((option, index) => (
+                      <Chip
+                        key={index}
+                        label={option}
+                        onDelete={() => handleRemoveOption(index)}
+                        deleteIcon={<IconTrash size={16} />}
+                        variant="outlined"
+                        sx={{
+                          borderRadius: 1.5,
+                          textTransform: "capitalize",
+                          "& .MuiChip-deleteIcon": {
+                            color: "error.main",
+                            "&:hover": { color: "error.dark" },
+                          },
+                        }}
+                      />
+                    ))}
+                  </Box>
+                </Box>
+              </AccordionDetails>
+            </Accordion>
+          )}
+        </>
       )}
       {/* Advanced Options */}
       {!isLayout && !isGroup && (

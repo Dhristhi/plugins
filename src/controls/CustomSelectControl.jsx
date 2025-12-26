@@ -10,7 +10,7 @@ import {
   FormControl,
   Box,
 } from "@mui/material";
-import { useTranslation } from "react-i18next";
+import axiosInstance from "../services/axiosInstance";
 
 import {
   queryStringToObject,
@@ -18,34 +18,37 @@ import {
   updateNestedValue,
 } from "../utils";
 
-// Extract MaterialEnumControl from Unwrapped
 const { MaterialEnumControl } = Unwrapped;
 
 const CustomSelectControl = (props) => {
   const { core } = useJsonForms();
-  const { i18n } = useTranslation();
 
   const [options, setOptions] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [cascadingValue, setCascadingValue] = useState(undefined);
 
   const { schema, uischema, path, handleChange, data, config } = props;
+  
+  console.log('🔍 Props received:', { 
+    hasUischema: !!uischema, 
+    hasOptions: !!uischema?.options,
+    entity: uischema?.options?.entity,
+    uischemaKeys: uischema ? Object.keys(uischema) : [],
+    optionsKeys: uischema?.options ? Object.keys(uischema.options) : []
+  });
+  
   const { entity, key, value, query, cascadingKey, computedFields, multi } =
-    uischema.options || {};
+    uischema?.options || {};
 
-  // Get translations and language from JsonForms config
   const translations = config?.translations;
   const formData = core?.data || {};
 
-  // Handle array paths: if path is like xxx.0.yyy, append xxx.0 to cascadingKey
   let effectiveCascadingKey = cascadingKey;
   if (cascadingKey && path) {
     const pathParts = path.split(".");
-    // Check if path contains array index (numeric part) like xxx.0.yyy
     if (pathParts.length > 2) {
       const arrayIndexMatch = pathParts.findIndex((part) => /^\d+$/.test(part));
       if (arrayIndexMatch > 0) {
-        // Build the array prefix (e.g., "xxx.0")
         const arrayPrefix = pathParts.slice(0, arrayIndexMatch + 1).join(".");
         effectiveCascadingKey = `${arrayPrefix}.${cascadingKey}`;
       }
@@ -61,64 +64,98 @@ const CustomSelectControl = (props) => {
     setCascadingValue(selCascadingValue);
   }
 
+  const getEntityName = (entity) => {
+    return ['user', 'tenant_setting'].includes(entity) ? `core_${entity}` : entity;
+  };
+
+  const apiCall = async (entity, params) => {
+    const url = `/entity/v1/lookup`;
+    const queryParams = { lookupContext: entity, ...params };
+    console.log('📡 API Call:', { url, queryParams, token: localStorage.getItem('site')?.substring(0, 50) + '...' });
+    try {
+      const res = await axiosInstance.get(url, { params: queryParams });
+      console.log('✅ API Response:', { status: res.status, dataLength: res.data?.data?.length, data: res.data });
+      const data = res.data?.data || res.data || [];
+      return Array.isArray(data) ? data : [];
+    } catch (err) {
+      console.error('❌ API Error:', { 
+        status: err.response?.status, 
+        message: err.message, 
+        responseData: err.response?.data, 
+        endpoint: url,
+        hasToken: !!localStorage.getItem('site')
+      });
+      return [];
+    }
+  };
+
   useEffect(() => {
-    const fetchOptions = async () => {
-      if (effectiveCascadingKey && !selCascadingValue) {
-        return;
-      }
-
-      if (entity && key) {
-        const updatedQuery =
-          query?.replace(/:(\w+)/g, (match, key) => match) || "";
-        const params = {
-          page: 1,
-          pageSize: 10000,
-          ...queryStringToObject(
-            selCascadingValue
-              ? updatedQuery.replace(":cascadingValue", selCascadingValue)
-              : updatedQuery
-          ),
-        };
-        const res = await apiCall(entity, params);
-        if (res.length > 0) {
-          // Apply configurable field filtering
-          const newOptions = res.map((r) => ({
-            label: r.value,
-            value: r.key,
-            raw: r,
-          }));
-          setOptions(newOptions);
+    const currentEntity = uischema?.options?.entity;
+    console.log('🔍 useEffect triggered:', { 
+      currentEntity, 
+      entity,
+      areEqual: currentEntity === entity,
+      cascadingKey, 
+      selCascadingValue,
+      hasSchema: !!schema,
+      schemaEnum: schema?.enum
+    });
+    
+    // If entity is provided, always use API call (ignore schema enum)
+    if (currentEntity) {
+      console.log('✅ Entity found, calling fetchOptions');
+      const fetchOptions = async () => {
+        setIsLoading(true);
+        
+        // Only skip if cascading is required but value is missing
+        if (cascadingKey && !selCascadingValue) {
+          console.log('⚠️ Cascading required but no value - skipping API call');
+          setIsLoading(false);
+          setOptions([]);
+          return;
         }
-      } else {
-        const newOptions =
-          schema.enum?.map((r) => ({
-            label: r,
-            value: r,
-            raw: r,
-          })) ||
-          schema.items?.enum?.map((r) => ({
-            label: r,
-            value: r,
-            raw: r,
-          })) ||
-          [];
-        setOptions(newOptions);
-      }
-    };
-    fetchOptions();
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    entity,
-    key,
-    value,
-    query,
-    schema,
-    effectiveCascadingKey,
-    selCascadingValue,
-  ]);
+        const params = {};
+        if (cascadingKey && selCascadingValue) {
+          params.cascadingValue = selCascadingValue;
+        }
 
-  const apiCall = (entity, params) => {};
+        try {
+          const res = await apiCall(entity, params);
+          console.log('🔍 apiCall result:', res);
+          if (res && res.length > 0) {
+            const mappedOptions = res.map((r) => ({
+              label: r.lookupDesc || r.lookupValue || r.value || r.label || r.name || String(r.lookupKey || r.key || r.id),
+              value: r.lookupKey || r.key || r.id || r.value,
+              raw: r,
+            }));
+            console.log('🔍 Mapped options:', mappedOptions);
+            setOptions(mappedOptions);
+          } else {
+            console.log('Empty API response');
+            setOptions([]);
+          }
+        } catch (error) {
+          console.error('Fetch error:', error);
+          setOptions([]);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+      fetchOptions();
+      return;
+    }
+    
+    // Fallback to schema enum only if no entity
+    console.log('⚠️ No entity - using schema enum fallback');
+    const newOptions =
+      schema.enum?.map((r) => ({ label: r, value: r, raw: r })) ||
+      schema.items?.enum?.map((r) => ({ label: r, value: r, raw: r })) ||
+      [];
+    console.log('Using schema enum, options:', newOptions);
+    setOptions(newOptions);
+  }, [entity, cascadingKey, selCascadingValue, schema]);
 
   const handleOnChange = (event, selectedVal) => {
     handleChange(path, selectedVal);
@@ -137,22 +174,15 @@ const CustomSelectControl = (props) => {
         scopedForm,
         multi ? vals.map((v) => v.raw) : vals?.raw ?? {}
       );
-      // TODO: Need to revisit implementation when used inside array
-      const _scope = scope; // path.split('.').length > 1 ? [...path.split('.').slice(0, -1), scope].join('.') :
-
-      handleChange(_scope, scopeValue);
-      updateNestedValue(formData, _scope, scopeValue);
+      handleChange(scope, scopeValue);
+      updateNestedValue(formData, scope, scopeValue);
     });
   };
 
-  // Get the label using the translation system with memoization for performance
   const fieldLabel = useMemo(() => {
-    // Get the field name from the path
     const fieldName = path.replace("#/properties/", "");
-    // Use translations passed from config (from ListView)
     if (translations) {
-      const currentLang = i18n.language || "en";
-      // Try current language first, then fallback to English
+      const currentLang = "en";
       const translation =
         translations[currentLang]?.[fieldName]?.label ||
         translations.en?.[fieldName]?.label;
@@ -161,9 +191,8 @@ const CustomSelectControl = (props) => {
         return translation;
       }
     }
-    // Final fallback to schema title
     return schema.title || "Select";
-  }, [path, translations, i18n.language, schema.title]);
+  }, [path, translations, schema.title]);
 
   return multi ? (
     <FormControl fullWidth>
@@ -212,7 +241,6 @@ const CustomSelectControl = (props) => {
   );
 };
 
-// eslint-disable-next-line react-refresh/only-export-components
 export const customSelectTester = rankWith(
   Number.MAX_VALUE,
   and(isControl, optionIs("format", "dynamicselect"))
