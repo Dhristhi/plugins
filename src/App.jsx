@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect, useMemo } from "react";
 import {
   ThemeProvider,
   createTheme,
@@ -103,6 +103,9 @@ const App = () => {
   const [formData, setFormData] = useState({});
   const [propertiesDrawerOpen, setPropertiesDrawerOpen] = useState(false);
   const [sampleSchemaLoaderOpen, setSampleSchemaLoaderOpen] = useState(false);
+  const [lookups, setLookups] = useState({
+    currency: [],
+  });
 
   // Drag and Drop state
   const [activeId, setActiveId] = useState(null);
@@ -473,22 +476,216 @@ const App = () => {
         setFormData(initializedData);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fields]);
 
-  const schemaData = buildSchemaFromFields(fields);
-  const formState = {
-    schema: {
-      type: "object",
-      properties: schemaData.properties,
-      ...(schemaData.required &&
-        schemaData.required.length > 0 && { required: schemaData.required }),
+  // Currency handling
+  const getCurrencyMeta = (currencyList) => {
+    const meta = {};
+    currencyList.forEach((c) => {
+      meta[c.lookupKey] = {
+        label: c.lookupValue,
+        rate: c.rate ?? 1,
+      };
+    });
+    return meta;
+  };
+
+  const currencyMeta = useMemo(
+    () => getCurrencyMeta(lookups.currency),
+    [lookups.currency]
+  );
+
+  const currencyLocaleMap = {
+    USD: "en-US",
+    EUR: "de-DE",
+    GBP: "en-GB",
+    INR: "en-IN",
+    JPY: "ja-JP",
+    CNY: "zh-CN",
+    AUD: "en-AU",
+    CAD: "en-CA",
+  };
+
+  const getCurrencySymbol = useCallback((currencyCode) => {
+    const symbols = {
+      USD: "$",
+      EUR: "€",
+      GBP: "£",
+      INR: "₹",
+      JPY: "¥",
+      CNY: "¥",
+      AUD: "A$",
+      CAD: "C$",
+    };
+    return symbols[currencyCode] || currencyCode;
+  }, []);
+
+  // Update currency_icon when currency changes
+  useEffect(() => {
+    const currencyCode = formData?.employment_info?.salary?.currency;
+    if (currencyCode) {
+      const symbol = getCurrencySymbol(currencyCode);
+      const currentIcon = formData?.employment_info?.salary?.currency_icon;
+
+      if (currentIcon !== symbol) {
+        setFormData((prev) => ({
+          ...prev,
+          employment_info: {
+            ...(prev.employment_info || {}),
+            salary: {
+              ...(prev.employment_info?.salary || {}),
+              currency_icon: symbol,
+            },
+          },
+        }));
+      }
+    }
+  }, [formData?.employment_info?.salary?.currency, getCurrencySymbol]);
+
+  // Convert amount using currencyMeta rate. Treat 0 as valid input.
+  const convertAmount = useCallback(
+    (amountInBase, currencyCode) => {
+      if (amountInBase === null || amountInBase === undefined || !currencyCode)
+        return 0;
+      const parsed =
+        typeof amountInBase === "string"
+          ? parseFloat(amountInBase)
+          : amountInBase;
+      if (Number.isNaN(parsed)) return 0;
+      const meta = currencyMeta[currencyCode];
+      const rate = meta?.rate ?? 1;
+      return parsed * rate;
     },
-    uischema: {
+    [currencyMeta]
+  );
+
+  const schemaData = useMemo(() => {
+    return buildSchemaFromFields(fields);
+  }, [fields]);
+
+  const applyCurrencyToSchema = useCallback((schema, currencyList) => {
+    if (!schema || !currencyList?.length) return schema;
+
+    const enums = currencyList.map((c) => c.lookupKey);
+
+    const applyRecursive = (properties) => {
+      if (!properties) return properties;
+      const newProps = { ...properties };
+
+      Object.keys(newProps).forEach((key) => {
+        if (newProps[key]?.type === "object" && newProps[key].properties) {
+          newProps[key] = {
+            ...newProps[key],
+            properties: applyRecursive(newProps[key].properties),
+          };
+        } else if (key === "currency" && newProps[key]?.type === "string") {
+          newProps[key] = {
+            ...newProps[key],
+            enum: enums,
+          };
+        }
+      });
+
+      return newProps;
+    };
+
+    return {
+      ...schema,
+      properties: applyRecursive(schema.properties),
+    };
+  }, []);
+
+  const schemaWithCurrency = useMemo(() => {
+    return applyCurrencyToSchema(schemaData, lookups.currency);
+  }, [schemaData, lookups.currency, applyCurrencyToSchema]);
+
+  const baseUiSchema = useMemo(() => {
+    return {
       type: "VerticalLayout",
       elements: buildUISchemaFromFields(fields),
+    };
+  }, [fields]);
+
+  const applyCurrencyLookupToUiSchema = useCallback(
+    (uischema, currencyList) => {
+      if (!uischema || !currencyList?.length) return uischema;
+
+      const enums = currencyList.map((c) => c.lookupKey);
+
+      const applyRec = (element) => {
+        if (!element) return element;
+        const cloned = Array.isArray(element) ? [...element] : { ...element };
+
+        if (cloned.type === "Control" && typeof cloned.scope === "string") {
+          // Apply currency dropdown to currency field
+          if (
+            cloned.scope.includes("/currency") &&
+            !cloned.scope.includes("currency_icon")
+          ) {
+            cloned.options = {
+              ...(cloned.options || {}),
+              enum: enums,
+            };
+          }
+          // Make currency_icon field (remove readonly if you want it editable)
+          if (cloned.scope.includes("/currency_icon")) {
+            cloned.options = {
+              ...(cloned.options || {}),
+              // readonly: true,  // Comment this out to make it editable
+            };
+          }
+          // Apply currency format to salary fields
+          if (
+            cloned.scope.includes("/basic_salary") ||
+            cloned.scope.includes("/allowances") ||
+            cloned.scope.includes("/deductions") ||
+            cloned.scope.includes("/net_salary")
+          ) {
+            cloned.options = {
+              ...(cloned.options || {}),
+              format: "currency",
+            };
+          }
+        }
+
+        if (Array.isArray(cloned.elements)) {
+          cloned.elements = cloned.elements.map(applyRec);
+        }
+
+        if (cloned.detail && Array.isArray(cloned.detail.elements)) {
+          cloned.detail = {
+            ...cloned.detail,
+            elements: cloned.detail.elements.map(applyRec),
+          };
+        }
+
+        return cloned;
+      };
+
+      return applyRec(uischema);
     },
-    data: formData,
-  };
+    []
+  );
+
+  const finalUiSchema = useMemo(() => {
+    return applyCurrencyLookupToUiSchema(baseUiSchema, lookups.currency);
+  }, [baseUiSchema, lookups.currency, applyCurrencyLookupToUiSchema]);
+
+  // Stable form state object
+  const formState = useMemo(() => {
+    return {
+      schema: {
+        type: "object",
+        properties: schemaWithCurrency.properties,
+        ...(schemaWithCurrency.required && schemaWithCurrency.required.length
+          ? { required: schemaWithCurrency.required }
+          : {}),
+      },
+      uischema: finalUiSchema,
+      data: formData,
+    };
+  }, [schemaWithCurrency, finalUiSchema, formData]);
 
   const addField = useCallback((fieldType, parentId, index) => {
     // Create a unique operation ID to prevent duplicates
@@ -878,6 +1075,239 @@ const App = () => {
   };
 
   // Schema loading functionality
+  // Map schema property to field type
+  const mapSchemaPropertyToFieldType = useCallback((property) => {
+    const { type, enum: enumValues, format } = property;
+
+    if (enumValues && enumValues.length > 0) {
+      if (enumValues.length <= 3) {
+        return (
+          defaultFieldTypes.find((ft) => ft.id === "radio") ||
+          defaultFieldTypes[0]
+        );
+      } else {
+        return (
+          defaultFieldTypes.find((ft) => ft.id === "select") ||
+          defaultFieldTypes[0]
+        );
+      }
+    }
+
+    switch (type) {
+      case "string":
+        if (format === "email") {
+          return (
+            defaultFieldTypes.find((ft) => ft.id === "email") ||
+            defaultFieldTypes[0]
+          );
+        }
+        if (format === "date") {
+          return (
+            defaultFieldTypes.find((ft) => ft.id === "date") ||
+            defaultFieldTypes[0]
+          );
+        }
+        if (property.maxLength && property.maxLength > 100) {
+          return (
+            defaultFieldTypes.find((ft) => ft.id === "textarea") ||
+            defaultFieldTypes[0]
+          );
+        }
+        return (
+          defaultFieldTypes.find((ft) => ft.id === "text") ||
+          defaultFieldTypes[0]
+        );
+      case "number":
+      case "integer":
+        return (
+          defaultFieldTypes.find((ft) => ft.id === "number") ||
+          defaultFieldTypes[0]
+        );
+      case "boolean":
+        return (
+          defaultFieldTypes.find((ft) => ft.id === "checkbox") ||
+          defaultFieldTypes[0]
+        );
+      default:
+        return (
+          defaultFieldTypes.find((ft) => ft.id === "text") ||
+          defaultFieldTypes[0]
+        );
+    }
+  }, []);
+
+  // Convert schema to fields format (recursive)
+  const convertSchemaToFields = useCallback((schema) => {
+    if (!schema || !schema.properties) return [];
+
+    const fields = [];
+
+    Object.entries(schema.properties).forEach(([key, property]) => {
+      fieldCounter.current += 1;
+      const uniqueId = fieldCounter.current;
+
+      const label =
+        property.title ||
+        key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, " ");
+
+      if (property.type === "object" && property.properties) {
+        const objectType =
+          defaultFieldTypes.find((ft) => ft.id === "object") ||
+          defaultFieldTypes[0];
+        let children = convertSchemaToFields(property);
+
+        fieldCounter.current += 1;
+        const layoutId = fieldCounter.current;
+        const verticalLayout = {
+          id: `field_${layoutId}`,
+          type: "vertical-layout",
+          label: "Vertical Layout",
+          key: `layout_${layoutId}`,
+          isLayout: true,
+          schema: {},
+          uischema: { type: "VerticalLayout" },
+          children: children.map((c) => ({
+            ...c,
+            parentId: `field_${layoutId}`,
+          })),
+          parentId: `field_${uniqueId}`,
+        };
+
+        const newField = {
+          id: `field_${uniqueId}`,
+          type: objectType.id,
+          label,
+          key,
+          required: schema.required?.includes(key) || false,
+          isLayout: true,
+          schema: { ...objectType.schema, ...property },
+          uischema: { ...objectType.uischema, label },
+          children: [verticalLayout],
+          parentId: null,
+          icon: "",
+        };
+
+        fields.push(newField);
+        return;
+      }
+
+      if (
+        property.type === "array" &&
+        property.items &&
+        property.items.type === "object"
+      ) {
+        const arrayType =
+          defaultFieldTypes.find((ft) => ft.id === "array") ||
+          defaultFieldTypes[0];
+        let children = convertSchemaToFields(property.items);
+        children = children.map((c) => ({
+          ...c,
+          parentId: `field_${uniqueId}`,
+        }));
+
+        const newField = {
+          id: `field_${uniqueId}`,
+          type: arrayType.id,
+          label,
+          key,
+          required: schema.required?.includes(key) || false,
+          isLayout: false,
+          schema: {},
+          uischema: { ...arrayType.uischema, scope: `#/properties/${key}` },
+          children,
+          parentId: null,
+        };
+
+        newField.schema.type = "array";
+        if (property.title) newField.schema.title = property.title;
+        if (property.items) newField.schema.items = property.items;
+        if (property.minItems) newField.schema.minItems = property.minItems;
+        if (property.maxItems) newField.schema.maxItems = property.maxItems;
+        if (property.uniqueItems)
+          newField.schema.uniqueItems = property.uniqueItems;
+        if (property.tableView) newField.schema.tableView = property.tableView;
+
+        fields.push(newField);
+        return;
+      }
+
+      if (property.type === "array" && property.items && property.items.enum) {
+        const fieldType = mapSchemaPropertyToFieldType(property);
+        const newField = {
+          id: `field_${uniqueId}`,
+          type: fieldType.id,
+          label,
+          key,
+          required: schema.required?.includes(key) || false,
+          isLayout: false,
+          schema: { ...property },
+          uischema: {
+            ...fieldType.uischema,
+            scope: `#/properties/${key}`,
+            options: {
+              ...fieldType.uischema.options,
+              multi: true,
+              format: "dynamicselect",
+            },
+          },
+          parentId: null,
+        };
+
+        fields.push(newField);
+        return;
+      }
+
+      const fieldType = mapSchemaPropertyToFieldType(property);
+      const newField = {
+        id: `field_${uniqueId}`,
+        type: fieldType.id,
+        label,
+        key,
+        required: schema.required?.includes(key) || false,
+        isLayout: fieldType.isLayout || false,
+        schema: { ...fieldType.schema, ...property },
+        uischema: { ...fieldType.uischema, scope: `#/properties/${key}` },
+        parentId: null,
+      };
+
+      if (property.enum) {
+        newField.schema.enum = property.enum;
+      }
+
+      fields.push(newField);
+    });
+
+    return fields;
+  }, [mapSchemaPropertyToFieldType]);
+
+  // Load currency lookup data
+  const getLookupData = async (lookupContext) => {
+    const response = await fetch(
+      `http://localhost:3000/api/auth/v1/lookup?lookupContext=${lookupContext}`
+    );
+    const text = await response.text();
+    try {
+      const json = JSON.parse(text);
+      return json;
+    } catch (e) {
+      console.error("Failed to parse lookup response", e);
+      return [];
+    }
+  };
+
+  useEffect(() => {
+    let mounted = true;
+    getLookupData("currency")
+      .then((data) => {
+        if (!mounted) return;
+        setLookups((prev) => ({ ...prev, currency: data.currency || [] }));
+      })
+      .catch((err) => console.error("Error loading currency lookup", err));
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   const handleLoadSchemaFromPalette = useCallback((schemaId) => {
     // Simple sample schemas for the dropdown
     const sampleSchemas = [
@@ -2002,230 +2432,13 @@ const App = () => {
 
     const selectedSchema = sampleSchemas.find((s) => s.id === schemaId);
     if (selectedSchema && selectedSchema.schema) {
-      // Convert schema to fields format
       const convertedFields = convertSchemaToFields(selectedSchema.schema);
       setFields(convertedFields);
       setFormData({});
       setSelectedField(null);
       setPropertiesDrawerOpen(false);
     }
-  }, []);
-
-  // Convert schema to fields format (recursive) so nested object/array-of-object
-  // properties become layout fields with children and show up in the designer.
-  const convertSchemaToFields = (schema) => {
-    if (!schema || !schema.properties) return [];
-
-    const fields = [];
-
-    Object.entries(schema.properties).forEach(([key, property]) => {
-      // Use the shared ref counter so ids are unique across the app
-      fieldCounter.current += 1;
-      const uniqueId = fieldCounter.current;
-
-      // Helper label
-      const label =
-        property.title ||
-        key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, " ");
-
-      // Object (nested) properties -> create an object layout with children
-      if (property.type === "object" && property.properties) {
-        const objectType =
-          defaultFieldTypes.find((ft) => ft.id === "object") ||
-          defaultFieldTypes[0];
-        let children = convertSchemaToFields(property);
-
-        // Wrap children in a VerticalLayout for proper export structure
-        fieldCounter.current += 1;
-        const layoutId = fieldCounter.current;
-        const verticalLayout = {
-          id: `field_${layoutId}`,
-          type: "vertical-layout",
-          label: "Vertical Layout",
-          key: `layout_${layoutId}`,
-          isLayout: true,
-          schema: {},
-          uischema: { type: "VerticalLayout" },
-          children: children.map((c) => ({
-            ...c,
-            parentId: `field_${layoutId}`,
-          })),
-          parentId: `field_${uniqueId}`,
-        };
-
-        const newField = {
-          id: `field_${uniqueId}`,
-          type: objectType.id,
-          label,
-          key,
-          required: schema.required?.includes(key) || false,
-          isLayout: true,
-          schema: { ...objectType.schema, ...property },
-          uischema: { ...objectType.uischema, label },
-          children: [verticalLayout],
-          parentId: null,
-          icon: "",
-        };
-
-        fields.push(newField);
-        return;
-      }
-
-      // Array of objects -> create an array field whose item detail contains children
-      if (
-        property.type === "array" &&
-        property.items &&
-        property.items.type === "object"
-      ) {
-        const arrayType =
-          defaultFieldTypes.find((ft) => ft.id === "array") ||
-          defaultFieldTypes[0];
-        let children = convertSchemaToFields(property.items);
-        // children belong to this array field (set parentId to this array field's id)
-        children = children.map((c) => ({
-          ...c,
-          parentId: `field_${uniqueId}`,
-        }));
-
-        // keep the original items schema but attach children for designer
-        const newField = {
-          id: `field_${uniqueId}`,
-          type: arrayType.id,
-          label,
-          key,
-          required: schema.required?.includes(key) || false,
-          isLayout: false,
-          schema: {},
-          uischema: { ...arrayType.uischema, scope: `#/properties/${key}` },
-          children,
-          parentId: null,
-        };
-
-        // Build schema with correct property order
-        newField.schema.type = "array";
-        if (property.title) newField.schema.title = property.title;
-        if (property.items) newField.schema.items = property.items;
-        if (property.minItems) newField.schema.minItems = property.minItems;
-        if (property.maxItems) newField.schema.maxItems = property.maxItems;
-        if (property.uniqueItems)
-          newField.schema.uniqueItems = property.uniqueItems;
-        if (property.tableView) newField.schema.tableView = property.tableView;
-
-        fields.push(newField);
-        return;
-      }
-
-      // Array with enum items (multi-select) -> set multi in uischema options
-      if (property.type === "array" && property.items && property.items.enum) {
-        const fieldType = mapSchemaPropertyToFieldType(property);
-        const newField = {
-          id: `field_${uniqueId}`,
-          type: fieldType.id,
-          label,
-          key,
-          required: schema.required?.includes(key) || false,
-          isLayout: false,
-          schema: { ...property },
-          uischema: {
-            ...fieldType.uischema,
-            scope: `#/properties/${key}`,
-            options: {
-              ...fieldType.uischema.options,
-              multi: true,
-              format: "dynamicselect",
-            },
-          },
-          parentId: null,
-        };
-
-        fields.push(newField);
-        return;
-      }
-
-      // Regular scalar or enum fields
-      const fieldType = mapSchemaPropertyToFieldType(property);
-      const newField = {
-        id: `field_${uniqueId}`,
-        type: fieldType.id,
-        label,
-        key,
-        required: schema.required?.includes(key) || false,
-        isLayout: fieldType.isLayout || false,
-        schema: { ...fieldType.schema, ...property },
-        uischema: { ...fieldType.uischema, scope: `#/properties/${key}` },
-        parentId: null,
-      };
-
-      if (property.enum) {
-        newField.schema.enum = property.enum;
-      }
-
-      fields.push(newField);
-    });
-
-    return fields;
-  };
-
-  // Map schema property to field type
-  const mapSchemaPropertyToFieldType = (property) => {
-    const { type, enum: enumValues, format } = property;
-
-    if (enumValues && enumValues.length > 0) {
-      if (enumValues.length <= 3) {
-        return (
-          defaultFieldTypes.find((ft) => ft.id === "radio") ||
-          defaultFieldTypes[0]
-        );
-      } else {
-        return (
-          defaultFieldTypes.find((ft) => ft.id === "select") ||
-          defaultFieldTypes[0]
-        );
-      }
-    }
-
-    switch (type) {
-      case "string":
-        if (format === "email") {
-          return (
-            defaultFieldTypes.find((ft) => ft.id === "email") ||
-            defaultFieldTypes[0]
-          );
-        }
-        if (format === "date") {
-          return (
-            defaultFieldTypes.find((ft) => ft.id === "date") ||
-            defaultFieldTypes[0]
-          );
-        }
-        if (property.maxLength && property.maxLength > 100) {
-          return (
-            defaultFieldTypes.find((ft) => ft.id === "textarea") ||
-            defaultFieldTypes[0]
-          );
-        }
-        return (
-          defaultFieldTypes.find((ft) => ft.id === "text") ||
-          defaultFieldTypes[0]
-        );
-      case "number":
-      case "integer":
-        return (
-          defaultFieldTypes.find((ft) => ft.id === "number") ||
-          defaultFieldTypes[0]
-        );
-      case "boolean":
-        return (
-          defaultFieldTypes.find((ft) => ft.id === "checkbox") ||
-          defaultFieldTypes[0]
-        );
-      default:
-        return (
-          defaultFieldTypes.find((ft) => ft.id === "text") ||
-          defaultFieldTypes[0]
-        );
-    }
-  };
+  }, [convertSchemaToFields]);
 
   const isGroup = selectedField?.uischema?.type === "Group";
 
