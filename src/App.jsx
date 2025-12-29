@@ -1214,6 +1214,10 @@ const App = () => {
                 "Choice E",
               ],
             },
+            cascading_select: {
+              type: "string",
+              title: "Select (Cascading)",
+            },
             select_multiple: {
               type: "array",
               title: "Select (Multiple Selection)",
@@ -2150,6 +2154,19 @@ const App = () => {
         uischema: { ...fieldType.uischema, scope: `#/properties/${key}` },
         parentId: null,
       };
+
+      // Auto-detect cascading: if field name contains "cascading" and previous field exists
+      if (key.includes("cascading") && fields.length > 0) {
+        const prevField = fields[fields.length - 1];
+
+        // Set cascading configuration
+        newField.uischema.options = {
+          ...newField.uischema.options,
+          format: "dynamicselect",
+          entity: "states",
+          cascadingKey: prevField.key,
+        };
+      }
 
       if (property.enum) {
         newField.schema.enum = property.enum;

@@ -28,15 +28,7 @@ const CustomSelectControl = (props) => {
   const [cascadingValue, setCascadingValue] = useState(undefined);
 
   const { schema, uischema, path, handleChange, data, config } = props;
-  
-  console.log('🔍 Props received:', { 
-    hasUischema: !!uischema, 
-    hasOptions: !!uischema?.options,
-    entity: uischema?.options?.entity,
-    uischemaKeys: uischema ? Object.keys(uischema) : [],
-    optionsKeys: uischema?.options ? Object.keys(uischema.options) : []
-  });
-  
+
   const { entity, key, value, query, cascadingKey, computedFields, multi } =
     uischema?.options || {};
 
@@ -65,51 +57,35 @@ const CustomSelectControl = (props) => {
   }
 
   const getEntityName = (entity) => {
-    return ['user', 'tenant_setting'].includes(entity) ? `core_${entity}` : entity;
+    return ["user", "tenant_setting"].includes(entity)
+      ? `core_${entity}`
+      : entity;
   };
 
   const apiCall = async (entity, params) => {
     const url = `/entity/v1/lookup`;
-    const queryParams = { lookupContext: entity, ...params };
-    console.log('📡 API Call:', { url, queryParams, token: localStorage.getItem('site')?.substring(0, 50) + '...' });
+    const queryParams = { lookupContext: entity, pageSize: 1000, ...params };
+
     try {
       const res = await axiosInstance.get(url, { params: queryParams });
-      console.log('✅ API Response:', { status: res.status, dataLength: res.data?.data?.length, data: res.data });
+
       const data = res.data?.data || res.data || [];
       return Array.isArray(data) ? data : [];
     } catch (err) {
-      console.error('❌ API Error:', { 
-        status: err.response?.status, 
-        message: err.message, 
-        responseData: err.response?.data, 
-        endpoint: url,
-        hasToken: !!localStorage.getItem('site')
-      });
       return [];
     }
   };
 
   useEffect(() => {
     const currentEntity = uischema?.options?.entity;
-    console.log('🔍 useEffect triggered:', { 
-      currentEntity, 
-      entity,
-      areEqual: currentEntity === entity,
-      cascadingKey, 
-      selCascadingValue,
-      hasSchema: !!schema,
-      schemaEnum: schema?.enum
-    });
-    
+
     // If entity is provided, always use API call (ignore schema enum)
     if (currentEntity) {
-      console.log('✅ Entity found, calling fetchOptions');
       const fetchOptions = async () => {
         setIsLoading(true);
-        
+
         // Only skip if cascading is required but value is missing
         if (cascadingKey && !selCascadingValue) {
-          console.log('⚠️ Cascading required but no value - skipping API call');
           setIsLoading(false);
           setOptions([]);
           return;
@@ -117,26 +93,34 @@ const CustomSelectControl = (props) => {
 
         const params = {};
         if (cascadingKey && selCascadingValue) {
-          params.cascadingValue = selCascadingValue;
+          params.parentLookupKey = selCascadingValue;
         }
 
         try {
           const res = await apiCall(entity, params);
-          console.log('🔍 apiCall result:', res);
+
           if (res && res.length > 0) {
-            const mappedOptions = res.map((r) => ({
-              label: r.lookupDesc || r.lookupValue || r.value || r.label || r.name || String(r.lookupKey || r.key || r.id),
+            // Filter by lookupContext to ensure we only get matching records
+            const filtered = res.filter((r) => r.lookupContext === entity);
+
+            const mappedOptions = filtered.map((r) => ({
+              label:
+                r.lookupDesc ||
+                r.lookupValue ||
+                r.value ||
+                r.label ||
+                r.name ||
+                String(r.lookupKey || r.key || r.id),
               value: r.lookupKey || r.key || r.id || r.value,
               raw: r,
             }));
-            console.log('🔍 Mapped options:', mappedOptions);
+
             setOptions(mappedOptions);
           } else {
-            console.log('Empty API response');
             setOptions([]);
           }
         } catch (error) {
-          console.error('Fetch error:', error);
+          console.error("Fetch error:", error);
           setOptions([]);
         } finally {
           setIsLoading(false);
@@ -146,14 +130,14 @@ const CustomSelectControl = (props) => {
       fetchOptions();
       return;
     }
-    
+
     // Fallback to schema enum only if no entity
-    console.log('⚠️ No entity - using schema enum fallback');
+
     const newOptions =
       schema.enum?.map((r) => ({ label: r, value: r, raw: r })) ||
       schema.items?.enum?.map((r) => ({ label: r, value: r, raw: r })) ||
       [];
-    console.log('Using schema enum, options:', newOptions);
+
     setOptions(newOptions);
   }, [entity, cascadingKey, selCascadingValue, schema]);
 
@@ -229,15 +213,17 @@ const CustomSelectControl = (props) => {
       </Select>
     </FormControl>
   ) : (
-    <MaterialEnumControl
-      {...props}
-      path={path}
-      schema={{ ...schema, title: fieldLabel }}
-      options={options}
-      uischema={uischema}
-      disabled={isLoading}
-      handleChange={handleOnChange}
-    />
+    <>
+      <MaterialEnumControl
+        {...props}
+        path={path}
+        schema={{ ...schema, title: fieldLabel }}
+        options={options}
+        uischema={uischema}
+        disabled={isLoading}
+        handleChange={handleOnChange}
+      />
+    </>
   );
 };
 
