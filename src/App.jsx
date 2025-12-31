@@ -245,7 +245,7 @@ const App = () => {
             nestedDetailElements = buildUISchemaForArrayItems(field.children);
           }
           return {
-            type: "Group",
+            type: "GroupWithIcon",
             label: field.label,
             elements: [
               {
@@ -292,9 +292,11 @@ const App = () => {
             uischema.icon = `Icon${field.icon}`; // Store as full icon name like IconStars
           }
 
-          // Determine type - object fields become Groups
+          // Determine type - all groups use GroupWithIcon
           uischema.type =
-            field.type === "object" ? "Group" : field.uischema.type;
+            field.type === "object" || field.type === "group"
+              ? "GroupWithIcon"
+              : field.uischema.type;
           uischema.label = field.label;
 
           // Process children with appropriate parentKey
@@ -327,9 +329,9 @@ const App = () => {
               detailElements = buildUISchemaForArrayItems(field.children);
             }
 
-            // Wrap array control in a Group to show title like objects
+            // Wrap array control in GroupWithIcon to show title like objects
             return {
-              type: "Group",
+              type: "GroupWithIcon",
               label: field.label,
               elements: [
                 {

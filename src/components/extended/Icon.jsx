@@ -1,5 +1,5 @@
-import React from 'react';
-import { useTheme } from '@mui/material';
+import React from "react";
+import { useTheme } from "@mui/material";
 
 export const Icon = (props) => {
   const theme = useTheme();
@@ -14,17 +14,17 @@ export const Icon = (props) => {
       {gradient && (
         <svg width={0} height={0}>
           <linearGradient
-            x1='0'
-            y1='0'
-            x2='1'
-            y2='1'
-            id='icon-gradient-stroke'
-            gradientTransform='rotate(35)'
+            x1="0"
+            y1="0"
+            x2="1"
+            y2="1"
+            id="icon-gradient-stroke"
+            gradientTransform="rotate(35)"
           >
-            <stop offset='0%' stopColor={theme.palette.gradient.stop1} />
-            <stop offset='35%' stopColor={theme.palette.gradient.stop2} />
-            <stop offset='70%' stopColor={theme.palette.gradient.stop3} />
-            <stop offset='90%' stopColor={theme.palette.gradient.stop4} />
+            <stop offset="0%" stopColor={theme.palette.gradient.stop1} />
+            <stop offset="35%" stopColor={theme.palette.gradient.stop2} />
+            <stop offset="70%" stopColor={theme.palette.gradient.stop3} />
+            <stop offset="90%" stopColor={theme.palette.gradient.stop4} />
           </linearGradient>
         </svg>
       )}
@@ -33,9 +33,11 @@ export const Icon = (props) => {
         strokeWidth={otherProps.stroke}
         style={{
           ...(otherProps.style || {}),
-          fill: 'none',
+          fill: "none",
           color: undefined,
-          stroke: gradient ? 'url(#icon-gradient-stroke)' : otherProps.color || 'currentColor',
+          stroke: gradient
+            ? "url(#icon-gradient-stroke)"
+            : otherProps.color || "currentColor",
         }}
       />
     </React.Fragment>
