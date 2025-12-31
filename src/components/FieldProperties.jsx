@@ -226,14 +226,14 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
   const getCompatibleFieldTypes = () => {
     const currentSchemaType = localField.schema?.type;
 
-    // Array fields with enum items (multiselect) can only remain as multiselect
+    // Array fields with enum items (multiselect) can switch between multiselect and array
     if (currentSchemaType === "array" && localField.schema?.items?.enum) {
-      return availableFieldTypes.filter((ft) => ft.id === "multiselect");
+      return availableFieldTypes.filter((ft) => ft.id === "multiselect" || ft.id === "array");
     }
 
-    // Array fields without enum (regular arrays) can only remain as array
+    // Array fields without enum can switch between array and multiselect
     if (currentSchemaType === "array") {
-      return availableFieldTypes.filter((ft) => ft.id === "array");
+      return availableFieldTypes.filter((ft) => ft.id === "array" || ft.id === "multiselect");
     }
 
     return availableFieldTypes.filter((ft) => {
@@ -259,7 +259,19 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
   const availableFieldTypes = defaultFieldTypes.filter((ft) => !ft.isLayout);
   const hasEnumOptions =
     ["select", "radio", "multiselect"].includes(localField.type) ||
-    (localField.schema?.type === "array" && localField.schema?.items?.enum);
+    (localField.schema?.type === "array" && !!localField.schema?.items && localField.uischema?.options?.multi) ||
+    (localField.uischema?.options?.format === "dynamicselect");
+  
+  // Debug logging
+  console.log('FieldProperties Debug:', {
+    type: localField.type,
+    schemaType: localField.schema?.type,
+    hasItems: !!localField.schema?.items,
+    multi: localField.uischema?.options?.multi,
+    format: localField.uischema?.options?.format,
+    hasEnumOptions
+  });
+  
   const isGroup = localField.uischema?.type === "Group";
   const isLayout = localField.isLayout && localField.uischema?.type !== "Group";
 
@@ -651,6 +663,99 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
           </AccordionSummary>
           <AccordionDetails>
             <Box>
+              {((localField.type === "select" || localField.type === "multiselect") || 
+                (localField.schema?.type === "array" && localField.uischema?.options?.multi) ||
+                (localField.uischema?.options?.format === "dynamicselect")) && (
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={localField.uischema?.options?.entity !== undefined}
+                      onChange={(e) => {
+                        const isDynamic = e.target.checked;
+                        const isMultiSelect = localField.type === "multiselect" || localField.schema?.type === "array";
+                        const updatedUISchema = {
+                          ...localField.uischema,
+                          options: {
+                            ...localField.uischema?.options,
+                            format: isDynamic ? "dynamicselect" : undefined,
+                            multi: isMultiSelect ? true : undefined,
+                            entity: isDynamic ? "" : undefined,
+                            key: isDynamic ? "" : undefined,
+                            value: isDynamic ? "" : undefined,
+                          },
+                        };
+                        handleUpdate({ uischema: updatedUISchema });
+                      }}
+                      color="primary"
+                    />
+                  }
+                  label="Use Dynamic Data (API)"
+                  sx={{ mb: 2 }}
+                />
+              )}
+
+              {localField.uischema?.options?.entity !== undefined ? (
+                <Box>
+                  <TextField
+                    label="API Entity"
+                    fullWidth
+                    value={localField.uischema?.options?.entity || ""}
+                    onChange={(e) => {
+                      const updatedUISchema = {
+                        ...localField.uischema,
+                        options: {
+                          ...localField.uischema?.options,
+                          entity: e.target.value,
+                        },
+                      };
+                      handleUpdate({ uischema: updatedUISchema });
+                    }}
+                    margin="normal"
+                    variant="outlined"
+                    helperText="API endpoint name (e.g., countries, cities)"
+                    sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+                  />
+                  <TextField
+                    label="Value Field Name"
+                    fullWidth
+                    value={localField.uischema?.options?.key || ""}
+                    onChange={(e) => {
+                      const updatedUISchema = {
+                        ...localField.uischema,
+                        options: {
+                          ...localField.uischema?.options,
+                          key: e.target.value,
+                        },
+                      };
+                      handleUpdate({ uischema: updatedUISchema });
+                    }}
+                    margin="normal"
+                    variant="outlined"
+                    helperText="Field name for stored value (e.g., code, id). Leave empty for primitive arrays."
+                    sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+                  />
+                  <TextField
+                    label="Label Field Name"
+                    fullWidth
+                    value={localField.uischema?.options?.value || ""}
+                    onChange={(e) => {
+                      const updatedUISchema = {
+                        ...localField.uischema,
+                        options: {
+                          ...localField.uischema?.options,
+                          value: e.target.value,
+                        },
+                      };
+                      handleUpdate({ uischema: updatedUISchema });
+                    }}
+                    margin="normal"
+                    variant="outlined"
+                    helperText="Field name for display label (e.g., name, label). Leave empty for primitive arrays."
+                    sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+                  />
+                </Box>
+              ) : (
+                <>
               <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
                 <TextField
                   label="New Option"
@@ -703,6 +808,8 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                   />
                 ))}
               </Box>
+                </>
+              )}
             </Box>
           </AccordionDetails>
         </Accordion>
