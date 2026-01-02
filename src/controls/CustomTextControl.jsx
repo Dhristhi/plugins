@@ -5,6 +5,8 @@ import { CircularProgress, TextField } from "@mui/material";
 import { and, isControl, optionIs, rankWith } from "@jsonforms/core";
 import { useJsonForms, withJsonFormsControlProps } from "@jsonforms/react";
 
+// import { useAuth, useToast } from "@/hooks";
+// import { searchByParams } from "@/services/entity.service";
 import { queryStringToObject, formatCurrencyAmount } from "../utils";
 
 // Extract MaterialTextControl from Unwrapped
@@ -12,8 +14,11 @@ const { MaterialTextControl } = Unwrapped;
 
 const CustomTextControl = (props) => {
   const params = useParams();
+  const { getUser } = useAuth();
   const { core } = useJsonForms();
+  const { enqueueToast } = useToast();
 
+  const uData = getUser();
   const [isLoading, setIsLoading] = useState(false);
   const [displayValue, setDisplayValue] = useState("");
 
@@ -65,6 +70,7 @@ const CustomTextControl = (props) => {
       const fetchDefaults = async () => {
         const splitKey = referencePath?.split(".");
         const updatedQuery =
+          // query?.replace(/:(\w+)/g, (match, key) => uData[key] || match) || "";
           query?.replace(/:(\w+)/g, (match, key) => match) || "";
         const params = queryStringToObject(updatedQuery);
 

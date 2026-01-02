@@ -129,6 +129,16 @@ const FieldPalette = ({ onLoadSchema }) => {
       description: "Demo with all available field types",
     },
     {
+      id: "all-in-one-demo",
+      name: "All-in-one Demo Form",
+      description: "Comprehensive demo with advanced features",
+    },
+    {
+      id: "computed-plan",
+      name: "Computed Plan Form",
+      description: "Plan selection with computed field",
+    },
+    {
       id: "company-profile",
       name: "Company Profile Form",
       description: "Company profile with grouped sections",
