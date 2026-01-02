@@ -359,6 +359,156 @@ const sampleSchemas = [
     },
   },
   {
+    id: "all-in-one-demo",
+    name: "All-in-one Demo Form",
+    description:
+      "Comprehensive demo with string formats, arrays, enums, and file upload",
+    tags: ["Demo", "Advanced", "Comprehensive"],
+    schema: {
+      type: "object",
+      properties: {
+        string_basic: {
+          type: "string",
+          title: "Basic String",
+          minLength: 3,
+          maxLength: 100,
+        },
+        string_email: {
+          type: "string",
+          title: "Email",
+          format: "email",
+          pattern: "^[A-Za-z0-9 _-]+$",
+        },
+        string_date: {
+          type: "string",
+          title: "Date",
+          format: "date",
+        },
+        string_url: {
+          type: "string",
+          title: "URL",
+          format: "uri",
+        },
+        file_upload: {
+          type: "string",
+          title: "File Upload (base64)",
+          contentEncoding: "base64",
+          contentMediaType: "application/pdf",
+          pattern: "^[A-Za-z0-9+/=]+$",
+        },
+        number_basic: {
+          type: "number",
+          title: "Number",
+          minimum: 0,
+          maximum: 1000,
+        },
+        boolean_basic: {
+          type: "boolean",
+          title: "Boolean Flag",
+        },
+        array_strings: {
+          type: "array",
+          title: "Array of Strings",
+          items: {
+            type: "string",
+            minLength: 1,
+            maxLength: 50,
+          },
+          minItems: 1,
+          maxItems: 5,
+          uniqueItems: true,
+        },
+        array_objects: {
+          type: "array",
+          title: "Array of Objects",
+          items: {
+            type: "object",
+            properties: {
+              label: {
+                type: "string",
+                minLength: 1,
+                maxLength: 50,
+              },
+              value: {
+                type: "number",
+                minimum: 0,
+                maximum: 100,
+              },
+              active: {
+                type: "boolean",
+              },
+            },
+            required: ["label", "value"],
+          },
+          minItems: 1,
+          maxItems: 10,
+          uniqueItems: false,
+        },
+        select_single_enum: {
+          type: "string",
+          title: "Single Select Enum",
+          enum: ["Choice A", "Choice B", "Choice C"],
+        },
+        select_multi_enum: {
+          type: "array",
+          title: "Multi Select Enum",
+          items: {
+            type: "string",
+            enum: ["item 1", "item 2", "item 3", "item 4", "item 5"],
+          },
+          minItems: 1,
+          maxItems: 3,
+          uniqueItems: true,
+        },
+      },
+      required: [
+        "string_basic",
+        "string_email",
+        "number_basic",
+        "boolean_basic",
+        "array_strings",
+        "array_objects",
+      ],
+      additionalProperties: false,
+    },
+  },
+  {
+    id: "computed-plan",
+    name: "Computed Plan Form",
+    description: "Plan selection with computed readonly field",
+    tags: ["Demo", "Computed", "ReadOnly"],
+    schema: {
+      type: "object",
+      properties: {
+        plan: {
+          type: "string",
+          title: "Plan",
+          enum: ["basic", "pro", "enterprise"],
+        },
+        tier: {
+          type: "string",
+          title: "Tier",
+          enum: ["monthly", "yearly"],
+        },
+        computed_plan_label: {
+          type: "string",
+          title: "Computed Plan Label",
+          enum: [
+            "Basic – Monthly",
+            "Basic – Yearly",
+            "Pro – Monthly",
+            "Pro – Yearly",
+            "Enterprise – Monthly",
+            "Enterprise – Yearly",
+          ],
+          readOnly: true,
+        },
+      },
+      required: ["plan", "tier"],
+      additionalProperties: false,
+    },
+  },
+  {
     id: "company-profile",
     name: "Company Profile Form",
     description:
