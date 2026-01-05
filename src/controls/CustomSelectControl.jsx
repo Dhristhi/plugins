@@ -67,7 +67,7 @@ const CustomSelectControl = (props) => {
         return;
       }
 
-      if (entity && key) {
+      if (entity) {
         const updatedQuery =
           query?.replace(/:(\w+)/g, (match, key) => match) || "";
         const params = {
@@ -81,12 +81,12 @@ const CustomSelectControl = (props) => {
         };
         const res = await apiCall(entity, params);
         if (res.length > 0) {
-          // Apply configurable field filtering
           const newOptions = res.map((r) => ({
-            label: r.value,
-            value: r.key,
+            label: String(r[value]),
+            value: r[key],
             raw: r,
           }));
+          console.log('Fetched options:', newOptions);
           setOptions(newOptions);
         }
       } else {
@@ -118,7 +118,62 @@ const CustomSelectControl = (props) => {
     selCascadingValue,
   ]);
 
-  const apiCall = (entity, params) => {};
+  const apiCall = async (entity, params) => {
+    setIsLoading(true);
+    
+    try {
+      // Check if entity is a full URL
+      const isFullUrl = entity.startsWith('http://') || entity.startsWith('https://');
+      
+      if (isFullUrl) {
+        // Use entity as full URL
+        const response = await fetch(entity);
+        const data = await response.json();
+        setIsLoading(false);
+        return data;
+      } else {
+        // Mock data fallback for local entities
+        await new Promise((resolve) => setTimeout(resolve, 300));
+        const mockData = {
+          countries: [
+            { code: "us", name: "United States" },
+            { code: "ca", name: "Canada" },
+            { code: "uk", name: "United Kingdom" },
+            { code: "au", name: "Australia" },
+            { code: "de", name: "Germany" },
+            { code: "fr", name: "France" },
+            { code: "jp", name: "Japan" },
+            { code: "cn", name: "China" },
+            { code: "in", name: "India" },
+            { code: "br", name: "Brazil" },
+          ],
+          skills: [
+            { id: "js", title: "JavaScript" },
+            { id: "py", title: "Python" },
+            { id: "java", title: "Java" },
+            { id: "react", title: "React" },
+            { id: "node", title: "Node.js" },
+            { id: "aws", title: "AWS" },
+            { id: "docker", title: "Docker" },
+            { id: "k8s", title: "Kubernetes" },
+          ],
+          departments: [
+            { id: "eng", name: "Engineering" },
+            { id: "hr", name: "Human Resources" },
+            { id: "sales", name: "Sales" },
+            { id: "mkt", name: "Marketing" },
+            { id: "fin", name: "Finance" },
+          ],
+        };
+        setIsLoading(false);
+        return mockData[entity] || [];
+      }
+    } catch (error) {
+      console.error('API call failed:', error);
+      setIsLoading(false);
+      return [];
+    }
+  };
 
   const handleOnChange = (event, selectedVal) => {
     handleChange(path, selectedVal);
@@ -171,7 +226,7 @@ const CustomSelectControl = (props) => {
       <Select
         label={fieldLabel}
         multiple
-        value={data || []}
+        value={Array.isArray(data) ? data : []}
         onChange={(e) => handleOnChange(e, e.target.value)}
         renderValue={(selected) => (
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
