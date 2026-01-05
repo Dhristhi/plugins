@@ -1,12 +1,3 @@
-import React, { useState, useCallback, useEffect, useMemo } from "react";
-import {
-  ThemeProvider,
-  createTheme,
-  CssBaseline,
-  Box,
-  Button,
-  Typography,
-} from "@mui/material";
 import {
   DndContext,
   DragOverlay,
@@ -16,50 +7,49 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
-} from "@dnd-kit/core";
-import {
-  SortableContext,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
-import { IconHammer, IconX } from "@tabler/icons-react";
-import { restrictToWindowEdges } from "@dnd-kit/modifiers";
+} from '@dnd-kit/core';
+import { IconHammer, IconX } from '@tabler/icons-react';
+import { restrictToWindowEdges } from '@dnd-kit/modifiers';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { ThemeProvider, createTheme, CssBaseline, Box, Button, Typography } from '@mui/material';
 
-import FormPreview from "./components/FormPreview";
-import FieldPalette from "./components/FieldPalette";
-import SchemaEditor from "./components/SchemaEditor";
-import FormStructure from "./components/FormStructure";
-import FieldProperties from "./components/FieldProperties";
+import FormPreview from './components/FormPreview';
+import FieldPalette from './components/FieldPalette';
+import SchemaEditor from './components/SchemaEditor';
+import FormStructure from './components/FormStructure';
+import FieldProperties from './components/FieldProperties';
 
-import { defaultFieldTypes } from "./types";
+import { defaultFieldTypes } from './types';
 
-const theme = createTheme({
+const defaultTheme = createTheme({
   palette: {
-    mode: "light",
+    mode: 'light',
     primary: {
-      main: "#3b82f6",
-      light: "#60a5fa",
-      dark: "#1d4ed8",
+      main: '#3b82f6',
+      light: '#60a5fa',
+      dark: '#1d4ed8',
     },
     secondary: {
-      main: "#8b5cf6",
-      light: "#a78bfa",
-      dark: "#7c3aed",
+      main: '#8b5cf6',
+      light: '#a78bfa',
+      dark: '#7c3aed',
     },
     background: {
-      default: "#f8fafc",
-      paper: "#ffffff",
+      default: '#f8fafc',
+      paper: '#ffffff',
     },
     grey: {
-      50: "#f8fafc",
-      100: "#f1f5f9",
-      200: "#e2e8f0",
-      300: "#cbd5e1",
-      400: "#94a3b8",
-      500: "#64748b",
-      600: "#475569",
-      700: "#334155",
-      800: "#1e293b",
-      900: "#0f172a",
+      50: '#f8fafc',
+      100: '#f1f5f9',
+      200: '#e2e8f0',
+      300: '#cbd5e1',
+      400: '#94a3b8',
+      500: '#64748b',
+      600: '#475569',
+      700: '#334155',
+      800: '#1e293b',
+      900: '#0f172a',
     },
   },
   typography: {
@@ -78,7 +68,7 @@ const theme = createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
-          textTransform: "none",
+          textTransform: 'none',
           fontWeight: 500,
           borderRadius: 4,
         },
@@ -87,25 +77,22 @@ const theme = createTheme({
     MuiPaper: {
       styleOverrides: {
         root: {
-          boxShadow:
-            "0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)",
+          boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
         },
       },
     },
   },
 });
 
-const App = () => {
+const App = ({ onExport, onSchemaChange, schemas = [], theme: customTheme } = {}) => {
   const [fields, setFields] = useState([]);
-  const [selectedField, setSelectedField] = useState(null);
-  const [showSchemaEditor, setShowSchemaEditor] = useState(false);
-  const [showFormPreview, setShowFormPreview] = useState(false);
   const [formData, setFormData] = useState({});
+  const [selectedField, setSelectedField] = useState(null);
+  const [showFormPreview, setShowFormPreview] = useState(false);
+  const [showSchemaEditor, setShowSchemaEditor] = useState(false);
   const [propertiesDrawerOpen, setPropertiesDrawerOpen] = useState(false);
-  const [sampleSchemaLoaderOpen, setSampleSchemaLoaderOpen] = useState(false);
-  const [lookups, setLookups] = useState({
-    currency: [],
-  });
+
+  const appliedTheme = customTheme || defaultTheme;
 
   // Drag and Drop state
   const [activeId, setActiveId] = useState(null);
@@ -143,13 +130,13 @@ const App = () => {
         if (field.required) {
           required.push(field.key);
         }
-      } else if (field.type === "object") {
+      } else if (field.type === 'object') {
         // Object field - creates nested structure
         const childSchema = field.children
           ? buildSchemaFromFields(field.children, field.key)
           : { properties: {}, required: [] };
         const objectSchema = {
-          type: "object",
+          type: 'object',
           title: field.label,
           properties: childSchema.properties,
         };
@@ -165,7 +152,7 @@ const App = () => {
         }
         // Merge any nested objects from children
         Object.assign(nestedObjects, childSchema.nestedObjects || {});
-      } else if (field.type === "array") {
+      } else if (field.type === 'array') {
         // Array field - Process children into items structure
         if (field.children && field.children.length > 0) {
           // Build schema for array items from children
@@ -173,10 +160,10 @@ const App = () => {
 
           // Build array schema with explicit property order
           properties[field.key] = {};
-          properties[field.key].type = "array";
+          properties[field.key].type = 'array';
           properties[field.key].title = field.label;
           properties[field.key].items = {
-            type: "object",
+            type: 'object',
             properties: childSchema.properties,
           };
 
@@ -185,22 +172,19 @@ const App = () => {
           }
 
           // Add optional properties after items
-          if (field.schema.minItems)
-            properties[field.key].minItems = field.schema.minItems;
-          if (field.schema.maxItems)
-            properties[field.key].maxItems = field.schema.maxItems;
+          if (field.schema.minItems) properties[field.key].minItems = field.schema.minItems;
+          if (field.schema.maxItems) properties[field.key].maxItems = field.schema.maxItems;
           if (field.schema.uniqueItems)
             properties[field.key].uniqueItems = field.schema.uniqueItems;
-          if (field.schema.tableView)
-            properties[field.key].tableView = field.schema.tableView;
+          if (field.schema.tableView) properties[field.key].tableView = field.schema.tableView;
         } else {
           // Simple array without children
           properties[field.key] = {};
-          properties[field.key].type = "array";
+          properties[field.key].type = 'array';
           properties[field.key].title = field.label;
           // Copy other properties from field.schema except type
           Object.keys(field.schema).forEach((key) => {
-            if (key !== "type") {
+            if (key !== 'type') {
               properties[field.key][key] = field.schema[key];
             }
           });
@@ -230,33 +214,31 @@ const App = () => {
     return fieldsArray
       .filter((field) => !field.uischema?.options?.hidden)
       .map((field) => {
-        if (field.isLayout && field.type !== "array") {
+        if (field.isLayout && field.type !== 'array') {
           return {
             ...field.uischema,
             label: field.label,
-            elements: field.children
-              ? buildUISchemaForArrayItems(field.children)
-              : [],
+            elements: field.children ? buildUISchemaForArrayItems(field.children) : [],
           };
-        } else if (field.type === "array") {
+        } else if (field.type === 'array') {
           // Nested array inside array - wrap in Group to show title
           let nestedDetailElements = [];
           if (field.children && field.children.length > 0) {
             nestedDetailElements = buildUISchemaForArrayItems(field.children);
           }
           return {
-            type: "GroupWithIcon",
+            type: 'GroupWithIcon',
             label: field.label,
             elements: [
               {
-                type: "Control",
+                type: 'Control',
                 scope: `#/properties/${field.key}`,
                 options: {
                   ...field.uischema?.options,
                   showSortButtons: true,
                   ...(nestedDetailElements.length > 0 && {
                     detail: {
-                      type: "VerticalLayout",
+                      type: 'VerticalLayout',
                       elements: nestedDetailElements,
                     },
                   }),
@@ -267,7 +249,7 @@ const App = () => {
         } else {
           // Regular field inside array - scope is relative to item
           return {
-            type: "Control",
+            type: 'Control',
             scope: `#/properties/${field.key}`,
             label: field.label,
             options: field.uischema?.options,
@@ -294,14 +276,14 @@ const App = () => {
 
           // Determine type - all groups use GroupWithIcon
           uischema.type =
-            field.type === "object" || field.type === "group"
-              ? "GroupWithIcon"
+            field.type === 'object' || field.type === 'group'
+              ? 'GroupWithIcon'
               : field.uischema.type;
           uischema.label = field.label;
 
           // Process children with appropriate parentKey
           const newParentKey =
-            field.type === "object"
+            field.type === 'object'
               ? parentKey
                 ? `${parentKey}/properties/${field.key}`
                 : field.key
@@ -319,7 +301,7 @@ const App = () => {
           return uischema;
         } else {
           // Check if it's an array field
-          if (field.type === "array") {
+          if (field.type === 'array') {
             const scope = parentKey
               ? `#/properties/${parentKey}/properties/${field.key}`
               : `#/properties/${field.key}`;
@@ -331,18 +313,18 @@ const App = () => {
 
             // Wrap array control in GroupWithIcon to show title like objects
             return {
-              type: "GroupWithIcon",
+              type: 'GroupWithIcon',
               label: field.label,
               elements: [
                 {
-                  type: "Control",
+                  type: 'Control',
                   scope: scope,
                   options: {
                     ...field.uischema?.options,
                     showSortButtons: true,
                     ...(detailElements.length > 0 && {
                       detail: {
-                        type: "VerticalLayout",
+                        type: 'VerticalLayout',
                         elements: detailElements,
                       },
                     }),
@@ -375,21 +357,19 @@ const App = () => {
     children.forEach((child) => {
       if (!child.isLayout) {
         // Initialize field with default value
-        if (child.schema.type === "boolean") {
+        if (child.schema.type === 'boolean') {
           item[child.key] = false;
-        } else if (child.schema.type === "number") {
+        } else if (child.schema.type === 'number') {
           item[child.key] = 0;
-        } else if (child.schema.type === "array") {
+        } else if (child.schema.type === 'array') {
           item[child.key] = [];
         } else {
-          item[child.key] = "";
+          item[child.key] = '';
         }
-      } else if (child.type === "object") {
+      } else if (child.type === 'object') {
         // Initialize nested object
-        item[child.key] = child.children
-          ? createDefaultArrayItem(child.children)
-          : {};
-      } else if (child.type === "array") {
+        item[child.key] = child.children ? createDefaultArrayItem(child.children) : {};
+      } else if (child.type === 'array') {
         // Nested array
         item[child.key] = [];
       } else if (child.children) {
@@ -409,11 +389,11 @@ const App = () => {
       if (!field.isLayout) {
         // Initialize field with default value if not set
         if (!(field.key in data)) {
-          if (field.schema.type === "boolean") {
+          if (field.schema.type === 'boolean') {
             data[field.key] = false;
-          } else if (field.schema.type === "number") {
+          } else if (field.schema.type === 'number') {
             data[field.key] = 0;
-          } else if (field.schema.type === "array") {
+          } else if (field.schema.type === 'array') {
             // Arrays should be initialized with sample data if children exist
             if (field.children && field.children.length > 0) {
               // Create one sample item to show the structure
@@ -423,21 +403,18 @@ const App = () => {
               data[field.key] = [];
             }
           } else {
-            data[field.key] = "";
+            data[field.key] = '';
           }
         }
-      } else if (field.type === "object") {
+      } else if (field.type === 'object') {
         // Initialize nested object
         if (!(field.key in data)) {
           data[field.key] = {};
         }
         if (field.children) {
-          data[field.key] = initializeNestedFormData(
-            field.children,
-            data[field.key]
-          );
+          data[field.key] = initializeNestedFormData(field.children, data[field.key]);
         }
-      } else if (field.type === "array") {
+      } else if (field.type === 'array') {
         // Initialize array with sample data to show structure
         if (!(field.key in data)) {
           if (field.children && field.children.length > 0) {
@@ -449,11 +426,7 @@ const App = () => {
           }
         } else if (Array.isArray(data[field.key])) {
           // If array exists but is empty and has children, add a sample item
-          if (
-            data[field.key].length === 0 &&
-            field.children &&
-            field.children.length > 0
-          ) {
+          if (data[field.key].length === 0 && field.children && field.children.length > 0) {
             const sampleItem = createDefaultArrayItem(field.children);
             data[field.key] = [sampleItem];
           }
@@ -481,70 +454,6 @@ const App = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fields]);
 
-  // Currency handling
-  const getCurrencyMeta = (currencyList) => {
-    const meta = {};
-    currencyList.forEach((c) => {
-      meta[c.lookupKey] = {
-        label: c.lookupValue,
-        rate: c.rate ?? 1,
-      };
-    });
-    return meta;
-  };
-
-  const currencyMeta = useMemo(
-    () => getCurrencyMeta(lookups.currency),
-    [lookups.currency]
-  );
-
-  const currencyLocaleMap = {
-    USD: "en-US",
-    EUR: "de-DE",
-    GBP: "en-GB",
-    INR: "en-IN",
-    JPY: "ja-JP",
-    CNY: "zh-CN",
-    AUD: "en-AU",
-    CAD: "en-CA",
-  };
-
-  const getCurrencySymbol = useCallback((currencyCode) => {
-    const symbols = {
-      USD: "$",
-      EUR: "€",
-      GBP: "£",
-      INR: "₹",
-      JPY: "¥",
-      CNY: "¥",
-      AUD: "A$",
-      CAD: "C$",
-    };
-    return symbols[currencyCode] || currencyCode;
-  }, []);
-
-  // Update currency_icon when currency changes
-  useEffect(() => {
-    const currencyCode = formData?.employment_info?.salary?.currency;
-    if (currencyCode) {
-      const symbol = getCurrencySymbol(currencyCode);
-      const currentIcon = formData?.employment_info?.salary?.currency_icon;
-
-      if (currentIcon !== symbol) {
-        setFormData((prev) => ({
-          ...prev,
-          employment_info: {
-            ...(prev.employment_info || {}),
-            salary: {
-              ...(prev.employment_info?.salary || {}),
-              currency_icon: symbol,
-            },
-          },
-        }));
-      }
-    }
-  }, [formData?.employment_info?.salary?.currency, getCurrencySymbol]);
-
   // Compute plan label when plan or tier changes
   useEffect(() => {
     const plan = formData?.plan;
@@ -553,7 +462,7 @@ const App = () => {
       const planLabel = plan.charAt(0).toUpperCase() + plan.slice(1);
       const tierLabel = tier.charAt(0).toUpperCase() + tier.slice(1);
       const computed = `${planLabel} – ${tierLabel}`;
-      
+
       if (formData?.computed_plan_label !== computed) {
         setFormData((prev) => ({
           ...prev,
@@ -563,153 +472,41 @@ const App = () => {
     }
   }, [formData?.plan, formData?.tier]);
 
-  // Convert amount using currencyMeta rate. Treat 0 as valid input.
-  const convertAmount = useCallback(
-    (amountInBase, currencyCode) => {
-      if (amountInBase === null || amountInBase === undefined || !currencyCode)
-        return 0;
-      const parsed =
-        typeof amountInBase === "string"
-          ? parseFloat(amountInBase)
-          : amountInBase;
-      if (Number.isNaN(parsed)) return 0;
-      const meta = currencyMeta[currencyCode];
-      const rate = meta?.rate ?? 1;
-      return parsed * rate;
-    },
-    [currencyMeta]
-  );
-
   const schemaData = useMemo(() => {
     return buildSchemaFromFields(fields);
   }, [fields]);
 
-  const applyCurrencyToSchema = useCallback((schema, currencyList) => {
-    if (!schema || !currencyList?.length) return schema;
-
-    const enums = currencyList.map((c) => c.lookupKey);
-
-    const applyRecursive = (properties) => {
-      if (!properties) return properties;
-      const newProps = { ...properties };
-
-      Object.keys(newProps).forEach((key) => {
-        if (newProps[key]?.type === "object" && newProps[key].properties) {
-          newProps[key] = {
-            ...newProps[key],
-            properties: applyRecursive(newProps[key].properties),
-          };
-        } else if (key === "currency" && newProps[key]?.type === "string") {
-          newProps[key] = {
-            ...newProps[key],
-            enum: enums,
-          };
-        }
-      });
-
-      return newProps;
-    };
-
-    return {
-      ...schema,
-      properties: applyRecursive(schema.properties),
-    };
-  }, []);
-
-  const schemaWithCurrency = useMemo(() => {
-    return applyCurrencyToSchema(schemaData, lookups.currency);
-  }, [schemaData, lookups.currency, applyCurrencyToSchema]);
-
   const baseUiSchema = useMemo(() => {
     return {
-      type: "VerticalLayout",
+      type: 'VerticalLayout',
       elements: buildUISchemaFromFields(fields),
     };
   }, [fields]);
-
-  const applyCurrencyLookupToUiSchema = useCallback(
-    (uischema, currencyList) => {
-      if (!uischema || !currencyList?.length) return uischema;
-
-      const enums = currencyList.map((c) => c.lookupKey);
-
-      const applyRec = (element) => {
-        if (!element) return element;
-        const cloned = Array.isArray(element) ? [...element] : { ...element };
-
-        if (cloned.type === "Control" && typeof cloned.scope === "string") {
-          // Apply currency dropdown to currency field
-          if (
-            cloned.scope.includes("/currency") &&
-            !cloned.scope.includes("currency_icon")
-          ) {
-            cloned.options = {
-              ...(cloned.options || {}),
-              enum: enums,
-            };
-          }
-          // Make currency_icon field (remove readonly if you want it editable)
-          if (cloned.scope.includes("/currency_icon")) {
-            cloned.options = {
-              ...(cloned.options || {}),
-              // readonly: true,  // Comment this out to make it editable
-            };
-          }
-          // Apply currency format to salary fields
-          if (
-            cloned.scope.includes("/basic_salary") ||
-            cloned.scope.includes("/allowances") ||
-            cloned.scope.includes("/deductions") ||
-            cloned.scope.includes("/net_salary")
-          ) {
-            cloned.options = {
-              ...(cloned.options || {}),
-              format: "currency",
-            };
-          }
-        }
-
-        if (Array.isArray(cloned.elements)) {
-          cloned.elements = cloned.elements.map(applyRec);
-        }
-
-        if (cloned.detail && Array.isArray(cloned.detail.elements)) {
-          cloned.detail = {
-            ...cloned.detail,
-            elements: cloned.detail.elements.map(applyRec),
-          };
-        }
-
-        return cloned;
-      };
-
-      return applyRec(uischema);
-    },
-    []
-  );
-
-  const finalUiSchema = useMemo(() => {
-    return applyCurrencyLookupToUiSchema(baseUiSchema, lookups.currency);
-  }, [baseUiSchema, lookups.currency, applyCurrencyLookupToUiSchema]);
 
   // Stable form state object
   const formState = useMemo(() => {
     return {
       schema: {
-        type: "object",
-        properties: schemaWithCurrency.properties,
-        ...(schemaWithCurrency.required && schemaWithCurrency.required.length
-          ? { required: schemaWithCurrency.required }
-          : {}),
+        type: 'object',
+        properties: schemaData.properties,
+        ...(schemaData.required && schemaData.required.length ? { required: schemaData.required } : {}),
       },
-      uischema: finalUiSchema,
+      uischema: baseUiSchema,
       data: formData,
     };
-  }, [schemaWithCurrency, finalUiSchema, formData]);
+  }, [schemaData, baseUiSchema, formData]);
+
+  // Notify consumer when schema or uischema changes
+  useEffect(() => {
+    if (typeof onSchemaChange === 'function') {
+      onSchemaChange(formState.schema, formState.uischema);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formState.schema, formState.uischema]);
 
   const addField = useCallback((fieldType, parentId, index) => {
     // Create a unique operation ID to prevent duplicates
-    const operationId = `${fieldType.id}-${parentId || "root"}-${Date.now()}`;
+    const operationId = `${fieldType.id}-${parentId || 'root'}-${Date.now()}`;
 
     // Check if this operation is already pending
     if (pendingOperations.current.has(operationId)) {
@@ -728,9 +525,7 @@ const App = () => {
     fieldCounter.current += 1;
     const uniqueId = fieldCounter.current;
 
-    const fieldKey = fieldType.isLayout
-      ? `layout_${uniqueId}`
-      : `${fieldType.id}_${uniqueId}`;
+    const fieldKey = fieldType.isLayout ? `layout_${uniqueId}` : `${fieldType.id}_${uniqueId}`;
 
     const newField = {
       id: `field_${uniqueId}`,
@@ -741,7 +536,7 @@ const App = () => {
       schema: { ...fieldType.schema },
       uischema: { ...fieldType.uischema },
       isLayout: fieldType.isLayout,
-      children: fieldType.isLayout || fieldType.id === "array" ? [] : undefined,
+      children: fieldType.isLayout || fieldType.id === 'array' ? [] : undefined,
       parentId: parentId,
     };
     setFields((prev) => {
@@ -751,12 +546,9 @@ const App = () => {
         // Add to specific parent layout
         const addToParent = (fieldsArray) => {
           for (const field of fieldsArray) {
-            if (
-              field.id === parentId &&
-              (field.isLayout || field.type === "array")
-            ) {
+            if (field.id === parentId && (field.isLayout || field.type === 'array')) {
               if (!field.children) field.children = [];
-              if (typeof index === "number") {
+              if (typeof index === 'number') {
                 field.children.splice(index, 0, newField);
               } else {
                 field.children.push(newField);
@@ -772,7 +564,7 @@ const App = () => {
         addToParent(newFields);
       } else {
         // Add to root level
-        if (typeof index === "number") {
+        if (typeof index === 'number') {
           newFields.splice(index, 0, newField);
         } else {
           newFields.push(newField);
@@ -791,8 +583,7 @@ const App = () => {
   const addFieldToLayout = useCallback(
     (parentId, index) => {
       const defaultFieldType =
-        defaultFieldTypes.find((ft) => !ft.isLayout && ft.id !== "array") ||
-        defaultFieldTypes[0];
+        defaultFieldTypes.find((ft) => !ft.isLayout && ft.id !== 'array') || defaultFieldTypes[0];
       addField(defaultFieldType, parentId, index);
     },
     [addField]
@@ -827,15 +618,6 @@ const App = () => {
     setSelectedField(updatedField);
   }, []);
 
-  const handleImportSchema = useCallback((importedFields) => {
-    setFields(importedFields);
-    setSelectedField(null);
-    setPropertiesDrawerOpen(false);
-
-    // Reset form data to match new schema
-    setFormData({});
-  }, []);
-
   const exportForm = () => {
     const exportData = {
       schema: formState.schema,
@@ -843,13 +625,17 @@ const App = () => {
       fields: fields,
     };
 
-    const dataStr = JSON.stringify(exportData, null, 2);
-    const dataUri =
-      "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
+    if (typeof onExport === 'function') {
+      onExport({ schema: exportData.schema, uiSchema: exportData.uischema });
+      return;
+    }
 
-    const linkElement = document.createElement("a");
-    linkElement.setAttribute("href", dataUri);
-    linkElement.setAttribute("download", "form-config.json");
+    const dataStr = JSON.stringify(exportData, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', 'form-config.json');
     linkElement.click();
   };
 
@@ -859,18 +645,18 @@ const App = () => {
     setActiveId(active.id);
 
     // Determine what is being dragged
-    if (active.data.current?.type === "palette-item") {
+    if (active.data.current?.type === 'palette-item') {
       // Dragging from palette
       const fieldType = defaultFieldTypes.find((ft) => ft.id === active.id);
       setDraggedItem({
-        type: "palette-item",
+        type: 'palette-item',
         fieldType: fieldType,
       });
     } else {
       // Dragging existing field in structure
       const draggedField = findFieldById(fields, active.id);
       setDraggedItem({
-        type: "structure-item",
+        type: 'structure-item',
         field: draggedField,
       });
     }
@@ -881,10 +667,7 @@ const App = () => {
     if (!over) return;
 
     // Handle dropping palette items into structure
-    if (
-      active.data.current?.type === "palette-item" &&
-      over.data.current?.accepts
-    ) {
+    if (active.data.current?.type === 'palette-item' && over.data.current?.accepts) {
       // Visual feedback logic can go here
     }
   };
@@ -899,34 +682,29 @@ const App = () => {
     }
 
     // Handle different drag scenarios
-    if (active.data.current?.type === "palette-item") {
+    if (active.data.current?.type === 'palette-item') {
       // Dragging from palette to structure
       const fieldType = defaultFieldTypes.find((ft) => ft.id === active.id);
       if (
         fieldType &&
-        over.data.current?.accepts?.includes(
-          fieldType.isLayout ? "layout" : "field"
-        )
+        over.data.current?.accepts?.includes(fieldType.isLayout ? 'layout' : 'field')
       ) {
         const dropTargetId = over.data.current.parentId;
         const dropIndex = over.data.current.index;
         addField(fieldType, dropTargetId, dropIndex);
       }
-    } else if (active.data.current?.type === "structure-item") {
+    } else if (active.data.current?.type === 'structure-item') {
       // Dragging existing structure item
       if (
-        over.data.current?.accepts?.includes("structure-item") ||
+        over.data.current?.accepts?.includes('structure-item') ||
         over.data.current?.parentId !== undefined ||
-        over.id.startsWith("drop-")
+        over.id.startsWith('drop-')
       ) {
         // Dropping into a drop zone
         const dropTargetId = over.data.current.parentId;
         const dropIndex = over.data.current.index;
         moveExistingField(active.id, dropTargetId, dropIndex);
-      } else if (
-        active.id !== over.id &&
-        over.data.current?.type === "structure-item"
-      ) {
+      } else if (active.id !== over.id && over.data.current?.type === 'structure-item') {
         // Reordering within structure (dragging onto another field)
         handleReorderFields(active.id, over.id, over.data.current);
       }
@@ -949,7 +727,7 @@ const App = () => {
       if (targetParentId) {
         // Moving into a layout
         const parent = findFieldById(newFields, targetParentId);
-        if (parent && (parent.isLayout || parent.type === "array")) {
+        if (parent && (parent.isLayout || parent.type === 'array')) {
           if (!parent.children) parent.children = [];
           const insertIndex = Math.min(targetIndex, parent.children.length);
           parent.children.splice(insertIndex, 0, fieldToMove);
@@ -1018,12 +796,9 @@ const App = () => {
     // If dropping into a layout, add to its children
     if (overData?.parentId) {
       const parent = findFieldById(fieldsArray, overData.parentId);
-      if (parent && (parent.isLayout || parent.type === "array")) {
+      if (parent && (parent.isLayout || parent.type === 'array')) {
         if (!parent.children) parent.children = [];
-        const insertIndex =
-          overData.index !== undefined
-            ? overData.index
-            : parent.children.length;
+        const insertIndex = overData.index !== undefined ? overData.index : parent.children.length;
         parent.children.splice(insertIndex, 0, fieldToInsert);
         fieldToInsert.parentId = parent.id;
         return true;
@@ -1038,14 +813,7 @@ const App = () => {
         return true;
       }
       if (fieldsArray[i].children) {
-        if (
-          insertFieldAfter(
-            fieldsArray[i].children,
-            fieldToInsert,
-            afterId,
-            overData
-          )
-        ) {
+        if (insertFieldAfter(fieldsArray[i].children, fieldToInsert, afterId, overData)) {
           return true;
         }
       }
@@ -1058,13 +826,13 @@ const App = () => {
     const { active, droppableContainers } = args;
 
     // For palette items, use closest center
-    if (active.data.current?.type === "palette-item") {
+    if (active.data.current?.type === 'palette-item') {
       return closestCenter(args);
     }
 
     // For structure items, prioritize drop zones
-    const dropZones = Array.from(droppableContainers.values()).filter(
-      (container) => container.id.includes("drop-")
+    const dropZones = Array.from(droppableContainers.values()).filter((container) =>
+      container.id.includes('drop-')
     );
 
     if (dropZones.length > 0) {
@@ -1101,58 +869,31 @@ const App = () => {
 
     if (enumValues && enumValues.length > 0) {
       if (enumValues.length <= 3) {
-        return (
-          defaultFieldTypes.find((ft) => ft.id === "radio") ||
-          defaultFieldTypes[0]
-        );
+        return defaultFieldTypes.find((ft) => ft.id === 'radio') || defaultFieldTypes[0];
       } else {
-        return (
-          defaultFieldTypes.find((ft) => ft.id === "select") ||
-          defaultFieldTypes[0]
-        );
+        return defaultFieldTypes.find((ft) => ft.id === 'select') || defaultFieldTypes[0];
       }
     }
 
     switch (type) {
-      case "string":
-        if (format === "email") {
-          return (
-            defaultFieldTypes.find((ft) => ft.id === "email") ||
-            defaultFieldTypes[0]
-          );
+      case 'string':
+        if (format === 'email') {
+          return defaultFieldTypes.find((ft) => ft.id === 'email') || defaultFieldTypes[0];
         }
-        if (format === "date") {
-          return (
-            defaultFieldTypes.find((ft) => ft.id === "date") ||
-            defaultFieldTypes[0]
-          );
+        if (format === 'date') {
+          return defaultFieldTypes.find((ft) => ft.id === 'date') || defaultFieldTypes[0];
         }
         if (property.maxLength && property.maxLength > 100) {
-          return (
-            defaultFieldTypes.find((ft) => ft.id === "textarea") ||
-            defaultFieldTypes[0]
-          );
+          return defaultFieldTypes.find((ft) => ft.id === 'textarea') || defaultFieldTypes[0];
         }
-        return (
-          defaultFieldTypes.find((ft) => ft.id === "text") ||
-          defaultFieldTypes[0]
-        );
-      case "number":
-      case "integer":
-        return (
-          defaultFieldTypes.find((ft) => ft.id === "number") ||
-          defaultFieldTypes[0]
-        );
-      case "boolean":
-        return (
-          defaultFieldTypes.find((ft) => ft.id === "checkbox") ||
-          defaultFieldTypes[0]
-        );
+        return defaultFieldTypes.find((ft) => ft.id === 'text') || defaultFieldTypes[0];
+      case 'number':
+      case 'integer':
+        return defaultFieldTypes.find((ft) => ft.id === 'number') || defaultFieldTypes[0];
+      case 'boolean':
+        return defaultFieldTypes.find((ft) => ft.id === 'checkbox') || defaultFieldTypes[0];
       default:
-        return (
-          defaultFieldTypes.find((ft) => ft.id === "text") ||
-          defaultFieldTypes[0]
-        );
+        return defaultFieldTypes.find((ft) => ft.id === 'text') || defaultFieldTypes[0];
     }
   }, []);
 
@@ -1168,25 +909,23 @@ const App = () => {
         const uniqueId = fieldCounter.current;
 
         const label =
-          property.title ||
-          key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, " ");
+          property.title || key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' ');
 
-        if (property.type === "object" && property.properties) {
+        if (property.type === 'object' && property.properties) {
           const objectType =
-            defaultFieldTypes.find((ft) => ft.id === "object") ||
-            defaultFieldTypes[0];
+            defaultFieldTypes.find((ft) => ft.id === 'object') || defaultFieldTypes[0];
           let children = convertSchemaToFields(property);
 
           fieldCounter.current += 1;
           const layoutId = fieldCounter.current;
           const verticalLayout = {
             id: `field_${layoutId}`,
-            type: "vertical-layout",
-            label: "Vertical Layout",
+            type: 'vertical-layout',
+            label: 'Vertical Layout',
             key: `layout_${layoutId}`,
             isLayout: true,
             schema: {},
-            uischema: { type: "VerticalLayout" },
+            uischema: { type: 'VerticalLayout' },
             children: children.map((c) => ({
               ...c,
               parentId: `field_${layoutId}`,
@@ -1205,21 +944,16 @@ const App = () => {
             uischema: { ...objectType.uischema, label },
             children: [verticalLayout],
             parentId: null,
-            icon: "",
+            icon: '',
           };
 
           fields.push(newField);
           return;
         }
 
-        if (
-          property.type === "array" &&
-          property.items &&
-          property.items.type === "object"
-        ) {
+        if (property.type === 'array' && property.items && property.items.type === 'object') {
           const arrayType =
-            defaultFieldTypes.find((ft) => ft.id === "array") ||
-            defaultFieldTypes[0];
+            defaultFieldTypes.find((ft) => ft.id === 'array') || defaultFieldTypes[0];
           let children = convertSchemaToFields(property.items);
           children = children.map((c) => ({
             ...c,
@@ -1239,25 +973,19 @@ const App = () => {
             parentId: null,
           };
 
-          newField.schema.type = "array";
+          newField.schema.type = 'array';
           if (property.title) newField.schema.title = property.title;
           if (property.items) newField.schema.items = property.items;
           if (property.minItems) newField.schema.minItems = property.minItems;
           if (property.maxItems) newField.schema.maxItems = property.maxItems;
-          if (property.uniqueItems)
-            newField.schema.uniqueItems = property.uniqueItems;
-          if (property.tableView)
-            newField.schema.tableView = property.tableView;
+          if (property.uniqueItems) newField.schema.uniqueItems = property.uniqueItems;
+          if (property.tableView) newField.schema.tableView = property.tableView;
 
           fields.push(newField);
           return;
         }
 
-        if (
-          property.type === "array" &&
-          property.items &&
-          property.items.enum
-        ) {
+        if (property.type === 'array' && property.items && property.items.enum) {
           const fieldType = mapSchemaPropertyToFieldType(property);
           const newField = {
             id: `field_${uniqueId}`,
@@ -1273,7 +1001,7 @@ const App = () => {
               options: {
                 ...fieldType.uischema.options,
                 multi: true,
-                format: "dynamicselect",
+                format: 'dynamicselect',
               },
             },
             parentId: null,
@@ -1308,1322 +1036,9 @@ const App = () => {
     [mapSchemaPropertyToFieldType]
   );
 
-  // Load currency lookup data
-  const getLookupData = async (lookupContext) => {
-    const response = await fetch(
-      `http://localhost:3000/api/auth/v1/lookup?lookupContext=${lookupContext}`
-    );
-    const text = await response.text();
-    try {
-      const json = JSON.parse(text);
-      return json;
-    } catch (e) {
-      console.error("Failed to parse lookup response", e);
-      return [];
-    }
-  };
-
-  useEffect(() => {
-    let mounted = true;
-    getLookupData("currency")
-      .then((data) => {
-        if (!mounted) return;
-        setLookups((prev) => ({ ...prev, currency: data.currency || [] }));
-      })
-      .catch((err) => console.error("Error loading currency lookup", err));
-    return () => {
-      mounted = false;
-    };
-  }, []);
-
   const handleLoadSchemaFromPalette = useCallback(
     (schemaId) => {
-      // Simple sample schemas for the dropdown
-      const sampleSchemas = [
-        {
-          id: "user-registration",
-          name: "User Registration Form",
-          description:
-            "Complete user registration with personal details, contact information, and preferences",
-          tags: ["Registration", "User", "Contact"],
-          schema: {
-            type: "object",
-            properties: {
-              firstName: {
-                type: "string",
-                title: "First Name",
-                minLength: 2,
-              },
-              lastName: {
-                type: "string",
-                title: "Last Name",
-                minLength: 2,
-              },
-              email: {
-                type: "string",
-                format: "email",
-                title: "Email Address",
-              },
-              phone: {
-                type: "string",
-                title: "Phone Number",
-                pattern: "^[+]?[0-9\\s\\-\\(\\)]{10,}$",
-              },
-              age: {
-                type: "number",
-                title: "Age",
-                minimum: 13,
-                maximum: 120,
-              },
-              country: {
-                type: "string",
-                title: "Country",
-                enum: ["USA", "Canada", "UK", "Germany", "France", "Other"],
-              },
-              newsletter: {
-                type: "boolean",
-                title: "Subscribe to Newsletter",
-              },
-              bio: {
-                type: "string",
-                title: "Bio",
-                maxLength: 500,
-              },
-            },
-            required: ["firstName", "lastName", "email"],
-          },
-        },
-        {
-          id: "job-application",
-          name: "Job Application Form",
-          description:
-            "Professional job application with experience, skills, and document uploads",
-          tags: ["Job", "Application", "Professional"],
-          schema: {
-            type: "object",
-            properties: {
-              fullName: {
-                type: "string",
-                title: "Full Name",
-              },
-              email: {
-                type: "string",
-                format: "email",
-                title: "Email",
-              },
-              position: {
-                type: "string",
-                title: "Position Applied For",
-                enum: [
-                  "Software Engineer",
-                  "Product Manager",
-                  "Designer",
-                  "Data Scientist",
-                  "DevOps Engineer",
-                ],
-              },
-              experience: {
-                type: "string",
-                title: "Years of Experience",
-                enum: ["0-1", "2-3", "4-6", "7-10", "10+"],
-              },
-              skills: {
-                type: "string",
-                title: "Technical Skills",
-                maxLength: 1000,
-              },
-              coverLetter: {
-                type: "string",
-                title: "Cover Letter",
-                maxLength: 2000,
-              },
-              relocate: {
-                type: "boolean",
-                title: "Willing to Relocate",
-              },
-              salary: {
-                type: "number",
-                title: "Expected Salary (USD)",
-                minimum: 30000,
-              },
-            },
-            required: ["fullName", "email", "position", "experience"],
-          },
-        },
-        {
-          id: "event-registration",
-          name: "Event Registration",
-          description:
-            "Event registration form with attendance preferences and dietary requirements",
-          tags: ["Event", "Registration", "Conference"],
-          schema: {
-            type: "object",
-            properties: {
-              attendeeName: {
-                type: "string",
-                title: "Attendee Name",
-              },
-              company: {
-                type: "string",
-                title: "Company/Organization",
-              },
-              email: {
-                type: "string",
-                format: "email",
-                title: "Email",
-              },
-              ticketType: {
-                type: "string",
-                title: "Ticket Type",
-                enum: ["Standard", "VIP", "Student", "Speaker"],
-              },
-              sessions: {
-                type: "string",
-                title: "Interested Sessions",
-                enum: [
-                  "Technical Track",
-                  "Business Track",
-                  "Design Track",
-                  "All Sessions",
-                ],
-              },
-              dietaryRequirements: {
-                type: "string",
-                title: "Dietary Requirements",
-                enum: ["None", "Vegetarian", "Vegan", "Gluten-Free", "Other"],
-              },
-              networking: {
-                type: "boolean",
-                title: "Join Networking Event",
-              },
-              accommodation: {
-                type: "boolean",
-                title: "Need Accommodation Assistance",
-              },
-            },
-            required: ["attendeeName", "email", "ticketType"],
-          },
-        },
-        {
-          id: "survey-feedback",
-          name: "Customer Feedback Survey",
-          description:
-            "Customer satisfaction survey with ratings and feedback collection",
-          tags: ["Survey", "Feedback", "Rating"],
-          schema: {
-            type: "object",
-            properties: {
-              customerName: {
-                type: "string",
-                title: "Customer Name (Optional)",
-              },
-              email: {
-                type: "string",
-                format: "email",
-                title: "Email (Optional)",
-              },
-              overallRating: {
-                type: "number",
-                title: "Overall Satisfaction",
-                minimum: 1,
-                maximum: 5,
-                enum: [1, 2, 3, 4, 5],
-                enumNames: ["Very Poor", "Poor", "Fair", "Good", "Excellent"],
-              },
-              productQuality: {
-                type: "number",
-                title: "Product Quality Rating",
-                minimum: 1,
-                maximum: 5,
-              },
-              customerService: {
-                type: "number",
-                title: "Customer Service Rating",
-                minimum: 1,
-                maximum: 5,
-              },
-              recommend: {
-                type: "boolean",
-                title: "Would you recommend us to others?",
-              },
-              improvements: {
-                type: "string",
-                title: "Suggestions for Improvement",
-                maxLength: 1000,
-              },
-              futureContact: {
-                type: "boolean",
-                title: "May we contact you for follow-up?",
-              },
-            },
-            required: ["overallRating"],
-          },
-        },
-        {
-          id: "product-order",
-          name: "Product Order Form",
-          description:
-            "E-commerce order form with product selection and shipping details",
-          tags: ["E-commerce", "Order", "Shopping"],
-          schema: {
-            type: "object",
-            properties: {
-              customerName: {
-                type: "string",
-                title: "Full Name",
-              },
-              email: {
-                type: "string",
-                format: "email",
-                title: "Email",
-              },
-              phone: {
-                type: "string",
-                title: "Phone Number",
-              },
-              product: {
-                type: "string",
-                title: "Product",
-                enum: [
-                  "Laptop",
-                  "Smartphone",
-                  "Tablet",
-                  "Headphones",
-                  "Smart Watch",
-                ],
-              },
-              quantity: {
-                type: "number",
-                title: "Quantity",
-                minimum: 1,
-                maximum: 10,
-              },
-              shippingAddress: {
-                type: "string",
-                title: "Shipping Address",
-                maxLength: 500,
-              },
-              shippingMethod: {
-                type: "string",
-                title: "Shipping Method",
-                enum: [
-                  "Standard (5-7 days)",
-                  "Express (2-3 days)",
-                  "Overnight",
-                ],
-              },
-              giftWrap: {
-                type: "boolean",
-                title: "Gift Wrap ($5 extra)",
-              },
-              specialInstructions: {
-                type: "string",
-                title: "Special Instructions",
-                maxLength: 200,
-              },
-            },
-            required: [
-              "customerName",
-              "email",
-              "product",
-              "quantity",
-              "shippingAddress",
-            ],
-          },
-        },
-        {
-          id: "all-field-types",
-          name: "All Field Types Demo",
-          description: "Demonstration form with all available field types",
-          tags: ["Demo", "All Fields", "Reference"],
-          schema: {
-            type: "object",
-            properties: {
-              text_field: {
-                type: "string",
-                title: "Text Field",
-              },
-              textarea_field: {
-                type: "string",
-                title: "Text Area Field",
-                maxLength: 500,
-              },
-              email_field: {
-                type: "string",
-                format: "email",
-                title: "Email Field",
-              },
-              checkbox_field: {
-                type: "boolean",
-                title: "Checkbox Field",
-              },
-              radio_field: {
-                type: "string",
-                title: "Radio Button Field",
-                enum: ["Option 1", "Option 2", "Option 3"],
-              },
-              number_field: {
-                type: "number",
-                title: "Number Field",
-              },
-              date_field: {
-                type: "string",
-                format: "date",
-                title: "Date Field",
-              },
-              select_single: {
-                type: "string",
-                title: "Select (Single Selection)",
-                enum: [
-                  "Choice A",
-                  "Choice B",
-                  "Choice C",
-                  "Choice D",
-                  "Choice E",
-                ],
-              },
-              select_multiple: {
-                type: "array",
-                title: "Select (Multiple Selection)",
-                items: {
-                  type: "string",
-                  enum: ["item 1", "item 2", "item 3", "item 4", "item 5"],
-                },
-                uniqueItems: true,
-              },
-            },
-            required: ["text_field", "email_field"],
-          },
-        },
-        {
-          id: "all-in-one-demo",
-          name: "All-in-one Demo Form",
-          description:
-            "Comprehensive demo with string formats, arrays, enums, and file upload",
-          tags: ["Demo", "Advanced", "Comprehensive"],
-          schema: {
-            type: "object",
-            properties: {
-              string_basic: {
-                type: "string",
-                title: "Basic String",
-                minLength: 3,
-                maxLength: 100,
-              },
-              string_email: {
-                type: "string",
-                title: "Email",
-                format: "email",
-                pattern: "^[A-Za-z0-9 _-]+$",
-              },
-              string_date: {
-                type: "string",
-                title: "Date",
-                format: "date",
-              },
-              string_url: {
-                type: "string",
-                title: "URL",
-                format: "uri",
-              },
-              file_upload: {
-                type: "string",
-                title: "File Upload (base64)",
-                contentEncoding: "base64",
-                contentMediaType: "application/pdf",
-                pattern: "^[A-Za-z0-9+/=]+$",
-              },
-              number_basic: {
-                type: "number",
-                title: "Number",
-                minimum: 0,
-                maximum: 1000,
-              },
-              boolean_basic: {
-                type: "boolean",
-                title: "Boolean Flag",
-              },
-              array_strings: {
-                type: "array",
-                title: "Array of Strings",
-                items: {
-                  type: "string",
-                  minLength: 1,
-                  maxLength: 50,
-                },
-                minItems: 1,
-                maxItems: 5,
-                uniqueItems: true,
-              },
-              array_objects: {
-                type: "array",
-                title: "Array of Objects",
-                items: {
-                  type: "object",
-                  properties: {
-                    label: {
-                      type: "string",
-                      minLength: 1,
-                      maxLength: 50,
-                    },
-                    value: {
-                      type: "number",
-                      minimum: 0,
-                      maximum: 100,
-                    },
-                    active: {
-                      type: "boolean",
-                    },
-                  },
-                  required: ["label", "value"],
-                },
-                minItems: 1,
-                maxItems: 10,
-                uniqueItems: false,
-              },
-              select_single_enum: {
-                type: "string",
-                title: "Single Select Enum",
-                enum: ["Choice A", "Choice B", "Choice C"],
-              },
-              select_multi_enum: {
-                type: "array",
-                title: "Multi Select Enum",
-                items: {
-                  type: "string",
-                  enum: ["item 1", "item 2", "item 3", "item 4", "item 5"],
-                },
-                minItems: 1,
-                maxItems: 3,
-                uniqueItems: true,
-              },
-            },
-            required: [
-              "string_basic",
-              "string_email",
-              "number_basic",
-              "boolean_basic",
-              "array_strings",
-              "array_objects",
-            ],
-            additionalProperties: false,
-          },
-        },
-        {
-          id: "computed-plan",
-          name: "Computed Plan Form",
-          description: "Plan selection with computed readonly field",
-          tags: ["Demo", "Computed", "ReadOnly"],
-          schema: {
-            type: "object",
-            properties: {
-              plan: {
-                type: "string",
-                title: "Plan",
-                enum: ["basic", "pro", "enterprise"],
-              },
-              tier: {
-                type: "string",
-                title: "Tier",
-                enum: ["monthly", "yearly"],
-              },
-              computed_plan_label: {
-                type: "string",
-                title: "Computed Plan Label",
-                enum: [
-                  "Basic – Monthly",
-                  "Basic – Yearly",
-                  "Pro – Monthly",
-                  "Pro – Yearly",
-                  "Enterprise – Monthly",
-                  "Enterprise – Yearly",
-                ],
-                readOnly: true,
-              },
-            },
-            required: ["plan", "tier"],
-            additionalProperties: false,
-          },
-        },
-        {
-          id: "company-profile",
-          name: "Company Profile Form",
-          description:
-            "Company profile with grouped sections for basic info, contact details, and business information",
-          tags: ["Company", "Profile", "Business"],
-          schema: {
-            type: "object",
-            properties: {
-              company_details: {
-                type: "object",
-                title: "Company Details",
-                properties: {
-                  company_name: {
-                    type: "string",
-                    title: "Company Name",
-                  },
-                  registration_number: {
-                    type: "string",
-                    title: "Registration Number",
-                  },
-                  industry: {
-                    type: "string",
-                    title: "Industry",
-                    enum: [
-                      "Technology",
-                      "Finance",
-                      "Healthcare",
-                      "Manufacturing",
-                      "Retail",
-                      "Other",
-                    ],
-                  },
-                  founded_year: {
-                    type: "number",
-                    title: "Founded Year",
-                    minimum: 1800,
-                    maximum: 2024,
-                  },
-                },
-                required: ["company_name", "registration_number", "industry"],
-              },
-              contact_information: {
-                type: "object",
-                title: "Contact Information",
-                properties: {
-                  email: {
-                    type: "string",
-                    format: "email",
-                    title: "Business Email",
-                  },
-                  phone: {
-                    type: "string",
-                    title: "Phone Number",
-                  },
-                  website: {
-                    type: "string",
-                    title: "Website URL",
-                  },
-                  address: {
-                    type: "object",
-                    title: "Business Address",
-                    properties: {
-                      street: {
-                        type: "string",
-                        title: "Street Address",
-                      },
-                      city: {
-                        type: "string",
-                        title: "City",
-                      },
-                      state: {
-                        type: "string",
-                        title: "State/Province",
-                      },
-                      postal_code: {
-                        type: "string",
-                        title: "Postal Code",
-                      },
-                      country: {
-                        type: "string",
-                        title: "Country",
-                      },
-                    },
-                    required: ["street", "city", "country"],
-                  },
-                },
-                required: ["email", "phone"],
-              },
-              business_info: {
-                type: "object",
-                title: "Business Information",
-                properties: {
-                  employee_count: {
-                    type: "string",
-                    title: "Number of Employees",
-                    enum: ["1-10", "11-50", "51-200", "201-500", "500+"],
-                  },
-                  annual_revenue: {
-                    type: "string",
-                    title: "Annual Revenue Range",
-                    enum: [
-                      "< $1M",
-                      "$1M - $10M",
-                      "$10M - $50M",
-                      "$50M - $100M",
-                      "> $100M",
-                    ],
-                  },
-                  description: {
-                    type: "string",
-                    title: "Company Description",
-                    maxLength: 1000,
-                  },
-                  public_company: {
-                    type: "boolean",
-                    title: "Publicly Traded Company",
-                  },
-                },
-                required: ["employee_count"],
-              },
-            },
-            required: [
-              "company_details",
-              "contact_information",
-              "business_info",
-            ],
-          },
-        },
-        {
-          id: "organization-onboarding",
-          name: "Organization Onboarding Form",
-          description:
-            "Comprehensive onboarding form for new organizations with multiple departments and contacts",
-          tags: ["Onboarding", "Organization", "Multi-department"],
-          schema: {
-            type: "object",
-            properties: {
-              personal_info: {
-                type: "object",
-                properties: {
-                  first_name: {
-                    type: "string",
-                    isTitle: true,
-                    tableView: true,
-                    showAvatar: true,
-                    picturePath: "personal_info.profile_picture",
-                    title: "First Name",
-                  },
-                  middle_name: {
-                    type: "string",
-                    title: "Middle Name",
-                  },
-                  last_name: {
-                    type: "string",
-                    isTitle: true,
-                    tableView: true,
-                    title: "Last Name",
-                  },
-                  blood_group: {
-                    type: "string",
-                    title: "Blood Group",
-                    enum: [
-                      "A+",
-                      "A-",
-                      "B+",
-                      "B-",
-                      "AB+",
-                      "AB-",
-                      "O+",
-                      "O-",
-                      "Prefer not to say",
-                    ],
-                  },
-                  date_of_birth: {
-                    type: "string",
-                    format: "date",
-                    title: "Date of Birth",
-                  },
-                  gender: {
-                    type: "string",
-                    enum: ["Male", "Female", "Other", "Prefer not to say"],
-                  },
-                  marital_status: {
-                    type: "string",
-                    enum: [
-                      "Single",
-                      "Married",
-                      "Divorced",
-                      "Widowed",
-                      "Prefer not to say",
-                    ],
-                  },
-                  nationality: {
-                    type: "string",
-                  },
-                  profile_picture: {
-                    type: "string",
-                  },
-                },
-                required: [
-                  "first_name",
-                  "last_name",
-                  "date_of_birth",
-                  "gender",
-                  "nationality",
-                ],
-              },
-              contact_info: {
-                type: "object",
-                properties: {
-                  contact_number: {
-                    type: "string",
-                    title: "Contact Number",
-                  },
-                  email: {
-                    type: "string",
-                    title: "Email",
-                  },
-                  current_address: {
-                    type: "object",
-                    properties: {
-                      address_line_1: {
-                        type: "string",
-                      },
-                      address_line_2: {
-                        type: "string",
-                      },
-                      city: {
-                        type: "string",
-                      },
-                      state: {
-                        type: "string",
-                      },
-                      country: {
-                        type: "string",
-                      },
-                      zipcode: {
-                        type: "string",
-                      },
-                    },
-                    required: [
-                      "address_line_1",
-                      "address_line_2",
-                      "city",
-                      "state",
-                      "country",
-                      "zipcode",
-                    ],
-                  },
-                  permanent_address: {
-                    type: "object",
-                    properties: {
-                      address_line_1: {
-                        type: "string",
-                      },
-                      address_line_2: {
-                        type: "string",
-                      },
-                      city: {
-                        type: "string",
-                      },
-                      state: {
-                        type: "string",
-                      },
-                      country: {
-                        type: "string",
-                      },
-                      zipcode: {
-                        type: "string",
-                      },
-                    },
-                    required: [
-                      "address_line_1",
-                      "address_line_2",
-                      "city",
-                      "state",
-                      "country",
-                      "zipcode",
-                    ],
-                  },
-                },
-                required: ["contact_number", "email"],
-              },
-              education: {
-                type: "array",
-                title: "Education",
-                items: {
-                  type: "object",
-                  properties: {
-                    degree: {
-                      type: "string",
-                      enum: [
-                        "High School",
-                        "Associate",
-                        "Bachelor",
-                        "Master",
-                        "Doctorate",
-                      ],
-                    },
-                    field_of_study: {
-                      type: "string",
-                    },
-                    institution_name: {
-                      type: "string",
-                    },
-                    start_year: {
-                      type: "number",
-                    },
-                    end_year: {
-                      type: "number",
-                    },
-                  },
-                  required: [
-                    "degree",
-                    "field_of_study",
-                    "institution_name",
-                    "start_year",
-                  ],
-                },
-                minItems: 1,
-                uniqueItems: true,
-              },
-              emergency_contacts: {
-                type: "array",
-                items: {
-                  type: "object",
-                  properties: {
-                    first_name: {
-                      type: "string",
-                    },
-                    middle_name: {
-                      type: "string",
-                    },
-                    last_name: {
-                      type: "string",
-                    },
-                    contact_number: {
-                      type: "string",
-                    },
-                    email: {
-                      type: "string",
-                    },
-                    relation: {
-                      type: "string",
-                    },
-                  },
-                  required: [
-                    "first_name",
-                    "last_name",
-                    "contact_number",
-                    "relation",
-                  ],
-                },
-                minItems: 1,
-                uniqueItems: true,
-              },
-              experience: {
-                type: "array",
-                items: {
-                  type: "object",
-                  properties: {
-                    organisation: {
-                      type: "string",
-                    },
-                    experience_years: {
-                      type: "number",
-                    },
-                    startDate: {
-                      type: "string",
-                      format: "date",
-                      title: "Start Date",
-                    },
-                    endDate: {
-                      type: "string",
-                      format: "date",
-                      title: "End Date",
-                    },
-                    address: {
-                      type: "string",
-                    },
-                    contact: {
-                      type: "string",
-                    },
-                  },
-                  required: [
-                    "organisation",
-                    "experience_years",
-                    "startDate",
-                    "endDate",
-                    "address",
-                    "contact",
-                  ],
-                },
-              },
-              certifications: {
-                type: "array",
-                items: {
-                  type: "object",
-                  properties: {
-                    issuer: {
-                      type: "string",
-                    },
-                    number: {
-                      type: "string",
-                    },
-                    level: {
-                      type: "string",
-                    },
-                    name: {
-                      type: "string",
-                    },
-                    issue_date: {
-                      type: "string",
-                      format: "date",
-                    },
-                    expiry_date: {
-                      type: "string",
-                      format: "date",
-                    },
-                  },
-                  required: [
-                    "issuer",
-                    "number",
-                    "level",
-                    "name",
-                    "issue_date",
-                    "expiry_date",
-                  ],
-                },
-              },
-              passport: {
-                type: "object",
-                properties: {
-                  number: {
-                    type: "string",
-                  },
-                  nationality: {
-                    type: "string",
-                  },
-                  expiry_date: {
-                    type: "string",
-                    format: "date",
-                  },
-                  full_name: {
-                    type: "string",
-                  },
-                },
-                required: ["number", "nationality", "expiry_date", "full_name"],
-              },
-              visa: {
-                type: "array",
-                items: {
-                  type: "object",
-                  properties: {
-                    visa_number: {
-                      type: "string",
-                    },
-                    name: {
-                      type: "string",
-                    },
-                    nationality: {
-                      type: "string",
-                    },
-                    date_of_birth: {
-                      type: "string",
-                      format: "date",
-                    },
-                    issue_date: {
-                      type: "string",
-                      format: "date",
-                    },
-                    expiry_date: {
-                      type: "string",
-                      format: "date",
-                    },
-                    visa_type: {
-                      type: "string",
-                      enum: [
-                        "Tourist",
-                        "Business",
-                        "Work",
-                        "Student",
-                        "Transit",
-                      ],
-                    },
-                  },
-                  required: [
-                    "visa_number",
-                    "name",
-                    "nationality",
-                    "date_of_birth",
-                    "issue_date",
-                    "expiry_date",
-                    "visa_type",
-                  ],
-                },
-                uniqueItems: true,
-              },
-              documents: {
-                type: "array",
-                items: {
-                  type: "object",
-                  properties: {
-                    id: {
-                      type: "string",
-                    },
-                    type: {
-                      type: "string",
-                    },
-                    description: {
-                      type: "string",
-                    },
-                    status: {
-                      type: "string",
-                      enum: [
-                        "UPLOAD-PENDING",
-                        "REVIEW-PENDING",
-                        "ACCEPTED",
-                        "REJECTED",
-                      ],
-                    },
-                    comments: {
-                      type: "string",
-                    },
-                  },
-                  required: ["id", "type", "description", "status"],
-                },
-              },
-              documents_issued: {
-                type: "array",
-                items: {
-                  type: "object",
-                  properties: {
-                    id: {
-                      type: "string",
-                    },
-                    type: {
-                      type: "string",
-                    },
-                    description: {
-                      type: "string",
-                    },
-                  },
-                  required: ["id", "type", "description"],
-                },
-              },
-              employment_info: {
-                type: "object",
-                properties: {
-                  employeeid: {
-                    type: "string",
-                    title: "Employee Id",
-                    tableView: true,
-                    isSubTitle: true,
-                  },
-                  joining_date: {
-                    type: "string",
-                    format: "date",
-                  },
-                  email: {
-                    type: "string",
-                    title: "Email",
-                  },
-                  employee_level: {
-                    type: "string",
-                    enum: [
-                      "Junior",
-                      "Mid",
-                      "Senior",
-                      "Lead",
-                      "Manager",
-                      "Director",
-                      "VP",
-                      "C-Level",
-                    ],
-                  },
-                  job_role: {
-                    type: "object",
-                    properties: {
-                      code: {
-                        type: "string",
-                      },
-                      title: {
-                        type: "string",
-                        tableView: true,
-                        title: "Job Role",
-                      },
-                    },
-                    required: ["code", "title"],
-                  },
-                  designation: {
-                    type: "string",
-                    title: "Designation",
-                    tableView: true,
-                  },
-                  office_location: {
-                    type: "string",
-                    title: "Office Location",
-                    tableView: true,
-                    isSubTitle: true,
-                  },
-                  salary: {
-                    type: "object",
-                    tableView: true,
-                    title: "Salary Details",
-                    properties: {
-                      currency: {
-                        type: "string",
-                        title: "Currency",
-                      },
-                      currency_icon: {
-                        type: "string",
-                        title: "Currency Icon",
-                      },
-                      basic_salary: {
-                        type: "number",
-                        title: "Basic Salary",
-                      },
-                      allowances: {
-                        type: "number",
-                        title: "Allowances",
-                      },
-                      deductions: {
-                        type: "number",
-                        title: "Deductions",
-                      },
-                      net_salary: {
-                        type: "number",
-                        title: "Net Salary",
-                      },
-                    },
-                    required: [
-                      "currency",
-                      "currency_icon",
-                      "basic_salary",
-                      "allowances",
-                      "deductions",
-                      "net_salary",
-                    ],
-                  },
-                  hr_partner: {
-                    type: "object",
-                    properties: {
-                      name: {
-                        type: "string",
-                        title: "HR Partner",
-                      },
-                      employeeid: {
-                        type: "string",
-                      },
-                    },
-                    required: ["name", "employeeid"],
-                  },
-                  reporting_manager: {
-                    type: "object",
-                    properties: {
-                      name: {
-                        type: "string",
-                      },
-                      employeeid: {
-                        type: "string",
-                      },
-                    },
-                    required: ["name", "employeeid"],
-                  },
-
-                  accounts: {
-                    type: "array",
-                    title: "Accounts",
-                    items: {
-                      type: "object",
-                      properties: {
-                        id: {
-                          type: "string",
-                          title: "Account ID",
-                        },
-                        name: {
-                          type: "string",
-                          title: "Account Name",
-                          tableView: true,
-                          isSubTitle: true,
-                        },
-                        start_date: {
-                          type: "string",
-                          format: "date",
-                          title: "Start Date",
-                        },
-                        end_date: {
-                          type: "string",
-                          format: "date",
-                          title: "End Date",
-                        },
-                        projects: {
-                          type: "array",
-                          title: "Projects",
-                          items: {
-                            type: "object",
-                            properties: {
-                              id: {
-                                type: "string",
-                                title: "Project ID",
-                              },
-                              name: {
-                                type: "string",
-                                title: "Project Name",
-                                tableView: true,
-                              },
-                              start_date: {
-                                type: "string",
-                                format: "date",
-                                title: "Start Date",
-                              },
-                              end_date: {
-                                type: "string",
-                                format: "date",
-                                title: "End Date",
-                              },
-                            },
-                            required: ["id", "name", "start_date", "end_date"],
-                          },
-                        },
-                      },
-                      required: ["id", "name", "start_date", "end_date"],
-                    },
-                  },
-                },
-                required: [
-                  "salary",
-                  "job_role",
-                  "employeeid",
-                  "designation",
-                  "joining_date",
-                  "hr_partner",
-                  "employee_level",
-                  "office_location",
-                  "reporting_manager",
-                ],
-              },
-              skills: {
-                type: "array",
-                title: "Skills",
-                tableView: true,
-                items: {
-                  type: "object",
-                  properties: {
-                    skill: {
-                      type: "string",
-                      title: "Skills",
-                      tableView: true,
-                    },
-                    self: {
-                      type: "number",
-                      title: "Self Rating",
-                    },
-                    system: {
-                      type: "number",
-                      title: "System Rating",
-                    },
-                  },
-                  required: ["skill"],
-                },
-              },
-            },
-            required: [
-              "personal_info",
-              "contact_info",
-              "education",
-              "emergency_contacts",
-              "skills",
-              "documents",
-              "documents_issued",
-              "employment_info",
-            ],
-          },
-        },
-      ];
-
-      const selectedSchema = sampleSchemas.find((s) => s.id === schemaId);
+      const selectedSchema = schemas.find((s) => s.id === schemaId);
       if (selectedSchema && selectedSchema.schema) {
         const convertedFields = convertSchemaToFields(selectedSchema.schema);
         setFields(convertedFields);
@@ -2635,19 +1050,18 @@ const App = () => {
     [convertSchemaToFields]
   );
 
-  const isGroup = selectedField?.uischema?.type === "Group";
+  const isGroup = selectedField?.uischema?.type === 'Group';
 
-  const isLayout =
-    selectedField?.isLayout && selectedField?.uischema?.type !== "Group";
+  const isLayout = selectedField?.isLayout && selectedField?.uischema?.type !== 'Group';
 
   const formTitle = isGroup
-    ? "Group Properties"
+    ? 'Group Properties'
     : isLayout
-    ? "Layout Properties"
-    : "Field Properties";
+      ? 'Layout Properties'
+      : 'Field Properties';
 
   return (
-    <ThemeProvider theme={theme}>
+    <ThemeProvider theme={appliedTheme}>
       <CssBaseline />
       <DndContext
         sensors={sensors}
@@ -2657,16 +1071,13 @@ const App = () => {
         onDragEnd={handleDragEnd}
         modifiers={[restrictToWindowEdges]}
       >
-        <SortableContext
-          items={getAllFieldIds(fields)}
-          strategy={verticalListSortingStrategy}
-        >
+        <SortableContext items={getAllFieldIds(fields)} strategy={verticalListSortingStrategy}>
           <Box
             sx={{
-              width: "100vw",
-              height: "100vh",
-              display: "flex",
-              flexDirection: "column",
+              width: '100vw',
+              height: '100vh',
+              display: 'flex',
+              flexDirection: 'column',
               background: (theme) =>
                 `linear-gradient(135deg, ${theme.palette.grey[50]} 0%, ${theme.palette.grey[200]} 100%)`,
             }}
@@ -2676,23 +1087,23 @@ const App = () => {
               sx={{
                 background: (theme) =>
                   `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-                color: "primary.contrastText",
+                color: 'primary.contrastText',
                 p: 2,
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
                 boxShadow: 4,
               }}
             >
-              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 <IconHammer size={28} />
                 <Typography
                   variant="h5"
                   sx={{
                     margin: 0,
-                    fontSize: { xs: "20px", sm: "28px" },
+                    fontSize: { xs: '20px', sm: '28px' },
                     fontWeight: 600,
-                    letterSpacing: "-0.02em",
+                    letterSpacing: '-0.02em',
                   }}
                 >
                   Form Builder
@@ -2703,48 +1114,53 @@ const App = () => {
             {/* Main Content */}
             <Box
               sx={{
-                display: "flex",
+                display: 'flex',
                 flex: 1,
-                overflow: "hidden",
-                flexDirection: { xs: "column", md: "row" },
+                overflow: 'hidden',
+                flexDirection: { xs: 'column', md: 'row' },
               }}
             >
               {/* Left Sidebar - Field Palette */}
               <Box
                 sx={{
-                  width: { xs: "100%", md: "320px" },
-                  minWidth: { md: "320px" },
-                  maxHeight: { xs: "40vh", md: "none" },
+                  width: { xs: '100%', md: '320px' },
+                  minWidth: { md: '320px' },
+                  maxHeight: { xs: '40vh', md: 'none' },
                   borderRight: { md: 1 },
-                  borderColor: { md: "grey.200" },
-                  borderBottom: { xs: 1, md: "none" },
-                  display: "flex",
-                  flexDirection: "column",
-                  overflow: "auto",
+                  borderColor: { md: 'grey.200' },
+                  borderBottom: { xs: 1, md: 'none' },
+                  display: 'flex',
+                  flexDirection: 'column',
+                  overflow: 'auto',
                   boxShadow: { md: 1 },
                 }}
               >
-                {" "}
-                <FieldPalette onLoadSchema={handleLoadSchemaFromPalette} />{" "}
+                {' '}
+                <FieldPalette
+                  onLoadSchema={handleLoadSchemaFromPalette}
+                  schemas={schemas.map((s) => ({
+                    id: s.id,
+                    name: s.name,
+                    description: s.description,
+                  }))}
+                />{' '}
               </Box>
 
               {/* Center Content - Toggle between Form Structure and Form Preview */}
               <Box
                 sx={{
                   flex: 1,
-                  display: "flex",
-                  flexDirection: "column",
-                  overflow: "auto",
-                  minHeight: { xs: "60vh", md: "auto" },
+                  display: 'flex',
+                  flexDirection: 'column',
+                  overflow: 'auto',
+                  minHeight: { xs: '60vh', md: 'auto' },
                 }}
               >
                 {/* Schema Editor (when enabled) */}
                 {showSchemaEditor && (
                   <SchemaEditor
                     formState={formState}
-                    onFormStateChange={(newFormState) =>
-                      setFormData(newFormState.data)
-                    }
+                    onFormStateChange={(newFormState) => setFormData(newFormState.data)}
                     showFormPreview={showFormPreview}
                     setShowFormPreview={setShowFormPreview}
                     showSchemaEditor={showSchemaEditor}
@@ -2758,7 +1174,7 @@ const App = () => {
                   <div
                     style={{
                       flex: 1,
-                      overflow: "auto",
+                      overflow: 'auto',
                     }}
                   >
                     {showFormPreview ? (
@@ -2805,29 +1221,29 @@ const App = () => {
                 <Box
                   sx={{
                     backgroundColor: (theme) => theme.palette.primary.main,
-                    color: "primary.contrastText",
-                    p: "8px 12px",
+                    color: 'primary.contrastText',
+                    p: '8px 12px',
                     borderRadius: 1,
-                    fontSize: "14px",
-                    fontWeight: "bold",
+                    fontSize: '14px',
+                    fontWeight: 'bold',
                     boxShadow: 2,
-                    display: "flex",
-                    alignItems: "center",
+                    display: 'flex',
+                    alignItems: 'center',
                     gap: 1,
                   }}
                 >
                   <span>
-                    {draggedItem.type === "palette-item"
+                    {draggedItem.type === 'palette-item'
                       ? draggedItem.fieldType?.icon &&
                         React.createElement(draggedItem.fieldType.icon, {
                           size: 16,
                         })
-                      : "📝"}
+                      : '📝'}
                   </span>
                   <span>
-                    {draggedItem.type === "palette-item"
+                    {draggedItem.type === 'palette-item'
                       ? draggedItem.fieldType?.label
-                      : draggedItem.field?.label || "Field"}
+                      : draggedItem.field?.label || 'Field'}
                   </span>
                 </Box>
               ) : null}
@@ -2838,48 +1254,44 @@ const App = () => {
           {propertiesDrawerOpen && selectedField && (
             <Box
               sx={{
-                position: "fixed",
+                position: 'fixed',
                 right: 0,
                 top: 0,
-                width: { xs: "100vw", sm: "400px", md: "380px" },
-                height: "100vh",
-                background: "white",
-                boxShadow:
-                  "-4px 0 25px -5px rgb(0 0 0 / 0.1), -2px 0 10px -5px rgb(0 0 0 / 0.04)",
+                width: { xs: '100vw', sm: '400px', md: '380px' },
+                height: '100vh',
+                background: 'white',
+                boxShadow: '-4px 0 25px -5px rgb(0 0 0 / 0.1), -2px 0 10px -5px rgb(0 0 0 / 0.04)',
                 zIndex: 1000,
-                overflow: "auto",
+                overflow: 'auto',
                 borderLeft: 1,
-                borderColor: "grey.200",
+                borderColor: 'grey.200',
               }}
             >
               <Box
                 sx={{
                   p: 3,
                   borderBottom: 1,
-                  borderColor: "grey.200",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  backgroundColor: "grey.50",
+                  borderColor: 'grey.200',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  backgroundColor: 'grey.50',
                 }}
               >
-                <Typography
-                  variant="h6"
-                  sx={{ margin: 0, fontWeight: 600, color: "grey.800" }}
-                >
+                <Typography variant="h6" sx={{ margin: 0, fontWeight: 600, color: 'grey.800' }}>
                   {formTitle}
                 </Typography>
                 <Button
                   onClick={() => setPropertiesDrawerOpen(false)}
                   size="small"
                   sx={{
-                    minWidth: "auto",
+                    minWidth: 'auto',
                     p: 1,
                     borderRadius: 1.5,
-                    color: "grey.500",
-                    "&:hover": {
-                      backgroundColor: "grey.200",
-                      color: "grey.600",
+                    color: 'grey.500',
+                    '&:hover': {
+                      backgroundColor: 'grey.200',
+                      color: 'grey.600',
                     },
                   }}
                 >
@@ -2887,10 +1299,7 @@ const App = () => {
                 </Button>
               </Box>
               <Box sx={{ p: 3 }}>
-                <FieldProperties
-                  field={selectedField}
-                  onFieldUpdate={handleFieldUpdate}
-                />
+                <FieldProperties field={selectedField} onFieldUpdate={handleFieldUpdate} />
               </Box>
             </Box>
           )}

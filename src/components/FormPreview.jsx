@@ -48,7 +48,6 @@ const FormPreview = ({
             validationMode={hasValidated ? "ValidateAndShow" : "NoValidation"}
             additionalErrors={validationErrors}
             onChange={({ data }) => onDataChange(data)}
-            // readonly={isLoading}
             // i18n={{
             //   locale: i18n.language,
             //   translate: (key, defaultMessage) => getTranslation(key, 'label', defaultMessage),

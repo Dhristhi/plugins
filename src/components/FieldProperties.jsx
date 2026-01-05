@@ -3,11 +3,9 @@ import {
   Typography,
   TextField,
   FormControlLabel,
-  Checkbox,
   Box,
   Chip,
   IconButton,
-  Divider,
   Select,
   MenuItem,
   FormControl,
@@ -26,6 +24,7 @@ import {
   IconChevronDown,
   IconEdit,
 } from "@tabler/icons-react";
+
 import { defaultFieldTypes } from "../types";
 import IconSelector from "../utils/IconSelector";
 

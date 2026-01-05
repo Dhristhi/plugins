@@ -94,61 +94,8 @@ const DraggableFieldItem = ({ fieldType }) => {
   );
 };
 
-const FieldPalette = ({ onLoadSchema }) => {
+const FieldPalette = ({ onLoadSchema, schemas = [] }) => {
   const [selectedSchema, setSelectedSchema] = useState("");
-
-  const sampleSchemas = [
-    {
-      id: "user-registration",
-      name: "User Registration Form",
-      description: "Complete user registration with personal details",
-    },
-    {
-      id: "job-application",
-      name: "Job Application Form",
-      description: "Professional job application form",
-    },
-    {
-      id: "event-registration",
-      name: "Event Registration",
-      description: "Event registration with preferences",
-    },
-    {
-      id: "survey-feedback",
-      name: "Customer Feedback Survey",
-      description: "Customer satisfaction survey",
-    },
-    {
-      id: "product-order",
-      name: "Product Order Form",
-      description: "E-commerce order form",
-    },
-    {
-      id: "all-field-types",
-      name: "All Field Types Demo",
-      description: "Demo with all available field types",
-    },
-    {
-      id: "all-in-one-demo",
-      name: "All-in-one Demo Form",
-      description: "Comprehensive demo with advanced features",
-    },
-    {
-      id: "computed-plan",
-      name: "Computed Plan Form",
-      description: "Plan selection with computed field",
-    },
-    {
-      id: "company-profile",
-      name: "Company Profile Form",
-      description: "Company profile with grouped sections",
-    },
-    {
-      id: "organization-onboarding",
-      name: "Organization Onboarding",
-      description: "Comprehensive onboarding form",
-    },
-  ];
 
   const handleSchemaChange = (event) => {
     const schemaId = event.target.value;
@@ -213,7 +160,7 @@ const FieldPalette = ({ onLoadSchema }) => {
           <MenuItem value="">
             <em>Select a template...</em>
           </MenuItem>
-          {sampleSchemas.map((schema) => (
+          {schemas.map((schema) => (
             <MenuItem key={schema.id} value={schema.id}>
               <Box>
                 <Typography variant="body2" sx={{ fontWeight: 500 }}>

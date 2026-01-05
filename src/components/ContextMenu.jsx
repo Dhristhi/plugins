@@ -1,26 +1,11 @@
-import React, { useState } from 'react';
 import {
-  Menu,
-  MenuItem,
-  ListItemIcon,
-  ListItemText,
-  Divider,
-  MenuList,
-  Paper,
-  ClickAwayListener,
-  Popper,
-  Typography,
-} from '@mui/material';
-import {
-  Add as AddIcon,
-  Folder as FolderIcon,
-  ViewModule as ViewModuleIcon,
-  ViewWeek as ViewWeekIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
   FileCopy as CopyIcon,
   ContentCut as CutIcon,
 } from '@mui/icons-material';
+import { Menu, MenuItem, ListItemIcon, ListItemText, Divider, Typography } from '@mui/material';
+
 import { defaultFieldTypes } from '../types';
 
 const ContextMenu = ({
@@ -115,33 +100,21 @@ const ContextMenu = ({
           </MenuItem>
 
           {/* Quick add common field types */}
-          <MenuItem
-            onClick={() =>
-              handleAddField(fieldTypes.find((ft) => ft.id === 'text'))
-            }
-          >
+          <MenuItem onClick={() => handleAddField(fieldTypes.find((ft) => ft.id === 'text'))}>
             <ListItemIcon>
               <Typography>📝</Typography>
             </ListItemIcon>
             <ListItemText primary="Add Text Field" />
           </MenuItem>
 
-          <MenuItem
-            onClick={() =>
-              handleAddField(fieldTypes.find((ft) => ft.id === 'select'))
-            }
-          >
+          <MenuItem onClick={() => handleAddField(fieldTypes.find((ft) => ft.id === 'select'))}>
             <ListItemIcon>
               <Typography>📋</Typography>
             </ListItemIcon>
             <ListItemText primary="Add Select Field" />
           </MenuItem>
 
-          <MenuItem
-            onClick={() =>
-              handleAddField(fieldTypes.find((ft) => ft.id === 'checkbox'))
-            }
-          >
+          <MenuItem onClick={() => handleAddField(fieldTypes.find((ft) => ft.id === 'checkbox'))}>
             <ListItemIcon>
               <Typography>☑️</Typography>
             </ListItemIcon>
@@ -152,10 +125,7 @@ const ContextMenu = ({
 
           {/* Layout options */}
           {layoutTypes.map((layoutType) => (
-            <MenuItem
-              key={layoutType.id}
-              onClick={() => handleAddLayout(layoutType)}
-            >
+            <MenuItem key={layoutType.id} onClick={() => handleAddLayout(layoutType)}>
               <ListItemIcon>
                 <Typography>{layoutType.icon}</Typography>
               </ListItemIcon>
@@ -165,8 +135,8 @@ const ContextMenu = ({
                   layoutType.id === 'group'
                     ? 'Visual container with border'
                     : layoutType.id === 'vertical-layout'
-                    ? 'Stack elements vertically'
-                    : 'Arrange elements horizontally'
+                      ? 'Stack elements vertically'
+                      : 'Arrange elements horizontally'
                 }
               />
             </MenuItem>
@@ -176,10 +146,7 @@ const ContextMenu = ({
         </>
       )}
 
-      <MenuItem
-        onClick={() => handleAction(onDeleteField)}
-        sx={{ color: 'error.main' }}
-      >
+      <MenuItem onClick={() => handleAction(onDeleteField)} sx={{ color: 'error.main' }}>
         <ListItemIcon>
           <DeleteIcon fontSize="small" color="error" />
         </ListItemIcon>

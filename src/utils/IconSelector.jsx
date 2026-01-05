@@ -1,21 +1,5 @@
 import React, { useMemo, memo } from "react";
-import { Autocomplete, TextField, Box, Typography } from "@mui/material";
 import * as TablerIcons from "@tabler/icons-react";
-
-// Memoized icon option component for better performance
-const IconOption = memo(({ props, option }) => {
-  const IconComponent = option.component;
-  return (
-    <Box
-      component="li"
-      {...props}
-      sx={{ display: "flex", alignItems: "center", gap: 1, py: 0.5 }}
-    >
-      <IconComponent size={18} />
-      <Typography variant="body2">{option.name}</Typography>
-    </Box>
-  );
-});
 
 const IconSelector = ({ value, onChange }) => {
   // Get all Tabler icons - cached

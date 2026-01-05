@@ -1,12 +1,5 @@
-import React from 'react';
+import { IconEye, IconCode } from '@tabler/icons-react';
 import { Box, Typography, Button, ButtonGroup } from '@mui/material';
-import {
-  IconEye,
-  IconEyeOff,
-  IconCode,
-  IconClipboard,
-  IconDownload,
-} from '@tabler/icons-react';
 
 const CommonHeader = ({
   title,
@@ -16,7 +9,6 @@ const CommonHeader = ({
   setShowFormPreview,
   showSchemaEditor,
   setShowSchemaEditor,
-  exportForm,
 }) => {
   return (
     <Box
