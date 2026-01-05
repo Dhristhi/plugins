@@ -121,7 +121,8 @@ export default function MyPage() {
 
 ```
 apps/
-  demo/                 # Demo application (Vite)
+  form-builder-basic-demo/
+                        # Demo application (Vite)
 
 packages/
   form-builder/

@@ -7,7 +7,7 @@
     "apps/*"
   ],
   "scripts": {
-    "dev": "yarn workspace form-builder-demo dev",
+    "dev": "yarn workspace form-builder-basic-demo dev",
     "build": "yarn workspaces run build",
     "test": "yarn workspaces run test",
     "lint": "yarn workspaces run lint",
