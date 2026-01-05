@@ -7,7 +7,16 @@ import reactRefreshPlugin from 'eslint-plugin-react-refresh';
 export default [
   js.configs.recommended,
   {
-    files: ['src/**/*.{js,jsx}'],
+    linterOptions: {
+      reportUnusedDisableDirectives: 'off'
+    }
+  },
+  {
+    files: [
+      'src/**/*.{js,jsx,ts,tsx}',
+      'packages/**/src/**/*.{js,jsx,ts,tsx}',
+      'apps/**/src/**/*.{js,jsx,ts,tsx}'
+    ],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'module',
@@ -32,10 +41,13 @@ export default [
     settings: {
       react: { version: 'detect' }
     }
-  }
-  ,
+  },
   {
-    files: ['src/__tests__/**/*.{js,jsx}'],
+    files: [
+      'src/__tests__/**/*.{js,jsx,ts,tsx}',
+      'packages/**/src/__tests__/**/*.{js,jsx,ts,tsx}',
+      'apps/**/src/__tests__/**/*.{js,jsx,ts,tsx}'
+    ],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'module',

@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { Typography, TextField, Button, Box } from '@mui/material';
+import { useState, useEffect } from 'react';
 import { IconCode } from '@tabler/icons-react';
+import { Typography, TextField, Button, Box } from '@mui/material';
+
 import CommonHeader from './CommonHeader';
 
 const SchemaEditor = ({

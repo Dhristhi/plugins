@@ -1,11 +1,11 @@
-import { createAjv } from "@jsonforms/core";
-import { JsonForms } from "@jsonforms/react";
-import { IconEye } from "@tabler/icons-react";
-import { Typography, Box } from "@mui/material";
+import { useState } from 'react';
+import { createAjv } from '@jsonforms/core';
+import { JsonForms } from '@jsonforms/react';
+import { IconEye } from '@tabler/icons-react';
+import { Typography, Box } from '@mui/material';
 
-import { useState } from "react";
-import CommonHeader from "./CommonHeader";
-import { renderers, cells, config } from "../controls/renders";
+import CommonHeader from './CommonHeader';
+import { renderers, cells, config } from '../controls/renders';
 
 const FormPreview = ({
   formState,
@@ -35,8 +35,7 @@ const FormPreview = ({
       />
 
       <Box sx={{ p: 2 }}>
-        {formState.schema.properties &&
-        Object.keys(formState.schema.properties).length > 0 ? (
+        {formState.schema.properties && Object.keys(formState.schema.properties).length > 0 ? (
           <JsonForms
             ajv={ajv}
             data={formState.data}
@@ -45,7 +44,7 @@ const FormPreview = ({
             renderers={renderers}
             schema={formState.schema}
             uischema={formState.uischema}
-            validationMode={hasValidated ? "ValidateAndShow" : "NoValidation"}
+            validationMode={hasValidated ? 'ValidateAndShow' : 'NoValidation'}
             additionalErrors={validationErrors}
             onChange={({ data }) => onDataChange(data)}
             // i18n={{

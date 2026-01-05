@@ -1,6 +1,4 @@
-import React, { useState } from "react";
-import "../lib/registry/init";
-import { getFieldTypes } from "../lib/registry/fieldRegistry";
+import React, { useState } from 'react';
 import {
   Typography,
   Box,
@@ -10,24 +8,21 @@ import {
   InputLabel,
   Select,
   MenuItem,
-} from "@mui/material";
-import { useDraggable } from "@dnd-kit/core";
-import {
-  IconTarget,
-  IconLayersLinked,
-  IconForms,
-  IconClipboard,
-} from "@tabler/icons-react";
+} from '@mui/material';
+import { useDraggable } from '@dnd-kit/core';
+import { IconLayersLinked, IconForms, IconClipboard } from '@tabler/icons-react';
+
+import '../lib/registry/init';
+import { getFieldTypes } from '../lib/registry/fieldRegistry';
 
 const DraggableFieldItem = ({ fieldType }) => {
-  const { attributes, listeners, setNodeRef, transform, isDragging } =
-    useDraggable({
-      id: fieldType.id,
-      data: {
-        type: "palette-item",
-        fieldType: fieldType,
-      },
-    });
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+    id: fieldType.id,
+    data: {
+      type: 'palette-item',
+      fieldType: fieldType,
+    },
+  });
 
   const style = transform
     ? {
@@ -46,37 +41,37 @@ const DraggableFieldItem = ({ fieldType }) => {
       sx={{
         p: 1.5,
         mb: 1,
-        cursor: isDragging ? "grabbing" : "grab",
+        cursor: isDragging ? 'grabbing' : 'grab',
         border: 1,
-        borderColor: "grey.300",
-        "&:hover": {
-          backgroundColor: "grey.100",
-          borderColor: "primary.main",
-          transform: "translateY(-1px)",
+        borderColor: 'grey.300',
+        '&:hover': {
+          backgroundColor: 'grey.100',
+          borderColor: 'primary.main',
+          transform: 'translateY(-1px)',
         },
-        display: "flex",
-        alignItems: "center",
+        display: 'flex',
+        alignItems: 'center',
         gap: 1,
-        userSelect: "none",
-        transition: "all 0.2s ease",
+        userSelect: 'none',
+        transition: 'all 0.2s ease',
         ...(isDragging && {
-          backgroundColor: "primary.light",
-          borderColor: "primary.main",
+          backgroundColor: 'primary.light',
+          borderColor: 'primary.main',
           boxShadow: (theme) => `0 4px 12px ${theme.palette.primary.main}30`,
         }),
       }}
     >
       <Box
         sx={{
-          minWidth: "24px",
-          display: "flex",
-          alignItems: "center",
-          color: "primary.main",
+          minWidth: '24px',
+          display: 'flex',
+          alignItems: 'center',
+          color: 'primary.main',
         }}
       >
         {React.createElement(fieldType.icon, {
           size: 18,
-          stroke: "currentColor",
+          stroke: 'currentColor',
         })}
       </Box>
       <Box sx={{ flex: 1 }}>
@@ -86,9 +81,9 @@ const DraggableFieldItem = ({ fieldType }) => {
         <Typography
           variant="caption"
           color="textSecondary"
-          sx={{ fontSize: "11px", lineHeight: 1.2 }}
+          sx={{ fontSize: '11px', lineHeight: 1.2 }}
         >
-          {fieldType.isLayout ? "Layout Container" : "Form Input"}
+          {fieldType.isLayout ? 'Layout Container' : 'Form Input'}
         </Typography>
       </Box>
     </Paper>
@@ -96,7 +91,7 @@ const DraggableFieldItem = ({ fieldType }) => {
 };
 
 const FieldPalette = ({ onLoadSchema, schemas = [] }) => {
-  const [selectedSchema, setSelectedSchema] = useState("");
+  const [selectedSchema, setSelectedSchema] = useState('');
 
   const handleSchemaChange = (event) => {
     const schemaId = event.target.value;
@@ -107,9 +102,7 @@ const FieldPalette = ({ onLoadSchema, schemas = [] }) => {
   };
 
   const allTypes = getFieldTypes();
-  const layoutTypes = allTypes.filter(
-    (ft) => ft.isLayout && ft.id !== "object"
-  );
+  const layoutTypes = allTypes.filter((ft) => ft.isLayout && ft.id !== 'object');
   const fieldTypes = allTypes.filter((ft) => !ft.isLayout);
 
   return (
@@ -118,25 +111,25 @@ const FieldPalette = ({ onLoadSchema, schemas = [] }) => {
         p: { xs: 2, sm: 3 },
         background: (theme) =>
           `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.grey[50]} 100%)`,
-        backdropFilter: "blur(20px)",
-        borderRight: { md: "1px solid" },
-        borderColor: { md: "grey.200" },
-        height: "100%",
-        overflowY: "auto",
+        backdropFilter: 'blur(20px)',
+        borderRight: { md: '1px solid' },
+        borderColor: { md: 'grey.200' },
+        height: '100%',
+        overflowY: 'auto',
       }}
     >
       {/* Schema Loader Section */}
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
-        <Box sx={{ color: "primary.main" }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+        <Box sx={{ color: 'primary.main' }}>
           <IconClipboard size={20} />
         </Box>
         <Typography
           variant="subtitle1"
           sx={{
-            color: "grey.900",
+            color: 'grey.900',
             fontWeight: 700,
-            fontSize: "1rem",
-            letterSpacing: "-0.025em",
+            fontSize: '1rem',
+            letterSpacing: '-0.025em',
           }}
         >
           Form Templates
@@ -150,12 +143,12 @@ const FieldPalette = ({ onLoadSchema, schemas = [] }) => {
           label="Choose Template"
           onChange={handleSchemaChange}
           sx={{
-            backgroundColor: "background.paper",
-            "& .MuiOutlinedInput-notchedOutline": {
-              borderColor: "grey.300",
+            backgroundColor: 'background.paper',
+            '& .MuiOutlinedInput-notchedOutline': {
+              borderColor: 'grey.300',
             },
-            "&:hover .MuiOutlinedInput-notchedOutline": {
-              borderColor: "primary.main",
+            '&:hover .MuiOutlinedInput-notchedOutline': {
+              borderColor: 'primary.main',
             },
           }}
         >
@@ -180,17 +173,17 @@ const FieldPalette = ({ onLoadSchema, schemas = [] }) => {
       <Divider sx={{ my: 2 }} />
 
       {/* Layout Elements Section */}
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
-        <Box sx={{ color: "primary.main" }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+        <Box sx={{ color: 'primary.main' }}>
           <IconLayersLinked size={20} />
         </Box>
         <Typography
           variant="subtitle1"
           sx={{
-            color: "grey.900",
+            color: 'grey.900',
             fontWeight: 700,
-            fontSize: "1rem",
-            letterSpacing: "-0.025em",
+            fontSize: '1rem',
+            letterSpacing: '-0.025em',
           }}
         >
           Layouts
@@ -200,9 +193,9 @@ const FieldPalette = ({ onLoadSchema, schemas = [] }) => {
         variant="body2"
         sx={{
           mb: 2.5,
-          display: "block",
-          color: "grey.600",
-          fontSize: "0.875rem",
+          display: 'block',
+          color: 'grey.600',
+          fontSize: '0.875rem',
         }}
       >
         Organize fields with containers
@@ -216,17 +209,17 @@ const FieldPalette = ({ onLoadSchema, schemas = [] }) => {
       <Divider sx={{ my: 2 }} />
 
       {/* Form Fields Section */}
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
-        <Box sx={{ color: "primary.main" }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+        <Box sx={{ color: 'primary.main' }}>
           <IconForms size={20} />
         </Box>
         <Typography
           variant="subtitle1"
           sx={{
-            color: "grey.900",
+            color: 'grey.900',
             fontWeight: 700,
-            fontSize: "1rem",
-            letterSpacing: "-0.025em",
+            fontSize: '1rem',
+            letterSpacing: '-0.025em',
           }}
         >
           Form Fields
@@ -236,9 +229,9 @@ const FieldPalette = ({ onLoadSchema, schemas = [] }) => {
         variant="body2"
         sx={{
           mb: 2.5,
-          display: "block",
-          color: "grey.600",
-          fontSize: "0.875rem",
+          display: 'block',
+          color: 'grey.600',
+          fontSize: '0.875rem',
         }}
       >
         Input controls for data collection

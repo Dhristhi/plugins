@@ -1,4 +1,3 @@
-import React, { useState, useEffect } from "react";
 import {
   Typography,
   TextField,
@@ -16,37 +15,22 @@ import {
   Switch,
   Grid,
   Slider,
-} from "@mui/material";
-import {
-  IconPlus,
-  IconTrash,
-  IconSettings,
-  IconChevronDown,
-  IconEdit,
-} from "@tabler/icons-react";
+} from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { IconPlus, IconTrash, IconSettings, IconChevronDown, IconEdit } from '@tabler/icons-react';
 
-import { defaultFieldTypes } from "../types";
-import IconSelector from "../utils/IconSelector";
+import { defaultFieldTypes } from '../types';
+import IconSelector from '../utils/IconSelector';
 
 const FieldProperties = ({ field, onFieldUpdate }) => {
   const [localField, setLocalField] = useState(null);
   const [enumOptions, setEnumOptions] = useState([]);
-  const [newOption, setNewOption] = useState("");
+  const [newOption, setNewOption] = useState('');
   const [selectedAccess, setSelectedAccess] = useState([]);
-  const [layout, setLayout] = useState("");
-  const [selectedIcon, setSelectedIcon] = useState("");
+  const [layout, setLayout] = useState('');
+  const [selectedIcon, setSelectedIcon] = useState('');
 
-  const ALL_ROLE_CODES = [
-    "OWNER",
-    "HR",
-    "EXE",
-    "MGM",
-    "SAL",
-    "FIN",
-    "OPR",
-    "USER",
-    "ADM",
-  ];
+  const ALL_ROLE_CODES = ['OWNER', 'HR', 'EXE', 'MGM', 'SAL', 'FIN', 'OPR', 'USER', 'ADM'];
 
   const getRoleDisplayName = (code) => ALL_ROLE_CODES[code] || code;
   const handleAccessChipClick = (roleCode) => {
@@ -65,16 +49,11 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
     setLayout(newLayoutType);
 
     const uischemaType =
-      newLayoutType === "horizontal-layout"
-        ? "HorizontalLayout"
-        : "VerticalLayout";
+      newLayoutType === 'horizontal-layout' ? 'HorizontalLayout' : 'VerticalLayout';
 
     const updatedField = {
       ...localField,
-      label:
-        newLayoutType === "horizontal-layout"
-          ? "Horizontal Layout"
-          : "Vertical Layout",
+      label: newLayoutType === 'horizontal-layout' ? 'Horizontal Layout' : 'Vertical Layout',
       type: newLayoutType,
       uischema: {
         ...localField.uischema,
@@ -100,23 +79,15 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
         setEnumOptions([]);
       }
       setSelectedAccess(field.schema?.allowedAccess || []);
-      setSelectedIcon(field.icon || "");
+      setSelectedIcon(field.icon || '');
     }
   }, [field]);
 
   if (!localField) {
     return (
-      <Box sx={{ p: 3, textAlign: "center" }}>
-        <IconSettings
-          size={48}
-          style={{ marginBottom: "16px" }}
-          color="currentColor"
-        />
-        <Typography
-          variant="h6"
-          color="textSecondary"
-          sx={{ fontWeight: 500, color: "grey.400" }}
-        >
+      <Box sx={{ p: 3, textAlign: 'center' }}>
+        <IconSettings size={48} style={{ marginBottom: '16px' }} color="currentColor" />
+        <Typography variant="h6" color="textSecondary" sx={{ fontWeight: 500, color: 'grey.400' }}>
           Select a field to edit
         </Typography>
         <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>
@@ -141,7 +112,7 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
     if (newOption.trim()) {
       const newOptions = [...enumOptions, newOption.trim()];
       setEnumOptions(newOptions);
-      if (localField.schema?.type === "array" && localField.schema?.items) {
+      if (localField.schema?.type === 'array' && localField.schema?.items) {
         handleSchemaUpdate({
           items: {
             ...localField.schema.items,
@@ -151,19 +122,19 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
       } else {
         handleSchemaUpdate({ enum: newOptions });
       }
-      setNewOption("");
+      setNewOption('');
     }
   };
 
   const handleRemoveOption = (index) => {
     const newOptions = enumOptions.filter((_, i) => i !== index);
     setEnumOptions(newOptions);
-    if (localField.schema?.type === "array" && localField.schema?.items) {
+    if (localField.schema?.type === 'array' && localField.schema?.items) {
       handleSchemaUpdate({
         items:
           newOptions.length > 0
             ? { ...localField.schema.items, enum: newOptions }
-            : { type: "string" },
+            : { type: 'string' },
       });
     } else {
       handleSchemaUpdate({
@@ -186,13 +157,10 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
       };
 
       // Preserve enum options and uischema options
-      if (
-        hasEnumOptions &&
-        ["select", "radio", "multiselect"].includes(newTypeId)
-      ) {
-        if (newTypeId === "multiselect") {
+      if (hasEnumOptions && ['select', 'radio', 'multiselect'].includes(newTypeId)) {
+        if (newTypeId === 'multiselect') {
           updatedField.schema.items = {
-            type: "string",
+            type: 'string',
             enum: enumOptions,
           };
           delete updatedField.schema.enum;
@@ -216,7 +184,7 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
         setEnumOptions([...newFieldType.schema.enum]);
       } else if (newFieldType.schema.items?.enum) {
         setEnumOptions([...newFieldType.schema.items.enum]);
-      } else if (!["select", "radio", "multiselect"].includes(newTypeId)) {
+      } else if (!['select', 'radio', 'multiselect'].includes(newTypeId)) {
         setEnumOptions([]);
       }
     }
@@ -226,18 +194,18 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
     const currentSchemaType = localField.schema?.type;
 
     // Array fields with enum items (multiselect) can switch between multiselect and array
-    if (currentSchemaType === "array" && localField.schema?.items?.enum) {
-      return availableFieldTypes.filter((ft) => ft.id === "multiselect" || ft.id === "array");
+    if (currentSchemaType === 'array' && localField.schema?.items?.enum) {
+      return availableFieldTypes.filter((ft) => ft.id === 'multiselect' || ft.id === 'array');
     }
 
     // Array fields without enum can switch between array and multiselect
-    if (currentSchemaType === "array") {
-      return availableFieldTypes.filter((ft) => ft.id === "array" || ft.id === "multiselect");
+    if (currentSchemaType === 'array') {
+      return availableFieldTypes.filter((ft) => ft.id === 'array' || ft.id === 'multiselect');
     }
 
     return availableFieldTypes.filter((ft) => {
       // Don't allow converting to array types from other types
-      if (ft.id === "array" || ft.id === "multiselect") return false;
+      if (ft.id === 'array' || ft.id === 'multiselect') return false;
 
       const targetSchemaType = ft.schema?.type;
 
@@ -257,10 +225,12 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
 
   const availableFieldTypes = defaultFieldTypes.filter((ft) => !ft.isLayout);
   const hasEnumOptions =
-    ["select", "radio", "multiselect"].includes(localField.type) ||
-    (localField.schema?.type === "array" && !!localField.schema?.items && localField.uischema?.options?.multi) ||
-    (localField.uischema?.options?.format === "dynamicselect");
-  
+    ['select', 'radio', 'multiselect'].includes(localField.type) ||
+    (localField.schema?.type === 'array' &&
+      !!localField.schema?.items &&
+      localField.uischema?.options?.multi) ||
+    localField.uischema?.options?.format === 'dynamicselect';
+
   // Debug logging
   console.log('FieldProperties Debug:', {
     type: localField.type,
@@ -268,20 +238,19 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
     hasItems: !!localField.schema?.items,
     multi: localField.uischema?.options?.multi,
     format: localField.uischema?.options?.format,
-    hasEnumOptions
+    hasEnumOptions,
   });
-  
-  const isGroup = localField.uischema?.type === "Group";
-  const isLayout = localField.isLayout && localField.uischema?.type !== "Group";
+
+  const isGroup = localField.uischema?.type === 'Group';
+  const isLayout = localField.isLayout && localField.uischema?.type !== 'Group';
 
   const handleUiOptionsUpdate = (updates) => {
-    const existingUiOptions =
-      localField.uischema?.options?.["ui:options"] || {};
+    const existingUiOptions = localField.uischema?.options?.['ui:options'] || {};
     const updatedUiSchema = {
       ...localField.uischema,
       options: {
         ...localField.uischema?.options,
-        "ui:options": {
+        'ui:options': {
           ...existingUiOptions,
           ...updates,
         },
@@ -304,7 +273,7 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
             {/* Show label field only for groups and non-layout fields */}
             {!isLayout && (
               <TextField
-                label={isGroup ? "Group Title" : "Label"}
+                label={isGroup ? 'Group Title' : 'Label'}
                 fullWidth
                 value={localField.label}
                 onChange={(e) => {
@@ -325,11 +294,9 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                 margin="normal"
                 variant="outlined"
                 helperText={
-                  isGroup
-                    ? "Displayed as the group header"
-                    : "The display label for this field"
+                  isGroup ? 'Displayed as the group header' : 'The display label for this field'
                 }
-                sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+                sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
               />
             )}
 
@@ -345,9 +312,7 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                   sx={{ borderRadius: 2 }}
                 >
                   <MenuItem value="vertical-layout">Vertical Layout</MenuItem>
-                  <MenuItem value="horizontal-layout">
-                    Horizontal Layout
-                  </MenuItem>
+                  <MenuItem value="horizontal-layout">Horizontal Layout</MenuItem>
                 </Select>
               </FormControl>
             )}
@@ -362,7 +327,7 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                   margin="normal"
                   variant="outlined"
                   helperText="Unique identifier for this field"
-                  sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+                  sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                 />
 
                 <FormControl fullWidth margin="normal">
@@ -379,8 +344,8 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                         <MenuItem key={fieldType.id} value={fieldType.id}>
                           <Box
                             sx={{
-                              display: "flex",
-                              alignItems: "center",
+                              display: 'flex',
+                              alignItems: 'center',
                               gap: 1,
                             }}
                           >
@@ -397,9 +362,7 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                   control={
                     <Switch
                       checked={localField.required || false}
-                      onChange={(e) =>
-                        handleUpdate({ required: e.target.checked })
-                      }
+                      onChange={(e) => handleUpdate({ required: e.target.checked })}
                       color="primary"
                     />
                   }
@@ -446,10 +409,7 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                   <FormControlLabel
                     control={
                       <Switch
-                        checked={
-                          localField.uischema?.options
-                            ?.showUnfocusedDescription || false
-                        }
+                        checked={localField.uischema?.options?.showUnfocusedDescription || false}
                         onChange={(e) => {
                           const updatedUISchema = {
                             ...localField.uischema,
@@ -484,17 +444,15 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
               <TextField
                 label="Default Value"
                 fullWidth
-                value={localField.schema?.default || ""}
+                value={localField.schema?.default || ''}
                 onChange={(e) => {
                   let defaultValue = e.target.value;
 
                   // Convert to appropriate type
-                  if (localField.type === "number") {
-                    defaultValue = defaultValue
-                      ? Number(defaultValue)
-                      : undefined;
-                  } else if (localField.type === "checkbox") {
-                    defaultValue = defaultValue.toLowerCase() === "true";
+                  if (localField.type === 'number') {
+                    defaultValue = defaultValue ? Number(defaultValue) : undefined;
+                  } else if (localField.type === 'checkbox') {
+                    defaultValue = defaultValue.toLowerCase() === 'true';
                   }
 
                   handleSchemaUpdate({ default: defaultValue });
@@ -502,14 +460,14 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                 margin="normal"
                 variant="outlined"
                 helperText="Initial value for this field"
-                sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+                sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
               />
             </Box>
           </AccordionDetails>
         </Accordion>
       )}
       {/* File Upload Options */}
-      {localField.type === "file" && (
+      {localField.type === 'file' && (
         <Accordion sx={{ mb: 2, boxShadow: 1 }}>
           <AccordionSummary expandIcon={<IconChevronDown />}>
             <Typography variant="subtitle1" fontWeight={600}>
@@ -521,9 +479,7 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
               <TextField
                 label="Allowed File Types"
                 fullWidth
-                value={
-                  localField.uischema?.options?.["ui:options"]?.accept || ""
-                }
+                value={localField.uischema?.options?.['ui:options']?.accept || ''}
                 onChange={(e) =>
                   handleUiOptionsUpdate({
                     accept: e.target.value || undefined,
@@ -532,7 +488,7 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                 margin="normal"
                 variant="outlined"
                 helperText="Comma-separated list of allowed file types (e.g., .jpg, .png, .pdf)"
-                sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+                sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
               />
             </Box>
           </AccordionDetails>
@@ -548,9 +504,9 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
           </AccordionSummary>
           <AccordionDetails>
             <Box>
-              {(localField.type === "text" ||
-                localField.type === "textarea" ||
-                localField.type === "email") && (
+              {(localField.type === 'text' ||
+                localField.type === 'textarea' ||
+                localField.type === 'email') && (
                 <>
                   <Grid container spacing={2}>
                     <Grid item xs={6}>
@@ -558,17 +514,15 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                         label="Min Length"
                         type="number"
                         fullWidth
-                        value={localField.schema?.minLength || ""}
+                        value={localField.schema?.minLength || ''}
                         onChange={(e) =>
                           handleSchemaUpdate({
-                            minLength: e.target.value
-                              ? Number(e.target.value)
-                              : undefined,
+                            minLength: e.target.value ? Number(e.target.value) : undefined,
                           })
                         }
                         margin="normal"
                         variant="outlined"
-                        sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+                        sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                       />
                     </Grid>
                     <Grid item xs={6}>
@@ -576,17 +530,15 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                         label="Max Length"
                         type="number"
                         fullWidth
-                        value={localField.schema?.maxLength || ""}
+                        value={localField.schema?.maxLength || ''}
                         onChange={(e) =>
                           handleSchemaUpdate({
-                            maxLength: e.target.value
-                              ? Number(e.target.value)
-                              : undefined,
+                            maxLength: e.target.value ? Number(e.target.value) : undefined,
                           })
                         }
                         margin="normal"
                         variant="outlined"
-                        sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+                        sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                       />
                     </Grid>
                   </Grid>
@@ -594,7 +546,7 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                   <TextField
                     label="Pattern (RegEx)"
                     fullWidth
-                    value={localField.schema?.pattern || ""}
+                    value={localField.schema?.pattern || ''}
                     onChange={(e) =>
                       handleSchemaUpdate({
                         pattern: e.target.value || undefined,
@@ -603,29 +555,27 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                     margin="normal"
                     variant="outlined"
                     helperText="Regular expression for validation (e.g., ^[A-Za-z]+$ for letters only)"
-                    sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                   />
                 </>
               )}
 
-              {localField.type === "number" && (
+              {localField.type === 'number' && (
                 <Grid container spacing={2}>
                   <Grid item xs={6}>
                     <TextField
                       label="Minimum Value"
                       type="number"
                       fullWidth
-                      value={localField.schema?.minimum || ""}
+                      value={localField.schema?.minimum || ''}
                       onChange={(e) =>
                         handleSchemaUpdate({
-                          minimum: e.target.value
-                            ? Number(e.target.value)
-                            : undefined,
+                          minimum: e.target.value ? Number(e.target.value) : undefined,
                         })
                       }
                       margin="normal"
                       variant="outlined"
-                      sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+                      sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                     />
                   </Grid>
                   <Grid item xs={6}>
@@ -633,17 +583,15 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                       label="Maximum Value"
                       type="number"
                       fullWidth
-                      value={localField.schema?.maximum || ""}
+                      value={localField.schema?.maximum || ''}
                       onChange={(e) =>
                         handleSchemaUpdate({
-                          maximum: e.target.value
-                            ? Number(e.target.value)
-                            : undefined,
+                          maximum: e.target.value ? Number(e.target.value) : undefined,
                         })
                       }
                       margin="normal"
                       variant="outlined"
-                      sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+                      sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                     />
                   </Grid>
                 </Grid>
@@ -662,25 +610,27 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
           </AccordionSummary>
           <AccordionDetails>
             <Box>
-              {((localField.type === "select" || localField.type === "multiselect") || 
-                (localField.schema?.type === "array" && localField.uischema?.options?.multi) ||
-                (localField.uischema?.options?.format === "dynamicselect")) && (
+              {(localField.type === 'select' ||
+                localField.type === 'multiselect' ||
+                (localField.schema?.type === 'array' && localField.uischema?.options?.multi) ||
+                localField.uischema?.options?.format === 'dynamicselect') && (
                 <FormControlLabel
                   control={
                     <Switch
                       checked={localField.uischema?.options?.entity !== undefined}
                       onChange={(e) => {
                         const isDynamic = e.target.checked;
-                        const isMultiSelect = localField.type === "multiselect" || localField.schema?.type === "array";
+                        const isMultiSelect =
+                          localField.type === 'multiselect' || localField.schema?.type === 'array';
                         const updatedUISchema = {
                           ...localField.uischema,
                           options: {
                             ...localField.uischema?.options,
-                            format: isDynamic ? "dynamicselect" : undefined,
+                            format: isDynamic ? 'dynamicselect' : undefined,
                             multi: isMultiSelect ? true : undefined,
-                            entity: isDynamic ? "" : undefined,
-                            key: isDynamic ? "" : undefined,
-                            value: isDynamic ? "" : undefined,
+                            entity: isDynamic ? '' : undefined,
+                            key: isDynamic ? '' : undefined,
+                            value: isDynamic ? '' : undefined,
                           },
                         };
                         handleUpdate({ uischema: updatedUISchema });
@@ -698,7 +648,7 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                   <TextField
                     label="API Entity"
                     fullWidth
-                    value={localField.uischema?.options?.entity || ""}
+                    value={localField.uischema?.options?.entity || ''}
                     onChange={(e) => {
                       const updatedUISchema = {
                         ...localField.uischema,
@@ -712,12 +662,12 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                     margin="normal"
                     variant="outlined"
                     helperText="API endpoint name (e.g., countries, cities)"
-                    sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                   />
                   <TextField
                     label="Value Field Name"
                     fullWidth
-                    value={localField.uischema?.options?.key || ""}
+                    value={localField.uischema?.options?.key || ''}
                     onChange={(e) => {
                       const updatedUISchema = {
                         ...localField.uischema,
@@ -731,12 +681,12 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                     margin="normal"
                     variant="outlined"
                     helperText="Field name for stored value (e.g., code, id). Leave empty for primitive arrays."
-                    sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                   />
                   <TextField
                     label="Label Field Name"
                     fullWidth
-                    value={localField.uischema?.options?.value || ""}
+                    value={localField.uischema?.options?.value || ''}
                     onChange={(e) => {
                       const updatedUISchema = {
                         ...localField.uischema,
@@ -750,63 +700,63 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                     margin="normal"
                     variant="outlined"
                     helperText="Field name for display label (e.g., name, label). Leave empty for primitive arrays."
-                    sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                   />
                 </Box>
               ) : (
                 <>
-              <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
-                <TextField
-                  label="New Option"
-                  size="small"
-                  value={newOption}
-                  onChange={(e) => setNewOption(e.target.value)}
-                  onKeyPress={(e) => {
-                    if (e.key === "Enter") {
-                      handleAddOption();
-                    }
-                  }}
-                  variant="outlined"
-                  sx={{
-                    flex: 1,
-                    "& .MuiOutlinedInput-root": { borderRadius: 1.5 },
-                  }}
-                />
-                <IconButton
-                  onClick={handleAddOption}
-                  sx={{
-                    color: "success.main",
-                    backgroundColor: "success.light",
-                    borderRadius: 1.5,
-                    "&:hover": {
-                      backgroundColor: (theme) => theme.palette.success.light,
-                      color: "success.dark",
-                    },
-                  }}
-                >
-                  <IconPlus size={20} />
-                </IconButton>
-              </Box>
+                  <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+                    <TextField
+                      label="New Option"
+                      size="small"
+                      value={newOption}
+                      onChange={(e) => setNewOption(e.target.value)}
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter') {
+                          handleAddOption();
+                        }
+                      }}
+                      variant="outlined"
+                      sx={{
+                        flex: 1,
+                        '& .MuiOutlinedInput-root': { borderRadius: 1.5 },
+                      }}
+                    />
+                    <IconButton
+                      onClick={handleAddOption}
+                      sx={{
+                        color: 'success.main',
+                        backgroundColor: 'success.light',
+                        borderRadius: 1.5,
+                        '&:hover': {
+                          backgroundColor: (theme) => theme.palette.success.light,
+                          color: 'success.dark',
+                        },
+                      }}
+                    >
+                      <IconPlus size={20} />
+                    </IconButton>
+                  </Box>
 
-              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-                {enumOptions.map((option, index) => (
-                  <Chip
-                    key={index}
-                    label={option}
-                    onDelete={() => handleRemoveOption(index)}
-                    deleteIcon={<IconTrash size={16} />}
-                    variant="outlined"
-                    sx={{
-                      borderRadius: 1.5,
-                      textTransform: "capitalize",
-                      "& .MuiChip-deleteIcon": {
-                        color: "error.main",
-                        "&:hover": { color: "error.dark" },
-                      },
-                    }}
-                  />
-                ))}
-              </Box>
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                    {enumOptions.map((option, index) => (
+                      <Chip
+                        key={index}
+                        label={option}
+                        onDelete={() => handleRemoveOption(index)}
+                        deleteIcon={<IconTrash size={16} />}
+                        variant="outlined"
+                        sx={{
+                          borderRadius: 1.5,
+                          textTransform: 'capitalize',
+                          '& .MuiChip-deleteIcon': {
+                            color: 'error.main',
+                            '&:hover': { color: 'error.dark' },
+                          },
+                        }}
+                      />
+                    ))}
+                  </Box>
                 </>
               )}
             </Box>
@@ -824,25 +774,18 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
           <AccordionDetails>
             {/* Allowed Access */}
             <Box sx={{ mb: 2 }}>
-              <Typography
-                variant="caption"
-                sx={{ color: "text.secondary", fontWeight: 600 }}
-              >
+              <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
                 Allowed Access
               </Typography>
-              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mt: 1 }}>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
                 {ALL_ROLE_CODES.map((roleCode) => (
                   <Chip
                     key={roleCode}
                     size="small"
-                    variant={
-                      selectedAccess.includes(roleCode) ? "filled" : "outlined"
-                    }
-                    color={
-                      selectedAccess.includes(roleCode) ? "primary" : "default"
-                    }
+                    variant={selectedAccess.includes(roleCode) ? 'filled' : 'outlined'}
+                    color={selectedAccess.includes(roleCode) ? 'primary' : 'default'}
                     label={getRoleDisplayName(roleCode)}
-                    sx={{ textTransform: "capitalize" }}
+                    sx={{ textTransform: 'capitalize' }}
                     clickable
                     onClick={() => handleAccessChipClick(roleCode)}
                   />
@@ -872,7 +815,7 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                 sx={{ mb: 1 }}
               />
 
-              {localField.type === "textarea" && (
+              {localField.type === 'textarea' && (
                 <Box sx={{ mt: 2 }}>
                   <Typography variant="body2" gutterBottom>
                     Rows: {localField.uischema?.options?.rows || 3}
@@ -907,56 +850,42 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
         sx={{
           mt: 3,
           p: 2,
-          backgroundColor: "grey.50",
+          backgroundColor: 'grey.50',
           borderRadius: 2,
-          border: "1px solid",
-          borderColor: "grey.200",
+          border: '1px solid',
+          borderColor: 'grey.200',
         }}
       >
         <Typography variant="subtitle2" gutterBottom color="grey.700">
-          {isGroup
-            ? "Group Container"
-            : isLayout
-            ? "Layout Container"
-            : "Field Information"}
+          {isGroup ? 'Group Container' : isLayout ? 'Layout Container' : 'Field Information'}
         </Typography>
 
         {!isGroup && !isLayout && (
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
             {React.createElement(getFieldTypeIcon(localField.type), {
               size: 16,
-              color: "#666",
+              color: '#666',
             })}
             <Typography variant="body2" color="grey.600">
-              Type:{" "}
-              <span style={{ textTransform: "capitalize" }}>
-                {localField.type}
-              </span>
+              Type: <span style={{ textTransform: 'capitalize' }}>{localField.type}</span>
             </Typography>
           </Box>
         )}
 
         {!isGroup && !isLayout && localField.schema.format && (
           <Typography variant="body2" color="grey.600" sx={{ mb: 1 }}>
-            Format:{" "}
-            <span style={{ textTransform: "capitalize" }}>
-              {localField.schema.format}
-            </span>
+            Format: <span style={{ textTransform: 'capitalize' }}>{localField.schema.format}</span>
           </Typography>
         )}
 
-        <Typography
-          variant="body2"
-          color="grey.500"
-          sx={{ fontStyle: "italic" }}
-        >
+        <Typography variant="body2" color="grey.500" sx={{ fontStyle: 'italic' }}>
           {isGroup
-            ? "Groups provide visual separation and can contain any fields or layouts"
+            ? 'Groups provide visual separation and can contain any fields or layouts'
             : isLayout
-            ? localField.type === "vertical-layout"
-              ? "Stacks elements vertically"
-              : "Arranges elements horizontally"
-            : `Key: ${localField.key}`}
+              ? localField.type === 'vertical-layout'
+                ? 'Stacks elements vertically'
+                : 'Arranges elements horizontally'
+              : `Key: ${localField.key}`}
         </Typography>
       </Box>
     </Box>
