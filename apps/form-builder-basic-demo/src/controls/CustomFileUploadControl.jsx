@@ -89,25 +89,25 @@ const CustomFileUploadControl = (props) => {
     <Box sx={{ mb: 2 }}>
       <Box
         sx={{
-          'border': 2,
-          'borderRadius': 2,
-          'borderStyle': 'dashed',
-          'borderColor': hasError
+          border: 2,
+          borderRadius: 2,
+          borderStyle: 'dashed',
+          borderColor: hasError
             ? 'error.main'
             : hasFile
               ? 'success.main'
               : isDragOver
                 ? 'primary.main'
                 : 'grey.300',
-          'backgroundColor': isDragOver
+          backgroundColor: isDragOver
             ? 'action.hover'
             : hasFile
               ? 'success.lighter'
               : 'background.paper',
-          'p': 3,
-          'textAlign': 'center',
-          'cursor': 'pointer',
-          'transition': 'all 0.2s ease-in-out',
+          p: 3,
+          textAlign: 'center',
+          cursor: 'pointer',
+          transition: 'all 0.2s ease-in-out',
           '&:hover': {
             borderColor: 'primary.main',
             backgroundColor: 'action.hover',
@@ -120,7 +120,7 @@ const CustomFileUploadControl = (props) => {
       >
         <input
           ref={inputRef}
-          type='file'
+          type="file"
           accept={acceptedFileTypes}
           onChange={handleFileInputChange}
           style={{ display: 'none' }}
@@ -129,26 +129,26 @@ const CustomFileUploadControl = (props) => {
 
         {hasFile ? (
           <Box>
-            <IconFile size={32} color='currentColor' />
-            <Typography variant='body2' sx={{ mt: 1, color: 'success.main' }}>
+            <IconFile size={32} color="currentColor" />
+            <Typography variant="body2" sx={{ mt: 1, color: 'success.main' }}>
               {t('common.file_uploaded_successfully')}
             </Typography>
-            <Typography variant='caption' sx={{ color: 'text.secondary' }}>
+            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
               {t('common.click_to_change_file')}
             </Typography>
           </Box>
         ) : (
           <Box>
-            <IconUpload size={32} color='currentColor' />
-            <Typography variant='body2' sx={{ mt: 1, color: 'text.primary' }}>
+            <IconUpload size={32} color="currentColor" />
+            <Typography variant="body2" sx={{ mt: 1, color: 'text.primary' }}>
               {isUploading ? t('common.uploading_logo') : t('common.upload_logo')}
             </Typography>
-            <Typography variant='caption' sx={{ color: 'text.secondary' }}>
+            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
               {/* Drag and drop or click to select */}
               {t('common.drag_and_drop')}
             </Typography>
             {acceptedFileTypes && (
-              <Typography variant='caption' sx={{ display: 'block', color: 'text.secondary' }}>
+              <Typography variant="caption" sx={{ display: 'block', color: 'text.secondary' }}>
                 {t('common.accepted_formats')} {acceptedFileTypes}
               </Typography>
             )}
@@ -157,7 +157,7 @@ const CustomFileUploadControl = (props) => {
       </Box>
 
       {hasError && (
-        <Alert severity='error' sx={{ mt: 1 }}>
+        <Alert severity="error" sx={{ mt: 1 }}>
           {localError || jsonFormsError || 'Invalid file'}
         </Alert>
       )}

@@ -1,9 +1,9 @@
-import { useTheme } from "@emotion/react";
-import * as icons from "@tabler/icons-react";
-import { JsonFormsDispatch } from "@jsonforms/react";
-import { rankWith, uiTypeIs } from "@jsonforms/core";
-import { IconChevronDown } from "@tabler/icons-react";
-import { withJsonFormsLayoutProps } from "@jsonforms/react";
+import { useTheme } from '@emotion/react';
+import * as icons from '@tabler/icons-react';
+import { JsonFormsDispatch } from '@jsonforms/react';
+import { rankWith, uiTypeIs } from '@jsonforms/core';
+import { IconChevronDown } from '@tabler/icons-react';
+import { withJsonFormsLayoutProps } from '@jsonforms/react';
 import {
   Grid,
   Stack,
@@ -11,10 +11,10 @@ import {
   Typography,
   AccordionDetails,
   AccordionSummary,
-} from "@mui/material";
+} from '@mui/material';
 
-import { Icon } from "../components/extended/Icon";
-import { Avatar } from "../components/extended/Avatar";
+import { Icon } from '../components/Icon';
+import { Avatar } from '../components/Avatar';
 
 const CustomAccordionGroupLayoutRenderer = (props) => {
   const theme = useTheme();
@@ -24,29 +24,20 @@ const CustomAccordionGroupLayoutRenderer = (props) => {
   return (
     <Accordion sx={{ borderRadius: 0 }}>
       <AccordionSummary expandIcon={<IconChevronDown stroke={1.5} />}>
-        <Stack
-          direction="row"
-          alignItems="center"
-          spacing={1}
-          sx={{ marginBottom: 1 }}
-        >
+        <Stack direction="row" alignItems="center" spacing={1} sx={{ marginBottom: 1 }}>
           <Avatar
             sx={{
               width: 40,
               height: 40,
-              bgcolor: "grey.300",
-              fontSize: "1.25rem",
-              color: "primary.contrastText",
+              bgcolor: 'grey.300',
+              fontSize: '1.25rem',
+              color: 'primary.contrastText',
               backgroundImage: `linear-gradient(95deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 50%, ${theme.palette.primary.dark} 100%)`,
             }}
           >
             {uischema.icon && <Icon icon={icons[uischema.icon]} />}
           </Avatar>
-          <Typography
-            variant="h6"
-            component="div"
-            sx={{ mt: 2, fontWeight: 600 }}
-          >
+          <Typography variant="h6" component="div" sx={{ mt: 2, fontWeight: 600 }}>
             {uischema.label}
           </Typography>
         </Stack>
@@ -63,13 +54,8 @@ const CustomAccordionGroupLayoutRenderer = (props) => {
 };
 
 // eslint-disable-next-line react-refresh/only-export-components
-export const customAccordionGroupLayoutTester = rankWith(
-  4,
-  uiTypeIs("AccordionGroup")
-);
+export const customAccordionGroupLayoutTester = rankWith(4, uiTypeIs('AccordionGroup'));
 
-const CustomAccordionGroupLayout = withJsonFormsLayoutProps(
-  CustomAccordionGroupLayoutRenderer
-);
+const CustomAccordionGroupLayout = withJsonFormsLayoutProps(CustomAccordionGroupLayoutRenderer);
 
 export default CustomAccordionGroupLayout;

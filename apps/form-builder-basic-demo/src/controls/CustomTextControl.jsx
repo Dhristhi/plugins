@@ -1,13 +1,13 @@
-import { useParams } from "react-router-dom";
-import { useCallback, useEffect, useState } from "react";
-import { Unwrapped } from "@jsonforms/material-renderers";
-import { CircularProgress, TextField } from "@mui/material";
-import { and, isControl, optionIs, rankWith } from "@jsonforms/core";
-import { useJsonForms, withJsonFormsControlProps } from "@jsonforms/react";
+import { useParams } from 'react-router-dom';
+import { useCallback, useEffect, useState } from 'react';
+import { Unwrapped } from '@jsonforms/material-renderers';
+import { CircularProgress, TextField } from '@mui/material';
+import { and, isControl, optionIs, rankWith } from '@jsonforms/core';
+import { useJsonForms, withJsonFormsControlProps } from '@jsonforms/react';
 
 // import { useAuth, useToast } from "@/hooks";
 // import { searchByParams } from "@/services/entity.service";
-import { queryStringToObject, formatCurrencyAmount } from "../utils";
+import { queryStringToObject, formatCurrencyAmount } from '../utils';
 
 // Extract MaterialTextControl from Unwrapped
 const { MaterialTextControl } = Unwrapped;
@@ -20,58 +20,40 @@ const CustomTextControl = (props) => {
 
   const uData = getUser();
   const [isLoading, setIsLoading] = useState(false);
-  const [displayValue, setDisplayValue] = useState("");
+  const [displayValue, setDisplayValue] = useState('');
 
-  const {
-    schema,
-    uischema,
-    path,
-    handleChange,
-    data,
-    label,
-    required,
-    errors,
-    description,
-  } = props;
-  const { referencePath, query, relatedDefaults, computedFields, format } =
-    uischema.options || {};
+  const { schema, uischema, path, handleChange, data, label, required, errors, description } =
+    props;
+  const { referencePath, query, relatedDefaults, computedFields, format } = uischema.options || {};
 
   // Get currency from form data for dynamic formatting (memoized to prevent unnecessary re-renders)
   const getCurrencyFromFormData = useCallback(() => {
     // For salary fields, currency is at employment_info.salary.currency
-    if (
-      path.includes("salary") &&
-      core.data?.employment_info?.salary?.currency
-    ) {
+    if (path.includes('salary') && core.data?.employment_info?.salary?.currency) {
       return core.data.employment_info.salary.currency;
     }
-    return "USD"; // Default fallback
+    return 'USD'; // Default fallback
   }, [path, core.data?.employment_info?.salary?.currency]);
 
   // Sync display value when data changes
   useEffect(() => {
-    if (format === "currency") {
-      if (typeof data === "number" && !isNaN(data)) {
+    if (format === 'currency') {
+      if (typeof data === 'number' && !isNaN(data)) {
         const currency = getCurrencyFromFormData();
         setDisplayValue(formatCurrencyAmount(data, currency));
       } else {
-        setDisplayValue("");
+        setDisplayValue('');
       }
     }
-  }, [
-    data,
-    format,
-    core.data?.employment_info?.salary?.currency,
-    getCurrencyFromFormData,
-  ]);
+  }, [data, format, core.data?.employment_info?.salary?.currency, getCurrencyFromFormData]);
 
   useEffect(() => {
     if (referencePath) {
       const fetchDefaults = async () => {
-        const splitKey = referencePath?.split(".");
+        const splitKey = referencePath?.split('.');
         const updatedQuery =
           // query?.replace(/:(\w+)/g, (match, key) => uData[key] || match) || "";
-          query?.replace(/:(\w+)/g, (match, key) => match) || "";
+          query?.replace(/:(\w+)/g, (match, key) => match) || '';
         const params = queryStringToObject(updatedQuery);
 
         if (splitKey?.length === 2) {
@@ -106,13 +88,13 @@ const CustomTextControl = (props) => {
     //   .finally(() => setIsLoading(false));
   };
 
-  const toNumber = (value) => (value === "" ? undefined : Number(value));
+  const toNumber = (value) => (value === '' ? undefined : Number(value));
 
   const handleCurrencyChange = (event) => {
     const inputValue = event.target.value;
 
     // Remove existing commas for processing
-    const cleanValue = inputValue.replace(/,/g, "");
+    const cleanValue = inputValue.replace(/,/g, '');
 
     // Allow only digits during typing
     const allowedCharsRegex = /^[0-9]*$/;
@@ -121,10 +103,10 @@ const CustomTextControl = (props) => {
     }
 
     // Format the number with commas for display
-    let formattedValue = "";
+    let formattedValue = '';
     let numericValue;
 
-    if (cleanValue !== "") {
+    if (cleanValue !== '') {
       numericValue = Number(cleanValue);
       if (!isNaN(numericValue)) {
         const currency = getCurrencyFromFormData();
@@ -156,7 +138,7 @@ const CustomTextControl = (props) => {
     let processedValue = selectedVal;
 
     // Handle number conversion for non-currency fields
-    if (schema.type === "number" && selectedVal && format !== "currency") {
+    if (schema.type === 'number' && selectedVal && format !== 'currency') {
       processedValue = toNumber(selectedVal);
     }
 
@@ -174,16 +156,14 @@ const CustomTextControl = (props) => {
 
   if (isLoading) {
     return (
-      <div
-        style={{ display: "flex", justifyContent: "center", marginTop: "16px" }}
-      >
+      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '16px' }}>
         <CircularProgress />
       </div>
     );
   }
 
   // For currency fields, render custom TextField (no real-time icon for simplicity)
-  if (format === "currency") {
+  if (format === 'currency') {
     return (
       <div>
         <TextField
@@ -193,9 +173,7 @@ const CustomTextControl = (props) => {
           disabled={isLoading}
           required={required}
           error={errors && errors.length > 0}
-          helperText={
-            errors && errors.length > 0 ? errors[0].message : description || ""
-          }
+          helperText={errors && errors.length > 0 ? errors[0].message : description || ''}
           fullWidth
           variant="outlined"
         />
@@ -220,13 +198,13 @@ const CustomTextControl = (props) => {
 // eslint-disable-next-line react-refresh/only-export-components
 export const customTextTester = rankWith(
   Number.MAX_VALUE,
-  and(isControl, optionIs("format", "dynamicinput"))
+  and(isControl, optionIs('format', 'dynamicinput'))
 );
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const customCurrencyTester = rankWith(
   Number.MAX_VALUE + 1, // Higher priority than default text control
-  and(isControl, optionIs("format", "currency"))
+  and(isControl, optionIs('format', 'currency'))
 );
 
 const CustomTextControlWrapper = withJsonFormsControlProps(CustomTextControl);

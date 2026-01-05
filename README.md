@@ -72,6 +72,35 @@ registerFieldTypes([
 ]);
 ```
 
+### Controls Configuration (JSON Forms renderers)
+Enable/disable built-in custom controls from the `controls/` folder and add your own JSON Forms renderers at runtime.
+
+```js
+import { configureControls } from '@dhristhi/form-builder';
+
+// Call once before rendering <FormBuilder />
+configureControls({
+  // Only enable a subset:
+  // enable: ['text', 'select', 'verticalLayout'],
+
+  // Or disable some while keeping others enabled by default:
+  disable: ['currencyText', 'image'],
+
+  // Add custom renderers (tester + renderer components)
+  add: [
+    { tester: myCustomTester, renderer: MyCustomRenderer, id: 'myCustom' }
+  ]
+});
+```
+
+Built-in control IDs you can reference in `enable`/`disable`:
+- currencyText, text, label, image, infoAlert, select, downloadFile, fileUpload
+- arrayLayout, groupLayout, verticalLayout, horizontalLayout, accordionGroupLayout
+
+Notes:
+- Defaults: all built-in custom controls are enabled alongside Material renderers/cells.
+- `add` items are appended after built-ins. Provide a stable `id` if you need to toggle them later.
+
 ### Props
 - **`onSchemaChange(schema, uiSchema)`**: Called whenever the builder’s schema or UI schema changes.
 - **`onExport({ schema, uiSchema })`**: If provided, overrides default JSON download and delivers the export payload to your handler.

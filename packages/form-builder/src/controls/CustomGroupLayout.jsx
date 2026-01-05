@@ -1,17 +1,16 @@
-import * as icons from "@tabler/icons-react";
-import { JsonFormsDispatch } from "@jsonforms/react";
-import { rankWith, uiTypeIs } from "@jsonforms/core";
-import { withJsonFormsLayoutProps } from "@jsonforms/react";
-import { Box, Grid, Stack, Typography } from "@mui/material";
+import * as icons from '@tabler/icons-react';
+import { JsonFormsDispatch } from '@jsonforms/react';
+import { rankWith, uiTypeIs } from '@jsonforms/core';
+import { withJsonFormsLayoutProps } from '@jsonforms/react';
+import { Box, Grid, Stack, Typography } from '@mui/material';
 
-import { Icon } from "../components/extended/Icon";
+import { Icon } from '../components/Icon';
 
 const CustomGroupLayoutRenderer = (props) => {
   const { label, uischema } = props;
 
   const margin = uischema?.elements[0]?.elements?.[0]?.options?.detail ? 0 : 2;
-  const removeExtraMargin =
-    uischema?.elements[0]?.elements?.[0]?.options?.removeExtraMargin;
+  const removeExtraMargin = uischema?.elements[0]?.elements?.[0]?.options?.removeExtraMargin;
 
   return (
     <Grid container>
@@ -30,12 +29,7 @@ const CustomGroupLayoutRenderer = (props) => {
           </Stack>
           {uischema?.elements?.map((element, index) => (
             <Grid item xs={12} key={index} sx={{ mx: 6, mb: 0 }}>
-              <JsonFormsDispatch
-                {...props}
-                uischema={element}
-                type={"Group"}
-                key={index}
-              />
+              <JsonFormsDispatch {...props} uischema={element} type={'Group'} key={index} />
             </Grid>
           ))}
         </Box>
@@ -45,7 +39,7 @@ const CustomGroupLayoutRenderer = (props) => {
 };
 
 // eslint-disable-next-line react-refresh/only-export-components
-export const customGroupLayoutTester = rankWith(4, uiTypeIs("GroupWithIcon"));
+export const customGroupLayoutTester = rankWith(4, uiTypeIs('GroupWithIcon'));
 
 const CustomGroupLayout = withJsonFormsLayoutProps(CustomGroupLayoutRenderer);
 

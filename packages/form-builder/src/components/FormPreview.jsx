@@ -5,7 +5,7 @@ import { IconEye } from '@tabler/icons-react';
 import { Typography, Box } from '@mui/material';
 
 import CommonHeader from './CommonHeader';
-import { renderers, cells, config } from '../controls/renders';
+import { getRenderers, getCells, config } from '../controls/renders';
 
 const FormPreview = ({
   formState,
@@ -38,10 +38,10 @@ const FormPreview = ({
         {formState.schema.properties && Object.keys(formState.schema.properties).length > 0 ? (
           <JsonForms
             ajv={ajv}
-            data={formState.data}
-            cells={cells}
             config={config}
-            renderers={renderers}
+            cells={getCells()}
+            data={formState.data}
+            renderers={getRenderers()}
             schema={formState.schema}
             uischema={formState.uischema}
             validationMode={hasValidated ? 'ValidateAndShow' : 'NoValidation'}

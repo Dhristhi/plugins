@@ -1,24 +1,24 @@
-import { IconEye } from "@tabler/icons-react";
+import { IconEye } from '@tabler/icons-react';
 // import { download } from "@/services/doc.service";
-import { rankWith, uiTypeIs } from "@jsonforms/core";
-import { Box, IconButton, Tooltip, Typography } from "@mui/material";
-import { useJsonForms, withJsonFormsControlProps } from "@jsonforms/react";
+import { rankWith, uiTypeIs } from '@jsonforms/core';
+import { Box, IconButton, Tooltip, Typography } from '@mui/material';
+import { useJsonForms, withJsonFormsControlProps } from '@jsonforms/react';
 
-import { Icon } from "../components/extended/Icon";
+import { Icon } from '../components/Icon';
 
-import { getNestedValue } from "../utils";
-import { t } from "i18next";
+import { getNestedValue } from '../utils';
+import { t } from 'i18next';
 
 const CustomDownloadFileControl = (props) => {
-  let label = t("forms.custom_download_file_control.label_view_document");
+  let label = t('forms.custom_download_file_control.label_view_document');
   const { core } = useJsonForms();
   const { data, uischema } = props;
   const formData = core?.data || {};
 
   if (uischema.options?.elementLabelProp) {
-    const arrProps = props.path.split(".");
+    const arrProps = props.path.split('.');
     arrProps.splice(arrProps.length - 1, 1, uischema.options?.elementLabelProp);
-    const value = getNestedValue(formData, arrProps.join("."));
+    const value = getNestedValue(formData, arrProps.join('.'));
     label = value ?? label;
   }
 
@@ -49,10 +49,8 @@ const CustomDownloadFileControl = (props) => {
 };
 
 // eslint-disable-next-line react-refresh/only-export-components
-export const customDownloadFileTester = rankWith(2, uiTypeIs("DownloadFile"));
+export const customDownloadFileTester = rankWith(2, uiTypeIs('DownloadFile'));
 
-const CustomDownloadFileControlWrapper = withJsonFormsControlProps(
-  CustomDownloadFileControl
-);
+const CustomDownloadFileControlWrapper = withJsonFormsControlProps(CustomDownloadFileControl);
 
 export default CustomDownloadFileControlWrapper;

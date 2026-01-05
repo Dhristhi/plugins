@@ -1,5 +1,5 @@
-import React from "react";
-import { useTheme } from "@mui/material";
+import React from 'react';
+import { useTheme } from '@mui/material';
 
 export const Icon = (props) => {
   const theme = useTheme();
@@ -33,11 +33,9 @@ export const Icon = (props) => {
         strokeWidth={otherProps.stroke}
         style={{
           ...(otherProps.style || {}),
-          fill: "none",
+          fill: 'none',
           color: undefined,
-          stroke: gradient
-            ? "url(#icon-gradient-stroke)"
-            : otherProps.color || "currentColor",
+          stroke: gradient ? 'url(#icon-gradient-stroke)' : otherProps.color || 'currentColor',
         }}
       />
     </React.Fragment>

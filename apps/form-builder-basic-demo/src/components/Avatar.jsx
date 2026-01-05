@@ -1,30 +1,30 @@
-import { motion } from "framer-motion";
-import MuiAvatar from "@mui/material/Avatar";
-import { styled, useTheme } from "@mui/material/styles";
+import { motion } from 'framer-motion';
+import MuiAvatar from '@mui/material/Avatar';
+import { styled, useTheme } from '@mui/material/styles';
 
-import getColors from "../../utils/getColors";
+import getColors from '../utils/getColors';
 
 function getColorStyle({ theme, color, type }) {
   const colors = getColors(theme, color);
   const { dark, light, main, contrastText } = colors;
 
   switch (type) {
-    case "filled":
+    case 'filled':
       return {
         color: contrastText,
         background: main,
       };
-    case "outlined":
+    case 'outlined':
       return {
         color: main,
-        border: "1px solid",
+        border: '1px solid',
         borderColor: main,
-        background: "transparent",
+        background: 'transparent',
       };
-    case "combined":
+    case 'combined':
       return {
         color: dark,
-        border: "1px solid",
+        border: '1px solid',
         borderColor: dark,
         background: light,
       };
@@ -38,47 +38,47 @@ function getColorStyle({ theme, color, type }) {
 
 function getSizeStyle(size) {
   switch (size) {
-    case "badge":
+    case 'badge':
       return {
-        border: "2px solid",
-        fontSize: "0.675rem",
+        border: '2px solid',
+        fontSize: '0.675rem',
         width: 20,
         height: 20,
       };
-    case "xs":
+    case 'xs':
       return {
-        fontSize: "0.75rem",
+        fontSize: '0.75rem',
         width: 24,
         height: 24,
       };
-    case "sm":
+    case 'sm':
       return {
-        fontSize: "0.875rem",
+        fontSize: '0.875rem',
         width: 32,
         height: 32,
       };
-    case "lg":
+    case 'lg':
       return {
-        fontSize: "1.2rem",
+        fontSize: '1.2rem',
         width: 52,
         height: 52,
       };
-    case "xl":
+    case 'xl':
       return {
-        fontSize: "1.5rem",
+        fontSize: '1.5rem',
         width: 64,
         height: 64,
       };
-    case "xxl":
+    case 'xxl':
       return {
-        fontSize: "2rem",
+        fontSize: '2rem',
         width: 100,
         height: 100,
       };
-    case "md":
+    case 'md':
     default:
       return {
-        fontSize: "1rem",
+        fontSize: '1rem',
         width: 40,
         height: 40,
       };
@@ -86,23 +86,16 @@ function getSizeStyle(size) {
 }
 
 const AvatarStyle = styled(MuiAvatar, {
-  shouldForwardProp: (prop) =>
-    prop !== "color" && prop !== "type" && prop !== "size",
+  shouldForwardProp: (prop) => prop !== 'color' && prop !== 'type' && prop !== 'size',
 })(({ theme, color, type, size }) => ({
   ...getSizeStyle(size),
   ...getColorStyle({ theme, color, type }),
-  ...(size === "badge" && {
+  ...(size === 'badge' && {
     borderColor: theme.palette.background.default,
   }),
 }));
 
-export const Avatar = ({
-  children,
-  color = "primary",
-  type,
-  size = "md",
-  ...others
-}) => {
+export const Avatar = ({ children, color = 'primary', type, size = 'md', ...others }) => {
   const theme = useTheme();
 
   return (
@@ -117,7 +110,7 @@ export const Avatar = ({
       transition={{
         delay: 0.4,
         damping: 20,
-        type: "spring",
+        type: 'spring',
         stiffness: 260,
       }}
       {...others}

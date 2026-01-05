@@ -1,41 +1,53 @@
 import { materialCells, materialRenderers } from '@jsonforms/material-renderers';
 
-import CustomTextControl, { customTextTester, customCurrencyTester } from './CustomTextControl';
-import CustomInfoAlert, { customInfoAlertTester } from './CustomInfoAlert';
-import CustomLabelControl, { customLabelTester, customImageTester } from './CustomLabelControl';
-import customSelectControl, { customSelectTester } from './CustomSelectControl';
-import CustomDownloadFileControl, { customDownloadFileTester } from './CustomDownloadFileControl';
-import CustomFileUploadControl, { customFileUploadTester } from './CustomFileUploadControl';
-
-import ArrayLayoutRenderer, { customArrayLayoutTester } from './CustomArrayLayout';
 import CustomGroupLayoutRenderer, { customGroupLayoutTester } from './CustomGroupLayout';
 import CustomVerticalLayoutRenderer, { customVerticalLayoutTester } from './CustomVerticalLayout';
 import CustomHorizontalLayoutRenderer, {
   customHorizontalLayoutTester,
 } from './CustomHorizontalLayout';
-import CustomAccordionGroupLayoutRenderer, {
-  customAccordionGroupLayoutTester,
-} from './CustomAccordionGroupLayout';
 
-export const cells = [...materialCells];
-
-export const renderers = [
-  ...materialRenderers,
-  { tester: customCurrencyTester, renderer: CustomTextControl },
-  { tester: customTextTester, renderer: CustomTextControl },
-  { tester: customLabelTester, renderer: CustomLabelControl },
-  { tester: customImageTester, renderer: CustomLabelControl },
-  { tester: customInfoAlertTester, renderer: CustomInfoAlert },
-  { tester: customSelectTester, renderer: customSelectControl },
-  { tester: customDownloadFileTester, renderer: CustomDownloadFileControl },
-  { tester: customFileUploadTester, renderer: CustomFileUploadControl },
-
-  { tester: customArrayLayoutTester, renderer: ArrayLayoutRenderer },
-  { tester: customGroupLayoutTester, renderer: CustomGroupLayoutRenderer },
-  { tester: customVerticalLayoutTester, renderer: CustomVerticalLayoutRenderer },
-  { tester: customHorizontalLayoutTester, renderer: CustomHorizontalLayoutRenderer },
-  { tester: customAccordionGroupLayoutTester, renderer: CustomAccordionGroupLayoutRenderer },
+// Internal registry of custom renderers with IDs for configuration
+const customRendererEntries = [
+  { id: 'groupLayout', tester: customGroupLayoutTester, renderer: CustomGroupLayoutRenderer },
+  {
+    id: 'verticalLayout',
+    tester: customVerticalLayoutTester,
+    renderer: CustomVerticalLayoutRenderer,
+  },
+  {
+    id: 'horizontalLayout',
+    tester: customHorizontalLayoutTester,
+    renderer: CustomHorizontalLayoutRenderer,
+  },
 ];
+
+let enabledRendererIds = new Set(customRendererEntries.map((r) => r.id));
+let additionalRenderers = [];
+
+export function configureControls(options = {}) {
+  const { enable, disable, add } = options;
+  if (Array.isArray(enable) && enable.length) {
+    enabledRendererIds = new Set(enable);
+  }
+  if (Array.isArray(disable) && disable.length) {
+    disable.forEach((id) => enabledRendererIds.delete(id));
+  }
+  if (Array.isArray(add) && add.length) {
+    // Each added entry should be { tester, renderer, id? }
+    additionalRenderers = add.slice();
+  }
+}
+
+export function getCells() {
+  return [...materialCells];
+}
+
+export function getRenderers() {
+  const activeCustoms = customRendererEntries
+    .filter((r) => enabledRendererIds.has(r.id))
+    .map(({ tester, renderer }) => ({ tester, renderer }));
+  return [...materialRenderers, ...activeCustoms, ...additionalRenderers];
+}
 
 export const config = {
   // trim: true,

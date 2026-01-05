@@ -1,4 +1,49 @@
-import FormBuilder from '@dhristhi/form-builder';
+import FormBuilder, { configureControls } from '@dhristhi/form-builder';
+
+import CustomInfoAlert, { customInfoAlertTester } from './controls/CustomInfoAlert';
+import customSelectControl, { customSelectTester } from './controls/CustomSelectControl';
+import CustomFileUploadControl, {
+  customFileUploadTester,
+} from './controls/CustomFileUploadControl';
+import CustomTextControl, {
+  customTextTester,
+  customCurrencyTester,
+} from './controls/CustomTextControl';
+import CustomLabelControl, {
+  customLabelTester,
+  customImageTester,
+} from './controls/CustomLabelControl';
+import CustomDownloadFileControl, {
+  customDownloadFileTester,
+} from './controls/CustomDownloadFileControl';
+
+import ArrayLayoutRenderer, { customArrayLayoutTester } from './controls/CustomArrayLayout';
+import CustomAccordionGroupLayoutRenderer, {
+  customAccordionGroupLayoutTester,
+} from './controls/CustomAccordionGroupLayout';
+
+// Internal registry of custom renderers with IDs for configuration
+export const customRendererEntries = [
+  { id: 'currencyText', tester: customCurrencyTester, renderer: CustomTextControl },
+  { id: 'text', tester: customTextTester, renderer: CustomTextControl },
+  { id: 'label', tester: customLabelTester, renderer: CustomLabelControl },
+  { id: 'image', tester: customImageTester, renderer: CustomLabelControl },
+  { id: 'infoAlert', tester: customInfoAlertTester, renderer: CustomInfoAlert },
+  { id: 'select', tester: customSelectTester, renderer: customSelectControl },
+  { id: 'downloadFile', tester: customDownloadFileTester, renderer: CustomDownloadFileControl },
+  { id: 'fileUpload', tester: customFileUploadTester, renderer: CustomFileUploadControl },
+  { id: 'arrayLayout', tester: customArrayLayoutTester, renderer: ArrayLayoutRenderer },
+  {
+    id: 'accordionGroupLayout',
+    tester: customAccordionGroupLayoutTester,
+    renderer: CustomAccordionGroupLayoutRenderer,
+  },
+];
+
+configureControls({
+  // Add custom renderers (tester + renderer components)
+  add: customRendererEntries,
+});
 
 const schemas = [
   {
