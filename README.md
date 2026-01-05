@@ -1,4 +1,4 @@
-# React Form Builder (App)
+# React Form Builder (Monorepo)
 
 A modern drag-and-drop form builder app built with React 19, Material UI, and JSON Forms. Visually design forms, preview them live, and export JSON Schema + UI Schema.
 
@@ -14,19 +14,24 @@ Add images under `docs/screenshots/` and reference them here:
 ![Builder UI](docs/screenshots/builder.png)
 ![Live Preview](docs/screenshots/preview.png)
 
-## Quick Start
+## Quick Start (Monorepo)
 
 ```bash
-# Install dependencies
+## Install dependencies
+```bash
 yarn install
+```
 
-# Configure environment (optional)
-cp .env.example .env
-# Edit .env and set VITE_API_BASE_URL if needed
-
-# Start development server
+### Start Demo App
+```bash
 yarn dev
-# Open http://localhost:3000
+# Opens http://localhost:5173
+```
+
+### Build the Library Only
+```bash
+yarn workspace form-builder build
+```
 ```
 
 ## Use as a Component (Library)
@@ -34,14 +39,14 @@ yarn dev
 Install into another project and import the component:
 
 ```bash
-yarn add poc-form-builder
+yarn add form-builder
 # or
-npm install poc-form-builder
+npm install form-builder
 ```
 
 ```jsx
 import React from 'react';
-import { FormBuilder } from 'poc-form-builder';
+import { FormBuilder } from 'form-builder';
 
 export default function MyPage() {
   return <FormBuilder />;
@@ -50,6 +55,24 @@ export default function MyPage() {
 
 Notes:
 - Peer deps: React and ReactDOM (>=18) and UI/libs (@mui, @jsonforms, @dnd-kit, @emotion), icons (`@tabler/icons-react`), and i18n (`react-i18next`, `i18next`) must be installed in the host app.
+
+### Field-Type Registry (Extensibility)
+Register or override field types at runtime without forking:
+
+```js
+import { registerFieldTypes } from 'form-builder';
+
+registerFieldTypes([
+  {
+    id: 'my-custom',
+    label: 'My Custom',
+    isLayout: false,
+    schema: { type: 'string' },
+    uischema: { type: 'Control', options: { placeholder: 'Custom' } },
+    // icon: Optional React icon component
+  }
+]);
+```
 
 ### Props
 - **`onSchemaChange(schema, uiSchema)`**: Called whenever the builder’s schema or UI schema changes.
@@ -99,37 +122,36 @@ export default function MyPage() {
 ## Architecture
 
 ```
-src/
-  components/           # UI components (builder, preview, editor)
-  controls/             # JSON Forms custom renderers/cells
-  __tests__/            # Unit tests (Vitest + RTL)
-  test/setup.js         # Vitest setup
-  types.js              # Field type definitions
-  utils/                # Helpers and translations
-  App.jsx               # Root app component (library)
+apps/
+  demo/                 # Demo application (Vite)
 
-dev/
-  main.jsx              # Dev-only Vite entry
-  index.css             # Dev-only styles
+packages/
+  form-builder/
+    src/                # Library source
+    index.d.ts          # Public types
+    vite.config.js      # Library build config
+    dist/               # Build output
 ```
 
 ## Development
 
 ```bash
-# Lint
+```bash
+# Lint all workspaces
 yarn lint
 
-# Format
-yarn format
+# Test library
+yarn workspace form-builder test
 
-# Test
-yarn test
+# Build library
+yarn workspace form-builder build
 
-# Build
+# Build all workspaces
 yarn build
 ```
+```
 
-## Publishing
+## Publishing (CI)
 
 Release and publish are automated via GitHub Actions. Follow these steps:
 
@@ -156,13 +178,14 @@ git push origin main --follow-tags
 
 - What happens next:
   - The workflow at `.github/workflows/release.yml` runs on tags `v*.*.*`.
-  - Builds the library and publishes to npm using `NPM_TOKEN`.
-  - Creates a GitHub Release attaching `dist/index.js` and `dist/index.umd.cjs`.
+  - Builds the library package (`packages/form-builder`) and publishes to npm using `NPM_TOKEN`.
+  - Creates a GitHub Release attaching `packages/form-builder/dist/index.js` and `packages/form-builder/dist/index.umd.cjs`.
 
 - Manual publish (fallback):
 
 ```bash
 # ensure you are logged in to npm or have NODE_AUTH_TOKEN exported
+cd packages/form-builder
 npm publish --access public
 ```
 

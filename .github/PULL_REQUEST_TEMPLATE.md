@@ -14,10 +14,11 @@ Why is this change necessary?
 If UI changes, add screenshots/GIFs.
 
 ## How to Test
-Steps to verify:
+Steps to verify (monorepo):
 1. `yarn install`
-2. `yarn dev`
-3. Navigate to ...
+2. Run demo: `yarn dev` (http://localhost:5173)
+3. Build library: `yarn workspace form-builder build`
+4. Optional tests: `yarn workspace form-builder test`
 
 ## Checklist
 - [ ] Builds locally (`yarn build`)

@@ -1,6 +1,5 @@
-import ReactDOM from 'react-dom/client';
-import App from '../src/App.jsx';
-import './index.css';
+import React from 'react';
+import FormBuilder from 'form-builder';
 
 const schemas = [
   {
@@ -1158,4 +1157,10 @@ const schemas = [
   },
 ];
 
-ReactDOM.createRoot(document.getElementById('root')).render(<App schemas={schemas} />);
+export default function DemoApp() {
+  return (
+    <div style={{ width: '100vw', height: '100vh' }}>
+      <FormBuilder schemas={schemas} />
+    </div>
+  );
+}

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { defaultFieldTypes } from "../types";
+import "../lib/registry/init";
+import { getFieldTypes } from "../lib/registry/fieldRegistry";
 import {
   Typography,
   Box,
@@ -105,10 +106,11 @@ const FieldPalette = ({ onLoadSchema, schemas = [] }) => {
     }
   };
 
-  const layoutTypes = defaultFieldTypes.filter(
+  const allTypes = getFieldTypes();
+  const layoutTypes = allTypes.filter(
     (ft) => ft.isLayout && ft.id !== "object"
   );
-  const fieldTypes = defaultFieldTypes.filter((ft) => !ft.isLayout);
+  const fieldTypes = allTypes.filter((ft) => !ft.isLayout);
 
   return (
     <Box
