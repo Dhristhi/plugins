@@ -11,7 +11,7 @@
   "dependencies": {
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "form-builder": "1.0.0",
+    "@dhristhi/form-builder": "1.0.0",
     "@mui/material": "^6.5.0",
     "@mui/icons-material": "^6.5.0",
     "@mui/system": "^7.3.5",

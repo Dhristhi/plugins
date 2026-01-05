@@ -1,5 +1,5 @@
 {
-  "name": "poc-form-builder-monorepo",
+  "name": "dhristhi-web-component",
   "private": true,
   "packageManager": "yarn@1.22.22",
   "workspaces": [
@@ -10,6 +10,24 @@
     "dev": "yarn workspace form-builder-demo dev",
     "build": "yarn workspaces run build",
     "test": "yarn workspaces run test",
-    "lint": "yarn workspaces run lint"
+    "lint": "yarn workspaces run lint",
+    "prepare": "husky",
+    "commitlint": "commitlint"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.5.0",
+    "@commitlint/config-conventional": "^19.5.0",
+    "eslint": "^9.13.0",
+    "husky": "^9.1.6",
+    "lint-staged": "^15.2.10",
+    "prettier": "^3.3.3"
+  },
+  "lint-staged": {
+    "packages/form-builder/**/*.{js,jsx,ts,tsx}": [
+      "eslint --fix --max-warnings=0"
+    ],
+    "{packages,apps}/**/*.{js,jsx,ts,tsx,css,md,json}": [
+      "prettier --write"
+    ]
   }
 }

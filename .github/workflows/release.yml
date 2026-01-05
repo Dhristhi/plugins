@@ -25,7 +25,7 @@ jobs:
 
       - name: Build library package
         run: |
-          yarn workspace form-builder build || (cd packages/form-builder && npm run build)
+          yarn workspace @dhristhi/form-builder build || (cd packages/form-builder && npm run build)
 
       - name: Publish to npm (packages/form-builder)
         working-directory: packages/form-builder

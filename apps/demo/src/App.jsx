@@ -1,5 +1,4 @@
-import React from 'react';
-import FormBuilder from 'form-builder';
+import FormBuilder from '@dhristhi/form-builder';
 
 const schemas = [
   {

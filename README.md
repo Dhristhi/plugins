@@ -1,18 +1,16 @@
-# React Form Builder (Monorepo)
+# React Form Builder (@dhristhi/form-builder)
 
 A modern drag-and-drop form builder app built with React 19, Material UI, and JSON Forms. Visually design forms, preview them live, and export JSON Schema + UI Schema.
 
 [![React](https://img.shields.io/badge/React-19-blue.svg)](https://reactjs.org/)
 [![Material-UI](https://img.shields.io/badge/Material--UI-6-blue.svg)](https://mui.com/)
 [![JSON Forms](https://img.shields.io/badge/JSON%20Forms-3.6-green.svg)](https://jsonforms.io/)
+[![npm](https://img.shields.io/npm/v/%40dhristhi%2Fform-builder.svg?logo=npm&color=cb3837)](https://www.npmjs.com/package/@dhristhi/form-builder)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 ## Screenshots
 
-Add images under `docs/screenshots/` and reference them here:
-
-![Builder UI](docs/screenshots/builder.png)
-![Live Preview](docs/screenshots/preview.png)
+TODO
 
 ## Quick Start (Monorepo)
 
@@ -30,7 +28,7 @@ yarn dev
 
 ### Build the Library Only
 ```bash
-yarn workspace form-builder build
+yarn workspace @dhristhi/form-builder build
 ```
 ```
 
@@ -39,14 +37,14 @@ yarn workspace form-builder build
 Install into another project and import the component:
 
 ```bash
-yarn add form-builder
+yarn add @dhristhi/form-builder
 # or
-npm install form-builder
+npm install @dhristhi/form-builder
 ```
 
 ```jsx
 import React from 'react';
-import { FormBuilder } from 'form-builder';
+import { FormBuilder } from '@dhristhi/form-builder';
 
 export default function MyPage() {
   return <FormBuilder />;
@@ -60,7 +58,7 @@ Notes:
 Register or override field types at runtime without forking:
 
 ```js
-import { registerFieldTypes } from 'form-builder';
+import { registerFieldTypes } from '@dhristhi/form-builder';
 
 registerFieldTypes([
   {
@@ -83,7 +81,7 @@ registerFieldTypes([
 Example with multiple props:
 
 ```jsx
-import { FormBuilder } from 'poc-form-builder';
+import { FormBuilder } from '@dhristhi/form-builder';
 
 function handleSchemaChange(schema, uiSchema) {
   console.log('schema updated', schema);
@@ -141,10 +139,10 @@ packages/
 yarn lint
 
 # Test library
-yarn workspace form-builder test
+yarn workspace @dhristhi/form-builder test
 
 # Build library
-yarn workspace form-builder build
+yarn workspace @dhristhi/form-builder build
 
 # Build all workspaces
 yarn build
