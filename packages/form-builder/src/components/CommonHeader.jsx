@@ -1,4 +1,4 @@
-import { IconEye, IconCode } from '@tabler/icons-react';
+import { IconEye, IconCode, IconChecks } from '@tabler/icons-react';
 import { Box, Typography, Button, ButtonGroup } from '@mui/material';
 
 const headerContainerSx = {
@@ -61,7 +61,16 @@ const CommonHeader = ({
   setShowFormPreview,
   showSchemaEditor,
   setShowSchemaEditor,
+  hasValidated,
+  setHasValidated,
 }) => {
+  const toggleValidateButton = () => {
+    if (hasValidated) {
+      setHasValidated(false);
+    } else {
+      setHasValidated(true);
+    }
+  };
   return (
     <Box sx={headerContainerSx}>
       {/* Header Info */}
