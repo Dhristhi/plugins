@@ -1,4 +1,4 @@
-import { IconEye, IconCode } from '@tabler/icons-react';
+import { IconEye, IconCode, IconChecks } from '@tabler/icons-react';
 import { Box, Typography, Button, ButtonGroup } from '@mui/material';
 
 const CommonHeader = ({
@@ -9,7 +9,16 @@ const CommonHeader = ({
   setShowFormPreview,
   showSchemaEditor,
   setShowSchemaEditor,
+  hasValidated,
+  setHasValidated,
 }) => {
+  const toggleValidateButton = () => {
+    if (hasValidated) {
+      setHasValidated(false);
+    } else {
+      setHasValidated(true);
+    }
+  };
   return (
     <Box
       sx={{
@@ -79,6 +88,17 @@ const CommonHeader = ({
               },
             }}
           >
+            {/* {showFormPreview && (
+              <Button
+                onClick={() => {
+                  toggleValidateButton();
+                }}
+                variant={hasValidated ? 'contained' : 'outlined'}
+                startIcon={<IconChecks size={16} />}
+              >
+                Validate
+              </Button>
+            )} */}
             <Button
               onClick={() => {
                 const newShowPreview = !showFormPreview;
