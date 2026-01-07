@@ -1,5 +1,5 @@
 import FormBuilder, { configureControls } from '@dhristhi/form-builder';
-
+import { customTheme } from './customTheme';
 import CustomInfoAlert, { customInfoAlertTester } from './controls/CustomInfoAlert';
 import customSelectControl, { customSelectTester } from './controls/CustomSelectControl';
 import CustomFileUploadControl, {
@@ -1205,7 +1205,7 @@ export default function DemoApp() {
   const handleSchemaSave = (schema, uischema) => {
     console.log('Schema changed:', { schema, uischema });
   };
-
+  //You can Pass theme={customTheme} to FormBuilder to apply the custom theme
   return (
     <div style={{ width: '100vw', height: '100vh' }}>
       <FormBuilder schemas={schemas} onSave={handleSchemaSave} />
