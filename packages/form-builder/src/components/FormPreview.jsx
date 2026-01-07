@@ -32,6 +32,8 @@ const FormPreview = ({
         showSchemaEditor={showSchemaEditor}
         setShowSchemaEditor={setShowSchemaEditor}
         exportForm={exportForm}
+        hasValidated={hasValidated}
+        setHasValidated={setHasValidated}
       />
 
       <Box sx={{ p: 2 }}>
