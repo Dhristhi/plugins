@@ -88,7 +88,7 @@ const CommonHeader = ({
               },
             }}
           >
-            {showFormPreview && (
+            {/* {showFormPreview && (
               <Button
                 onClick={() => {
                   toggleValidateButton();
@@ -98,7 +98,7 @@ const CommonHeader = ({
               >
                 Validate
               </Button>
-            )}
+            )} */}
             <Button
               onClick={() => {
                 const newShowPreview = !showFormPreview;
