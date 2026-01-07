@@ -507,58 +507,58 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
               {(localField.type === 'text' ||
                 localField.type === 'textarea' ||
                 localField.type === 'email') && (
-                <>
-                  <Grid container spacing={2}>
-                    <Grid item xs={6}>
-                      <TextField
-                        label="Min Length"
-                        type="number"
-                        fullWidth
-                        value={localField.schema?.minLength || ''}
-                        onChange={(e) =>
-                          handleSchemaUpdate({
-                            minLength: e.target.value ? Number(e.target.value) : undefined,
-                          })
-                        }
-                        margin="normal"
-                        variant="outlined"
-                        sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-                      />
+                  <>
+                    <Grid container spacing={2}>
+                      <Grid item xs={6}>
+                        <TextField
+                          label="Min Length"
+                          type="number"
+                          fullWidth
+                          value={localField.schema?.minLength || ''}
+                          onChange={(e) =>
+                            handleSchemaUpdate({
+                              minLength: e.target.value ? Number(e.target.value) : undefined,
+                            })
+                          }
+                          margin="normal"
+                          variant="outlined"
+                          sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                        />
+                      </Grid>
+                      <Grid item xs={6}>
+                        <TextField
+                          label="Max Length"
+                          type="number"
+                          fullWidth
+                          value={localField.schema?.maxLength || ''}
+                          onChange={(e) =>
+                            handleSchemaUpdate({
+                              maxLength: e.target.value ? Number(e.target.value) : undefined,
+                            })
+                          }
+                          margin="normal"
+                          variant="outlined"
+                          sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                        />
+                      </Grid>
                     </Grid>
-                    <Grid item xs={6}>
-                      <TextField
-                        label="Max Length"
-                        type="number"
-                        fullWidth
-                        value={localField.schema?.maxLength || ''}
-                        onChange={(e) =>
-                          handleSchemaUpdate({
-                            maxLength: e.target.value ? Number(e.target.value) : undefined,
-                          })
-                        }
-                        margin="normal"
-                        variant="outlined"
-                        sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-                      />
-                    </Grid>
-                  </Grid>
 
-                  <TextField
-                    label="Pattern (RegEx)"
-                    fullWidth
-                    value={localField.schema?.pattern || ''}
-                    onChange={(e) =>
-                      handleSchemaUpdate({
-                        pattern: e.target.value || undefined,
-                      })
-                    }
-                    margin="normal"
-                    variant="outlined"
-                    helperText="Regular expression for validation (e.g., ^[A-Za-z]+$ for letters only)"
-                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-                  />
-                </>
-              )}
+                    <TextField
+                      label="Pattern (RegEx)"
+                      fullWidth
+                      value={localField.schema?.pattern || ''}
+                      onChange={(e) =>
+                        handleSchemaUpdate({
+                          pattern: e.target.value || undefined,
+                        })
+                      }
+                      margin="normal"
+                      variant="outlined"
+                      helperText="Regular expression for validation (e.g., ^[A-Za-z]+$ for letters only)"
+                      sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                    />
+                  </>
+                )}
 
               {localField.type === 'number' && (
                 <Grid container spacing={2}>
@@ -597,6 +597,33 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                 </Grid>
               )}
             </Box>
+            <Box>
+              {(localField.type === 'text' ||
+                localField.type === 'textarea' ||
+                localField.type === 'file') && (
+                  <>
+                    <Grid container spacing={1}>
+                      <Grid item xs={12}>
+                        <TextField
+                          label="Maximum File Size (MB)"
+                          type="number"
+                          fullWidth
+                          value={localField.uischema?.options?.['ui:options']?.maxSize || ''}
+                          onChange={(e) =>
+                            handleUiOptionsUpdate({
+                              maxSize: e.target.value ? Number(e.target.value) : undefined,
+                            })
+                          }
+                          margin="normal"
+                          variant="outlined"
+                          helperText="Maximum allowed file size in megabytes (e.g., 5 = 5MB)"
+                          sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                        />
+                      </Grid>
+                    </Grid>
+                  </>
+                )}
+            </Box>
           </AccordionDetails>
         </Accordion>
       )}
@@ -614,34 +641,34 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                 localField.type === 'multiselect' ||
                 (localField.schema?.type === 'array' && localField.uischema?.options?.multi) ||
                 localField.uischema?.options?.format === 'dynamicselect') && (
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={localField.uischema?.options?.entity !== undefined}
-                      onChange={(e) => {
-                        const isDynamic = e.target.checked;
-                        const isMultiSelect =
-                          localField.type === 'multiselect' || localField.schema?.type === 'array';
-                        const updatedUISchema = {
-                          ...localField.uischema,
-                          options: {
-                            ...localField.uischema?.options,
-                            format: isDynamic ? 'dynamicselect' : undefined,
-                            multi: isMultiSelect ? true : undefined,
-                            entity: isDynamic ? '' : undefined,
-                            key: isDynamic ? '' : undefined,
-                            value: isDynamic ? '' : undefined,
-                          },
-                        };
-                        handleUpdate({ uischema: updatedUISchema });
-                      }}
-                      color="primary"
-                    />
-                  }
-                  label="Use Dynamic Data (API)"
-                  sx={{ mb: 2 }}
-                />
-              )}
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={localField.uischema?.options?.entity !== undefined}
+                        onChange={(e) => {
+                          const isDynamic = e.target.checked;
+                          const isMultiSelect =
+                            localField.type === 'multiselect' || localField.schema?.type === 'array';
+                          const updatedUISchema = {
+                            ...localField.uischema,
+                            options: {
+                              ...localField.uischema?.options,
+                              format: isDynamic ? 'dynamicselect' : undefined,
+                              multi: isMultiSelect ? true : undefined,
+                              entity: isDynamic ? '' : undefined,
+                              key: isDynamic ? '' : undefined,
+                              value: isDynamic ? '' : undefined,
+                            },
+                          };
+                          handleUpdate({ uischema: updatedUISchema });
+                        }}
+                        color="primary"
+                      />
+                    }
+                    label="Use Dynamic Data (API)"
+                    sx={{ mb: 2 }}
+                  />
+                )}
 
               {localField.uischema?.options?.entity !== undefined ? (
                 <Box>
@@ -758,87 +785,6 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                     ))}
                   </Box>
                 </>
-              )}
-            </Box>
-          </AccordionDetails>
-        </Accordion>
-      )}
-      {/* Advanced Options */}
-      {!isLayout && !isGroup && (
-        <Accordion sx={{ mb: 2, boxShadow: 1 }}>
-          <AccordionSummary expandIcon={<IconChevronDown />}>
-            <Typography variant="subtitle1" fontWeight={600}>
-              Advanced Options
-            </Typography>
-          </AccordionSummary>
-          <AccordionDetails>
-            {/* Allowed Access */}
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
-                Allowed Access
-              </Typography>
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
-                {ALL_ROLE_CODES.map((roleCode) => (
-                  <Chip
-                    key={roleCode}
-                    size="small"
-                    variant={selectedAccess.includes(roleCode) ? 'filled' : 'outlined'}
-                    color={selectedAccess.includes(roleCode) ? 'primary' : 'default'}
-                    label={getRoleDisplayName(roleCode)}
-                    sx={{ textTransform: 'capitalize' }}
-                    clickable
-                    onClick={() => handleAccessChipClick(roleCode)}
-                  />
-                ))}
-              </Box>
-            </Box>
-
-            <Box>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={localField.uischema?.options?.readonly || false}
-                    onChange={(e) => {
-                      const updatedUISchema = {
-                        ...localField.uischema,
-                        options: {
-                          ...localField.uischema?.options,
-                          readonly: e.target.checked,
-                        },
-                      };
-                      handleUpdate({ uischema: updatedUISchema });
-                    }}
-                    color="primary"
-                  />
-                }
-                label="Read Only"
-                sx={{ mb: 1 }}
-              />
-
-              {localField.type === 'textarea' && (
-                <Box sx={{ mt: 2 }}>
-                  <Typography variant="body2" gutterBottom>
-                    Rows: {localField.uischema?.options?.rows || 3}
-                  </Typography>
-                  <Slider
-                    value={localField.uischema?.options?.rows || 3}
-                    onChange={(e, value) => {
-                      const updatedUISchema = {
-                        ...localField.uischema,
-                        options: {
-                          ...localField.uischema?.options,
-                          rows: value,
-                        },
-                      };
-                      handleUpdate({ uischema: updatedUISchema });
-                    }}
-                    min={1}
-                    max={10}
-                    step={1}
-                    marks
-                    valueLabelDisplay="auto"
-                  />
-                </Box>
               )}
             </Box>
           </AccordionDetails>
