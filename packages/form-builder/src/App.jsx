@@ -96,7 +96,7 @@ const defaultTheme = createTheme({
   },
 });
 
-const App = ({ onExport, onSchemaChange, schemas = [], theme: customTheme } = {}) => {
+const App = ({ onExport, onSave, schemas = [], theme: customTheme } = {}) => {
   const [fields, setFields] = useState([]);
   const [formData, setFormData] = useState({});
   const [selectedField, setSelectedField] = useState(null);
@@ -187,13 +187,13 @@ const App = ({ onExport, onSchemaChange, schemas = [], theme: customTheme } = {}
     };
   }, [schemaData, baseUiSchema, formData]);
 
-  // Notify consumer when schema or uischema changes
-  useEffect(() => {
-    if (typeof onSchemaChange === 'function') {
-      onSchemaChange(formState.schema, formState.uischema);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formState.schema, formState.uischema]);
+  // // Notify consumer when schema or uischema changes
+  // useEffect(() => {
+  //   if (typeof onSave === 'function') {
+  //     onSave(formState.schema, formState.uischema);
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [formState.schema, formState.uischema]);
 
   const addField = useCallback((fieldType, parentId, index) => {
     // Create a unique operation ID to prevent duplicates
@@ -584,6 +584,7 @@ const App = ({ onExport, onSchemaChange, schemas = [], theme: customTheme } = {}
                     showSchemaEditor={showSchemaEditor}
                     setShowSchemaEditor={setShowSchemaEditor}
                     exportForm={exportForm}
+                    onSave={onSave}
                   />
                 )}
 

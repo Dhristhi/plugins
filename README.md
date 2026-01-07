@@ -14,23 +14,26 @@ TODO
 
 ## Quick Start (Monorepo)
 
-```bash
+````bash
 ## Install dependencies
 ```bash
 yarn install
-```
+````
 
 ### Start Demo App
+
 ```bash
 yarn dev
 # Opens http://localhost:5173
 ```
 
 ### Build the Library Only
+
 ```bash
 yarn workspace @dhristhi/form-builder build
 ```
-```
+
+````
 
 ## Use as a Component (Library)
 
@@ -40,7 +43,7 @@ Install into another project and import the component:
 yarn add @dhristhi/form-builder
 # or
 npm install @dhristhi/form-builder
-```
+````
 
 ```jsx
 import React from 'react';
@@ -52,9 +55,11 @@ export default function MyPage() {
 ```
 
 Notes:
+
 - Peer deps: React and ReactDOM (>=18) and UI/libs (@mui, @jsonforms, @dnd-kit, @emotion), icons (`@tabler/icons-react`), and i18n (`react-i18next`, `i18next`) must be installed in the host app.
 
 ### Field-Type Registry (Extensibility)
+
 Register or override field types at runtime without forking:
 
 ```js
@@ -68,11 +73,12 @@ registerFieldTypes([
     schema: { type: 'string' },
     uischema: { type: 'Control', options: { placeholder: 'Custom' } },
     // icon: Optional React icon component
-  }
+  },
 ]);
 ```
 
 ### Controls Configuration (JSON Forms renderers)
+
 Enable/disable built-in custom controls from the `controls/` folder and add your own JSON Forms renderers at runtime.
 
 ```js
@@ -87,21 +93,22 @@ configureControls({
   disable: ['currencyText', 'image'],
 
   // Add custom renderers (tester + renderer components)
-  add: [
-    { tester: myCustomTester, renderer: MyCustomRenderer, id: 'myCustom' }
-  ]
+  add: [{ tester: myCustomTester, renderer: MyCustomRenderer, id: 'myCustom' }],
 });
 ```
 
 Built-in control IDs you can reference in `enable`/`disable`:
+
 - currencyText, text, label, image, infoAlert, select, downloadFile, fileUpload
 - arrayLayout, groupLayout, verticalLayout, horizontalLayout, accordionGroupLayout
 
 Notes:
+
 - Defaults: all built-in custom controls are enabled alongside Material renderers/cells.
 - `add` items are appended after built-ins. Provide a stable `id` if you need to toggle them later.
 
 ### Props
+
 - **`onSchemaChange(schema, uiSchema)`**: Called whenever the builder’s schema or UI schema changes.
 - **`onExport({ schema, uiSchema })`**: If provided, overrides default JSON download and delivers the export payload to your handler.
 - **`theme`**: Custom MUI theme instance to style the builder.
@@ -134,17 +141,16 @@ export default function MyPage() {
             type: 'object',
             properties: {
               firstName: { type: 'string', title: 'First Name' },
-              age: { type: 'number', title: 'Age' }
+              age: { type: 'number', title: 'Age' },
             },
-            required: ['firstName']
-          }
-        }
+            required: ['firstName'],
+          },
+        },
       ]}
     />
   );
 }
 ```
-
 
 ## Architecture
 
@@ -156,14 +162,13 @@ apps/
 packages/
   form-builder/
     src/                # Library source
-    index.d.ts          # Public types
     vite.config.js      # Library build config
     dist/               # Build output
 ```
 
 ## Development
 
-```bash
+````bash
 ```bash
 # Lint all workspaces
 yarn lint
@@ -176,8 +181,9 @@ yarn workspace @dhristhi/form-builder build
 
 # Build all workspaces
 yarn build
-```
-```
+````
+
+````
 
 ## Publishing (CI)
 
@@ -202,7 +208,7 @@ npm version patch
 # or: npm version major
 # pushes commit and tag
 git push origin main --follow-tags
-```
+````
 
 - What happens next:
   - The workflow at `.github/workflows/release.yml` runs on tags `v*.*.*`.
