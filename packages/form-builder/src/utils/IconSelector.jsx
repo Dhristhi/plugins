@@ -1,13 +1,24 @@
-import React, { useMemo, memo } from "react";
-import * as TablerIcons from "@tabler/icons-react";
+import React, { useMemo, memo } from 'react';
+import * as TablerIcons from '@tabler/icons-react';
+import { Autocomplete, Box, TextField, Typography } from '@mui/material';
+
+const IconOption = memo(({ props, option }) => {
+  const IconComponent = option.component;
+  return (
+    <Box component="li" {...props} sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 0.5 }}>
+      <IconComponent size={18} />
+      <Typography variant="body2">{option.name}</Typography>
+    </Box>
+  );
+});
 
 const IconSelector = ({ value, onChange }) => {
   // Get all Tabler icons - cached
   const allIcons = useMemo(() => {
     const icons = [];
     Object.keys(TablerIcons).forEach((key) => {
-      if (key.startsWith("Icon") && key !== "IconProps") {
-        const iconName = key.replace("Icon", "");
+      if (key.startsWith('Icon') && key !== 'IconProps') {
+        const iconName = key.replace('Icon', '');
         icons.push({
           name: iconName,
           component: TablerIcons[key],
@@ -26,16 +37,14 @@ const IconSelector = ({ value, onChange }) => {
     <Autocomplete
       value={selectedIconObj}
       onChange={(event, newValue) => {
-        onChange(newValue ? newValue.name : ""); // Returns just the name part (e.g., "Stars")
+        onChange(newValue ? newValue.name : ''); // Returns just the name part (e.g., "Stars")
       }}
       options={allIcons}
       getOptionLabel={(option) => option.name}
       filterOptions={(options, { inputValue }) => {
         if (!inputValue) return options.slice(0, 50); // Show only first 50 initially
         const query = inputValue.toLowerCase();
-        return options.filter((option) =>
-          option.name.toLowerCase().includes(query)
-        ).slice(0, 100); // Limit filtered results to 100
+        return options.filter((option) => option.name.toLowerCase().includes(query)).slice(0, 100); // Limit filtered results to 100
       }}
       renderOption={(props, option) => (
         <IconOption key={option.name} props={props} option={option} />
@@ -51,7 +60,7 @@ const IconSelector = ({ value, onChange }) => {
             startAdornment: (
               <>
                 {selectedIconObj && (
-                  <Box sx={{ display: "flex", alignItems: "center", ml: 1 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', ml: 1 }}>
                     {React.createElement(selectedIconObj.component, {
                       size: 18,
                     })}
@@ -64,10 +73,10 @@ const IconSelector = ({ value, onChange }) => {
         />
       )}
       ListboxProps={{
-        style: { maxHeight: "300px" },
+        style: { maxHeight: '300px' },
       }}
       sx={{
-        "& .MuiOutlinedInput-root": {
+        '& .MuiOutlinedInput-root': {
           borderRadius: 2,
         },
       }}
