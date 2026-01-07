@@ -1,10 +1,16 @@
-
 import { IconHammer, IconX } from '@tabler/icons-react';
 import { restrictToWindowEdges } from '@dnd-kit/modifiers';
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { ThemeProvider, createTheme, CssBaseline, Box, Button, Typography } from '@mui/material';
-import { DndContext, DragOverlay, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import {
+  DndContext,
+  DragOverlay,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
 
 import FormPreview from './components/FormPreview';
 import FieldPalette from './components/FieldPalette';
@@ -20,7 +26,13 @@ import { buildUISchemaFromFields } from './lib/schema/uiSchema';
 import { buildSchemaFromFields } from './lib/schema/buildSchema';
 import { getFieldTypes, getFieldTypeById } from './lib/registry/fieldRegistry';
 import { convertSchemaToFields as convertSchemaToFieldsLib } from './lib/schema/convert';
-import { findFieldById, getAllFieldIds, updateFieldById, moveField, reorderFieldRelative } from './lib/structure/treeOps';
+import {
+  findFieldById,
+  getAllFieldIds,
+  updateFieldById,
+  moveField,
+  reorderFieldRelative,
+} from './lib/structure/treeOps';
 
 const defaultTheme = createTheme({
   palette: {
@@ -84,7 +96,7 @@ const defaultTheme = createTheme({
   },
 });
 
-const App = ({ onExport, onSchemaChange, schemas = [], theme: customTheme } = {}) => {
+const App = ({ onExport, onSave, schemas = [], theme: customTheme } = {}) => {
   const [fields, setFields] = useState([]);
   const [formData, setFormData] = useState({});
   const [selectedField, setSelectedField] = useState(null);
@@ -166,20 +178,22 @@ const App = ({ onExport, onSchemaChange, schemas = [], theme: customTheme } = {}
       schema: {
         type: 'object',
         properties: schemaData.properties,
-        ...(schemaData.required && schemaData.required.length ? { required: schemaData.required } : {}),
+        ...(schemaData.required && schemaData.required.length
+          ? { required: schemaData.required }
+          : {}),
       },
       uischema: baseUiSchema,
       data: formData,
     };
   }, [schemaData, baseUiSchema, formData]);
 
-  // Notify consumer when schema or uischema changes
-  useEffect(() => {
-    if (typeof onSchemaChange === 'function') {
-      onSchemaChange(formState.schema, formState.uischema);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formState.schema, formState.uischema]);
+  // // Notify consumer when schema or uischema changes
+  // useEffect(() => {
+  //   if (typeof onSave === 'function') {
+  //     onSave(formState.schema, formState.uischema);
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [formState.schema, formState.uischema]);
 
   const addField = useCallback((fieldType, parentId, index) => {
     // Create a unique operation ID to prevent duplicates
@@ -273,18 +287,13 @@ const App = ({ onExport, onSchemaChange, schemas = [], theme: customTheme } = {}
     [addField]
   );
 
-  
-
   const handleFieldUpdate = useCallback((updatedField) => {
     setFields((prev) => updateFieldById(prev, updatedField));
     setSelectedField(updatedField);
   }, []);
 
   const exportForm = () =>
-    exportFormData(
-      { schema: formState.schema, uischema: formState.uischema, fields },
-      onExport
-    );
+    exportFormData({ schema: formState.schema, uischema: formState.uischema, fields }, onExport);
 
   // Drag and Drop handlers
   const handleDragStart = (event) => {
@@ -382,14 +391,10 @@ const App = ({ onExport, onSchemaChange, schemas = [], theme: customTheme } = {}
   // Schema loading functionality
   const convertSchemaToFields = useCallback(
     (schema) =>
-      convertSchemaToFieldsLib(
-        schema,
-        getFieldTypes(),
-        () => {
-          fieldCounter.current += 1;
-          return fieldCounter.current;
-        }
-      ),
+      convertSchemaToFieldsLib(schema, getFieldTypes(), () => {
+        fieldCounter.current += 1;
+        return fieldCounter.current;
+      }),
     []
   );
 
@@ -523,6 +528,7 @@ const App = ({ onExport, onSchemaChange, schemas = [], theme: customTheme } = {}
                     showSchemaEditor={showSchemaEditor}
                     setShowSchemaEditor={setShowSchemaEditor}
                     exportForm={exportForm}
+                    onSave={onSave}
                   />
                 )}
 
