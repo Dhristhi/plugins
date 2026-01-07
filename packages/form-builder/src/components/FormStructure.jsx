@@ -83,82 +83,129 @@ const SortableFieldItem = ({
     return <IconEdit {...iconProps} />;
   };
 
+  // Paper
+  const fieldPaperSx = (theme, { isSelected, isGroup, isArray, level }) => ({
+    p: 2.5,
+    mb: 1.5,
+    ml: level * 2,
+    cursor: 'pointer',
+    border: isSelected
+      ? `2px solid ${theme.palette.primary.main}`
+      : isGroup
+        ? `2px solid ${theme.palette.warning.main}`
+        : isArray
+          ? `2px solid ${theme.palette.info.main}`
+          : `1px solid ${theme.palette.grey[200]}`,
+    borderRadius: 2,
+    transition: 'all 0.2s ease',
+    '&:hover': {
+      transform: 'translateY(-1px)',
+      boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
+    },
+  });
+
+  // Layout containers
+  const rowBetweenSx = {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    minWidth: 0,
+    gap: 1,
+  };
+
+  const rowStartSx = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 1,
+    flex: 1,
+    minWidth: 0,
+    overflow: 'hidden',
+  };
+
+  // Drag handle
+  const dragHandleSx = {
+    cursor: 'grab',
+    display: 'flex',
+    alignItems: 'center',
+    color: 'grey.400',
+    '&:hover': { color: 'grey.500' },
+    '&:active': { cursor: 'grabbing' },
+  };
+
+  // Icon container
+  const fieldIconBoxSx = {
+    minWidth: '20px',
+    display: 'flex',
+    alignItems: 'center',
+  };
+
+  // Field label
+  const fieldLabelSx = (isLayout, isArray) => ({
+    fontWeight: isLayout || isArray ? 'bold' : 'normal',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    minWidth: 0,
+    flex: 1,
+  });
+
+  // Layout / array chip
+  const typeChipSx = (level) => ({
+    fontSize: level > 2 ? '10px' : '12px',
+    height: level > 2 ? 20 : 24,
+    '& .MuiChip-label': {
+      px: level > 2 ? 0.5 : 1,
+    },
+  });
+
+  // Hidden chip
+  const hiddenChipSx = {
+    fontSize: '10px',
+    height: 18,
+    opacity: 0.7,
+    '& .MuiChip-label': {
+      px: 0.5,
+    },
+  };
+
+  // Level chip
+  const levelChipSx = {
+    fontSize: '9px',
+    height: 16,
+    minWidth: 20,
+    '& .MuiChip-label': {
+      px: 0.5,
+    },
+  };
+
+  // Children container
+  const childrenContainerSx = {
+    mt: 2,
+    pl: 2,
+    borderLeft: 2,
+    borderColor: 'grey.300',
+  };
+
   return (
     <div ref={setNodeRef} style={style}>
       <Paper
         elevation={isSelected ? 2 : 0}
-        sx={{
-          p: 2.5,
-          mb: 1.5,
-          ml: level * 2,
-          cursor: 'pointer',
-          border: (theme) =>
-            isSelected
-              ? `2px solid ${theme.palette.primary.main}`
-              : isGroup
-                ? `2px solid ${theme.palette.warning.main}`
-                : isArray
-                  ? `2px solid ${theme.palette.info.main}`
-                  : `1px solid ${theme.palette.grey[200]}`,
-          borderRadius: 2,
-          transition: 'all 0.2s ease',
-          '&:hover': {
-            transform: 'translateY(-1px)',
-            boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
-          },
-        }}
+        sx={(theme) => fieldPaperSx(theme, { isSelected, isGroup, isArray, level })}
         onClick={() => onFieldSelect(field)}
         onContextMenu={handleContextMenu}
       >
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            minWidth: 0,
-            gap: 1,
-          }}
-        >
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 1,
-              flex: 1,
-              minWidth: 0,
-              overflow: 'hidden',
-            }}
-          >
-            <Box
-              {...attributes}
-              {...listeners}
-              sx={{
-                cursor: 'grab',
-                display: 'flex',
-                alignItems: 'center',
-                color: 'grey.400',
-                '&:hover': { color: 'grey.500' },
-                '&:active': { cursor: 'grabbing' },
-              }}
-            >
+        <Box sx={rowBetweenSx}>
+          <Box sx={rowStartSx}>
+            <Box {...attributes} {...listeners} sx={dragHandleSx}>
               <IconGripVertical size={16} />
             </Box>
-            <Box sx={{ minWidth: '20px', display: 'flex', alignItems: 'center' }}>
-              {getFieldIcon(useTheme())}
-            </Box>
-            <Typography
-              variant="subtitle2"
-              sx={{
-                fontWeight: isLayout || isArray ? 'bold' : 'normal',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-                minWidth: 0,
-                flex: 1,
-              }}
-            >
+
+            <Box sx={fieldIconBoxSx}>{getFieldIcon(useTheme())}</Box>
+
+            <Typography variant="subtitle2" sx={fieldLabelSx(isLayout, isArray)}>
               {field.label}
             </Typography>
+
             {(isLayout || isArray) && (
               <Chip
                 label={
@@ -177,50 +224,28 @@ const SortableFieldItem = ({
                       : 'primary'
                 }
                 variant="outlined"
-                sx={{
-                  fontSize: level > 2 ? '10px' : '12px',
-                  height: level > 2 ? 20 : 24,
-                  '& .MuiChip-label': {
-                    px: level > 2 ? 0.5 : 1,
-                  },
-                }}
+                sx={typeChipSx(level)}
               />
             )}
+
             {field.required && (
               <Typography variant="caption" color="error">
                 *
               </Typography>
             )}
+
             {field.uischema?.options?.hidden && (
               <Chip
                 label="Hidden"
                 size="small"
                 color="secondary"
                 variant="outlined"
-                sx={{
-                  fontSize: '10px',
-                  height: 18,
-                  opacity: 0.7,
-                  '& .MuiChip-label': {
-                    px: 0.5,
-                  },
-                }}
+                sx={hiddenChipSx}
               />
             )}
+
             {level > 0 && level <= 3 && (
-              <Chip
-                label={`L${level}`}
-                size="small"
-                variant="outlined"
-                sx={{
-                  fontSize: '9px',
-                  height: 16,
-                  minWidth: 20,
-                  '& .MuiChip-label': {
-                    px: 0.5,
-                  },
-                }}
-              />
+              <Chip label={`L${level}`} size="small" variant="outlined" sx={levelChipSx} />
             )}
           </Box>
 
@@ -236,16 +261,8 @@ const SortableFieldItem = ({
           />
         </Box>
 
-        {/* Render children for layouts AND arrays */}
-        {(isLayout || isArray) && field.children && field.children.length > 0 && (
-          <Box
-            sx={{
-              mt: 2,
-              pl: 2,
-              borderLeft: 2,
-              borderColor: 'grey.300',
-            }}
-          >
+        {(isLayout || isArray) && field.children?.length > 0 && (
+          <Box sx={childrenContainerSx}>
             <SortableContext
               items={field.children.map((child) => child.id)}
               strategy={verticalListSortingStrategy}
@@ -271,13 +288,12 @@ const SortableFieldItem = ({
           </Box>
         )}
 
-        {/* Show empty state for layouts/arrays without children */}
         {(isLayout || isArray) && (!field.children || field.children.length === 0) && (
           <DropZone
             parentId={field.id}
             index={0}
             accepts={['field', 'layout']}
-            isEmpty={true}
+            isEmpty
             onAddField={() => onAddFieldToLayout(field.id)}
           />
         )}
@@ -309,38 +325,51 @@ const DropZone = ({ parentId, index, accepts, isEmpty = false, onAddField }) => 
     },
   });
 
+  // Drop zone container
+  const dropZoneBoxSx = (isOver) => ({
+    mt: 2,
+    p: 4,
+    border: isOver ? 2 : '2px dashed',
+    borderColor: isOver ? 'primary.main' : 'grey.300',
+    borderRadius: 3,
+    textAlign: 'center',
+    color: isOver ? 'primary.main' : 'grey.500',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+    minHeight: 100,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    '&:hover': {
+      borderColor: 'primary.main',
+      transform: 'translateY(-1px)',
+    },
+  });
+
+  // Icon + label row
+  const dropZoneHeaderSx = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 1,
+    mb: 1,
+  };
+
+  // Header text
+  const dropZoneTitleSx = {
+    fontWeight: 500,
+  };
+
   if (isEmpty) {
     return (
-      <Box
-        ref={setNodeRef}
-        sx={{
-          mt: 2,
-          p: 4,
-          border: isOver ? 2 : '2px dashed',
-          borderColor: isOver ? 'primary.main' : 'grey.300',
-          borderRadius: 3,
-          textAlign: 'center',
-          color: isOver ? 'primary.main' : 'grey.500',
-          cursor: 'pointer',
-          transition: 'all 0.2s ease',
-          minHeight: 100,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          '&:hover': {
-            borderColor: 'primary.main',
-            transform: 'translateY(-1px)',
-          },
-        }}
-        onClick={onAddField}
-      >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+      <Box ref={setNodeRef} sx={dropZoneBoxSx(isOver)} onClick={onAddField}>
+        <Box sx={dropZoneHeaderSx}>
           {isOver ? <IconTarget size={20} /> : <IconPlus size={20} />}
-          <Typography variant="body2" sx={{ fontWeight: 500 }}>
+          <Typography variant="body2" sx={dropZoneTitleSx}>
             {isOver ? 'Drop here!' : 'No fields yet'}
           </Typography>
         </Box>
+
         <Typography variant="caption" color="textSecondary">
           {isOver ? 'Release to add item' : 'Drag fields from the palette '}
         </Typography>
@@ -348,44 +377,42 @@ const DropZone = ({ parentId, index, accepts, isEmpty = false, onAddField }) => 
     );
   }
 
+  // Drop indicator container
+  const compactDropZoneSx = (isOver) => ({
+    minHeight: isOver ? 50 : 24,
+    borderRadius: 1,
+    transition: 'all 0.2s ease',
+    margin: '8px 0',
+    opacity: isOver ? 1 : 0.7,
+    border: (theme) =>
+      isOver ? `2px solid ${theme.palette.primary.main}` : `2px dashed ${theme.palette.grey[300]}`,
+    borderColor: isOver ? 'primary.main' : 'grey.300',
+    position: 'relative',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    cursor: 'pointer',
+    '&:hover': {
+      opacity: 1,
+      minHeight: 36,
+      borderColor: 'primary.main',
+    },
+  });
+
+  // Drop indicator text
+  const compactDropZoneTextSx = (isOver) => ({
+    color: isOver ? 'white' : 'grey.500',
+    fontWeight: 500,
+    fontSize: '11px',
+    textAlign: 'center',
+    display: 'flex',
+    alignItems: 'center',
+    gap: 0.5,
+  });
+
   return (
-    <Box
-      ref={setNodeRef}
-      sx={{
-        minHeight: isOver ? 50 : 24,
-        borderRadius: 1,
-        transition: 'all 0.2s ease',
-        margin: '8px 0',
-        opacity: isOver ? 1 : 0.7,
-        border: (theme) =>
-          isOver
-            ? `2px solid ${theme.palette.primary.main}`
-            : `2px dashed ${theme.palette.grey[300]}`,
-        borderColor: isOver ? 'primary.main' : 'grey.300',
-        position: 'relative',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        cursor: 'pointer',
-        '&:hover': {
-          opacity: 1,
-          minHeight: 36,
-          borderColor: 'primary.main',
-        },
-      }}
-    >
-      <Typography
-        variant="caption"
-        sx={{
-          color: isOver ? 'white' : 'grey.500',
-          fontWeight: 500,
-          fontSize: '11px',
-          textAlign: 'center',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 0.5,
-        }}
-      >
+    <Box ref={setNodeRef} sx={compactDropZoneSx(isOver)}>
+      <Typography variant="caption" sx={compactDropZoneTextSx(isOver)}>
         {isOver ? (
           <>
             <IconTarget size={14} /> DROP HERE
@@ -484,6 +511,8 @@ const FormStructure = ({
     onFieldsChange(newFields);
   };
 
+  const nestedBox = { p: { xs: 1, sm: 2 } };
+
   return (
     <Box>
       <CommonHeader
@@ -497,7 +526,7 @@ const FormStructure = ({
         exportForm={exportForm}
       />
 
-      <Box sx={{ p: { xs: 1, sm: 2 } }}>
+      <Box sx={nestedBox}>
         {fields.length === 0 ? (
           <DropZone
             parentId={null}

@@ -81,20 +81,76 @@ const ActionButtons = ({
     handleClose();
   };
 
+  const styles = {
+    mainBox: {
+      display: 'flex',
+      gap: 0.25,
+      flexShrink: 0,
+    },
+
+    actionContainer: (level) => ({
+      display: 'flex',
+      gap: level > 1 ? 0.25 : 0.5,
+      flexShrink: 0,
+      alignItems: 'center',
+    }),
+
+    iconButtonBase: (level) => ({
+      p: level > 1 ? 0.25 : 0.5,
+    }),
+
+    successButton: (level) => ({
+      ...styles.iconButtonBase(level),
+      color: 'success.main',
+      '&:hover': {
+        color: 'success.dark',
+        backgroundColor: 'success.light',
+      },
+    }),
+
+    primaryButton: (level) => ({
+      ...styles.iconButtonBase(level),
+      color: 'primary.main',
+      '&:hover': {
+        color: 'primary.dark',
+        backgroundColor: 'primary.light',
+      },
+    }),
+
+    greyButton: (level) => ({
+      ...styles.iconButtonBase(level),
+      color: 'grey.500',
+      '&:hover': {
+        color: 'grey.600',
+        backgroundColor: 'grey.100',
+      },
+    }),
+
+    errorButton: (level) => ({
+      ...styles.iconButtonBase(level),
+      color: 'error.main',
+      '&:hover': {
+        color: 'error.dark',
+        backgroundColor: 'error.light',
+      },
+    }),
+
+    minimalGreyButton: {
+      p: 0.25,
+      color: 'grey.500',
+      '&:hover': {
+        color: 'primary.main',
+        backgroundColor: 'grey.100',
+      },
+    },
+  };
+
   // For deep nesting (level > 2), show minimal buttons
   if (level > 2) {
     return (
-      <Box sx={{ display: 'flex', gap: 0.25, flexShrink: 0 }}>
+      <Box sx={styles.mainBox}>
         <Tooltip title="More options">
-          <IconButton
-            size="small"
-            onClick={handleMoreClick}
-            sx={{
-              p: 0.25,
-              color: 'grey.500',
-              '&:hover': { color: 'primary.main', backgroundColor: 'grey.100' },
-            }}
-          >
+          <IconButton size="small" onClick={handleMoreClick} sx={styles.minimalGreyButton}>
             <IconDotsVertical size={16} />
           </IconButton>
         </Tooltip>
@@ -103,9 +159,7 @@ const ActionButtons = ({
           anchorEl={anchorEl}
           open={Boolean(anchorEl)}
           onClose={handleClose}
-          MenuListProps={{
-            dense: true,
-          }}
+          MenuListProps={{ dense: true }}
         >
           <MenuItem
             onClick={(e) => {
@@ -168,31 +222,18 @@ const ActionButtons = ({
     );
   }
 
+  const iconContainerSx = {
+    display: 'flex',
+    alignItems: 'center',
+  };
+
   // For shallower nesting, show more buttons
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        gap: level > 1 ? 0.25 : 0.5,
-        flexShrink: 0,
-        alignItems: 'center',
-      }}
-    >
+    <Box sx={styles.actionContainer(level)}>
       {isLayout && (
         <Tooltip title="Add field or layout">
-          <IconButton
-            size="small"
-            onClick={handleAddClick}
-            sx={{
-              p: level > 1 ? 0.25 : 0.5,
-              color: 'success.main',
-              '&:hover': {
-                color: 'success.dark',
-                backgroundColor: 'success.light',
-              },
-            }}
-          >
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <IconButton size="small" onClick={handleAddClick} sx={styles.successButton(level)}>
+            <Box sx={iconContainerSx}>
               <IconPlus size={level > 1 ? 16 : 18} />
               <IconChevronDown size={level > 1 ? 12 : 14} />
             </Box>
@@ -207,49 +248,20 @@ const ActionButtons = ({
             e.stopPropagation();
             onFieldSelect(field, true);
           }}
-          sx={{
-            p: level > 1 ? 0.25 : 0.5,
-            color: 'primary.main',
-            '&:hover': {
-              color: 'primary.dark',
-              backgroundColor: 'primary.light',
-            },
-          }}
+          sx={styles.primaryButton(level)}
         >
           <IconEdit size={level > 1 ? 16 : 18} />
         </IconButton>
       </Tooltip>
 
       <Tooltip title="More options">
-        <IconButton
-          size="small"
-          onClick={handleMoreClick}
-          sx={{
-            p: level > 1 ? 0.25 : 0.5,
-            color: 'grey.500',
-            '&:hover': {
-              color: 'grey.600',
-              backgroundColor: 'grey.100',
-            },
-          }}
-        >
+        <IconButton size="small" onClick={handleMoreClick} sx={styles.greyButton(level)}>
           <IconDotsVertical size={level > 1 ? 16 : 18} />
         </IconButton>
       </Tooltip>
 
       <Tooltip title="Delete">
-        <IconButton
-          size="small"
-          onClick={openDeleteConfirm}
-          sx={{
-            p: level > 1 ? 0.25 : 0.5,
-            color: 'error.main',
-            '&:hover': {
-              color: 'error.dark',
-              backgroundColor: 'error.light',
-            },
-          }}
-        >
+        <IconButton size="small" onClick={openDeleteConfirm} sx={styles.errorButton(level)}>
           <IconTrash size={level > 1 ? 16 : 18} />
         </IconButton>
       </Tooltip>

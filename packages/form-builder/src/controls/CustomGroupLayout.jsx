@@ -12,6 +12,8 @@ const CustomGroupLayoutRenderer = (props) => {
   const margin = uischema?.elements[0]?.elements?.[0]?.options?.detail ? 0 : 2;
   const removeExtraMargin = uischema?.elements[0]?.elements?.[0]?.options?.removeExtraMargin;
 
+  const mainBoxTypo = { marginLeft: 1, fontWeight: 500 };
+  const gridElement = { mx: 6, mb: 0 };
   return (
     <Grid container>
       <Grid item xs={12}>
@@ -23,12 +25,12 @@ const CustomGroupLayoutRenderer = (props) => {
             padding={2}
           >
             {uischema.icon && <Icon icon={icons[uischema.icon]} />}
-            <Typography variant="h4" sx={{ marginLeft: 1, fontWeight: 500 }}>
+            <Typography variant="h4" sx={mainBoxTypo}>
               {label}
             </Typography>
           </Stack>
           {uischema?.elements?.map((element, index) => (
-            <Grid item xs={12} key={index} sx={{ mx: 6, mb: 0 }}>
+            <Grid item xs={12} key={index} sx={gridElement}>
               <JsonFormsDispatch {...props} uischema={element} type={'Group'} key={index} />
             </Grid>
           ))}

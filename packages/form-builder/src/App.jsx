@@ -422,6 +422,118 @@ const App = ({ onExport, onSave, schemas = [], theme: customTheme } = {}) => {
       ? 'Layout Properties'
       : 'Field Properties';
 
+  const baseBox = {
+    width: '100vw',
+    height: '100vh',
+    display: 'flex',
+    flexDirection: 'column',
+    background: (theme) =>
+      `linear-gradient(135deg, ${theme.palette.grey[50]} 0%, ${theme.palette.grey[200]} 100%)`,
+  };
+
+  const headerBox = {
+    background: (theme) =>
+      `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+    color: 'primary.contrastText',
+    p: 2,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    boxShadow: 4,
+  };
+
+  const headerBoxInner = { display: 'flex', alignItems: 'center', gap: 2 };
+
+  const headerTypography = {
+    margin: 0,
+    fontSize: { xs: '20px', sm: '28px' },
+    fontWeight: 600,
+    letterSpacing: '-0.02em',
+  };
+
+  const mainBox = {
+    display: 'flex',
+    flex: 1,
+    overflow: 'hidden',
+    flexDirection: { xs: 'column', md: 'row' },
+  };
+
+  const leftSidebar = {
+    width: { xs: '100%', md: '320px' },
+    minWidth: { md: '320px' },
+    maxHeight: { xs: '40vh', md: 'none' },
+    borderRight: { md: 1 },
+    borderColor: { md: 'grey.200' },
+    borderBottom: { xs: 1, md: 'none' },
+    display: 'flex',
+    flexDirection: 'column',
+    overflow: 'auto',
+    boxShadow: { md: 1 },
+  };
+
+  const centerContent = {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    overflow: 'auto',
+    minHeight: { xs: '60vh', md: 'auto' },
+  };
+
+  const dragOverlay = {
+    backgroundColor: (theme) => theme.palette.primary.main,
+    color: 'primary.contrastText',
+    p: '8px 12px',
+    borderRadius: 1,
+    fontSize: '14px',
+    fontWeight: 'bold',
+    boxShadow: 2,
+    display: 'flex',
+    alignItems: 'center',
+    gap: 1,
+  };
+  const propertiesPanel = {
+    position: 'fixed',
+    right: 0,
+    top: 0,
+    width: { xs: '100vw', sm: '400px', md: '380px' },
+    height: '100vh',
+    background: 'white',
+    boxShadow: '-4px 0 25px -5px rgb(0 0 0 / 0.1), -2px 0 10px -5px rgb(0 0 0 / 0.04)',
+    zIndex: 1000,
+    overflow: 'auto',
+    borderLeft: 1,
+    borderColor: 'grey.200',
+  };
+
+  const propertiesPanelBox = {
+    p: 3,
+    borderBottom: 1,
+    borderColor: 'grey.200',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: 'grey.50',
+  };
+
+  const propertiesPanelButton = {
+    minWidth: 'auto',
+    p: 1,
+    borderRadius: 1.5,
+    color: 'grey.500',
+    '&:hover': {
+      backgroundColor: 'grey.200',
+      color: 'grey.600',
+    },
+  };
+  const propertiesPanelTypo = { margin: 0, fontWeight: 600, color: 'grey.800' };
+
+  const showFlex = {
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: '0%',
+    overflow: 'auto',
+  };
+
   return (
     <ThemeProvider theme={appliedTheme}>
       <CssBaseline />
@@ -434,69 +546,21 @@ const App = ({ onExport, onSave, schemas = [], theme: customTheme } = {}) => {
         modifiers={[restrictToWindowEdges]}
       >
         <SortableContext items={getAllFieldIds(fields)} strategy={verticalListSortingStrategy}>
-          <Box
-            sx={{
-              width: '100vw',
-              height: '100vh',
-              display: 'flex',
-              flexDirection: 'column',
-              background: (theme) =>
-                `linear-gradient(135deg, ${theme.palette.grey[50]} 0%, ${theme.palette.grey[200]} 100%)`,
-            }}
-          >
+          <Box sx={baseBox}>
             {/* Header */}
-            <Box
-              sx={{
-                background: (theme) =>
-                  `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-                color: 'primary.contrastText',
-                p: 2,
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                boxShadow: 4,
-              }}
-            >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Box sx={headerBox}>
+              <Box sx={headerBoxInner}>
                 <IconHammer size={28} />
-                <Typography
-                  variant="h5"
-                  sx={{
-                    margin: 0,
-                    fontSize: { xs: '20px', sm: '28px' },
-                    fontWeight: 600,
-                    letterSpacing: '-0.02em',
-                  }}
-                >
+                <Typography variant="h5" sx={headerTypography}>
                   Form Builder
                 </Typography>
               </Box>
             </Box>
 
             {/* Main Content */}
-            <Box
-              sx={{
-                display: 'flex',
-                flex: 1,
-                overflow: 'hidden',
-                flexDirection: { xs: 'column', md: 'row' },
-              }}
-            >
+            <Box sx={mainBox}>
               {/* Left Sidebar - Field Palette */}
-              <Box
-                sx={{
-                  width: { xs: '100%', md: '320px' },
-                  minWidth: { md: '320px' },
-                  maxHeight: { xs: '40vh', md: 'none' },
-                  borderRight: { md: 1 },
-                  borderColor: { md: 'grey.200' },
-                  borderBottom: { xs: 1, md: 'none' },
-                  display: 'flex',
-                  flexDirection: 'column',
-                  overflow: 'auto',
-                  boxShadow: { md: 1 },
-                }}
-              >
+              <Box sx={leftSidebar}>
                 {' '}
                 <FieldPalette
                   onLoadSchema={handleLoadSchemaFromPalette}
@@ -509,15 +573,7 @@ const App = ({ onExport, onSave, schemas = [], theme: customTheme } = {}) => {
               </Box>
 
               {/* Center Content - Toggle between Form Structure and Form Preview */}
-              <Box
-                sx={{
-                  flex: 1,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  overflow: 'auto',
-                  minHeight: { xs: '60vh', md: 'auto' },
-                }}
-              >
+              <Box sx={centerContent}>
                 {/* Schema Editor (when enabled) */}
                 {showSchemaEditor && (
                   <SchemaEditor
@@ -534,12 +590,7 @@ const App = ({ onExport, onSave, schemas = [], theme: customTheme } = {}) => {
 
                 {/* Content Area - Either Form Structure or Form Preview */}
                 {!showSchemaEditor && (
-                  <div
-                    style={{
-                      flex: 1,
-                      overflow: 'auto',
-                    }}
-                  >
+                  <Box sx={showFlex}>
                     {showFormPreview ? (
                       /* Form Preview Mode */
                       <FormPreview
@@ -573,7 +624,7 @@ const App = ({ onExport, onSave, schemas = [], theme: customTheme } = {}) => {
                         exportForm={exportForm}
                       />
                     )}
-                  </div>
+                  </Box>
                 )}
               </Box>
             </Box>
@@ -581,20 +632,7 @@ const App = ({ onExport, onSave, schemas = [], theme: customTheme } = {}) => {
             {/* Drag Overlay */}
             <DragOverlay>
               {activeId && draggedItem ? (
-                <Box
-                  sx={{
-                    backgroundColor: (theme) => theme.palette.primary.main,
-                    color: 'primary.contrastText',
-                    p: '8px 12px',
-                    borderRadius: 1,
-                    fontSize: '14px',
-                    fontWeight: 'bold',
-                    boxShadow: 2,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 1,
-                  }}
-                >
+                <Box sx={dragOverlay}>
                   <span>
                     {draggedItem.type === 'palette-item'
                       ? draggedItem.fieldType?.icon &&
@@ -615,48 +653,15 @@ const App = ({ onExport, onSave, schemas = [], theme: customTheme } = {}) => {
 
           {/* Properties Panel */}
           {propertiesDrawerOpen && selectedField && (
-            <Box
-              sx={{
-                position: 'fixed',
-                right: 0,
-                top: 0,
-                width: { xs: '100vw', sm: '400px', md: '380px' },
-                height: '100vh',
-                background: 'white',
-                boxShadow: '-4px 0 25px -5px rgb(0 0 0 / 0.1), -2px 0 10px -5px rgb(0 0 0 / 0.04)',
-                zIndex: 1000,
-                overflow: 'auto',
-                borderLeft: 1,
-                borderColor: 'grey.200',
-              }}
-            >
-              <Box
-                sx={{
-                  p: 3,
-                  borderBottom: 1,
-                  borderColor: 'grey.200',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  backgroundColor: 'grey.50',
-                }}
-              >
-                <Typography variant="h6" sx={{ margin: 0, fontWeight: 600, color: 'grey.800' }}>
+            <Box sx={propertiesPanel}>
+              <Box sx={propertiesPanelBox}>
+                <Typography variant="h6" sx={propertiesPanelTypo}>
                   {formTitle}
                 </Typography>
                 <Button
                   onClick={() => setPropertiesDrawerOpen(false)}
                   size="small"
-                  sx={{
-                    minWidth: 'auto',
-                    p: 1,
-                    borderRadius: 1.5,
-                    color: 'grey.500',
-                    '&:hover': {
-                      backgroundColor: 'grey.200',
-                      color: 'grey.600',
-                    },
-                  }}
+                  sx={propertiesPanelButton}
                 >
                   <IconX size={20} />
                 </Button>
