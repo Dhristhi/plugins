@@ -33,7 +33,6 @@ const FormPreview = ({
         setShowSchemaEditor={setShowSchemaEditor}
         exportForm={exportForm}
       />
-
       <Box sx={{ p: 2 }}>
         {formState.schema.properties && Object.keys(formState.schema.properties).length > 0 ? (
           <JsonForms

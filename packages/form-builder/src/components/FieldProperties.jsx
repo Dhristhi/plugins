@@ -83,13 +83,25 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
     }
   }, [field]);
 
+  const emptyStateContainerSx = {
+    p: 3,
+    textAlign: 'center',
+  };
+
+  const emptyStateTitleSx = {
+    fontWeight: 500,
+    color: 'grey.400',
+  };
+
   if (!localField) {
     return (
-      <Box sx={{ p: 3, textAlign: 'center' }}>
-        <IconSettings size={48} style={{ marginBottom: '16px' }} color="currentColor" />
-        <Typography variant="h6" color="textSecondary" sx={{ fontWeight: 500, color: 'grey.400' }}>
+      <Box sx={emptyStateContainerSx}>
+        <IconSettings size={48} className="mb-16" color="currentColor" />
+
+        <Typography variant="h6" color="textSecondary" sx={emptyStateTitleSx}>
           Select a field to edit
         </Typography>
+
         <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>
           Click on any field in the form structure to configure its properties
         </Typography>
@@ -259,10 +271,119 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
     handleUpdate({ uischema: updatedUiSchema });
   };
 
+  const outlinedTextFieldSx = {
+    '& .MuiOutlinedInput-root': {
+      borderRadius: 2,
+    },
+  };
+
+  const layoutSelectSx = {
+    borderRadius: 2,
+  };
+
+  const fieldTypeMenuItemSx = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 1,
+  };
+
+  const requiredSwitchSx = {
+    mt: 1,
+  };
+
+  const iconSelectorContainerSx = {
+    mt: 2,
+  };
+
+  const collapsibleGroupSwitchSx = {
+    mt: 1,
+  };
+
+  const accordionSx = {
+    mb: 2,
+    boxShadow: 1,
+  };
+
+  const optionInputRowSx = {
+    display: 'flex',
+    gap: 1,
+    mb: 2,
+  };
+
+  const newOptionTextFieldSx = {
+    flex: 1,
+    '& .MuiOutlinedInput-root': {
+      borderRadius: 1.5,
+    },
+  };
+
+  const addOptionButtonSx = {
+    color: 'success.main',
+    backgroundColor: 'success.light',
+    borderRadius: 1.5,
+    '&:hover': {
+      backgroundColor: (theme) => theme.palette.success.light,
+      color: 'success.dark',
+    },
+  };
+
+  const optionChipsWrapperSx = {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: 1,
+  };
+
+  const optionChipSx = {
+    borderRadius: 1.5,
+    textTransform: 'capitalize',
+    '& .MuiChip-deleteIcon': {
+      color: 'error.main',
+      '&:hover': {
+        color: 'error.dark',
+      },
+    },
+  };
+
+  const captionTypographySx = { color: 'text.secondary', fontWeight: 600 };
+  const chipsContainerSx = { display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 };
+  const formControlLabelSx = { mb: 1 };
+  const sliderContainerSx = { mt: 2 };
+
+  const containerSx = {
+    mt: 3,
+    p: 2,
+    backgroundColor: 'grey.50',
+    borderRadius: 2,
+    border: '1px solid',
+    borderColor: 'grey.200',
+  };
+
+  const subtitleSx = {
+    gutterBottom: true,
+    color: 'grey.700',
+  };
+
+  const infoRowSx = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 1,
+    mb: 1,
+  };
+
+  const bodyTextSx = {
+    color: 'grey.600',
+    mb: 1,
+  };
+
+  const italicTextSx = {
+    color: 'grey.500',
+    fontStyle: 'italic',
+  };
+
   return (
     <Box>
       {/* Basic Properties */}
-      <Accordion defaultExpanded sx={{ mb: 2, boxShadow: 1 }}>
+      <Accordion defaultExpanded sx={accordionSx}>
         <AccordionSummary expandIcon={<IconChevronDown />}>
           <Typography variant="subtitle1" fontWeight={600}>
             Basic Properties
@@ -296,7 +417,7 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                 helperText={
                   isGroup ? 'Displayed as the group header' : 'The display label for this field'
                 }
-                sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                sx={outlinedTextFieldSx}
               />
             )}
 
@@ -309,7 +430,7 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                   value={layout}
                   label="Layout Type"
                   onChange={handleLayoutChange}
-                  sx={{ borderRadius: 2 }}
+                  sx={layoutSelectSx}
                 >
                   <MenuItem value="vertical-layout">Vertical Layout</MenuItem>
                   <MenuItem value="horizontal-layout">Horizontal Layout</MenuItem>
@@ -327,7 +448,7 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                   margin="normal"
                   variant="outlined"
                   helperText="Unique identifier for this field"
-                  sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                  sx={outlinedTextFieldSx}
                 />
 
                 <FormControl fullWidth margin="normal">
@@ -336,19 +457,13 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                     value={localField.type}
                     label="Field Type"
                     onChange={(e) => handleFieldTypeChange(e.target.value)}
-                    sx={{ borderRadius: 2 }}
+                    sx={layoutSelectSx}
                   >
                     {getCompatibleFieldTypes().map((fieldType) => {
                       const IconComponent = fieldType.icon;
                       return (
                         <MenuItem key={fieldType.id} value={fieldType.id}>
-                          <Box
-                            sx={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: 1,
-                            }}
-                          >
+                          <Box sx={fieldTypeMenuItemSx}>
                             <IconComponent size={18} />
                             <Typography>{fieldType.label}</Typography>
                           </Box>
@@ -367,14 +482,14 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                     />
                   }
                   label="Required Field"
-                  sx={{ mt: 1 }}
+                  sx={requiredSwitchSx}
                 />
               </>
             )}
 
             {isGroup && (
               <>
-                <Box sx={{ mt: 2 }}>
+                <Box sx={iconSelectorContainerSx}>
                   <IconSelector
                     value={selectedIcon}
                     onChange={(iconName) => {
@@ -402,7 +517,7 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                     />
                   }
                   label="Collapsible Group"
-                  sx={{ mt: 1 }}
+                  sx={collapsibleGroupSwitchSx}
                 />
 
                 {localField.uischema?.options?.collapsed && (
@@ -433,12 +548,13 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
       </Accordion>
       {/* Display Options */}
       {!isLayout && !isGroup && (
-        <Accordion sx={{ mb: 2, boxShadow: 1 }}>
+        <Accordion sx={accordionSx}>
           <AccordionSummary expandIcon={<IconChevronDown />}>
             <Typography variant="subtitle1" fontWeight={600}>
               Display Options
             </Typography>
           </AccordionSummary>
+
           <AccordionDetails>
             <Box>
               <TextField
@@ -460,7 +576,7 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                 margin="normal"
                 variant="outlined"
                 helperText="Initial value for this field"
-                sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                sx={outlinedTextFieldSx}
               />
             </Box>
           </AccordionDetails>
@@ -468,12 +584,13 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
       )}
       {/* File Upload Options */}
       {localField.type === 'file' && (
-        <Accordion sx={{ mb: 2, boxShadow: 1 }}>
+        <Accordion sx={accordionSx}>
           <AccordionSummary expandIcon={<IconChevronDown />}>
             <Typography variant="subtitle1" fontWeight={600}>
               File Upload Options
             </Typography>
           </AccordionSummary>
+
           <AccordionDetails>
             <Box>
               <TextField
@@ -488,7 +605,7 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                 margin="normal"
                 variant="outlined"
                 helperText="Comma-separated list of allowed file types (e.g., .jpg, .png, .pdf)"
-                sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                sx={outlinedTextFieldSx}
               />
             </Box>
           </AccordionDetails>
@@ -496,17 +613,16 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
       )}
       {/* Validation Rules */}
       {!isLayout && !isGroup && (
-        <Accordion sx={{ mb: 2, boxShadow: 1 }}>
+        <Accordion sx={accordionSx}>
           <AccordionSummary expandIcon={<IconChevronDown />}>
             <Typography variant="subtitle1" fontWeight={600}>
               Validation Rules
             </Typography>
           </AccordionSummary>
+
           <AccordionDetails>
             <Box>
-              {(localField.type === 'text' ||
-                localField.type === 'textarea' ||
-                localField.type === 'email') && (
+              {(localField.type === 'text' || localField.type === 'textarea') && (
                 <>
                   <Grid container spacing={2}>
                     <Grid item xs={6}>
@@ -522,9 +638,10 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                         }
                         margin="normal"
                         variant="outlined"
-                        sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                        sx={outlinedTextFieldSx}
                       />
                     </Grid>
+
                     <Grid item xs={6}>
                       <TextField
                         label="Max Length"
@@ -538,7 +655,7 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                         }
                         margin="normal"
                         variant="outlined"
-                        sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                        sx={outlinedTextFieldSx}
                       />
                     </Grid>
                   </Grid>
@@ -555,11 +672,27 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                     margin="normal"
                     variant="outlined"
                     helperText="Regular expression for validation (e.g., ^[A-Za-z]+$ for letters only)"
-                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                    sx={outlinedTextFieldSx}
                   />
                 </>
               )}
 
+              {localField.type === 'email' && (
+                <TextField
+                  label="Pattern (RegEx)"
+                  fullWidth
+                  value={localField.schema?.pattern || ''}
+                  onChange={(e) =>
+                    handleSchemaUpdate({
+                      pattern: e.target.value || undefined,
+                    })
+                  }
+                  margin="normal"
+                  variant="outlined"
+                  helperText="Regular expression for validation (e.g., ^[A-Za-z]+$ for letters only)"
+                  sx={outlinedTextFieldSx}
+                />
+              )}
               {localField.type === 'number' && (
                 <Grid container spacing={2}>
                   <Grid item xs={6}>
@@ -575,9 +708,10 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                       }
                       margin="normal"
                       variant="outlined"
-                      sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                      sx={outlinedTextFieldSx}
                     />
                   </Grid>
+
                   <Grid item xs={6}>
                     <TextField
                       label="Maximum Value"
@@ -591,7 +725,7 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                       }
                       margin="normal"
                       variant="outlined"
-                      sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                      sx={outlinedTextFieldSx}
                     />
                   </Grid>
                 </Grid>
@@ -602,7 +736,7 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
       )}
       {/* Options for Select/Radio Fields */}
       {hasEnumOptions && (
-        <Accordion defaultExpanded sx={{ mb: 2, boxShadow: 1 }}>
+        <Accordion defaultExpanded sx={accordionSx}>
           <AccordionSummary expandIcon={<IconChevronDown />}>
             <Typography variant="subtitle1" fontWeight={600}>
               Options
@@ -662,7 +796,7 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                     margin="normal"
                     variant="outlined"
                     helperText="API endpoint name (e.g., countries, cities)"
-                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                    sx={outlinedTextFieldSx}
                   />
                   <TextField
                     label="Value Field Name"
@@ -681,7 +815,7 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                     margin="normal"
                     variant="outlined"
                     helperText="Field name for stored value (e.g., code, id). Leave empty for primitive arrays."
-                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                    sx={outlinedTextFieldSx}
                   />
                   <TextField
                     label="Label Field Name"
@@ -700,12 +834,12 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                     margin="normal"
                     variant="outlined"
                     helperText="Field name for display label (e.g., name, label). Leave empty for primitive arrays."
-                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                    sx={outlinedTextFieldSx}
                   />
                 </Box>
               ) : (
                 <>
-                  <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+                  <Box sx={optionInputRowSx}>
                     <TextField
                       label="New Option"
                       size="small"
@@ -717,28 +851,15 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                         }
                       }}
                       variant="outlined"
-                      sx={{
-                        flex: 1,
-                        '& .MuiOutlinedInput-root': { borderRadius: 1.5 },
-                      }}
+                      sx={newOptionTextFieldSx}
                     />
-                    <IconButton
-                      onClick={handleAddOption}
-                      sx={{
-                        color: 'success.main',
-                        backgroundColor: 'success.light',
-                        borderRadius: 1.5,
-                        '&:hover': {
-                          backgroundColor: (theme) => theme.palette.success.light,
-                          color: 'success.dark',
-                        },
-                      }}
-                    >
+
+                    <IconButton onClick={handleAddOption} sx={addOptionButtonSx}>
                       <IconPlus size={20} />
                     </IconButton>
                   </Box>
 
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                  <Box sx={optionChipsWrapperSx}>
                     {enumOptions.map((option, index) => (
                       <Chip
                         key={index}
@@ -746,14 +867,7 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                         onDelete={() => handleRemoveOption(index)}
                         deleteIcon={<IconTrash size={16} />}
                         variant="outlined"
-                        sx={{
-                          borderRadius: 1.5,
-                          textTransform: 'capitalize',
-                          '& .MuiChip-deleteIcon': {
-                            color: 'error.main',
-                            '&:hover': { color: 'error.dark' },
-                          },
-                        }}
+                        sx={optionChipSx}
                       />
                     ))}
                   </Box>
@@ -765,7 +879,7 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
       )}
       {/* Advanced Options */}
       {!isLayout && !isGroup && (
-        <Accordion sx={{ mb: 2, boxShadow: 1 }}>
+        <Accordion sx={accordionSx}>
           <AccordionSummary expandIcon={<IconChevronDown />}>
             <Typography variant="subtitle1" fontWeight={600}>
               Advanced Options
@@ -774,10 +888,10 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
           <AccordionDetails>
             {/* Allowed Access */}
             <Box sx={{ mb: 2 }}>
-              <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
+              <Typography variant="caption" sx={captionTypographySx}>
                 Allowed Access
               </Typography>
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
+              <Box sx={chipsContainerSx}>
                 {ALL_ROLE_CODES.map((roleCode) => (
                   <Chip
                     key={roleCode}
@@ -812,11 +926,11 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                   />
                 }
                 label="Read Only"
-                sx={{ mb: 1 }}
+                sx={formControlLabelSx}
               />
 
               {localField.type === 'textarea' && (
-                <Box sx={{ mt: 2 }}>
+                <Box sx={sliderContainerSx}>
                   <Typography variant="body2" gutterBottom>
                     Rows: {localField.uischema?.options?.rows || 3}
                   </Typography>
@@ -846,39 +960,30 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
       )}
 
       {/* Field Info */}
-      <Box
-        sx={{
-          mt: 3,
-          p: 2,
-          backgroundColor: 'grey.50',
-          borderRadius: 2,
-          border: '1px solid',
-          borderColor: 'grey.200',
-        }}
-      >
-        <Typography variant="subtitle2" gutterBottom color="grey.700">
+      <Box sx={containerSx}>
+        <Typography variant="subtitle2" sx={subtitleSx}>
           {isGroup ? 'Group Container' : isLayout ? 'Layout Container' : 'Field Information'}
         </Typography>
 
         {!isGroup && !isLayout && (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+          <Box sx={infoRowSx}>
             {React.createElement(getFieldTypeIcon(localField.type), {
               size: 16,
               color: '#666',
             })}
-            <Typography variant="body2" color="grey.600">
-              Type: <span style={{ textTransform: 'capitalize' }}>{localField.type}</span>
+            <Typography variant="body2" sx={{ color: 'grey.600' }}>
+              Type: <span className="textTransCaps">{localField.type}</span>
             </Typography>
           </Box>
         )}
 
         {!isGroup && !isLayout && localField.schema.format && (
-          <Typography variant="body2" color="grey.600" sx={{ mb: 1 }}>
-            Format: <span style={{ textTransform: 'capitalize' }}>{localField.schema.format}</span>
+          <Typography variant="body2" sx={bodyTextSx}>
+            Format: <span className="textTransCaps">{localField.schema.format}</span>
           </Typography>
         )}
 
-        <Typography variant="body2" color="grey.500" sx={{ fontStyle: 'italic' }}>
+        <Typography variant="body2" sx={italicTextSx}>
           {isGroup
             ? 'Groups provide visual separation and can contain any fields or layouts'
             : isLayout
