@@ -12,6 +12,7 @@ const SchemaEditor = ({
   showSchemaEditor,
   setShowSchemaEditor,
   exportForm,
+  onSave,
 }) => {
   const [schemaText, setSchemaText] = useState('');
   const [uischemaText, setUischemaText] = useState('');
@@ -32,6 +33,10 @@ const SchemaEditor = ({
         schema: newSchema,
         uischema: newUischema,
       });
+
+      if (onSave) {
+        onSave(newSchema, newUischema);
+      }
 
       setError(null);
     } catch (err) {

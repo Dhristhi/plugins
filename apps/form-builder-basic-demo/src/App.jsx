@@ -1202,9 +1202,13 @@ const schemas = [
 ];
 
 export default function DemoApp() {
+  const handleSchemaSave = (schema, uischema) => {
+    console.log('Schema changed:', { schema, uischema });
+  };
+
   return (
     <div style={{ width: '100vw', height: '100vh' }}>
-      <FormBuilder schemas={schemas} />
+      <FormBuilder schemas={schemas} onSave={handleSchemaSave} />
     </div>
   );
 }
