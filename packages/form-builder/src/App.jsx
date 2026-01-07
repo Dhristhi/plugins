@@ -34,8 +34,6 @@ import {
   reorderFieldRelative,
 } from './lib/structure/treeOps';
 
-import './style.css';
-
 const defaultTheme = createTheme({
   palette: {
     mode: 'light',
@@ -529,6 +527,13 @@ const App = ({ onExport, onSchemaChange, schemas = [], theme: customTheme } = {}
   };
   const propertiesPanelTypo = { margin: 0, fontWeight: 600, color: 'grey.800' };
 
+  const showFlex = {
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: '0%',
+    overflow: 'auto',
+  };
+
   return (
     <ThemeProvider theme={appliedTheme}>
       <CssBaseline />
@@ -584,7 +589,7 @@ const App = ({ onExport, onSchemaChange, schemas = [], theme: customTheme } = {}
 
                 {/* Content Area - Either Form Structure or Form Preview */}
                 {!showSchemaEditor && (
-                  <div className="showFlex">
+                  <Box sx={showFlex}>
                     {showFormPreview ? (
                       /* Form Preview Mode */
                       <FormPreview
@@ -618,7 +623,7 @@ const App = ({ onExport, onSchemaChange, schemas = [], theme: customTheme } = {}
                         exportForm={exportForm}
                       />
                     )}
-                  </div>
+                  </Box>
                 )}
               </Box>
             </Box>

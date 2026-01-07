@@ -93,10 +93,14 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
     color: 'grey.400',
   };
 
+  const mb16 = {
+    marginBottom: '16px',
+  };
+
   if (!localField) {
     return (
       <Box sx={emptyStateContainerSx}>
-        <IconSettings size={48} className="mb-16" color="currentColor" />
+        <IconSettings size={48} sx={mb16} color="currentColor" />
 
         <Typography variant="h6" color="textSecondary" sx={emptyStateTitleSx}>
           Select a field to edit
@@ -378,6 +382,10 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
   const italicTextSx = {
     color: 'grey.500',
     fontStyle: 'italic',
+  };
+
+  const textTransCaps = {
+    textTransform: 'capitalize',
   };
 
   return (
@@ -972,14 +980,20 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
               color: '#666',
             })}
             <Typography variant="body2" sx={{ color: 'grey.600' }}>
-              Type: <span className="textTransCaps">{localField.type}</span>
+              Type:{' '}
+              <Box component="span" sx={textTransCaps}>
+                {localField.type}
+              </Box>
             </Typography>
           </Box>
         )}
 
         {!isGroup && !isLayout && localField.schema.format && (
           <Typography variant="body2" sx={bodyTextSx}>
-            Format: <span className="textTransCaps">{localField.schema.format}</span>
+            Format:{' '}
+            <Box component="span" sx={textTransCaps}>
+              {localField.schema.format}
+            </Box>
           </Typography>
         )}
 
