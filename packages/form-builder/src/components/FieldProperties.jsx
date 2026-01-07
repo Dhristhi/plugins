@@ -630,7 +630,9 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
 
           <AccordionDetails>
             <Box>
-              {(localField.type === 'text' || localField.type === 'textarea') && (
+              {(localField.type === 'text' ||
+                localField.type === 'textarea' ||
+                localField.type === 'email') && (
                 <>
                   <Grid container spacing={2}>
                     <Grid item xs={6}>
@@ -646,10 +648,9 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                         }
                         margin="normal"
                         variant="outlined"
-                        sx={outlinedTextFieldSx}
+                        sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                       />
                     </Grid>
-
                     <Grid item xs={6}>
                       <TextField
                         label="Max Length"
@@ -663,7 +664,7 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                         }
                         margin="normal"
                         variant="outlined"
-                        sx={outlinedTextFieldSx}
+                        sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                       />
                     </Grid>
                   </Grid>
@@ -680,7 +681,7 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                     margin="normal"
                     variant="outlined"
                     helperText="Regular expression for validation (e.g., ^[A-Za-z]+$ for letters only)"
-                    sx={outlinedTextFieldSx}
+                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                   />
                 </>
               )}
@@ -737,6 +738,33 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                     />
                   </Grid>
                 </Grid>
+              )}
+            </Box>
+            <Box>
+              {(localField.type === 'text' ||
+                localField.type === 'textarea' ||
+                localField.type === 'file') && (
+                <>
+                  <Grid container spacing={1}>
+                    <Grid item xs={12}>
+                      <TextField
+                        label="Maximum File Size (MB)"
+                        type="number"
+                        fullWidth
+                        value={localField.uischema?.options?.['ui:options']?.maxSize || ''}
+                        onChange={(e) =>
+                          handleUiOptionsUpdate({
+                            maxSize: e.target.value ? Number(e.target.value) : undefined,
+                          })
+                        }
+                        margin="normal"
+                        variant="outlined"
+                        helperText="Maximum allowed file size in megabytes (e.g., 5 = 5MB)"
+                        sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                      />
+                    </Grid>
+                  </Grid>
+                </>
               )}
             </Box>
           </AccordionDetails>
