@@ -504,9 +504,7 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
           </AccordionSummary>
           <AccordionDetails>
             <Box>
-              {(localField.type === 'text' ||
-                localField.type === 'textarea' ||
-                localField.type === 'email') && (
+              {(localField.type === 'text' || localField.type === 'textarea') && (
                 <>
                   <Grid container spacing={2}>
                     <Grid item xs={6}>
@@ -558,6 +556,23 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                     sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                   />
                 </>
+              )}
+
+              {localField.type === 'email' && (
+                <TextField
+                  label="Pattern (RegEx)"
+                  fullWidth
+                  value={localField.schema?.pattern || ''}
+                  onChange={(e) =>
+                    handleSchemaUpdate({
+                      pattern: e.target.value || undefined,
+                    })
+                  }
+                  margin="normal"
+                  variant="outlined"
+                  helperText="Regular expression for validation (e.g., ^[A-Za-z]+$ for letters only)"
+                  sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                />
               )}
 
               {localField.type === 'number' && (
