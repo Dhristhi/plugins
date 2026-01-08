@@ -89,24 +89,25 @@ export const buildUISchemaFromFields = (fieldsArray, parentKey = null) => {
           }
 
           return {
-            type: 'GroupWithIcon',
-            label: field.label,
-            elements: [
-              {
-                type: 'Control',
-                scope: scope,
-                options: {
-                  ...field.uischema?.options,
-                  showSortButtons: true,
-                  ...(detailElements.length > 0 && {
-                    detail: {
-                      type: 'VerticalLayout',
-                      elements: detailElements,
-                    },
-                  }),
+            // type: 'GroupWithIcon',
+            // label: field.label,
+            // elements: [
+            //   {
+            type: 'Control',
+            scope: scope,
+            options: {
+              addable: true,
+              ...field.uischema?.options,
+              showSortButtons: true,
+              ...(detailElements.length > 0 && {
+                detail: {
+                  type: 'VerticalLayout',
+                  elements: detailElements,
                 },
-              },
-            ],
+              }),
+            },
+            //   },
+            // ],
           };
         } else {
           const scope = parentKey

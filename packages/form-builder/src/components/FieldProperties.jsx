@@ -32,28 +32,28 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
 
   const ALL_ROLE_CODES = ['OWNER', 'HR', 'EXE', 'MGM', 'SAL', 'FIN', 'OPR', 'USER', 'ADM'];
 
-  const FILE_TYPE_OPTIONS = [
-    { label: '.pdf', value: 'application/pdf' },
+    const FILE_TYPE_OPTIONS = [
+      { label: '.pdf', value: 'application/pdf' },
 
-    { label: '.jpg/.jpeg', value: 'image/jpeg' },
-    { label: '.png', value: 'image/png' },
-    { label: '.gif', value: 'image/gif' },
-    { label: '.webp', value: 'image/webp' },
+      { label: '.jpg/.jpeg', value: 'image/jpeg' },
+      { label: '.png', value: 'image/png' },
+      { label: '.gif', value: 'image/gif' },
+      { label: '.webp', value: 'image/webp' },
 
-    { label: '.doc', value: 'application/msword' },
-    { label: '.docx', value: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' },
+      { label: '.doc', value: 'application/msword' },
+      { label: '.docx', value: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' },
 
-    { label: '.txt', value: 'text/plain' },
-    { label: '.rtf', value: 'application/rtf' },
+      { label: '.txt', value: 'text/plain' },
+      { label: '.rtf', value: 'application/rtf' },
 
-    { label: '.xls', value: 'application/vnd.ms-excel' },
-    { label: '.xlsx', value: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' },
+      { label: '.xls', value: 'application/vnd.ms-excel' },
+      { label: '.xlsx', value: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' },
 
-    { label: '.ppt', value: 'application/vnd.ms-powerpoint' },
-    { label: '.pptx', value: 'application/vnd.openxmlformats-officedocument.presentationml.presentation' },
+      { label: '.ppt', value: 'application/vnd.ms-powerpoint' },
+      { label: '.pptx', value: 'application/vnd.openxmlformats-officedocument.presentationml.presentation' },
 
-    { label: '.csv', value: 'text/csv' },
-  ];
+      { label: '.csv', value: 'text/csv' },
+    ];
 
   const getRoleDisplayName = (code) => ALL_ROLE_CODES[code] || code;
   const handleAccessChipClick = (roleCode) => {
@@ -83,14 +83,43 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
         type: uischemaType,
       },
     };
-
     setLocalField(updatedField);
     onFieldUpdate(updatedField);
   };
 
   useEffect(() => {
     if (field) {
-      setLocalField({ ...field });
+      let updatedField = { ...field };
+
+      // Ensure date fields have default dateTimeFormat in UI schema
+      if (
+        (field.schema?.format === 'date' ||
+          field.schema?.format === 'datetime' ||
+          field.schema?.format === 'time' ||
+          field.type === 'date') &&
+        !field.uischema?.options?.dateTimeFormat
+      ) {
+        const defaultFormat = field.uischema?.options?.includeTime
+          ? 'DD MMM YYYY, HH:mm'
+          : 'D MMM YYYY';
+
+        updatedField = {
+          ...field,
+          uischema: {
+            ...field.uischema,
+            options: {
+              ...field.uischema?.options,
+              dateTimeFormat: defaultFormat,
+            },
+          },
+        };
+
+        // Update the field in the parent component
+        onFieldUpdate(updatedField);
+      }
+
+      setLocalField(updatedField);
+
       if (field.isLayout) {
         setLayout(field.type);
       }
@@ -104,7 +133,7 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
       setSelectedAccess(field.schema?.allowedAccess || []);
       setSelectedIcon(field.icon || '');
     }
-  }, [field]);
+  }, [field, onFieldUpdate]);
 
   const emptyStateContainerSx = {
     p: 3,
@@ -269,16 +298,6 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
       !!localField.schema?.items &&
       localField.uischema?.options?.multi) ||
     localField.uischema?.options?.format === 'dynamicselect';
-
-  // Debug logging
-  console.log('FieldProperties Debug:', {
-    type: localField.type,
-    schemaType: localField.schema?.type,
-    hasItems: !!localField.schema?.items,
-    multi: localField.uischema?.options?.multi,
-    format: localField.uischema?.options?.format,
-    hasEnumOptions,
-  });
 
   const isGroup = localField.uischema?.type === 'Group';
   const isLayout = localField.isLayout && localField.uischema?.type !== 'Group';
@@ -588,27 +607,139 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
 
           <AccordionDetails>
             <Box>
-              <TextField
-                label="Default Value"
-                fullWidth
-                value={localField.schema?.default || ''}
-                onChange={(e) => {
-                  let defaultValue = e.target.value;
+              {/* Date Format Selector for Date Fields */}
+              {localField.schema?.format === 'date' ||
+                localField.schema?.format === 'datetime' ||
+                localField.schema?.format === 'time' ||
+                localField.type === 'date' ? (
+                <>
+                  <FormControl fullWidth margin="normal" sx={outlinedTextFieldSx}>
+                    <InputLabel>Date Display Format</InputLabel>
+                    <Select
+                      value={(() => {
+                        const currentFormat = localField.uischema?.options?.dateTimeFormat;
+                        const includeTime = localField.uischema?.options?.includeTime;
 
-                  // Convert to appropriate type
-                  if (localField.type === 'number') {
-                    defaultValue = defaultValue ? Number(defaultValue) : undefined;
-                  } else if (localField.type === 'checkbox') {
-                    defaultValue = defaultValue.toLowerCase() === 'true';
-                  }
+                        if (!includeTime) {
+                          const dateOnlyFormats = [
+                            'D MMM YYYY',
+                            'DD MMMM YYYY',
+                            'MM/DD/YYYY',
+                            'DD/MM/YYYY',
+                            'YYYY-MM-DD',
+                          ];
+                          return dateOnlyFormats.includes(currentFormat)
+                            ? currentFormat
+                            : 'D MMM YYYY';
+                        } else {
+                          const dateTimeFormats = [
+                            'DD MMM YYYY, HH:mm',
+                            'MMMM D, YYYY at h:mm A',
+                            'MMM D, YYYY • HH:mm',
+                            'ddd, D MMM YYYY, HH:mm',
+                          ];
+                          return dateTimeFormats.includes(currentFormat)
+                            ? currentFormat
+                            : 'DD MMM YYYY, HH:mm';
+                        }
+                      })()}
+                      label="Date Display Format"
+                      onChange={(e) => {
+                        const updatedUISchema = {
+                          ...localField.uischema,
+                          options: {
+                            ...localField.uischema?.options,
+                            dateTimeFormat: e.target.value,
+                          },
+                        };
+                        handleUpdate({ uischema: updatedUISchema });
+                      }}
+                    >
+                      {!localField.uischema?.options?.includeTime
+                        ? [
+                          <MenuItem key="D MMM YYYY" value="D MMM YYYY">
+                            D MMM YYYY (8 Jan 2025)
+                          </MenuItem>,
+                          <MenuItem key="DD MMMM YYYY" value="DD MMMM YYYY">
+                            DD MMMM YYYY (08 January 2025)
+                          </MenuItem>,
+                          <MenuItem key="MM/DD/YYYY" value="MM/DD/YYYY">
+                            MM/DD/YYYY (01/08/2025)
+                          </MenuItem>,
+                          <MenuItem key="DD/MM/YYYY" value="DD/MM/YYYY">
+                            DD/MM/YYYY (08/01/2025)
+                          </MenuItem>,
+                          <MenuItem key="YYYY-MM-DD" value="YYYY-MM-DD">
+                            YYYY-MM-DD (2025-01-08)
+                          </MenuItem>,
+                        ]
+                        : [
+                          <MenuItem key="DD MMM YYYY, HH:mm" value="DD MMM YYYY, HH:mm">
+                            DD MMM YYYY, HH:mm (08 Jan 2025, 14:30)
+                          </MenuItem>,
+                          <MenuItem key="MMMM D, YYYY at h:mm A" value="MMMM D, YYYY at h:mm A">
+                            MMMM D, YYYY at h:mm A (January 8, 2025 at 2:30 PM)
+                          </MenuItem>,
+                          <MenuItem key="MMM D, YYYY • HH:mm" value="MMM D, YYYY • HH:mm">
+                            MMM D, YYYY • HH:mm (Jan 8, 2025 • 14:30)
+                          </MenuItem>,
+                          <MenuItem key="ddd, D MMM YYYY, HH:mm" value="ddd, D MMM YYYY, HH:mm">
+                            ddd, D MMM YYYY, HH:mm (Thu, 8 Jan 2025, 14:30)
+                          </MenuItem>,
+                        ]}
+                    </Select>
+                  </FormControl>
 
-                  handleSchemaUpdate({ default: defaultValue });
-                }}
-                margin="normal"
-                variant="outlined"
-                helperText="Initial value for this field"
-                sx={outlinedTextFieldSx}
-              />
+                  {/* Include Time Toggle */}
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={localField.uischema?.options?.includeTime || false}
+                        onChange={(e) => {
+                          const includeTime = e.target.checked;
+                          let defaultFormat = includeTime ? 'DD MMM YYYY, HH:mm' : 'D MMM YYYY';
+
+                          const updatedUISchema = {
+                            ...localField.uischema,
+                            options: {
+                              ...localField.uischema?.options,
+                              includeTime,
+                              dateTimeFormat: defaultFormat,
+                            },
+                          };
+                          handleUpdate({ uischema: updatedUISchema });
+                        }}
+                        color="primary"
+                      />
+                    }
+                    label="Include Time"
+                    sx={{ mt: 1, mb: 1 }}
+                  />
+                </>
+              ) : (
+                // Default Value field for non-date fields
+                <TextField
+                  label="Default Value"
+                  fullWidth
+                  value={localField.schema?.default || ''}
+                  onChange={(e) => {
+                    let defaultValue = e.target.value;
+
+                    // Convert to appropriate type
+                    if (localField.type === 'number') {
+                      defaultValue = defaultValue ? Number(defaultValue) : undefined;
+                    } else if (localField.type === 'checkbox') {
+                      defaultValue = defaultValue.toLowerCase() === 'true';
+                    }
+
+                    handleSchemaUpdate({ default: defaultValue });
+                  }}
+                  margin="normal"
+                  variant="outlined"
+                  helperText="Initial value for this field"
+                  sx={outlinedTextFieldSx}
+                />
+              )}
             </Box>
           </AccordionDetails>
         </Accordion>
@@ -693,61 +824,59 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
 
           <AccordionDetails>
             <Box>
-              {(localField.type === 'text' ||
-                localField.type === 'textarea' ||
-                localField.type === 'email') && (
-                  <>
-                    <Grid container spacing={2}>
-                      <Grid item xs={6}>
-                        <TextField
-                          label="Min Length"
-                          type="number"
-                          fullWidth
-                          value={localField.schema?.minLength || ''}
-                          onChange={(e) =>
-                            handleSchemaUpdate({
-                              minLength: e.target.value ? Number(e.target.value) : undefined,
-                            })
-                          }
-                          margin="normal"
-                          variant="outlined"
-                          sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-                        />
-                      </Grid>
-                      <Grid item xs={6}>
-                        <TextField
-                          label="Max Length"
-                          type="number"
-                          fullWidth
-                          value={localField.schema?.maxLength || ''}
-                          onChange={(e) =>
-                            handleSchemaUpdate({
-                              maxLength: e.target.value ? Number(e.target.value) : undefined,
-                            })
-                          }
-                          margin="normal"
-                          variant="outlined"
-                          sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-                        />
-                      </Grid>
+              {(localField.type === 'text' || localField.type === 'textarea') && (
+                <>
+                  <Grid container spacing={2}>
+                    <Grid item xs={6}>
+                      <TextField
+                        label="Min Length"
+                        type="number"
+                        fullWidth
+                        value={localField.schema?.minLength || ''}
+                        onChange={(e) =>
+                          handleSchemaUpdate({
+                            minLength: e.target.value ? Number(e.target.value) : undefined,
+                          })
+                        }
+                        margin="normal"
+                        variant="outlined"
+                        sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                      />
                     </Grid>
+                    <Grid item xs={6}>
+                      <TextField
+                        label="Max Length"
+                        type="number"
+                        fullWidth
+                        value={localField.schema?.maxLength || ''}
+                        onChange={(e) =>
+                          handleSchemaUpdate({
+                            maxLength: e.target.value ? Number(e.target.value) : undefined,
+                          })
+                        }
+                        margin="normal"
+                        variant="outlined"
+                        sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                      />
+                    </Grid>
+                  </Grid>
 
-                    <TextField
-                      label="Pattern (RegEx)"
-                      fullWidth
-                      value={localField.schema?.pattern || ''}
-                      onChange={(e) =>
-                        handleSchemaUpdate({
-                          pattern: e.target.value || undefined,
-                        })
-                      }
-                      margin="normal"
-                      variant="outlined"
-                      helperText="Regular expression for validation (e.g., ^[A-Za-z]+$ for letters only)"
-                      sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-                    />
-                  </>
-                )}
+                  <TextField
+                    label="Pattern (RegEx)"
+                    fullWidth
+                    value={localField.schema?.pattern || ''}
+                    onChange={(e) =>
+                      handleSchemaUpdate({
+                        pattern: e.target.value || undefined,
+                      })
+                    }
+                    margin="normal"
+                    variant="outlined"
+                    helperText="Regular expression for validation (e.g., ^[A-Za-z]+$ for letters only)"
+                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                  />
+                </>
+              )}
 
               {localField.type === 'email' && (
                 <TextField
@@ -805,28 +934,28 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
             </Box>
             <Box>
               {(localField.type === 'file') && (
-                <>
-                  <Grid container spacing={1}>
-                    <Grid item xs={12}>
-                      <TextField
-                        label="Maximum File Size (MB)"
-                        type="number"
-                        fullWidth
-                        value={localField.uischema?.options?.['ui:options']?.maxSize || ''}
-                        onChange={(e) =>
-                          handleUiOptionsUpdate({
-                            maxSize: e.target.value ? Number(e.target.value) : undefined,
-                          })
-                        }
-                        margin="normal"
-                        variant="outlined"
-                        helperText="Maximum allowed file size in megabytes (e.g., 5 = 5MB)"
-                        sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-                      />
+                  <>
+                    <Grid container spacing={1}>
+                      <Grid item xs={12}>
+                        <TextField
+                          label="Maximum File Size (MB)"
+                          type="number"
+                          fullWidth
+                          value={localField.uischema?.options?.['ui:options']?.maxSize || ''}
+                          onChange={(e) =>
+                            handleUiOptionsUpdate({
+                              maxSize: e.target.value ? Number(e.target.value) : undefined,
+                            })
+                          }
+                          margin="normal"
+                          variant="outlined"
+                          helperText="Maximum allowed file size in megabytes (e.g., 5 = 5MB)"
+                          sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                        />
+                      </Grid>
                     </Grid>
-                  </Grid>
-                </>
-              )}
+                  </>
+                )}
             </Box>
           </AccordionDetails>
         </Accordion>
