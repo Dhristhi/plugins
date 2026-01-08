@@ -15,21 +15,68 @@ const CustomFileUploadControl = (props) => {
   const [localError, setLocalError] = useState(null);
 
   // Accept images by default; allow override via uischema.options.accept
-  const acceptedFileTypes = (uischema?.options && uischema.options.accept) || t('common.image');
-  const placeholder = (uischema?.options && uischema.options.placeholder) || 'Choose an image';
+  const acceptedFileTypes = uischema?.options?.["ui:options"]?.accept;
+  const maxFileSize = uischema?.options?.["ui:options"]?.maxSize;
+  const EXTENSION_TO_MIME = {
+    pdf: ['application/pdf'],
+
+    jpg: ['image/jpeg'],
+    jpeg: ['image/jpeg'],
+    png: ['image/png'],
+    gif: ['image/gif'],
+    webp: ['image/webp'],
+
+    doc: ['application/msword'],
+    docx: ['application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
+
+    txt: ['text/plain'],
+    rtf: ['application/rtf'],
+
+    xls: ['application/vnd.ms-excel'],
+    xlsx: ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'],
+
+    ppt: ['application/vnd.ms-powerpoint'],
+    pptx: ['application/vnd.openxmlformats-officedocument.presentationml.presentation'],
+
+    csv: ['text/csv'],
+  };
+
+  function getAllowedMimes(acceptedFileTypes) {
+    if (!acceptedFileTypes?.trim()) return []
+
+    return acceptedFileTypes
+      .split(',')
+      .map(ext => ext.trim().replace(/^\./, '')
+        .toLowerCase())
+      .flatMap(ext => EXTENSION_TO_MIME[ext] || []);
+  }
+
+  function validateFile(file, allowedMimes, maxFileSizeMB) {
+    if (allowedMimes.length && !allowedMimes.includes(file.type)) {
+      return `Selected file "${file.name}" is not an allowed file type.`;
+    }
+      const MB = 1024 * 1024;
+    if (file.size > maxFileSize * MB) {
+      return `Selected file "${file.name}" exceeds the maximum size of ${maxFileSizeMB}MB.`;
+    }
+
+    return null;
+  }
 
   const inputRef = useRef(null);
 
   const handleFileSelect = useCallback(
     async (file) => {
       if (!file) return;
+    
+      const allowedMimes = getAllowedMimes(acceptedFileTypes);
+      const error = validateFile(file, allowedMimes, maxFileSize);
 
-      // Validate MIME type; accept is only a hint in browsers
-      if (!file.type || !file.type.startsWith('image/')) {
-        setLocalError(`Selected file "${file.name}" is not an image.`);
+      if (error) {
+        setLocalError(error);
+        handleChange(path, null);
         return;
       }
-
       setLocalError(null);
       setIsUploading(true);
       try {
@@ -41,12 +88,12 @@ const CustomFileUploadControl = (props) => {
         };
         reader.onerror = () => {
           setIsUploading(false);
-          setLocalError('Failed to read the image file.');
+          setLocalError('Failed to read the file.');
         };
         reader.readAsDataURL(file);
       } catch (e) {
         setIsUploading(false);
-        setLocalError('Unexpected error while processing the image.');
+        setLocalError('Unexpected error while processing the file.');
       }
     },
     [handleChange, path]
@@ -83,7 +130,7 @@ const CustomFileUploadControl = (props) => {
   const hasError = Boolean(jsonFormsError) || Boolean(localError);
 
   // Consider a data URL present if it starts with an image data prefix
-  const hasFile = typeof data === 'string' && data.startsWith('data:image');
+  const hasFile = typeof data === 'string' && data.startsWith('data:');
 
   return (
     <Box sx={{ mb: 2 }}>

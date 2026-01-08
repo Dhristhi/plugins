@@ -33,6 +33,13 @@ const IconSelector = ({ value, onChange }) => {
     [allIcons, value]
   );
 
+  const textFieldBox = { display: 'flex', alignItems: 'center', ml: 1 };
+  const autoComplete = {
+    '& .MuiOutlinedInput-root': {
+      borderRadius: 2,
+    },
+  };
+
   return (
     <Autocomplete
       value={selectedIconObj}
@@ -60,7 +67,7 @@ const IconSelector = ({ value, onChange }) => {
             startAdornment: (
               <>
                 {selectedIconObj && (
-                  <Box sx={{ display: 'flex', alignItems: 'center', ml: 1 }}>
+                  <Box sx={textFieldBox}>
                     {React.createElement(selectedIconObj.component, {
                       size: 18,
                     })}
@@ -75,11 +82,7 @@ const IconSelector = ({ value, onChange }) => {
       ListboxProps={{
         style: { maxHeight: '300px' },
       }}
-      sx={{
-        '& .MuiOutlinedInput-root': {
-          borderRadius: 2,
-        },
-      }}
+      sx={autoComplete}
     />
   );
 };
