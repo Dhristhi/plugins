@@ -12,6 +12,7 @@ import {
   IconCircleDot,
   IconCube,
   IconList,
+  IconEye,
   IconLink,
 } from '@tabler/icons-react';
 
@@ -111,6 +112,24 @@ export const defaultFieldTypes = [
       scope: '#/properties/field',
     },
   },
+  {
+    id: 'password',
+    type: 'string',
+    label: 'Password',
+    icon: IconEye,
+    schema: {
+      type: 'string',
+      format: 'password',
+    },
+    uischema: {
+      type: 'Control',
+      scope: '#/properties/field',
+      options: {
+        format: 'password',
+      },
+    },
+  },
+
   {
     id: 'url',
     type: 'string',
