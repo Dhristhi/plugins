@@ -17,6 +17,7 @@ const CustomSelectControl = (props) => {
   const [options, setOptions] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [cascadingValue, setCascadingValue] = useState(undefined);
+  const [showAllChips, setShowAllChips] = useState(false);
 
   const { schema, uischema, path, handleChange, data, config } = props;
   const { entity, key, value, query, cascadingKey, computedFields, multi } = uischema.options || {};
@@ -201,20 +202,52 @@ const CustomSelectControl = (props) => {
         multiple
         value={Array.isArray(data) ? data : []}
         onChange={(e) => handleOnChange(e, e.target.value)}
-        renderValue={(selected) => (
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-            {selected.map((val) => {
-              const opt = options.find((o) => o.value === val);
-              return (
+        renderValue={(selected) => {
+          const visibleCount = showAllChips ? selected.length : 5;
+          const hasMore = selected.length > 5;
+          return (
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, alignItems: 'center' }}>
+              {selected.slice(0, visibleCount).map((val) => {
+                const opt = options.find((o) => o.value === val);
+                return (
+                  <Chip
+                    key={val}
+                    label={opt ? opt.label : val}
+                    onDelete={() => {
+                      const newSelected = selected.filter((v) => v !== val);
+                      handleChange(path, newSelected);
+                      updateNestedValue(formData, path, newSelected);
+                    }}
+                    onMouseDown={(e) => e.stopPropagation()}
+                    sx={{ textTransform: 'capitalize' }}
+                  />
+                );
+              })}
+              {hasMore && !showAllChips && (
                 <Chip
-                  key={val}
-                  label={opt ? opt.label : val}
-                  sx={{ textTransform: 'capitalize' }}
+                  label={`+${selected.length - 5} more`}
+                  size="small"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowAllChips(true);
+                  }}
+                  sx={{ cursor: 'pointer', bgcolor: 'action.hover' }}
                 />
-              );
-            })}
-          </Box>
-        )}
+              )}
+              {showAllChips && hasMore && (
+                <Chip
+                  label="Show less"
+                  size="small"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowAllChips(false);
+                  }}
+                  sx={{ cursor: 'pointer', bgcolor: 'action.hover' }}
+                />
+              )}
+            </Box>
+          );
+        }}
       >
         {options.map((opt) => (
           <MenuItem key={opt.value} value={opt.value} sx={{ textTransform: 'capitalize' }}>
