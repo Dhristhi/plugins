@@ -12,6 +12,7 @@ import {
   IconCircleDot,
   IconCube,
   IconList,
+  IconLink,
 } from '@tabler/icons-react';
 
 export const defaultFieldTypes = [
@@ -104,6 +105,20 @@ export const defaultFieldTypes = [
     schema: {
       type: 'string',
       format: 'email',
+    },
+    uischema: {
+      type: 'Control',
+      scope: '#/properties/field',
+    },
+  },
+  {
+    id: 'url',
+    type: 'string',
+    label: 'URL',
+    icon: IconLink,
+    schema: {
+      type: 'string',
+      format: 'uri',
     },
     uischema: {
       type: 'Control',
