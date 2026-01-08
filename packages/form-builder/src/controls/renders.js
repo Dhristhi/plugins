@@ -6,12 +6,10 @@ import CustomHorizontalLayoutRenderer, {
   customHorizontalLayoutTester,
 } from './CustomHorizontalLayout';
 import CustomDateControl, { customDateTester } from './CustomDateControl';
-import CustomUrlControl, { customUrlTester } from './CustomUrlControl';
 
 // Internal registry of custom renderers with IDs for configuration
 const customRendererEntries = [
   { id: 'dateControl', tester: customDateTester, renderer: CustomDateControl },
-  { id: 'urlControl', tester: customUrlTester, renderer: CustomUrlControl },
   { id: 'groupLayout', tester: customGroupLayoutTester, renderer: CustomGroupLayoutRenderer },
   {
     id: 'verticalLayout',
