@@ -5,9 +5,11 @@ import CustomVerticalLayoutRenderer, { customVerticalLayoutTester } from './Cust
 import CustomHorizontalLayoutRenderer, {
   customHorizontalLayoutTester,
 } from './CustomHorizontalLayout';
+import CustomDateControl, { customDateTester } from './CustomDateControl';
 
 // Internal registry of custom renderers with IDs for configuration
 const customRendererEntries = [
+  { id: 'dateControl', tester: customDateTester, renderer: CustomDateControl },
   { id: 'groupLayout', tester: customGroupLayoutTester, renderer: CustomGroupLayoutRenderer },
   {
     id: 'verticalLayout',
