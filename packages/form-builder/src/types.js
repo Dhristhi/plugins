@@ -223,7 +223,7 @@ export const defaultFieldTypes = [
   {
     id: 'array',
     type: 'array',
-    label: 'Array',
+    label: 'Array of Objects',
     icon: IconList,
     schema: {
       type: 'array',
@@ -240,6 +240,22 @@ export const defaultFieldTypes = [
           elements: [],
         },
       },
+    },
+  },
+  {
+    id: 'array-strings',
+    type: 'array',
+    label: 'Array of Strings',
+    icon: IconList,
+    schema: {
+      type: 'array',
+      items: {
+        type: 'string',
+      },
+    },
+    uischema: {
+      type: 'Control',
+      scope: '#/properties/field',
     },
   },
   {
