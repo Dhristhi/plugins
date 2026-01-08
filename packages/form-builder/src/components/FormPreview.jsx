@@ -20,6 +20,22 @@ const FormPreview = ({
 
   const [hasValidated, setHasValidated] = useState(false);
   const [validationErrors, setValidationErrors] = useState([]);
+
+  const validateBox = {
+    position: 'fixed',
+    bottom: 0,
+    left: { xs: 0, md: 320 },
+    width: { xs: '100%', md: `calc(100% - 320px)` },
+    height: 64,
+    backgroundColor: 'background.paper',
+    borderTop: '1px solid',
+    borderColor: 'grey.200',
+    zIndex: (theme) => theme.zIndex.drawer + 1,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    px: 3,
+  };
   const toggleValidateButton = () => {
     if (hasValidated) {
       setHasValidated(false);
@@ -66,23 +82,7 @@ const FormPreview = ({
         )}
       </Box>
       {formState.schema.properties && Object.keys(formState.schema.properties).length > 0 && (
-        <Box
-          sx={{
-            position: 'fixed',
-            bottom: 0,
-            left: { xs: 0, md: 320 },
-            width: { xs: '100%', md: `calc(100% - 320px)` },
-            height: 64,
-            backgroundColor: 'background.paper',
-            borderTop: '1px solid',
-            borderColor: 'grey.200',
-            zIndex: (theme) => theme.zIndex.drawer + 1,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'flex-end',
-            px: 3,
-          }}
-        >
+        <Box sx={validateBox}>
           <Button
             onClick={() => {
               toggleValidateButton();

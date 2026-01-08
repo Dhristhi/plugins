@@ -630,7 +630,9 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
 
           <AccordionDetails>
             <Box>
-              {(localField.type === 'text' || localField.type === 'textarea') && (
+              {(localField.type === 'text' ||
+                localField.type === 'textarea' ||
+                localField.type === 'password') && (
                 <>
                   <Grid container spacing={2}>
                     <Grid item xs={6}>
