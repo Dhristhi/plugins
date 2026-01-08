@@ -17,45 +17,21 @@ const CustomFileUploadControl = (props) => {
   // Accept images by default; allow override via uischema.options.accept
   const acceptedFileTypes = uischema?.options?.["ui:options"]?.accept;
   const maxFileSize = uischema?.options?.["ui:options"]?.maxSize;
-  const EXTENSION_TO_MIME = {
-    pdf: ['application/pdf'],
-
-    jpg: ['image/jpeg'],
-    jpeg: ['image/jpeg'],
-    png: ['image/png'],
-    gif: ['image/gif'],
-    webp: ['image/webp'],
-
-    doc: ['application/msword'],
-    docx: ['application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
-
-    txt: ['text/plain'],
-    rtf: ['application/rtf'],
-
-    xls: ['application/vnd.ms-excel'],
-    xlsx: ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'],
-
-    ppt: ['application/vnd.ms-powerpoint'],
-    pptx: ['application/vnd.openxmlformats-officedocument.presentationml.presentation'],
-
-    csv: ['text/csv'],
-  };
 
   function getAllowedMimes(acceptedFileTypes) {
     if (!acceptedFileTypes?.trim()) return []
 
     return acceptedFileTypes
       .split(',')
-      .map(ext => ext.trim().replace(/^\./, '')
-        .toLowerCase())
-      .flatMap(ext => EXTENSION_TO_MIME[ext] || []);
+      .map((mime) => mime.trim())
+      .filter(Boolean);
   }
 
   function validateFile(file, allowedMimes, maxFileSizeMB) {
-    if (allowedMimes.length && !allowedMimes.includes(file.type)) {
+    if (allowedMimes.length && !allowedMimes.includes(file.type) || !file.type) {
       return `Selected file "${file.name}" is not an allowed file type.`;
     }
-      const MB = 1024 * 1024;
+    const MB = 1024 * 1024;
     if (file.size > maxFileSize * MB) {
       return `Selected file "${file.name}" exceeds the maximum size of ${maxFileSizeMB}MB.`;
     }
@@ -68,7 +44,7 @@ const CustomFileUploadControl = (props) => {
   const handleFileSelect = useCallback(
     async (file) => {
       if (!file) return;
-    
+
       const allowedMimes = getAllowedMimes(acceptedFileTypes);
       const error = validateFile(file, allowedMimes, maxFileSize);
 
