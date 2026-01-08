@@ -116,7 +116,7 @@ export const ArrayLayoutRenderer = (props) => {
     (p, value) => {
       if (autoScroll) {
         // Set the last added index to the current data count
-        lastAddedIndexRef.current = data;
+        lastAddedIndexRef.current = data ? data.length : 0;
       }
       return addItem(p, value);
     },
@@ -130,12 +130,23 @@ export const ArrayLayoutRenderer = (props) => {
     [removeItems]
   );
 
-  // Show default value if default value is specified and array is empty
-  if ((!data || data.length === 0) && schema?.default) {
+  // Show at least one item if array is empty but addable
+  if ((!data || data.length === 0) && isAddable && schema?.items) {
     const elements = uischema.options?.['detail'];
-    const defaultItem = createDefaultValue(schema.default);
     return (
       <Box alignItems="center" sx={{ mt: 0, ml: 0 }}>
+        {enabled && (
+          <Box display="flex" alignItems="center" justifyContent="flex-end">
+            <Tooltip title={'Add Item'}>
+              <IconButton
+                aria-label={'Add Item'}
+                onClick={() => addItemCb(path, createDefaultValue(schema.items))}
+              >
+                <IconPlus />
+              </IconButton>
+            </Tooltip>
+          </Box>
+        )}
         <Grid
           container
           justify="center"
@@ -147,11 +158,11 @@ export const ArrayLayoutRenderer = (props) => {
             <JsonFormsDispatch
               path={composePaths(path, '0')}
               cells={cells}
-              schema={schema.items} // use item schema
+              schema={schema.items}
               enabled={false}
               uischema={elements}
               renderers={renderers}
-              data={defaultItem} // show defaults
+              data={createDefaultValue(schema.items)}
             />
           </Grid>
         </Grid>
@@ -159,65 +170,36 @@ export const ArrayLayoutRenderer = (props) => {
     );
   }
 
-  if (!data?.length && emptyValue) {
-    const elements = uischema.options?.['detail'];
+  const toRender = (data || []).map((_, i) => {
+    const shouldScrollTo = autoScroll && i === (data?.length || 0) - 1;
+
     return (
-      <Box alignItems="center" sx={{ mt: 0, ml: 0 }}>
-        <Grid
-          container
-          justify="center"
-          alignItems="center"
-          alignContent="center"
-          sx={{ mt: enabled ? 3 : 2, borderBottom: '1px dotted #e0e0e0' }}
-        >
-          <Grid item xs justify="center" alignItems="center">
-            <JsonFormsDispatch
-              path={composePaths(path, '0')}
-              cells={cells}
-              schema={schema}
-              enabled={false}
-              uischema={elements}
-              renderers={renderers}
-              data={{}} // Empty object to show empty field values
-            />
-          </Grid>
-        </Grid>
-      </Box>
+      <CardRenderer
+        key={i}
+        index={i}
+        cells={cells}
+        schema={schema?.items || schema}
+        enabled={enabled}
+        boarder={(data?.length || 0) > 1}
+        uischema={uischema}
+        renderers={renderers}
+        shouldScrollTo={shouldScrollTo}
+        path={composePaths(path, `${i}`)}
+        onRemove={removeItemsCb(path, [i])}
+        lastAddedIndexRef={lastAddedIndexRef}
+        totalItems={data?.length || 0}
+        minItems={minItems}
+      />
     );
-  }
-
-  const toRender = Array(data)
-    .fill(0)
-    .map((_, i) => {
-      const shouldScrollTo = autoScroll && i === data - 1;
-
-      return (
-        <CardRenderer
-          key={i}
-          index={i}
-          cells={cells}
-          schema={schema}
-          enabled={enabled}
-          boarder={data > 1}
-          uischema={uischema}
-          renderers={renderers}
-          shouldScrollTo={shouldScrollTo}
-          path={composePaths(path, `${i}`)}
-          onRemove={removeItemsCb(path, [i])}
-          lastAddedIndexRef={lastAddedIndexRef}
-          totalItems={data}
-          minItems={minItems}
-        />
-      );
-    });
+  });
   return (
     <Box alignItems="center" sx={{ mt: 0, ml: 0 }}>
-      {enabled && isAddable && (
+      {enabled && isAddable && schema?.items && (
         <Box display="flex" alignItems="center" justifyContent="flex-end">
           <Tooltip title={t('common.tooltip_add')}>
             <IconButton
               aria-label={t('common.tooltip_add')}
-              onClick={addItemCb(path, createDefaultValue(schema))}
+              onClick={() => addItemCb(path, createDefaultValue(schema.items))}
             >
               <IconPlus />
             </IconButton>
@@ -230,7 +212,14 @@ export const ArrayLayoutRenderer = (props) => {
 };
 
 // eslint-disable-next-line react-refresh/only-export-components
-export const customArrayLayoutTester = rankWith(5, isObjectArrayWithNesting);
+export const customArrayLayoutTester = rankWith(10, (uischema, schema) => {
+  return (
+    uischema.type === 'Control' &&
+    schema?.type === 'array' &&
+    schema?.items?.type === 'object' &&
+    uischema?.options?.detail
+  );
+});
 
 const CustomArrayLayout = withJsonFormsArrayLayoutProps(ArrayLayoutRenderer);
 
