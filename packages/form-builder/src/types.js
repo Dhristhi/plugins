@@ -13,6 +13,7 @@ import {
   IconCube,
   IconList,
   IconEye,
+  IconLink,
 } from '@tabler/icons-react';
 
 export const defaultFieldTypes = [
@@ -126,6 +127,21 @@ export const defaultFieldTypes = [
       options: {
         format: 'password',
       },
+    },
+  },
+
+  {
+    id: 'url',
+    type: 'string',
+    label: 'URL',
+    icon: IconLink,
+    schema: {
+      type: 'string',
+      format: 'uri',
+    },
+    uischema: {
+      type: 'Control',
+      scope: '#/properties/field',
     },
   },
   {
