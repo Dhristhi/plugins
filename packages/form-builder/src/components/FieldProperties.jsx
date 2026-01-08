@@ -211,17 +211,21 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
 
     // Array fields with enum items (multiselect) can switch between multiselect and array
     if (currentSchemaType === 'array' && localField.schema?.items?.enum) {
-      return availableFieldTypes.filter((ft) => ft.id === 'multiselect' || ft.id === 'array');
+      return availableFieldTypes.filter(
+        (ft) => ft.id === 'multiselect' || ft.id === 'array' || ft.id === 'array-strings'
+      );
     }
 
     // Array fields without enum can switch between array and multiselect
     if (currentSchemaType === 'array') {
-      return availableFieldTypes.filter((ft) => ft.id === 'array' || ft.id === 'multiselect');
+      return availableFieldTypes.filter(
+        (ft) => ft.id === 'array' || ft.id === 'multiselect' || ft.id === 'array-strings'
+      );
     }
 
     return availableFieldTypes.filter((ft) => {
       // Don't allow converting to array types from other types
-      if (ft.id === 'array' || ft.id === 'multiselect') return false;
+      if (ft.id === 'array' || ft.id === 'multiselect' || ft.id === 'array-strings') return false;
 
       const targetSchemaType = ft.schema?.type;
 
