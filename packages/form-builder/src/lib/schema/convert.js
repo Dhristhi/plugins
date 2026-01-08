@@ -80,6 +80,13 @@ export const convertSchemaToFields = (schema, defaultFieldTypes, getNextId) => {
       let children = convertSchemaToFields(property.items, defaultFieldTypes, getNextId);
       children = children.map((c) => ({ ...c, parentId: `field_${uniqueId}` }));
 
+      // Create detail layout for array items
+      const detailElements = children.map((child) => ({
+        type: 'Control',
+        scope: `#/properties/${child.key}`,
+        options: child.uischema.options || {},
+      }));
+
       const newField = {
         id: `field_${uniqueId}`,
         type: arrayType.id,
@@ -88,7 +95,17 @@ export const convertSchemaToFields = (schema, defaultFieldTypes, getNextId) => {
         required: schema.required?.includes(key) || false,
         isLayout: false,
         schema: {},
-        uischema: { ...arrayType.uischema, scope: `#/properties/${key}` },
+        uischema: {
+          type: 'Control',
+          scope: `#/properties/${key}`,
+          options: {
+            addable: true,
+            detail: {
+              type: 'VerticalLayout',
+              elements: detailElements,
+            },
+          },
+        },
         children,
         parentId: null,
       };
