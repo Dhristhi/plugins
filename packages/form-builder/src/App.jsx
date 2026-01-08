@@ -162,7 +162,10 @@ const App = ({ onExport, onSave, schemas = [], theme: customTheme } = {}) => {
   }, [formData?.plan, formData?.tier]);
 
   const schemaData = useMemo(() => {
-    return buildSchemaFromFields(fields);
+    // console.log('Fields passed to buildSchemaFromFields:', JSON.stringify(fields, null, 2));
+    const result = buildSchemaFromFields(fields);
+    // console.log('Generated Schema Data:', JSON.stringify(result, null, 2));
+    return result;
   }, [fields]);
 
   const baseUiSchema = useMemo(() => {
@@ -174,14 +177,16 @@ const App = ({ onExport, onSave, schemas = [], theme: customTheme } = {}) => {
 
   // Stable form state object
   const formState = useMemo(() => {
+    const schema = {
+      type: 'object',
+      properties: schemaData.properties,
+      ...(schemaData.required && schemaData.required.length
+        ? { required: schemaData.required }
+        : {}),
+    };
+    // console.log('Final Schema in formState:', JSON.stringify(schema, null, 2));
     return {
-      schema: {
-        type: 'object',
-        properties: schemaData.properties,
-        ...(schemaData.required && schemaData.required.length
-          ? { required: schemaData.required }
-          : {}),
-      },
+      schema,
       uischema: baseUiSchema,
       data: formData,
     };
