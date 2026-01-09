@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
-import { Box, Typography, Alert } from '@mui/material';
+import { Box, Typography, Alert, FormHelperText } from '@mui/material';
 import { IconUpload, IconFile } from '@tabler/icons-react';
 import { and, isControl, optionIs, rankWith } from '@jsonforms/core';
 import { withJsonFormsControlProps } from '@jsonforms/react';
@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 const CustomFileUploadControl = (props) => {
   const { t } = useTranslation();
 
-  const { data, handleChange, path, errors, uischema } = props;
+  const { data, handleChange, path, errors, uischema, schema, label } = props;
 
   const [isDragOver, setIsDragOver] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -110,6 +110,11 @@ const CustomFileUploadControl = (props) => {
 
   return (
     <Box sx={{ mb: 2 }}>
+      {label && (
+        <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
+          {label}
+        </Typography>
+      )}
       <Box
         sx={{
           border: 2,
@@ -183,6 +188,9 @@ const CustomFileUploadControl = (props) => {
         <Alert severity="error" sx={{ mt: 1 }}>
           {localError || jsonFormsError || 'Invalid file'}
         </Alert>
+      )}
+      {schema?.description && (
+        <FormHelperText sx={{ mt: 1, mx: 0 }}>{schema.description}</FormHelperText>
       )}
     </Box>
   );
