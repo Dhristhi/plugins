@@ -4,7 +4,7 @@ import { TextField } from '@mui/material';
 import { formatDate } from '../utils';
 
 const CustomDateControl = (props) => {
-  const { data, handleChange, path, label, required, errors, uischema, config } = props;
+  const { data, handleChange, path, label, required, errors, uischema, config, schema } = props;
 
   console.log('CustomDateControl props:', {
     data,
@@ -73,7 +73,9 @@ const CustomDateControl = (props) => {
           }
         }}
         error={errors && errors.length > 0}
-        helperText={errors && errors.length > 0 ? errors[0].message : undefined}
+        helperText={
+          errors && errors.length > 0 ? errors[0].message : schema?.description || undefined
+        }
         margin="normal"
         variant="outlined"
         InputLabelProps={{
