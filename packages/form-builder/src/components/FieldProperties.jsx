@@ -30,42 +30,34 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
   const [layout, setLayout] = useState('');
   const [selectedIcon, setSelectedIcon] = useState('');
 
-  const ALL_ROLE_CODES = ['OWNER', 'HR', 'EXE', 'MGM', 'SAL', 'FIN', 'OPR', 'USER', 'ADM'];
+  const FILE_TYPE_OPTIONS = [
+    { label: '.pdf', value: 'application/pdf' },
 
-    const FILE_TYPE_OPTIONS = [
-      { label: '.pdf', value: 'application/pdf' },
+    { label: '.jpg/.jpeg', value: 'image/jpeg' },
+    { label: '.png', value: 'image/png' },
+    { label: '.gif', value: 'image/gif' },
+    { label: '.webp', value: 'image/webp' },
 
-      { label: '.jpg/.jpeg', value: 'image/jpeg' },
-      { label: '.png', value: 'image/png' },
-      { label: '.gif', value: 'image/gif' },
-      { label: '.webp', value: 'image/webp' },
+    { label: '.doc', value: 'application/msword' },
+    {
+      label: '.docx',
+      value: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    },
 
-      { label: '.doc', value: 'application/msword' },
-      { label: '.docx', value: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' },
+    { label: '.txt', value: 'text/plain' },
+    { label: '.rtf', value: 'application/rtf' },
 
-      { label: '.txt', value: 'text/plain' },
-      { label: '.rtf', value: 'application/rtf' },
+    { label: '.xls', value: 'application/vnd.ms-excel' },
+    { label: '.xlsx', value: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' },
 
-      { label: '.xls', value: 'application/vnd.ms-excel' },
-      { label: '.xlsx', value: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' },
+    { label: '.ppt', value: 'application/vnd.ms-powerpoint' },
+    {
+      label: '.pptx',
+      value: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    },
 
-      { label: '.ppt', value: 'application/vnd.ms-powerpoint' },
-      { label: '.pptx', value: 'application/vnd.openxmlformats-officedocument.presentationml.presentation' },
-
-      { label: '.csv', value: 'text/csv' },
-    ];
-
-  const getRoleDisplayName = (code) => ALL_ROLE_CODES[code] || code;
-  const handleAccessChipClick = (roleCode) => {
-    const exists = selectedAccess.includes(roleCode);
-    const newSelected = exists
-      ? selectedAccess.filter((r) => r !== roleCode)
-      : [...selectedAccess, roleCode];
-    setSelectedAccess(newSelected);
-    handleSchemaUpdate({
-      allowedAccess: newSelected.length > 0 ? newSelected : undefined,
-    });
-  };
+    { label: '.csv', value: 'text/csv' },
+  ];
 
   const handleLayoutChange = (event) => {
     const newLayoutType = event.target.value;
@@ -613,9 +605,9 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
             <Box>
               {/* Date Format Selector for Date Fields */}
               {localField.schema?.format === 'date' ||
-                localField.schema?.format === 'datetime' ||
-                localField.schema?.format === 'time' ||
-                localField.type === 'date' ? (
+              localField.schema?.format === 'datetime' ||
+              localField.schema?.format === 'time' ||
+              localField.type === 'date' ? (
                 <>
                   <FormControl fullWidth margin="normal" sx={outlinedTextFieldSx}>
                     <InputLabel>Date Display Format</InputLabel>
@@ -661,36 +653,36 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                     >
                       {!localField.uischema?.options?.includeTime
                         ? [
-                          <MenuItem key="D MMM YYYY" value="D MMM YYYY">
-                            D MMM YYYY (8 Jan 2025)
-                          </MenuItem>,
-                          <MenuItem key="DD MMMM YYYY" value="DD MMMM YYYY">
-                            DD MMMM YYYY (08 January 2025)
-                          </MenuItem>,
-                          <MenuItem key="MM/DD/YYYY" value="MM/DD/YYYY">
-                            MM/DD/YYYY (01/08/2025)
-                          </MenuItem>,
-                          <MenuItem key="DD/MM/YYYY" value="DD/MM/YYYY">
-                            DD/MM/YYYY (08/01/2025)
-                          </MenuItem>,
-                          <MenuItem key="YYYY-MM-DD" value="YYYY-MM-DD">
-                            YYYY-MM-DD (2025-01-08)
-                          </MenuItem>,
-                        ]
+                            <MenuItem key="D MMM YYYY" value="D MMM YYYY">
+                              D MMM YYYY (8 Jan 2025)
+                            </MenuItem>,
+                            <MenuItem key="DD MMMM YYYY" value="DD MMMM YYYY">
+                              DD MMMM YYYY (08 January 2025)
+                            </MenuItem>,
+                            <MenuItem key="MM/DD/YYYY" value="MM/DD/YYYY">
+                              MM/DD/YYYY (01/08/2025)
+                            </MenuItem>,
+                            <MenuItem key="DD/MM/YYYY" value="DD/MM/YYYY">
+                              DD/MM/YYYY (08/01/2025)
+                            </MenuItem>,
+                            <MenuItem key="YYYY-MM-DD" value="YYYY-MM-DD">
+                              YYYY-MM-DD (2025-01-08)
+                            </MenuItem>,
+                          ]
                         : [
-                          <MenuItem key="DD MMM YYYY, HH:mm" value="DD MMM YYYY, HH:mm">
-                            DD MMM YYYY, HH:mm (08 Jan 2025, 14:30)
-                          </MenuItem>,
-                          <MenuItem key="MMMM D, YYYY at h:mm A" value="MMMM D, YYYY at h:mm A">
-                            MMMM D, YYYY at h:mm A (January 8, 2025 at 2:30 PM)
-                          </MenuItem>,
-                          <MenuItem key="MMM D, YYYY • HH:mm" value="MMM D, YYYY • HH:mm">
-                            MMM D, YYYY • HH:mm (Jan 8, 2025 • 14:30)
-                          </MenuItem>,
-                          <MenuItem key="ddd, D MMM YYYY, HH:mm" value="ddd, D MMM YYYY, HH:mm">
-                            ddd, D MMM YYYY, HH:mm (Thu, 8 Jan 2025, 14:30)
-                          </MenuItem>,
-                        ]}
+                            <MenuItem key="DD MMM YYYY, HH:mm" value="DD MMM YYYY, HH:mm">
+                              DD MMM YYYY, HH:mm (08 Jan 2025, 14:30)
+                            </MenuItem>,
+                            <MenuItem key="MMMM D, YYYY at h:mm A" value="MMMM D, YYYY at h:mm A">
+                              MMMM D, YYYY at h:mm A (January 8, 2025 at 2:30 PM)
+                            </MenuItem>,
+                            <MenuItem key="MMM D, YYYY • HH:mm" value="MMM D, YYYY • HH:mm">
+                              MMM D, YYYY • HH:mm (Jan 8, 2025 • 14:30)
+                            </MenuItem>,
+                            <MenuItem key="ddd, D MMM YYYY, HH:mm" value="ddd, D MMM YYYY, HH:mm">
+                              ddd, D MMM YYYY, HH:mm (Thu, 8 Jan 2025, 14:30)
+                            </MenuItem>,
+                          ]}
                     </Select>
                   </FormControl>
 
@@ -771,9 +763,7 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                   label="Allowed File Types"
                   value={
                     localField.uischema?.options?.['ui:options']?.accept
-                      ? localField.uischema.options['ui:options'].accept
-                        .split(',')
-                        .filter(Boolean)
+                      ? localField.uischema.options['ui:options'].accept.split(',').filter(Boolean)
                       : []
                   }
                   onChange={(e) => {
@@ -785,16 +775,11 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                   renderValue={(selected) => {
                     if (selected.length === 0) {
                       return (
-                        <Typography sx={{ color: 'text.disabled' }}>
-                          Select file types
-                        </Typography>
+                        <Typography sx={{ color: 'text.disabled' }}>Select file types</Typography>
                       );
                     }
                     return selected
-                      .map(
-                        (mime) =>
-                          FILE_TYPE_OPTIONS.find((o) => o.value === mime)?.label
-                      )
+                      .map((mime) => FILE_TYPE_OPTIONS.find((o) => o.value === mime)?.label)
                       .join(', ');
                   }}
                   MenuProps={{
@@ -939,29 +924,29 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
               )}
             </Box>
             <Box>
-              {(localField.type === 'file') && (
-                  <>
-                    <Grid container spacing={1}>
-                      <Grid item xs={12}>
-                        <TextField
-                          label="Maximum File Size (MB)"
-                          type="number"
-                          fullWidth
-                          value={localField.uischema?.options?.['ui:options']?.maxSize || ''}
-                          onChange={(e) =>
-                            handleUiOptionsUpdate({
-                              maxSize: e.target.value ? Number(e.target.value) : undefined,
-                            })
-                          }
-                          margin="normal"
-                          variant="outlined"
-                          helperText="Maximum allowed file size in megabytes (e.g., 5 = 5MB)"
-                          sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-                        />
-                      </Grid>
+              {localField.type === 'file' && (
+                <>
+                  <Grid container spacing={1}>
+                    <Grid item xs={12}>
+                      <TextField
+                        label="Maximum File Size (MB)"
+                        type="number"
+                        fullWidth
+                        value={localField.uischema?.options?.['ui:options']?.maxSize || ''}
+                        onChange={(e) =>
+                          handleUiOptionsUpdate({
+                            maxSize: e.target.value ? Number(e.target.value) : undefined,
+                          })
+                        }
+                        margin="normal"
+                        variant="outlined"
+                        helperText="Maximum allowed file size in megabytes (e.g., 5 = 5MB)"
+                        sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                      />
                     </Grid>
-                  </>
-                )}
+                  </Grid>
+                </>
+              )}
             </Box>
           </AccordionDetails>
         </Accordion>
@@ -980,34 +965,34 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                 localField.type === 'multiselect' ||
                 (localField.schema?.type === 'array' && localField.uischema?.options?.multi) ||
                 localField.uischema?.options?.format === 'dynamicselect') && (
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={localField.uischema?.options?.entity !== undefined}
-                        onChange={(e) => {
-                          const isDynamic = e.target.checked;
-                          const isMultiSelect =
-                            localField.type === 'multiselect' || localField.schema?.type === 'array';
-                          const updatedUISchema = {
-                            ...localField.uischema,
-                            options: {
-                              ...localField.uischema?.options,
-                              format: isDynamic ? 'dynamicselect' : undefined,
-                              multi: isMultiSelect ? true : undefined,
-                              entity: isDynamic ? '' : undefined,
-                              key: isDynamic ? '' : undefined,
-                              value: isDynamic ? '' : undefined,
-                            },
-                          };
-                          handleUpdate({ uischema: updatedUISchema });
-                        }}
-                        color="primary"
-                      />
-                    }
-                    label="Use Dynamic Data (API)"
-                    sx={{ mb: 2 }}
-                  />
-                )}
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={localField.uischema?.options?.entity !== undefined}
+                      onChange={(e) => {
+                        const isDynamic = e.target.checked;
+                        const isMultiSelect =
+                          localField.type === 'multiselect' || localField.schema?.type === 'array';
+                        const updatedUISchema = {
+                          ...localField.uischema,
+                          options: {
+                            ...localField.uischema?.options,
+                            format: isDynamic ? 'dynamicselect' : undefined,
+                            multi: isMultiSelect ? true : undefined,
+                            entity: isDynamic ? '' : undefined,
+                            key: isDynamic ? '' : undefined,
+                            value: isDynamic ? '' : undefined,
+                          },
+                        };
+                        handleUpdate({ uischema: updatedUISchema });
+                      }}
+                      color="primary"
+                    />
+                  }
+                  label="Use Dynamic Data (API)"
+                  sx={{ mb: 2 }}
+                />
+              )}
 
               {localField.uischema?.options?.entity !== undefined ? (
                 <Box>
@@ -1118,27 +1103,6 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
             </Typography>
           </AccordionSummary>
           <AccordionDetails>
-            {/* Allowed Access */}
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="caption" sx={captionTypographySx}>
-                Allowed Access
-              </Typography>
-              <Box sx={chipsContainerSx}>
-                {ALL_ROLE_CODES.map((roleCode) => (
-                  <Chip
-                    key={roleCode}
-                    size="small"
-                    variant={selectedAccess.includes(roleCode) ? 'filled' : 'outlined'}
-                    color={selectedAccess.includes(roleCode) ? 'primary' : 'default'}
-                    label={getRoleDisplayName(roleCode)}
-                    sx={{ textTransform: 'capitalize' }}
-                    clickable
-                    onClick={() => handleAccessChipClick(roleCode)}
-                  />
-                ))}
-              </Box>
-            </Box>
-
             <Box>
               <FormControlLabel
                 control={
