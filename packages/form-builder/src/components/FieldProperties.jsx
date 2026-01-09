@@ -992,7 +992,8 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
           </AccordionSummary>
           <AccordionDetails>
             <Box>
-              {(localField.type === 'select' ||
+              {/* We will add dynamic API call in Phase 2 */}
+              {/* {(localField.type === 'select' ||
                 localField.type === 'multiselect' ||
                 (localField.schema?.type === 'array' && localField.uischema?.options?.multi) ||
                 localField.uischema?.options?.format === 'dynamicselect') && (
@@ -1023,7 +1024,7 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                   label="Use Dynamic Data (API)"
                   sx={{ mb: 2 }}
                 />
-              )}
+              )} */}
 
               {localField.uischema?.options?.entity !== undefined ? (
                 <Box>
