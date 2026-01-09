@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { createAjv } from '@jsonforms/core';
 import { JsonForms } from '@jsonforms/react';
 import { IconEye, IconChecks } from '@tabler/icons-react';
@@ -16,12 +16,14 @@ const FormPreview = ({
   setShowSchemaEditor,
   exportForm,
 }) => {
-  const ajv = createAjv({ useDefaults: true });
+  //const ajv = createAjv({ useDefaults: true });
+  const ajv = useMemo(() => createAjv({ useDefaults: 'empty' }), []);
   const formRef = useRef();
 
   const [hasValidated, setHasValidated] = useState(false);
   const [key, setKey] = useState(0); // Force re-render
   const [validationErrors, setValidationErrors] = useState([]);
+  const isProgrammaticUpdateRef = useRef(false);
 
   const validateBox = {
     position: 'fixed',
@@ -140,6 +142,37 @@ const FormPreview = ({
       setKey((prev) => prev + 1);
     }
   };
+
+  const buildDefaultsFromSchema = () => {
+    if (!formState.schema?.properties) return {};
+    const data = {};
+    isProgrammaticUpdateRef.current = true;
+    Object.entries(formState.schema.properties).forEach(([key, prop]) => {
+      if (
+        prop.default !== undefined &&
+        (formState.data[key] === '' ||
+          formState.data[key]?.length === 0 ||
+          prop.type === 'boolean' ||
+          prop.type === 'number')
+      ) {
+        formState.data[key] = prop.default;
+      }
+    });
+    return data;
+  };
+
+  const dataWithDefaults = useMemo(() => {
+    if (formState.data) {
+      return {
+        ...buildDefaultsFromSchema(),
+        ...formState.data,
+      };
+    }
+    return {
+      ...buildDefaultsFromSchema(),
+    };
+  }, [formState.schema, formState.data]);
+
   return (
     <Box sx={{ paddingBottom: '64px' }}>
       <CommonHeader
@@ -167,13 +200,17 @@ const FormPreview = ({
                 hideRequiredAsterisk: false,
               }}
               cells={getCells()}
-              data={formState.data}
+              data={dataWithDefaults}
               renderers={getRenderers()}
               schema={formState.schema}
               uischema={formState.uischema}
               validationMode="NoValidation"
               additionalErrors={hasValidated ? validationErrors : []}
               onChange={({ data }) => {
+                if (isProgrammaticUpdateRef.current) {
+                  isProgrammaticUpdateRef.current = false;
+                  return;
+                }
                 onDataChange(data);
                 // Perform real-time validation if validation mode is active
                 if (hasValidated) {

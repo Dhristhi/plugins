@@ -15,6 +15,7 @@ import {
   Switch,
   Grid,
   Slider,
+  Checkbox,
 } from '@mui/material';
 import React, { useState, useEffect } from 'react';
 import { IconPlus, IconTrash, IconSettings, IconChevronDown, IconEdit } from '@tabler/icons-react';
@@ -712,7 +713,9 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                   />
                 </>
               ) : // Default Value field for non-date fields
-              localField.type !== 'array' && localField.type !== 'array-strings' ? (
+              localField.type !== 'array' &&
+                localField.type !== 'array-strings' &&
+                localField.type !== 'checkbox' ? (
                 <TextField
                   label="Default Value"
                   fullWidth
@@ -726,13 +729,30 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                     } else if (localField.type === 'checkbox') {
                       defaultValue = defaultValue.toLowerCase() === 'true';
                     }
-
-                    handleSchemaUpdate({ default: defaultValue });
+                    if (localField.type === 'multiselect') {
+                      let defaultArray = [];
+                      defaultArray.push(defaultValue);
+                      handleSchemaUpdate({ default: defaultArray });
+                    } else {
+                      handleSchemaUpdate({ default: defaultValue });
+                    }
                   }}
                   margin="normal"
                   variant="outlined"
                   helperText="Initial value for this field"
                   sx={outlinedTextFieldSx}
+                />
+              ) : localField.type === 'checkbox' ? (
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={localField.schema?.default === true} // reflects builder default
+                      onChange={(e) => {
+                        handleSchemaUpdate({ default: e.target.checked });
+                      }}
+                    />
+                  }
+                  label="Checked by default"
                 />
               ) : null}
               <TextField
@@ -972,7 +992,8 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
           </AccordionSummary>
           <AccordionDetails>
             <Box>
-              {(localField.type === 'select' ||
+              {/* We will add dynamic API call in Phase 2 */}
+              {/* {(localField.type === 'select' ||
                 localField.type === 'multiselect' ||
                 (localField.schema?.type === 'array' && localField.uischema?.options?.multi) ||
                 localField.uischema?.options?.format === 'dynamicselect') && (
@@ -1003,7 +1024,7 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                   label="Use Dynamic Data (API)"
                   sx={{ mb: 2 }}
                 />
-              )}
+              )} */}
 
               {localField.uischema?.options?.entity !== undefined ? (
                 <Box>
