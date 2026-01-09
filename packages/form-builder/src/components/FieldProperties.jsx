@@ -30,8 +30,6 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
   const [layout, setLayout] = useState('');
   const [selectedIcon, setSelectedIcon] = useState('');
 
-  const ALL_ROLE_CODES = ['OWNER', 'HR', 'EXE', 'MGM', 'SAL', 'FIN', 'OPR', 'USER', 'ADM'];
-
   const FILE_TYPE_OPTIONS = [
     { label: '.pdf', value: 'application/pdf' },
 
@@ -60,18 +58,6 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
 
     { label: '.csv', value: 'text/csv' },
   ];
-
-  const getRoleDisplayName = (code) => ALL_ROLE_CODES[code] || code;
-  const handleAccessChipClick = (roleCode) => {
-    const exists = selectedAccess.includes(roleCode);
-    const newSelected = exists
-      ? selectedAccess.filter((r) => r !== roleCode)
-      : [...selectedAccess, roleCode];
-    setSelectedAccess(newSelected);
-    handleSchemaUpdate({
-      allowedAccess: newSelected.length > 0 ? newSelected : undefined,
-    });
-  };
 
   const handleLayoutChange = (event) => {
     const newLayoutType = event.target.value;
@@ -1116,27 +1102,6 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
             </Typography>
           </AccordionSummary>
           <AccordionDetails>
-            {/* Allowed Access */}
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="caption" sx={captionTypographySx}>
-                Allowed Access
-              </Typography>
-              <Box sx={chipsContainerSx}>
-                {ALL_ROLE_CODES.map((roleCode) => (
-                  <Chip
-                    key={roleCode}
-                    size="small"
-                    variant={selectedAccess.includes(roleCode) ? 'filled' : 'outlined'}
-                    color={selectedAccess.includes(roleCode) ? 'primary' : 'default'}
-                    label={getRoleDisplayName(roleCode)}
-                    sx={{ textTransform: 'capitalize' }}
-                    clickable
-                    onClick={() => handleAccessChipClick(roleCode)}
-                  />
-                ))}
-              </Box>
-            </Box>
-
             <Box>
               <FormControlLabel
                 control={
