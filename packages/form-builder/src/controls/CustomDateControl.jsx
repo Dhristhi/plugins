@@ -6,20 +6,11 @@ import { formatDate } from '../utils';
 const CustomDateControl = (props) => {
   const { data, handleChange, path, label, required, errors, uischema, config, schema } = props;
 
-  console.log('CustomDateControl props:', {
-    data,
-    dateFormat: uischema?.options?.dateTimeFormat,
-    includeTime: uischema?.options?.includeTime,
-    readOnly: config?.readOnly,
-  });
-
   const dateFormat = uischema?.options?.dateTimeFormat || 'friendly';
   const includeTime = uischema?.options?.includeTime || false;
 
   const getDisplayValue = () => {
     if (!data) return '';
-
-    console.log('Formatting date:', { data, dateFormat, includeTime, readOnly: config?.readOnly });
 
     if (config?.readOnly) {
       return formatDate(data, dateFormat);
@@ -72,10 +63,17 @@ const CustomDateControl = (props) => {
             handleChange(path, value);
           }
         }}
-        error={errors && errors.length > 0}
-        helperText={
-          errors && errors.length > 0 ? errors[0].message : schema?.description || undefined
-        }
+        error={errors && (Array.isArray(errors) ? errors.length > 0 : !!errors)}
+        helperText={(() => {
+          if (!errors) return undefined;
+          if (Array.isArray(errors) && errors.length > 0) {
+            return errors[0].message || errors[0];
+          }
+          if (typeof errors === 'string') {
+            return errors;
+          }
+          return undefined;
+        })()}
         margin="normal"
         variant="outlined"
         InputLabelProps={{

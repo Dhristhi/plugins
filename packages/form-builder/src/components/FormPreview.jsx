@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { createAjv } from '@jsonforms/core';
 import { JsonForms } from '@jsonforms/react';
 import { IconEye, IconChecks } from '@tabler/icons-react';
@@ -17,8 +17,10 @@ const FormPreview = ({
   exportForm,
 }) => {
   const ajv = createAjv({ useDefaults: true });
+  const formRef = useRef();
 
   const [hasValidated, setHasValidated] = useState(false);
+  const [key, setKey] = useState(0); // Force re-render
   const [validationErrors, setValidationErrors] = useState([]);
 
   const validateBox = {
@@ -36,11 +38,106 @@ const FormPreview = ({
     justifyContent: 'flex-end',
     px: 3,
   };
+
+  const hasFieldContent = (value) => {
+    if (value === undefined || value === null || value === '') {
+      return false;
+    }
+    // For arrays (multiselect), check if it has items
+    if (Array.isArray(value)) {
+      return value.length > 0;
+    }
+    // For boolean (checkbox), false is considered no content for required validation
+    if (typeof value === 'boolean') {
+      return value === true;
+    }
+    return true;
+  };
+
+  const filterErrors = (errors, data, schema) => {
+    const filteredErrors = [];
+
+    // Handle required field errors
+    const requiredErrors = errors.filter((err) => err.keyword === 'required');
+    requiredErrors.forEach((error) => {
+      const fieldKey = error.params?.missingProperty;
+      if (fieldKey) {
+        const fieldValue = data[fieldKey];
+        const hasContent = hasFieldContent(fieldValue);
+        const isRequired = schema.required && schema.required.includes(fieldKey);
+
+        if (isRequired && !hasContent) {
+          // Create error with correct instancePath for the field
+          filteredErrors.push({
+            ...error,
+            instancePath: `/${fieldKey}`,
+          });
+        }
+      }
+    });
+
+    // Handle field-specific validation errors (format, pattern, etc.)
+    const fieldErrors = errors.filter((err) => err.keyword !== 'required');
+    fieldErrors.forEach((error) => {
+      const fieldPath = error.instancePath || '';
+      const fieldKey = fieldPath.replace(/^\//, '');
+
+      if (fieldKey) {
+        const fieldValue = data[fieldKey];
+        const hasContent = hasFieldContent(fieldValue);
+
+        // Only show validation errors if field has content
+        if (hasContent) {
+          filteredErrors.push(error);
+        }
+      }
+    });
+
+    return filteredErrors;
+  };
+
+  const performValidation = (data = formState.data) => {
+    // Create validation data where empty strings become undefined for required validation
+    const validationData = { ...data };
+    Object.keys(validationData).forEach((key) => {
+      if (
+        validationData[key] === '' ||
+        validationData[key] === null ||
+        (Array.isArray(validationData[key]) && validationData[key].length === 0) ||
+        validationData[key] === false
+      ) {
+        delete validationData[key];
+      }
+    });
+
+    const validate = ajv.compile(formState.schema);
+    const isValid = validate(validationData);
+
+    if (!isValid && validate.errors) {
+      const transformedErrors = validate.errors.map((error) => ({
+        instancePath: error.instancePath || error.dataPath || '',
+        schemaPath: error.schemaPath,
+        keyword: error.keyword,
+        params: error.params,
+        message: error.message,
+        data: error.data,
+      }));
+
+      const filteredErrors = filterErrors(transformedErrors, data, formState.schema);
+      setValidationErrors(filteredErrors);
+    } else {
+      setValidationErrors([]);
+    }
+  };
+
   const toggleValidateButton = () => {
     if (hasValidated) {
       setHasValidated(false);
+      setValidationErrors([]);
     } else {
+      performValidation();
       setHasValidated(true);
+      setKey((prev) => prev + 1);
     }
   };
   return (
@@ -59,22 +156,36 @@ const FormPreview = ({
       />
       <Box sx={{ p: 2 }}>
         {formState.schema.properties && Object.keys(formState.schema.properties).length > 0 ? (
-          <JsonForms
-            ajv={ajv}
-            config={config}
-            cells={getCells()}
-            data={formState.data}
-            renderers={getRenderers()}
-            schema={formState.schema}
-            uischema={formState.uischema}
-            validationMode={hasValidated ? 'ValidateAndShow' : 'NoValidation'}
-            additionalErrors={validationErrors}
-            onChange={({ data }) => onDataChange(data)}
-            // i18n={{
-            //   locale: i18n.language,
-            //   translate: (key, defaultMessage) => getTranslation(key, 'label', defaultMessage),
-            // }}
-          />
+          <div ref={formRef}>
+            <JsonForms
+              key={key} // Force re-render when validation state changes
+              ajv={ajv}
+              config={{
+                ...config,
+                showUnfocusedDescription: hasValidated,
+                trim: false,
+                hideRequiredAsterisk: false,
+              }}
+              cells={getCells()}
+              data={formState.data}
+              renderers={getRenderers()}
+              schema={formState.schema}
+              uischema={formState.uischema}
+              validationMode="NoValidation"
+              additionalErrors={hasValidated ? validationErrors : []}
+              onChange={({ data }) => {
+                onDataChange(data);
+                // Perform real-time validation if validation mode is active
+                if (hasValidated) {
+                  performValidation(data);
+                }
+              }}
+              // i18n={{
+              //   locale: i18n.language,
+              //   translate: (key, defaultMessage) => getTranslation(key, 'label', defaultMessage),
+              // }}
+            />
+          </div>
         ) : (
           <Typography variant="body2" color="textSecondary">
             No fields added yet. Start by adding fields from the palette.
@@ -84,9 +195,7 @@ const FormPreview = ({
       {formState.schema.properties && Object.keys(formState.schema.properties).length > 0 && (
         <Box sx={validateBox}>
           <Button
-            onClick={() => {
-              toggleValidateButton();
-            }}
+            onClick={toggleValidateButton}
             variant="contained"
             startIcon={<IconChecks size={16} />}
           >

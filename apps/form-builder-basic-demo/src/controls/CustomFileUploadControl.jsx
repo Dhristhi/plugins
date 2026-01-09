@@ -15,11 +15,11 @@ const CustomFileUploadControl = (props) => {
   const [localError, setLocalError] = useState(null);
 
   // Accept images by default; allow override via uischema.options.accept
-  const acceptedFileTypes = uischema?.options?.["ui:options"]?.accept;
-  const maxFileSize = uischema?.options?.["ui:options"]?.maxSize;
+  const acceptedFileTypes = uischema?.options?.['ui:options']?.accept;
+  const maxFileSize = uischema?.options?.['ui:options']?.maxSize;
 
   function getAllowedMimes(acceptedFileTypes) {
-    if (!acceptedFileTypes?.trim()) return []
+    if (!acceptedFileTypes?.trim()) return [];
 
     return acceptedFileTypes
       .split(',')
@@ -28,7 +28,7 @@ const CustomFileUploadControl = (props) => {
   }
 
   function validateFile(file, allowedMimes, maxFileSizeMB) {
-    if (allowedMimes.length && !allowedMimes.includes(file.type) || !file.type) {
+    if ((allowedMimes.length && !allowedMimes.includes(file.type)) || !file.type) {
       return `Selected file "${file.name}" is not an allowed file type.`;
     }
     const MB = 1024 * 1024;
