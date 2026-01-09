@@ -150,7 +150,10 @@ const FormPreview = ({
     Object.entries(formState.schema.properties).forEach(([key, prop]) => {
       if (
         prop.default !== undefined &&
-        (formState.data[key] === '' || formState.data[key]?.length === 0 || prop.type === 'boolean')
+        (formState.data[key] === '' ||
+          formState.data[key]?.length === 0 ||
+          prop.type === 'boolean' ||
+          prop.type === 'number')
       ) {
         formState.data[key] = prop.default;
       }
