@@ -148,13 +148,10 @@ const FormPreview = ({
     const data = {};
     isProgrammaticUpdateRef.current = true;
     Object.entries(formState.schema.properties).forEach(([key, prop]) => {
-      console.log(
-        'prop.default',
-        formState.data[key] === '',
-        formState.data[key]?.length === 0,
-        formState.data
-      );
-      if (prop.default !== undefined) {
+      if (
+        prop.default !== undefined &&
+        (formState.data[key] === '' || formState.data[key]?.length === 0 || prop.type === 'boolean')
+      ) {
         formState.data[key] = prop.default;
       }
     });
