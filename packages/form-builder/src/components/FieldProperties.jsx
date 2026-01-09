@@ -735,6 +735,18 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                   sx={outlinedTextFieldSx}
                 />
               ) : null}
+              <TextField
+                label="Description"
+                fullWidth
+                multiline
+                rows={2}
+                value={localField.schema?.description || ''}
+                onChange={(e) => handleSchemaUpdate({ description: e.target.value || undefined })}
+                margin="normal"
+                variant="outlined"
+                helperText="Help text displayed below the field"
+                sx={outlinedTextFieldSx}
+              />
             </Box>
           </AccordionDetails>
         </Accordion>

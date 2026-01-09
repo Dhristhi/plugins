@@ -4,7 +4,7 @@ import { TextField } from '@mui/material';
 import { formatDate } from '../utils';
 
 const CustomDateControl = (props) => {
-  const { data, handleChange, path, label, required, errors, uischema, config } = props;
+  const { data, handleChange, path, label, required, errors, uischema, config, schema } = props;
 
   const dateFormat = uischema?.options?.dateTimeFormat || 'friendly';
   const includeTime = uischema?.options?.includeTime || false;
