@@ -425,7 +425,6 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
   const textTransCaps = {
     textTransform: 'capitalize',
   };
-
   return (
     <Box>
       {/* Basic Properties */}
@@ -712,8 +711,8 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                     sx={{ mt: 1, mb: 1 }}
                   />
                 </>
-              ) : (
-                // Default Value field for non-date fields
+              ) : // Default Value field for non-date fields
+              localField.type !== 'array' && localField.type !== 'array-strings' ? (
                 <TextField
                   label="Default Value"
                   fullWidth
@@ -735,7 +734,7 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                   helperText="Initial value for this field"
                   sx={outlinedTextFieldSx}
                 />
-              )}
+              ) : null}
             </Box>
           </AccordionDetails>
         </Accordion>
