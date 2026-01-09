@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { createAjv } from '@jsonforms/core';
 import { JsonForms } from '@jsonforms/react';
 import { IconEye, IconChecks } from '@tabler/icons-react';
@@ -16,10 +16,11 @@ const FormPreview = ({
   setShowSchemaEditor,
   exportForm,
 }) => {
-  const ajv = createAjv({ useDefaults: true });
-
+  //const ajv = createAjv({ useDefaults: true });
+  const ajv = useMemo(() => createAjv({ useDefaults: 'empty' }), []);
   const [hasValidated, setHasValidated] = useState(false);
   const [validationErrors, setValidationErrors] = useState([]);
+  const isProgrammaticUpdateRef = useRef(false);
 
   const validateBox = {
     position: 'fixed',
@@ -43,6 +44,37 @@ const FormPreview = ({
       setHasValidated(true);
     }
   };
+
+  const buildDefaultsFromSchema = () => {
+    if (!formState.schema?.properties) return {};
+    const data = {};
+    isProgrammaticUpdateRef.current = true;
+    Object.entries(formState.schema.properties).forEach(([key, prop]) => {
+      console.log(
+        'prop.default',
+        formState.data[key] === '',
+        formState.data[key]?.length === 0,
+        formState.data
+      );
+      if (prop.default !== undefined) {
+        formState.data[key] = prop.default;
+      }
+    });
+    return data;
+  };
+
+  const dataWithDefaults = useMemo(() => {
+    if (formState.data) {
+      return {
+        ...buildDefaultsFromSchema(),
+        ...formState.data,
+      };
+    }
+    return {
+      ...buildDefaultsFromSchema(),
+    };
+  }, [formState.schema, formState.data]);
+
   return (
     <Box sx={{ paddingBottom: '64px' }}>
       <CommonHeader
@@ -63,13 +95,19 @@ const FormPreview = ({
             ajv={ajv}
             config={config}
             cells={getCells()}
-            data={formState.data}
+            data={dataWithDefaults}
             renderers={getRenderers()}
             schema={formState.schema}
             uischema={formState.uischema}
             validationMode={hasValidated ? 'ValidateAndShow' : 'NoValidation'}
             additionalErrors={validationErrors}
-            onChange={({ data }) => onDataChange(data)}
+            onChange={({ data }) => {
+              if (isProgrammaticUpdateRef.current) {
+                isProgrammaticUpdateRef.current = false;
+                return;
+              }
+              onDataChange(data);
+            }}
             // i18n={{
             //   locale: i18n.language,
             //   translate: (key, defaultMessage) => getTranslation(key, 'label', defaultMessage),
