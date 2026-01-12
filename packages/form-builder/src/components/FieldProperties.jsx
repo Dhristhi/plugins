@@ -504,11 +504,9 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
     if (typeof value !== 'string') return value;
 
     let tempVal = value.includes(',') ? value.split(',').map((v) => v) : value;
-    console.log('tempVal', tempVal);
     let trimmed;
     if (Array.isArray(tempVal)) {
       trimmed = [...tempVal.map((item) => item.trim())];
-      console.log('trimmed', trimmed);
       return trimmed;
     } else {
       trimmed = tempVal.trim();
@@ -1020,14 +1018,12 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                     }
                     if (localField.type === 'multiselect') {
                       const valu1 = parseCommaSeparated(defaultValue);
-                      // console.log('valu1', valu1);
                       let defaultArray = [];
                       if (!Array.isArray(valu1)) {
                         defaultArray.push(defaultValue);
                       } else {
                         defaultArray = valu1;
                       }
-                      // console.log('defaultArray', defaultArray);
                       handleSchemaUpdate({ default: defaultArray });
                     } else {
                       handleSchemaUpdate({ default: defaultValue });
