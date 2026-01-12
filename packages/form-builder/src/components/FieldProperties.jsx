@@ -22,14 +22,17 @@ import { IconPlus, IconTrash, IconSettings, IconChevronDown, IconEdit } from '@t
 
 import { defaultFieldTypes } from '../types';
 import IconSelector from '../utils/IconSelector';
+import { updateFieldById } from '../lib/structure/treeOps';
 
-const FieldProperties = ({ field, onFieldUpdate }) => {
+const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
   const [localField, setLocalField] = useState(null);
   const [enumOptions, setEnumOptions] = useState([]);
   const [newOption, setNewOption] = useState('');
   const [selectedAccess, setSelectedAccess] = useState([]);
   const [layout, setLayout] = useState('');
   const [selectedIcon, setSelectedIcon] = useState('');
+  const [isInsideArrayOfObjects, setIsInsideArrayOfObjects] = useState(false);
+  const [parentArrayField, setParentArrayField] = useState(null);
 
   const FILE_TYPE_OPTIONS = [
     { label: '.pdf', value: 'application/pdf' },
@@ -80,7 +83,71 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
     onFieldUpdate(updatedField);
   };
 
+  // Helper function to find parent array field
+  const findParentArrayField = (fieldId, fieldsArray, parentField = null) => {
+    for (const f of fieldsArray) {
+      if (f.id === fieldId) {
+        return parentField?.type === 'array' ? parentField : null;
+      }
+      if (f.children) {
+        const result = findParentArrayField(fieldId, f.children, f);
+        if (result) return result;
+      }
+    }
+    return null;
+  };
+
+  // Helper function to update elementLabelProp in parent array
+  const updateParentArrayElementLabel = (arrayField, newElementLabelProp) => {
+    const updatedArrayField = {
+      ...arrayField,
+      uischema: {
+        ...arrayField.uischema,
+        options: {
+          ...arrayField.uischema?.options,
+          elementLabelProp: newElementLabelProp,
+        },
+      },
+    };
+    // Update fields directly without changing selected field
+    setFields((prev) => updateFieldById(prev, updatedArrayField));
+  };
+
+  // Helper function to clear elementLabelProp from other fields in the same array
+  const clearElementLabelFromSiblings = (arrayField, currentFieldKey) => {
+    if (!arrayField?.children) return;
+
+    const updateChildren = (children) => {
+      return children.map((child) => {
+        if (child.key !== currentFieldKey && child.isElementLabel) {
+          const updatedChild = {
+            ...child,
+            isElementLabel: false,
+          };
+          // Update fields directly without changing selected field
+          setFields((prev) => updateFieldById(prev, updatedChild));
+          return updatedChild;
+        }
+        if (child.children) {
+          return {
+            ...child,
+            children: updateChildren(child.children),
+          };
+        }
+        return child;
+      });
+    };
+
+    updateChildren(arrayField.children);
+  };
   useEffect(() => {
+    if (field && fields) {
+      // Check if field is inside an array of objects
+      const parentArray = findParentArrayField(field.id, fields);
+      setIsInsideArrayOfObjects(!!parentArray);
+      setParentArrayField(parentArray);
+    }
+
     if (field) {
       let updatedField = { ...field };
 
@@ -126,7 +193,7 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
       setSelectedAccess(field.schema?.allowedAccess || []);
       setSelectedIcon(field.icon || '');
     }
-  }, [field, onFieldUpdate]);
+  }, [field, fields, onFieldUpdate]);
 
   const emptyStateContainerSx = {
     p: 3,
@@ -755,6 +822,29 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                   label="Checked by default"
                 />
               ) : null}
+              {/* Element Label field for array of objects */}
+              {localField.type === 'array' && (
+                <TextField
+                  label="Element Label"
+                  fullWidth
+                  value={localField.uischema?.options?.elementLabelProp || ''}
+                  onChange={(e) => {
+                    const updatedUISchema = {
+                      ...localField.uischema,
+                      options: {
+                        ...localField.uischema?.options,
+                        elementLabelProp: e.target.value || undefined,
+                      },
+                    };
+                    handleUpdate({ uischema: updatedUISchema });
+                  }}
+                  margin="normal"
+                  variant="outlined"
+                  helperText="Property name to use as accordion label for array items (e.g., 'name', 'title'). It should be 'Field Key'."
+                  sx={outlinedTextFieldSx}
+                />
+              )}
+
               <TextField
                 label="Description"
                 fullWidth
@@ -1156,6 +1246,44 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                 label="Read Only"
                 sx={formControlLabelSx}
               />
+
+              {/* Make Field as Element Label switch - only for fields inside array of objects */}
+              {isInsideArrayOfObjects && !isLayout && !isGroup && (
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={localField.isElementLabel || false}
+                      onChange={(e) => {
+                        const isChecked = e.target.checked;
+
+                        if (isChecked && parentArrayField) {
+                          // Clear element label from other fields in the same array
+                          clearElementLabelFromSiblings(parentArrayField, localField.key);
+
+                          // Set this field as element label
+                          handleUpdate({ isElementLabel: true });
+
+                          // Update parent array's elementLabelProp
+                          updateParentArrayElementLabel(parentArrayField, localField.key);
+                        } else {
+                          // Remove element label from this field
+                          handleUpdate({ isElementLabel: false });
+
+                          // Clear elementLabelProp from parent array if this was the selected field
+                          if (
+                            parentArrayField?.uischema?.options?.elementLabelProp === localField.key
+                          ) {
+                            updateParentArrayElementLabel(parentArrayField, undefined);
+                          }
+                        }
+                      }}
+                      color="primary"
+                    />
+                  }
+                  label="Make Field as Element Label"
+                  sx={formControlLabelSx}
+                />
+              )}
 
               {localField.type === 'textarea' && (
                 <Box sx={sliderContainerSx}>
