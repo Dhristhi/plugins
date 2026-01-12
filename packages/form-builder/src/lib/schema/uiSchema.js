@@ -29,6 +29,9 @@ export const buildUISchemaForArrayItems = (fieldsArray) => {
                     elements: nestedDetailElements,
                   },
                 }),
+                ...(field.uischema?.options?.elementLabelProp && {
+                  elementLabelProp: field.uischema.options.elementLabelProp,
+                }),
               },
             },
           ],
