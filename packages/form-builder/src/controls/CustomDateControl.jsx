@@ -4,24 +4,16 @@ import { TextField } from '@mui/material';
 import { formatDate } from '../utils';
 
 const CustomDateControl = (props) => {
-  const { data, handleChange, path, label, required, errors, uischema, config } = props;
-
-  console.log('CustomDateControl props:', {
-    data,
-    dateFormat: uischema?.options?.dateTimeFormat,
-    includeTime: uischema?.options?.includeTime,
-    readOnly: config?.readOnly,
-  });
+  const { data, handleChange, path, label, required, errors, uischema, config, schema } = props;
 
   const dateFormat = uischema?.options?.dateTimeFormat || 'friendly';
   const includeTime = uischema?.options?.includeTime || false;
+  const isReadOnly = uischema?.options?.readonly;
 
   const getDisplayValue = () => {
     if (!data) return '';
 
-    console.log('Formatting date:', { data, dateFormat, includeTime, readOnly: config?.readOnly });
-
-    if (config?.readOnly) {
+    if (isReadOnly) {
       return formatDate(data, dateFormat);
     }
 
@@ -41,12 +33,11 @@ const CustomDateControl = (props) => {
   };
 
   const getFormattedDisplayText = () => {
-    if (!data || config?.readOnly) return null;
+    if (!data || isReadOnly) return null;
     return formatDate(data, dateFormat);
   };
 
   const getInputType = () => {
-    if (config?.readOnly) return 'text';
     return includeTime ? 'datetime-local' : 'date';
   };
 
@@ -60,8 +51,12 @@ const CustomDateControl = (props) => {
         fullWidth
         required={required}
         value={getDisplayValue()}
+        placeholder={undefined}
+        InputProps={{
+          placeholder: undefined,
+        }}
         onChange={(e) => {
-          if (!config?.readOnly) {
+          if (!isReadOnly) {
             let value = e.target.value;
 
             if (includeTime && value) {
@@ -72,14 +67,23 @@ const CustomDateControl = (props) => {
             handleChange(path, value);
           }
         }}
-        error={errors && errors.length > 0}
-        helperText={errors && errors.length > 0 ? errors[0].message : undefined}
+        error={errors && (Array.isArray(errors) ? errors.length > 0 : !!errors)}
+        helperText={(() => {
+          if (!errors) return undefined;
+          if (Array.isArray(errors) && errors.length > 0) {
+            return errors[0].message || errors[0];
+          }
+          if (typeof errors === 'string') {
+            return errors;
+          }
+          return undefined;
+        })()}
         margin="normal"
         variant="outlined"
         InputLabelProps={{
           shrink: true,
         }}
-        disabled={config?.readOnly}
+        disabled={isReadOnly}
         sx={{
           '& .MuiOutlinedInput-root': {
             borderRadius: 2,
