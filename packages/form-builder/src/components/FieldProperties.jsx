@@ -24,14 +24,17 @@ import { IconPlus, IconTrash, IconSettings, IconChevronDown, IconEdit } from '@t
 
 import { defaultFieldTypes } from '../types';
 import IconSelector from '../utils/IconSelector';
+import { updateFieldById } from '../lib/structure/treeOps';
 
-const FieldProperties = ({ field, onFieldUpdate }) => {
+const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
   const [localField, setLocalField] = useState(null);
   const [enumOptions, setEnumOptions] = useState([]);
   const [newOption, setNewOption] = useState('');
   const [selectedAccess, setSelectedAccess] = useState([]);
   const [layout, setLayout] = useState('');
   const [selectedIcon, setSelectedIcon] = useState('');
+  const [isInsideArrayOfObjects, setIsInsideArrayOfObjects] = useState(false);
+  const [parentArrayField, setParentArrayField] = useState(null);
 
   const FILE_TYPE_OPTIONS = [
     { label: '.pdf', value: 'application/pdf' },
@@ -82,7 +85,71 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
     onFieldUpdate(updatedField);
   };
 
+  // Helper function to find parent array field
+  const findParentArrayField = (fieldId, fieldsArray, parentField = null) => {
+    for (const f of fieldsArray) {
+      if (f.id === fieldId) {
+        return parentField?.type === 'array' ? parentField : null;
+      }
+      if (f.children) {
+        const result = findParentArrayField(fieldId, f.children, f);
+        if (result) return result;
+      }
+    }
+    return null;
+  };
+
+  // Helper function to update elementLabelProp in parent array
+  const updateParentArrayElementLabel = (arrayField, newElementLabelProp) => {
+    const updatedArrayField = {
+      ...arrayField,
+      uischema: {
+        ...arrayField.uischema,
+        options: {
+          ...arrayField.uischema?.options,
+          elementLabelProp: newElementLabelProp,
+        },
+      },
+    };
+    // Update fields directly without changing selected field
+    setFields((prev) => updateFieldById(prev, updatedArrayField));
+  };
+
+  // Helper function to clear elementLabelProp from other fields in the same array
+  const clearElementLabelFromSiblings = (arrayField, currentFieldKey) => {
+    if (!arrayField?.children) return;
+
+    const updateChildren = (children) => {
+      return children.map((child) => {
+        if (child.key !== currentFieldKey && child.isElementLabel) {
+          const updatedChild = {
+            ...child,
+            isElementLabel: false,
+          };
+          // Update fields directly without changing selected field
+          setFields((prev) => updateFieldById(prev, updatedChild));
+          return updatedChild;
+        }
+        if (child.children) {
+          return {
+            ...child,
+            children: updateChildren(child.children),
+          };
+        }
+        return child;
+      });
+    };
+
+    updateChildren(arrayField.children);
+  };
   useEffect(() => {
+    if (field && fields) {
+      // Check if field is inside an array of objects
+      const parentArray = findParentArrayField(field.id, fields);
+      setIsInsideArrayOfObjects(!!parentArray);
+      setParentArrayField(parentArray);
+    }
+
     if (field) {
       let updatedField = { ...field };
 
@@ -125,7 +192,7 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
       setSelectedAccess(field.schema?.allowedAccess || []);
       setSelectedIcon(field.icon || '');
     }
-  }, [field]);
+  }, [field, fields, onFieldUpdate]);
 
   const emptyStateContainerSx = {
     p: 3,
@@ -382,7 +449,7 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
 
   const captionTypographySx = { color: 'text.secondary', fontWeight: 600 };
   const chipsContainerSx = { display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 };
-  const formControlLabelSx = { mb: 1 };
+  const formControlLabelSx = { mb: 1, display: 'block' };
   const sliderContainerSx = { mt: 2 };
 
   const containerSx = {
@@ -853,6 +920,54 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                     label="Include Time"
                     sx={{ mt: 1, mb: 1 }}
                   />
+
+                  {/* Default Date Value Picker */}
+                  <TextField
+                    label="Default Date Value"
+                    type={localField.uischema?.options?.includeTime ? 'datetime-local' : 'date'}
+                    fullWidth
+                    value={(() => {
+                      const defaultDate = localField.schema?.default;
+                      if (!defaultDate) return '';
+
+                      const includeTime = localField.uischema?.options?.includeTime;
+                      if (includeTime) {
+                        const date = new Date(defaultDate);
+                        if (!isNaN(date.getTime())) {
+                          const year = date.getFullYear();
+                          const month = String(date.getMonth() + 1).padStart(2, '0');
+                          const day = String(date.getDate()).padStart(2, '0');
+                          const hours = String(date.getHours()).padStart(2, '0');
+                          const minutes = String(date.getMinutes()).padStart(2, '0');
+                          return `${year}-${month}-${day}T${hours}:${minutes}`;
+                        }
+                      }
+
+                      return defaultDate ? defaultDate.split('T')[0] : '';
+                    })()}
+                    onChange={(e) => {
+                      let dateValue = e.target.value;
+
+                      if (dateValue) {
+                        const includeTime = localField.uischema?.options?.includeTime;
+                        if (includeTime) {
+                          const date = new Date(dateValue);
+                          dateValue = date.toISOString();
+                        }
+                      } else {
+                        dateValue = undefined;
+                      }
+
+                      handleSchemaUpdate({ default: dateValue });
+                    }}
+                    margin="normal"
+                    variant="outlined"
+                    helperText="Default date value that will be pre-filled in the form"
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                    sx={outlinedTextFieldSx}
+                  />
                 </>
               ) : // Default Value field for non-date fields
               localField.type !== 'array' &&
@@ -897,6 +1012,28 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                   label="Checked by default"
                 />
               ) : null}
+              {/* Element Label field for array of objects */}
+              {localField.type === 'array' && (
+                <TextField
+                  label="Element Label"
+                  fullWidth
+                  value={localField.uischema?.options?.elementLabelProp || ''}
+                  onChange={(e) => {
+                    const updatedUISchema = {
+                      ...localField.uischema,
+                      options: {
+                        ...localField.uischema?.options,
+                        elementLabelProp: e.target.value || undefined,
+                      },
+                    };
+                    handleUpdate({ uischema: updatedUISchema });
+                  }}
+                  margin="normal"
+                  variant="outlined"
+                  helperText="Property name to use as accordion label for array items (e.g., 'name', 'title'). It should be 'Field Key'."
+                  sx={outlinedTextFieldSx}
+                />
+              )}
 
               <TextField
                 label="Description"
@@ -985,6 +1122,43 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                 label="Read Only"
                 sx={formControlLabelSx}
               />
+              {/* Make Field as Element Label switch - only for fields inside array of objects */}
+              {isInsideArrayOfObjects && !isLayout && !isGroup && (
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={localField.isElementLabel || false}
+                      onChange={(e) => {
+                        const isChecked = e.target.checked;
+
+                        if (isChecked && parentArrayField) {
+                          // Clear element label from other fields in the same array
+                          clearElementLabelFromSiblings(parentArrayField, localField.key);
+
+                          // Set this field as element label
+                          handleUpdate({ isElementLabel: true });
+
+                          // Update parent array's elementLabelProp
+                          updateParentArrayElementLabel(parentArrayField, localField.key);
+                        } else {
+                          // Remove element label from this field
+                          handleUpdate({ isElementLabel: false });
+
+                          // Clear elementLabelProp from parent array if this was the selected field
+                          if (
+                            parentArrayField?.uischema?.options?.elementLabelProp === localField.key
+                          ) {
+                            updateParentArrayElementLabel(parentArrayField, undefined);
+                          }
+                        }
+                      }}
+                      color="primary"
+                    />
+                  }
+                  label="Make Field as Element Label"
+                  sx={formControlLabelSx}
+                />
+              )}
 
               {localField.type === 'textarea' && (
                 <Box sx={sliderContainerSx}>
@@ -1077,7 +1251,6 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
           </AccordionDetails>
         </Accordion>
       )}
-
       {/* Options for Select/Radio Fields */}
       {hasEnumOptions && (
         <Accordion defaultExpanded sx={accordionSx}>
@@ -1230,9 +1403,60 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
               Advanced Options
             </Typography>
           </AccordionSummary>
-          <AccordionDetails></AccordionDetails>
-        </Accordion>
-      )} */}
+          <AccordionDetails>
+            <Box>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={localField.uischema?.options?.readonly || false}
+                    onChange={(e) => {
+                      const updatedUISchema = {
+                        ...localField.uischema,
+                        options: {
+                          ...localField.uischema?.options,
+                          readonly: e.target.checked,
+                        },
+                      };
+                      handleUpdate({ uischema: updatedUISchema });
+                    }}
+                    color="primary"
+                  />
+                }
+                label="Read Only"
+                sx={formControlLabelSx}
+              />
+
+             
+
+      {localField.type === 'textarea' && (
+        <Box sx={sliderContainerSx}>
+          <Typography variant="body2" gutterBottom>
+            Rows: {localField.uischema?.options?.rows || 3}
+          </Typography>
+          <Slider
+            value={localField.uischema?.options?.rows || 3}
+            onChange={(e, value) => {
+              const updatedUISchema = {
+                ...localField.uischema,
+                options: {
+                  ...localField.uischema?.options,
+                  rows: value,
+                },
+              };
+              handleUpdate({ uischema: updatedUISchema });
+            }}
+            min={1}
+            max={10}
+            step={1}
+            marks
+            valueLabelDisplay="auto"
+          />
+        </Box>
+      )}
+    </Box>
+    //     </AccordionDetails>
+    //   </Accordion>
+    // )} */}
     </Box>
   );
 };

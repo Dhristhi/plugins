@@ -730,6 +730,8 @@ const App = ({ onExport, onSave, schemas = [], theme: customTheme } = {}) => {
                 <FieldProperties
                   field={editingField || selectedField}
                   onFieldUpdate={handleFieldUpdate}
+                  fields={fields}
+                  setFields={setFields}
                 />
               </Box>
               <Box sx={propertiesPanelFooter}>
