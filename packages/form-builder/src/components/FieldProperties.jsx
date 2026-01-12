@@ -108,9 +108,6 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
             },
           },
         };
-
-        // Update the field in the parent component
-        onFieldUpdate(updatedField);
       }
 
       setLocalField(updatedField);
@@ -128,7 +125,7 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
       setSelectedAccess(field.schema?.allowedAccess || []);
       setSelectedIcon(field.icon || '');
     }
-  }, [field, onFieldUpdate]);
+  }, [field]);
 
   const emptyStateContainerSx = {
     p: 3,
@@ -363,13 +360,7 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
   };
 
   const addOptionButtonSx = {
-    color: 'success.main',
-    backgroundColor: 'success.light',
     borderRadius: 1.5,
-    '&:hover': {
-      backgroundColor: (theme) => theme.palette.success.light,
-      color: 'success.dark',
-    },
   };
 
   const optionChipsWrapperSx = {
@@ -520,18 +511,6 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                     })}
                   </Select>
                 </FormControl>
-
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={localField.required || false}
-                      onChange={(e) => handleUpdate({ required: e.target.checked })}
-                      color="primary"
-                    />
-                  }
-                  label="Required Field"
-                  sx={requiredSwitchSx}
-                />
               </>
             )}
 
@@ -594,6 +573,167 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
           </Box>
         </AccordionDetails>
       </Accordion>
+      {/* Validation Rules */}
+      {!isLayout && !isGroup && (
+        <Accordion sx={accordionSx}>
+          <AccordionSummary expandIcon={<IconChevronDown />}>
+            <Typography variant="subtitle1" fontWeight={600}>
+              Validation Rules
+            </Typography>
+          </AccordionSummary>
+
+          <AccordionDetails>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={localField.required || false}
+                  onChange={(e) => handleUpdate({ required: e.target.checked })}
+                  color="primary"
+                />
+              }
+              label="Required Field"
+              sx={requiredSwitchSx}
+            />
+
+            <Box>
+              {(localField.type === 'text' ||
+                localField.type === 'textarea' ||
+                localField.type === 'password') && (
+                <>
+                  <Grid container spacing={2}>
+                    <Grid item xs={6}>
+                      <TextField
+                        label="Min Length"
+                        type="number"
+                        fullWidth
+                        value={localField.schema?.minLength || ''}
+                        onChange={(e) =>
+                          handleSchemaUpdate({
+                            minLength: e.target.value ? Number(e.target.value) : undefined,
+                          })
+                        }
+                        margin="normal"
+                        variant="outlined"
+                        sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                      />
+                    </Grid>
+                    <Grid item xs={6}>
+                      <TextField
+                        label="Max Length"
+                        type="number"
+                        fullWidth
+                        value={localField.schema?.maxLength || ''}
+                        onChange={(e) =>
+                          handleSchemaUpdate({
+                            maxLength: e.target.value ? Number(e.target.value) : undefined,
+                          })
+                        }
+                        margin="normal"
+                        variant="outlined"
+                        sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                      />
+                    </Grid>
+                  </Grid>
+
+                  <TextField
+                    label="Pattern (RegEx)"
+                    fullWidth
+                    value={localField.schema?.pattern || ''}
+                    onChange={(e) =>
+                      handleSchemaUpdate({
+                        pattern: e.target.value || undefined,
+                      })
+                    }
+                    margin="normal"
+                    variant="outlined"
+                    helperText="Regular expression for validation (e.g., ^[A-Za-z]+$ for letters only)"
+                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                  />
+                </>
+              )}
+
+              {localField.type === 'email' && (
+                <TextField
+                  label="Pattern (RegEx)"
+                  fullWidth
+                  value={localField.schema?.pattern || ''}
+                  onChange={(e) =>
+                    handleSchemaUpdate({
+                      pattern: e.target.value || undefined,
+                    })
+                  }
+                  margin="normal"
+                  variant="outlined"
+                  helperText="Regular expression for validation (e.g., ^[A-Za-z]+$ for letters only)"
+                  sx={outlinedTextFieldSx}
+                />
+              )}
+              {localField.type === 'number' && (
+                <Grid container spacing={2}>
+                  <Grid item xs={6}>
+                    <TextField
+                      label="Minimum Value"
+                      type="number"
+                      fullWidth
+                      value={localField.schema?.minimum || ''}
+                      onChange={(e) =>
+                        handleSchemaUpdate({
+                          minimum: e.target.value ? Number(e.target.value) : undefined,
+                        })
+                      }
+                      margin="normal"
+                      variant="outlined"
+                      sx={outlinedTextFieldSx}
+                    />
+                  </Grid>
+
+                  <Grid item xs={6}>
+                    <TextField
+                      label="Maximum Value"
+                      type="number"
+                      fullWidth
+                      value={localField.schema?.maximum || ''}
+                      onChange={(e) =>
+                        handleSchemaUpdate({
+                          maximum: e.target.value ? Number(e.target.value) : undefined,
+                        })
+                      }
+                      margin="normal"
+                      variant="outlined"
+                      sx={outlinedTextFieldSx}
+                    />
+                  </Grid>
+                </Grid>
+              )}
+            </Box>
+            <Box>
+              {localField.type === 'file' && (
+                <>
+                  <Grid container spacing={1}>
+                    <Grid item xs={12}>
+                      <TextField
+                        label="Maximum File Size (MB)"
+                        type="number"
+                        fullWidth
+                        value={localField.uischema?.options?.['ui:options']?.maxSize || ''}
+                        onChange={(e) =>
+                          handleUiOptionsUpdate({
+                            maxSize: e.target.value ? Number(e.target.value) : undefined,
+                          })
+                        }
+                        margin="normal"
+                        variant="outlined"
+                        helperText="Maximum allowed file size in megabytes (e.g., 5 = 5MB)"
+                        sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                      />
+                    </Grid>
+                  </Grid>
+                </>
+              )}
+            </Box>
+          </AccordionDetails>
+        </Accordion>
+      )}
       {/* Display Options */}
       {!isLayout && !isGroup && (
         <Accordion sx={accordionSx}>
@@ -605,62 +745,6 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
 
           <AccordionDetails>
             <Box>
-              {/* Multiselect Display Type */}
-              {localField.type === 'multiselect' && (
-                <>
-                  <FormControl fullWidth margin="normal">
-                    <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
-                      Display As
-                    </Typography>
-                    <RadioGroup
-                      row
-                      value={localField.uischema?.options?.displayType || 'dropdown'}
-                      onChange={(e) => {
-                        const updatedUISchema = {
-                          ...localField.uischema,
-                          options: {
-                            ...localField.uischema?.options,
-                            displayType: e.target.value,
-                          },
-                        };
-                        handleUpdate({ uischema: updatedUISchema });
-                      }}
-                    >
-                      <FormControlLabel value="dropdown" control={<Radio />} label="Dropdown" />
-                      <FormControlLabel value="checkbox" control={<Radio />} label="Checkboxes" />
-                    </RadioGroup>
-                  </FormControl>
-
-                  {localField.uischema?.options?.displayType !== 'checkbox' && (
-                    <TextField
-                      label="Visible Chips Count"
-                      type="number"
-                      fullWidth
-                      value={localField.uischema?.options?.autocompleteProps?.limitTags || ''}
-                      onChange={(e) => {
-                        const count = e.target.value;
-                        const updatedUISchema = {
-                          ...localField.uischema,
-                          options: {
-                            ...localField.uischema?.options,
-                            autocompleteProps: {
-                              ...localField.uischema?.options?.autocompleteProps,
-                              limitTags: Number(count),
-                            },
-                          },
-                        };
-                        handleUpdate({ uischema: updatedUISchema });
-                      }}
-                      margin="normal"
-                      variant="outlined"
-                      helperText="Number of chips to show before 'show more'"
-                      inputProps={{ min: 1, max: 20 }}
-                      sx={outlinedTextFieldSx}
-                    />
-                  )}
-                </>
-              )}
-
               {/* Date Format Selector for Date Fields */}
               {localField.schema?.format === 'date' ||
               localField.schema?.format === 'datetime' ||
@@ -813,6 +897,7 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                   label="Checked by default"
                 />
               ) : null}
+
               <TextField
                 label="Description"
                 fullWidth
@@ -825,6 +910,107 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                 helperText="Help text displayed below the field"
                 sx={outlinedTextFieldSx}
               />
+              {/* Multiselect Display Type */}
+              {localField.type === 'multiselect' && (
+                <>
+                  <FormControl fullWidth margin="normal">
+                    <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
+                      Display As
+                    </Typography>
+                    <RadioGroup
+                      row
+                      value={localField.uischema?.options?.displayType || 'dropdown'}
+                      onChange={(e) => {
+                        const updatedUISchema = {
+                          ...localField.uischema,
+                          options: {
+                            ...localField.uischema?.options,
+                            displayType: e.target.value,
+                          },
+                        };
+                        handleUpdate({ uischema: updatedUISchema });
+                      }}
+                    >
+                      <FormControlLabel value="dropdown" control={<Radio />} label="Dropdown" />
+                      <FormControlLabel value="checkbox" control={<Radio />} label="Checkboxes" />
+                    </RadioGroup>
+                  </FormControl>
+
+                  {localField.uischema?.options?.displayType !== 'checkbox' && (
+                    <TextField
+                      label="Visible Chips Count"
+                      type="number"
+                      fullWidth
+                      value={localField.uischema?.options?.autocompleteProps?.limitTags || ''}
+                      onChange={(e) => {
+                        const count = e.target.value;
+                        const updatedUISchema = {
+                          ...localField.uischema,
+                          options: {
+                            ...localField.uischema?.options,
+                            autocompleteProps: {
+                              ...localField.uischema?.options?.autocompleteProps,
+                              limitTags: Number(count),
+                            },
+                          },
+                        };
+                        handleUpdate({ uischema: updatedUISchema });
+                      }}
+                      margin="normal"
+                      variant="outlined"
+                      helperText="Number of chips to show before 'show more'"
+                      inputProps={{ min: 1, max: 20 }}
+                      sx={outlinedTextFieldSx}
+                    />
+                  )}
+                </>
+              )}
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={localField.uischema?.options?.readonly || false}
+                    onChange={(e) => {
+                      const updatedUISchema = {
+                        ...localField.uischema,
+                        options: {
+                          ...localField.uischema?.options,
+                          readonly: e.target.checked,
+                        },
+                      };
+                      handleUpdate({ uischema: updatedUISchema });
+                    }}
+                    color="primary"
+                  />
+                }
+                label="Read Only"
+                sx={formControlLabelSx}
+              />
+
+              {localField.type === 'textarea' && (
+                <Box sx={sliderContainerSx}>
+                  <Typography variant="body2" gutterBottom>
+                    Rows: {localField.uischema?.options?.rows || 3}
+                  </Typography>
+                  <Slider
+                    value={localField.uischema?.options?.rows || 3}
+                    onChange={(e, value) => {
+                      const updatedUISchema = {
+                        ...localField.uischema,
+                        options: {
+                          ...localField.uischema?.options,
+                          rows: value,
+                        },
+                      };
+                      handleUpdate({ uischema: updatedUISchema });
+                    }}
+                    min={1}
+                    max={10}
+                    step={1}
+                    marks
+                    valueLabelDisplay="auto"
+                  />
+                </Box>
+              )}
             </Box>
           </AccordionDetails>
         </Accordion>
@@ -891,161 +1077,13 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
           </AccordionDetails>
         </Accordion>
       )}
-      {/* Validation Rules */}
-      {!isLayout && !isGroup && (
-        <Accordion sx={accordionSx}>
-          <AccordionSummary expandIcon={<IconChevronDown />}>
-            <Typography variant="subtitle1" fontWeight={600}>
-              Validation Rules
-            </Typography>
-          </AccordionSummary>
 
-          <AccordionDetails>
-            <Box>
-              {(localField.type === 'text' ||
-                localField.type === 'textarea' ||
-                localField.type === 'password') && (
-                <>
-                  <Grid container spacing={2}>
-                    <Grid item xs={6}>
-                      <TextField
-                        label="Min Length"
-                        type="number"
-                        fullWidth
-                        value={localField.schema?.minLength || ''}
-                        onChange={(e) =>
-                          handleSchemaUpdate({
-                            minLength: e.target.value ? Number(e.target.value) : undefined,
-                          })
-                        }
-                        margin="normal"
-                        variant="outlined"
-                        sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-                      />
-                    </Grid>
-                    <Grid item xs={6}>
-                      <TextField
-                        label="Max Length"
-                        type="number"
-                        fullWidth
-                        value={localField.schema?.maxLength || ''}
-                        onChange={(e) =>
-                          handleSchemaUpdate({
-                            maxLength: e.target.value ? Number(e.target.value) : undefined,
-                          })
-                        }
-                        margin="normal"
-                        variant="outlined"
-                        sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-                      />
-                    </Grid>
-                  </Grid>
-
-                  <TextField
-                    label="Pattern (RegEx)"
-                    fullWidth
-                    value={localField.schema?.pattern || ''}
-                    onChange={(e) =>
-                      handleSchemaUpdate({
-                        pattern: e.target.value || undefined,
-                      })
-                    }
-                    margin="normal"
-                    variant="outlined"
-                    helperText="Regular expression for validation (e.g., ^[A-Za-z]+$ for letters only)"
-                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-                  />
-                </>
-              )}
-
-              {localField.type === 'email' && (
-                <TextField
-                  label="Pattern (RegEx)"
-                  fullWidth
-                  value={localField.schema?.pattern || ''}
-                  onChange={(e) =>
-                    handleSchemaUpdate({
-                      pattern: e.target.value || undefined,
-                    })
-                  }
-                  margin="normal"
-                  variant="outlined"
-                  helperText="Regular expression for validation (e.g., ^[A-Za-z]+$ for letters only)"
-                  sx={outlinedTextFieldSx}
-                />
-              )}
-              {localField.type === 'number' && (
-                <Grid container spacing={2}>
-                  <Grid item xs={6}>
-                    <TextField
-                      label="Minimum Value"
-                      type="number"
-                      fullWidth
-                      value={localField.schema?.minimum || ''}
-                      onChange={(e) =>
-                        handleSchemaUpdate({
-                          minimum: e.target.value ? Number(e.target.value) : undefined,
-                        })
-                      }
-                      margin="normal"
-                      variant="outlined"
-                      sx={outlinedTextFieldSx}
-                    />
-                  </Grid>
-
-                  <Grid item xs={6}>
-                    <TextField
-                      label="Maximum Value"
-                      type="number"
-                      fullWidth
-                      value={localField.schema?.maximum || ''}
-                      onChange={(e) =>
-                        handleSchemaUpdate({
-                          maximum: e.target.value ? Number(e.target.value) : undefined,
-                        })
-                      }
-                      margin="normal"
-                      variant="outlined"
-                      sx={outlinedTextFieldSx}
-                    />
-                  </Grid>
-                </Grid>
-              )}
-            </Box>
-            <Box>
-              {localField.type === 'file' && (
-                <>
-                  <Grid container spacing={1}>
-                    <Grid item xs={12}>
-                      <TextField
-                        label="Maximum File Size (MB)"
-                        type="number"
-                        fullWidth
-                        value={localField.uischema?.options?.['ui:options']?.maxSize || ''}
-                        onChange={(e) =>
-                          handleUiOptionsUpdate({
-                            maxSize: e.target.value ? Number(e.target.value) : undefined,
-                          })
-                        }
-                        margin="normal"
-                        variant="outlined"
-                        helperText="Maximum allowed file size in megabytes (e.g., 5 = 5MB)"
-                        sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-                      />
-                    </Grid>
-                  </Grid>
-                </>
-              )}
-            </Box>
-          </AccordionDetails>
-        </Accordion>
-      )}
       {/* Options for Select/Radio Fields */}
       {hasEnumOptions && (
         <Accordion defaultExpanded sx={accordionSx}>
           <AccordionSummary expandIcon={<IconChevronDown />}>
             <Typography variant="subtitle1" fontWeight={600}>
-              Options
+              Enum Values
             </Typography>
           </AccordionSummary>
           <AccordionDetails>
@@ -1184,7 +1222,7 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
           </AccordionDetails>
         </Accordion>
       )}
-      {/* Advanced Options */}
+      {/* Advanced Options
       {!isLayout && !isGroup && (
         <Accordion sx={accordionSx}>
           <AccordionSummary expandIcon={<IconChevronDown />}>
@@ -1192,99 +1230,9 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
               Advanced Options
             </Typography>
           </AccordionSummary>
-          <AccordionDetails>
-            <Box>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={localField.uischema?.options?.readonly || false}
-                    onChange={(e) => {
-                      const updatedUISchema = {
-                        ...localField.uischema,
-                        options: {
-                          ...localField.uischema?.options,
-                          readonly: e.target.checked,
-                        },
-                      };
-                      handleUpdate({ uischema: updatedUISchema });
-                    }}
-                    color="primary"
-                  />
-                }
-                label="Read Only"
-                sx={formControlLabelSx}
-              />
-
-              {localField.type === 'textarea' && (
-                <Box sx={sliderContainerSx}>
-                  <Typography variant="body2" gutterBottom>
-                    Rows: {localField.uischema?.options?.rows || 3}
-                  </Typography>
-                  <Slider
-                    value={localField.uischema?.options?.rows || 3}
-                    onChange={(e, value) => {
-                      const updatedUISchema = {
-                        ...localField.uischema,
-                        options: {
-                          ...localField.uischema?.options,
-                          rows: value,
-                        },
-                      };
-                      handleUpdate({ uischema: updatedUISchema });
-                    }}
-                    min={1}
-                    max={10}
-                    step={1}
-                    marks
-                    valueLabelDisplay="auto"
-                  />
-                </Box>
-              )}
-            </Box>
-          </AccordionDetails>
+          <AccordionDetails></AccordionDetails>
         </Accordion>
-      )}
-
-      {/* Field Info */}
-      <Box sx={containerSx}>
-        <Typography variant="subtitle2" sx={subtitleSx}>
-          {isGroup ? 'Group Container' : isLayout ? 'Layout Container' : 'Field Information'}
-        </Typography>
-
-        {!isGroup && !isLayout && (
-          <Box sx={infoRowSx}>
-            {React.createElement(getFieldTypeIcon(localField.type), {
-              size: 16,
-              color: '#666',
-            })}
-            <Typography variant="body2" sx={{ color: 'grey.600' }}>
-              Type:{' '}
-              <Box component="span" sx={textTransCaps}>
-                {localField.type}
-              </Box>
-            </Typography>
-          </Box>
-        )}
-
-        {!isGroup && !isLayout && localField.schema.format && (
-          <Typography variant="body2" sx={bodyTextSx}>
-            Format:{' '}
-            <Box component="span" sx={textTransCaps}>
-              {localField.schema.format}
-            </Box>
-          </Typography>
-        )}
-
-        <Typography variant="body2" sx={italicTextSx}>
-          {isGroup
-            ? 'Groups provide visual separation and can contain any fields or layouts'
-            : isLayout
-              ? localField.type === 'vertical-layout'
-                ? 'Stacks elements vertically'
-                : 'Arranges elements horizontally'
-              : `Key: ${localField.key}`}
-        </Typography>
-      </Box>
+      )} */}
     </Box>
   );
 };
