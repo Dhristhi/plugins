@@ -672,7 +672,12 @@ const App = ({ onExport, onSave, schemas = [], theme: customTheme } = {}) => {
                 </Button>
               </Box>
               <Box sx={{ p: 3 }}>
-                <FieldProperties field={selectedField} onFieldUpdate={handleFieldUpdate} />
+                <FieldProperties
+                  field={selectedField}
+                  onFieldUpdate={handleFieldUpdate}
+                  fields={fields}
+                  setFields={setFields}
+                />
               </Box>
             </Box>
           )}

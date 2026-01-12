@@ -2,20 +2,21 @@ import { withJsonFormsControlProps } from '@jsonforms/react';
 import { rankWith, isControl, and, schemaMatches } from '@jsonforms/core';
 import { TextField } from '@mui/material';
 import { formatDate } from '../utils';
-
+ 
 const CustomDateControl = (props) => {
   const { data, handleChange, path, label, required, errors, uischema, config, schema } = props;
-
+ 
   const dateFormat = uischema?.options?.dateTimeFormat || 'friendly';
   const includeTime = uischema?.options?.includeTime || false;
-
+  const isReadOnly = uischema?.options?.readonly;
+ 
   const getDisplayValue = () => {
     if (!data) return '';
-
-    if (config?.readOnly) {
+ 
+    if (isReadOnly) {
       return formatDate(data, dateFormat);
     }
-
+ 
     if (includeTime) {
       const date = new Date(data);
       if (!isNaN(date.getTime())) {
@@ -27,22 +28,21 @@ const CustomDateControl = (props) => {
         return `${year}-${month}-${day}T${hours}:${minutes}`;
       }
     }
-
+ 
     return data ? data.split('T')[0] : '';
   };
-
+ 
   const getFormattedDisplayText = () => {
-    if (!data || config?.readOnly) return null;
+    if (!data || isReadOnly) return null;
     return formatDate(data, dateFormat);
   };
-
+ 
   const getInputType = () => {
-    if (config?.readOnly) return 'text';
     return includeTime ? 'datetime-local' : 'date';
   };
-
+ 
   const formattedDisplay = getFormattedDisplayText();
-
+ 
   return (
     <div>
       <TextField
@@ -51,15 +51,19 @@ const CustomDateControl = (props) => {
         fullWidth
         required={required}
         value={getDisplayValue()}
+        placeholder={undefined}
+        InputProps={{
+          placeholder: undefined,
+        }}
         onChange={(e) => {
-          if (!config?.readOnly) {
+          if (!isReadOnly) {
             let value = e.target.value;
-
+ 
             if (includeTime && value) {
               const date = new Date(value);
               value = date.toISOString();
             }
-
+ 
             handleChange(path, value);
           }
         }}
@@ -79,7 +83,7 @@ const CustomDateControl = (props) => {
         InputLabelProps={{
           shrink: true,
         }}
-        disabled={config?.readOnly}
+        disabled={isReadOnly}
         sx={{
           '& .MuiOutlinedInput-root': {
             borderRadius: 2,
@@ -101,7 +105,7 @@ const CustomDateControl = (props) => {
     </div>
   );
 };
-
+ 
 export const customDateTester = rankWith(
   1000,
   and(
@@ -114,5 +118,5 @@ export const customDateTester = rankWith(
     )
   )
 );
-
+ 
 export default withJsonFormsControlProps(CustomDateControl);
