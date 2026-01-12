@@ -2,7 +2,17 @@ import { useEffect, useState, useMemo } from 'react';
 import { Unwrapped } from '@jsonforms/material-renderers';
 import { and, isControl, optionIs, rankWith } from '@jsonforms/core';
 import { useJsonForms, withJsonFormsControlProps } from '@jsonforms/react';
-import { Chip, Select, MenuItem, InputLabel, FormControl, Box } from '@mui/material';
+import {
+  Chip,
+  Select,
+  MenuItem,
+  InputLabel,
+  FormControl,
+  Box,
+  FormLabel,
+  FormControlLabel,
+  Checkbox,
+} from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
 import { queryStringToObject, getNestedValue, updateNestedValue } from '../utils';
@@ -21,6 +31,8 @@ const CustomSelectControl = (props) => {
 
   const { schema, uischema, path, handleChange, data, config } = props;
   const { entity, key, value, query, cascadingKey, computedFields, multi } = uischema.options || {};
+  const displayType = uischema.options?.displayType;
+  const visibleChipsCount = uischema.options?.autocompleteProps?.limitTags;
 
   // Get translations and language from JsonForms config
   const translations = config?.translations;
@@ -195,67 +207,97 @@ const CustomSelectControl = (props) => {
   }, [path, translations, i18n.language, schema.title]);
 
   return multi ? (
-    <FormControl fullWidth>
-      <InputLabel>{fieldLabel}</InputLabel>
-      <Select
-        label={fieldLabel}
-        multiple
-        value={Array.isArray(data) ? data : []}
-        onChange={(e) => handleOnChange(e, e.target.value)}
-        renderValue={(selected) => {
-          const visibleCount = showAllChips ? selected.length : 5;
-          const hasMore = selected.length > 5;
-          return (
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, alignItems: 'center' }}>
-              {selected.slice(0, visibleCount).map((val) => {
-                const opt = options.find((o) => o.value === val);
-                return (
-                  <Chip
-                    key={val}
-                    label={opt ? opt.label : val}
-                    onDelete={() => {
-                      const newSelected = selected.filter((v) => v !== val);
-                      handleChange(path, newSelected);
-                      updateNestedValue(formData, path, newSelected);
+    displayType === 'checkbox' ? (
+      <FormControl fullWidth>
+        <FormLabel>{fieldLabel}</FormLabel>
+        <Box sx={{ display: 'flex', flexDirection: 'row', gap: 2, flexWrap: 'wrap' }}>
+          {options.map((opt) => {
+            const isChecked = Array.isArray(data) && data.includes(opt.value);
+            return (
+              <FormControlLabel
+                key={opt.value}
+                control={
+                  <Checkbox
+                    checked={isChecked}
+                    onChange={(e) => {
+                      const currentValues = Array.isArray(data) ? data : [];
+                      const newValues = e.target.checked
+                        ? [...currentValues, opt.value]
+                        : currentValues.filter((v) => v !== opt.value);
+                      handleOnChange(e, newValues);
                     }}
-                    onMouseDown={(e) => e.stopPropagation()}
-                    sx={{ textTransform: 'capitalize' }}
                   />
-                );
-              })}
-              {hasMore && !showAllChips && (
-                <Chip
-                  label={`+${selected.length - 5} more`}
-                  size="small"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowAllChips(true);
-                  }}
-                  sx={{ cursor: 'pointer', bgcolor: 'action.hover' }}
-                />
-              )}
-              {showAllChips && hasMore && (
-                <Chip
-                  label="Show less"
-                  size="small"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowAllChips(false);
-                  }}
-                  sx={{ cursor: 'pointer', bgcolor: 'action.hover' }}
-                />
-              )}
-            </Box>
-          );
-        }}
-      >
-        {options.map((opt) => (
-          <MenuItem key={opt.value} value={opt.value} sx={{ textTransform: 'capitalize' }}>
-            {opt.label}
-          </MenuItem>
-        ))}
-      </Select>
-    </FormControl>
+                }
+                label={opt.label}
+                sx={{ textTransform: 'capitalize' }}
+              />
+            );
+          })}
+        </Box>
+      </FormControl>
+    ) : (
+      <FormControl fullWidth>
+        <InputLabel>{fieldLabel}</InputLabel>
+        <Select
+          label={fieldLabel}
+          multiple
+          value={Array.isArray(data) ? data : []}
+          onChange={(e) => handleOnChange(e, e.target.value)}
+          renderValue={(selected) => {
+            const visibleCount = showAllChips ? selected.length : visibleChipsCount;
+            const hasMore = selected.length > visibleChipsCount;
+            return (
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, alignItems: 'center' }}>
+                {selected.slice(0, visibleCount).map((val) => {
+                  const opt = options.find((o) => o.value === val);
+                  return (
+                    <Chip
+                      key={val}
+                      label={opt ? opt.label : val}
+                      onDelete={() => {
+                        const newSelected = selected.filter((v) => v !== val);
+                        handleChange(path, newSelected);
+                        updateNestedValue(formData, path, newSelected);
+                      }}
+                      onMouseDown={(e) => e.stopPropagation()}
+                      sx={{ textTransform: 'capitalize' }}
+                    />
+                  );
+                })}
+                {hasMore && !showAllChips && (
+                  <Chip
+                    label={`+${selected.length - visibleChipsCount} more`}
+                    size="small"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowAllChips(true);
+                    }}
+                    sx={{ cursor: 'pointer', bgcolor: 'action.hover' }}
+                  />
+                )}
+                {showAllChips && hasMore && (
+                  <Chip
+                    label="Show less"
+                    size="small"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowAllChips(false);
+                    }}
+                    sx={{ cursor: 'pointer', bgcolor: 'action.hover' }}
+                  />
+                )}
+              </Box>
+            );
+          }}
+        >
+          {options.map((opt) => (
+            <MenuItem key={opt.value} value={opt.value} sx={{ textTransform: 'capitalize' }}>
+              {opt.label}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+    )
   ) : (
     <MaterialEnumControl
       {...props}
