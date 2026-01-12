@@ -778,6 +778,54 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                     label="Include Time"
                     sx={{ mt: 1, mb: 1 }}
                   />
+
+                  {/* Default Date Value Picker */}
+                  <TextField
+                    label="Default Date Value"
+                    type={localField.uischema?.options?.includeTime ? 'datetime-local' : 'date'}
+                    fullWidth
+                    value={(() => {
+                      const defaultDate = localField.schema?.default;
+                      if (!defaultDate) return '';
+
+                      const includeTime = localField.uischema?.options?.includeTime;
+                      if (includeTime) {
+                        const date = new Date(defaultDate);
+                        if (!isNaN(date.getTime())) {
+                          const year = date.getFullYear();
+                          const month = String(date.getMonth() + 1).padStart(2, '0');
+                          const day = String(date.getDate()).padStart(2, '0');
+                          const hours = String(date.getHours()).padStart(2, '0');
+                          const minutes = String(date.getMinutes()).padStart(2, '0');
+                          return `${year}-${month}-${day}T${hours}:${minutes}`;
+                        }
+                      }
+
+                      return defaultDate ? defaultDate.split('T')[0] : '';
+                    })()}
+                    onChange={(e) => {
+                      let dateValue = e.target.value;
+
+                      if (dateValue) {
+                        const includeTime = localField.uischema?.options?.includeTime;
+                        if (includeTime) {
+                          const date = new Date(dateValue);
+                          dateValue = date.toISOString();
+                        }
+                      } else {
+                        dateValue = undefined;
+                      }
+
+                      handleSchemaUpdate({ default: dateValue });
+                    }}
+                    margin="normal"
+                    variant="outlined"
+                    helperText="Default date value that will be pre-filled in the form"
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                    sx={outlinedTextFieldSx}
+                  />
                 </>
               ) : // Default Value field for non-date fields
               localField.type !== 'array' &&
