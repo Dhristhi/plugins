@@ -30,6 +30,11 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
   const [selectedAccess, setSelectedAccess] = useState([]);
   const [layout, setLayout] = useState('');
   const [selectedIcon, setSelectedIcon] = useState('');
+  const [defaultInput, setDefaultInput] = useState(
+    Array.isArray(localField?.schema?.default)
+      ? localField.schema.default.join(', ')
+      : (localField?.schema?.default ?? '')
+  );
 
   const FILE_TYPE_OPTIONS = [
     { label: '.pdf', value: 'application/pdf' },
@@ -79,6 +84,14 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
     setLocalField(updatedField);
     onFieldUpdate(updatedField);
   };
+
+  useEffect(() => {
+    setDefaultInput(
+      Array.isArray(localField?.schema?.default)
+        ? localField.schema.default.join(', ')
+        : (localField?.schema?.default ?? '')
+    );
+  }, [localField?.schema?.default]);
 
   useEffect(() => {
     if (field) {
@@ -426,6 +439,21 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
   const textTransCaps = {
     textTransform: 'capitalize',
   };
+
+  const parseCommaSeparated = (value) => {
+    if (typeof value !== 'string') return value;
+
+    let tempVal = value.includes(',') ? value.split(',').map((v) => v) : value;
+    console.log('tempVal', tempVal);
+    let trimmed;
+    if (Array.isArray(tempVal)) {
+      trimmed = [...tempVal.map((item) => item.trim())];
+      console.log('trimmed', trimmed);
+      return trimmed;
+    } else {
+      trimmed = tempVal.trim();
+    }
+  };
   return (
     <Box>
       {/* Basic Properties */}
@@ -719,8 +747,12 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                 <TextField
                   label="Default Value"
                   fullWidth
-                  value={localField.schema?.default || ''}
+                  // value={localField.schema?.default || ''}
+                  value={defaultInput}
                   onChange={(e) => {
+                    setDefaultInput(e.target.value);
+                  }}
+                  onBlur={(e) => {
                     let defaultValue = e.target.value;
 
                     // Convert to appropriate type
@@ -730,8 +762,15 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
                       defaultValue = defaultValue.toLowerCase() === 'true';
                     }
                     if (localField.type === 'multiselect') {
+                      const valu1 = parseCommaSeparated(defaultValue);
+                      // console.log('valu1', valu1);
                       let defaultArray = [];
-                      defaultArray.push(defaultValue);
+                      if (!Array.isArray(valu1)) {
+                        defaultArray.push(defaultValue);
+                      } else {
+                        defaultArray = valu1;
+                      }
+                      // console.log('defaultArray', defaultArray);
                       handleSchemaUpdate({ default: defaultArray });
                     } else {
                       handleSchemaUpdate({ default: defaultValue });
