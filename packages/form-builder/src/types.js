@@ -201,6 +201,13 @@ export const defaultFieldTypes = [
     uischema: {
       type: 'Control',
       scope: '#/properties/field',
+      options: {
+        multi: true,
+        format: 'dynamicselect',
+        autocompleteProps: {
+          limitTags: 5,
+        },
+      },
     },
   },
   {

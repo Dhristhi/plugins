@@ -100,6 +100,8 @@ const App = ({ onExport, onSave, schemas = [], theme: customTheme } = {}) => {
   const [fields, setFields] = useState([]);
   const [formData, setFormData] = useState({});
   const [selectedField, setSelectedField] = useState(null);
+  const [editingField, setEditingField] = useState(null);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showFormPreview, setShowFormPreview] = useState(false);
   const [showSchemaEditor, setShowSchemaEditor] = useState(false);
   const [propertiesDrawerOpen, setPropertiesDrawerOpen] = useState(false);
@@ -271,6 +273,8 @@ const App = ({ onExport, onSave, schemas = [], theme: customTheme } = {}) => {
     });
 
     setSelectedField(newField);
+    setEditingField(newField);
+    setHasUnsavedChanges(false);
     if (!fieldType.isLayout) {
       setPropertiesDrawerOpen(true);
     }
@@ -293,9 +297,24 @@ const App = ({ onExport, onSave, schemas = [], theme: customTheme } = {}) => {
   );
 
   const handleFieldUpdate = useCallback((updatedField) => {
-    setFields((prev) => updateFieldById(prev, updatedField));
-    setSelectedField(updatedField);
+    setEditingField(updatedField);
+    setHasUnsavedChanges(true);
   }, []);
+
+  const handleSaveChanges = useCallback(() => {
+    if (editingField) {
+      setFields((prev) => updateFieldById(prev, editingField));
+      setSelectedField(editingField);
+      setHasUnsavedChanges(false);
+      setPropertiesDrawerOpen(false);
+    }
+  }, [editingField]);
+
+  const handleCancelChanges = useCallback(() => {
+    setEditingField(selectedField);
+    setHasUnsavedChanges(false);
+    setPropertiesDrawerOpen(false);
+  }, [selectedField]);
 
   const exportForm = () =>
     exportFormData({ schema: formState.schema, uischema: formState.uischema, fields }, onExport);
@@ -500,7 +519,7 @@ const App = ({ onExport, onSave, schemas = [], theme: customTheme } = {}) => {
     position: 'fixed',
     right: 0,
     top: 0,
-    width: { xs: '100vw', sm: '400px', md: '380px' },
+    width: { xs: '100vw', sm: '400px', md: '480px' },
     height: '100vh',
     background: 'white',
     boxShadow: '-4px 0 25px -5px rgb(0 0 0 / 0.1), -2px 0 10px -5px rgb(0 0 0 / 0.04)',
@@ -531,6 +550,37 @@ const App = ({ onExport, onSave, schemas = [], theme: customTheme } = {}) => {
     },
   };
   const propertiesPanelTypo = { margin: 0, fontWeight: 600, color: 'grey.800' };
+
+  const propertiesPanelContent = { p: 3, pb: '100px' };
+
+  const propertiesPanelFooter = {
+    position: 'fixed',
+    bottom: 0,
+    right: 0,
+    width: { xs: '100vw', sm: '400px', md: '480px' },
+    p: 2.5,
+    bgcolor: 'white',
+    borderTop: 1,
+    borderColor: 'grey.200',
+    display: 'flex',
+    gap: 2,
+    boxShadow: '0 -2px 10px rgba(0,0,0,0.1)',
+    zIndex: 10,
+  };
+
+  const saveButton = { py: 1.5, textTransform: 'none', fontSize: '15px' };
+
+  const cancelButton = {
+    py: 1.5,
+    textTransform: 'none',
+    fontSize: '15px',
+    borderColor: 'primary.main',
+    color: 'primary.main',
+    '&:hover': {
+      borderColor: 'primary.dark',
+      backgroundColor: 'primary.light',
+    },
+  };
 
   const showFlex = {
     flexGrow: 1,
@@ -614,6 +664,8 @@ const App = ({ onExport, onSave, schemas = [], theme: customTheme } = {}) => {
                         onFieldsChange={setFields}
                         onFieldSelect={(field, openDrawer = false) => {
                           setSelectedField(field);
+                          setEditingField(field);
+                          setHasUnsavedChanges(false);
 
                           if (openDrawer) {
                             setPropertiesDrawerOpen(true);
@@ -664,20 +716,45 @@ const App = ({ onExport, onSave, schemas = [], theme: customTheme } = {}) => {
                   {formTitle}
                 </Typography>
                 <Button
-                  onClick={() => setPropertiesDrawerOpen(false)}
+                  onClick={() => {
+                    setPropertiesDrawerOpen(false);
+                    setHasUnsavedChanges(false);
+                  }}
                   size="small"
                   sx={propertiesPanelButton}
                 >
                   <IconX size={20} />
                 </Button>
               </Box>
-              <Box sx={{ p: 3 }}>
+              <Box sx={propertiesPanelContent}>
                 <FieldProperties
-                  field={selectedField}
+                  field={editingField || selectedField}
                   onFieldUpdate={handleFieldUpdate}
                   fields={fields}
                   setFields={setFields}
                 />
+              </Box>
+              <Box sx={propertiesPanelFooter}>
+                <Button
+                  type="button"
+                  variant="contained"
+                  color="primary"
+                  onClick={handleSaveChanges}
+                  disabled={!hasUnsavedChanges}
+                  fullWidth
+                  sx={saveButton}
+                >
+                  Save
+                </Button>
+                <Button
+                  type="button"
+                  variant="outlined"
+                  onClick={handleCancelChanges}
+                  fullWidth
+                  sx={cancelButton}
+                >
+                  Cancel
+                </Button>
               </Box>
             </Box>
           )}
