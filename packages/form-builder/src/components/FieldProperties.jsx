@@ -15,6 +15,8 @@ import {
   Switch,
   Grid,
   Slider,
+  RadioGroup,
+  Radio,
 } from '@mui/material';
 import React, { useState, useEffect } from 'react';
 import { IconPlus, IconTrash, IconSettings, IconChevronDown, IconEdit } from '@tabler/icons-react';
@@ -602,6 +604,62 @@ const FieldProperties = ({ field, onFieldUpdate }) => {
 
           <AccordionDetails>
             <Box>
+              {/* Multiselect Display Type */}
+              {localField.type === 'multiselect' && (
+                <>
+                  <FormControl fullWidth margin="normal">
+                    <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
+                      Display As
+                    </Typography>
+                    <RadioGroup
+                      row
+                      value={localField.uischema?.options?.displayType || 'dropdown'}
+                      onChange={(e) => {
+                        const updatedUISchema = {
+                          ...localField.uischema,
+                          options: {
+                            ...localField.uischema?.options,
+                            displayType: e.target.value,
+                          },
+                        };
+                        handleUpdate({ uischema: updatedUISchema });
+                      }}
+                    >
+                      <FormControlLabel value="dropdown" control={<Radio />} label="Dropdown" />
+                      <FormControlLabel value="checkbox" control={<Radio />} label="Checkboxes" />
+                    </RadioGroup>
+                  </FormControl>
+
+                  {localField.uischema?.options?.displayType !== 'checkbox' && (
+                    <TextField
+                      label="Visible Chips Count"
+                      type="number"
+                      fullWidth
+                      value={localField.uischema?.options?.autocompleteProps?.limitTags || ''}
+                      onChange={(e) => {
+                        const count = e.target.value;
+                        const updatedUISchema = {
+                          ...localField.uischema,
+                          options: {
+                            ...localField.uischema?.options,
+                            autocompleteProps: {
+                              ...localField.uischema?.options?.autocompleteProps,
+                              limitTags: Number(count),
+                            },
+                          },
+                        };
+                        handleUpdate({ uischema: updatedUISchema });
+                      }}
+                      margin="normal"
+                      variant="outlined"
+                      helperText="Number of chips to show before 'show more'"
+                      inputProps={{ min: 1, max: 20 }}
+                      sx={outlinedTextFieldSx}
+                    />
+                  )}
+                </>
+              )}
+
               {/* Date Format Selector for Date Fields */}
               {localField.schema?.format === 'date' ||
               localField.schema?.format === 'datetime' ||
