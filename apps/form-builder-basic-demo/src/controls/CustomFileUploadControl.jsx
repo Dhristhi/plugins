@@ -17,6 +17,7 @@ const CustomFileUploadControl = (props) => {
   // Accept images by default; allow override via uischema.options.accept
   const acceptedFileTypes = uischema?.options?.['ui:options']?.accept;
   const maxFileSize = uischema?.options?.['ui:options']?.maxSize;
+  const isReadOnly = uischema?.options?.readonly || false;
 
   function getAllowedMimes(acceptedFileTypes) {
     if (!acceptedFileTypes?.trim()) return [];
@@ -84,7 +85,9 @@ const CustomFileUploadControl = (props) => {
 
   const handleDragOver = (event) => {
     event.preventDefault();
-    setIsDragOver(true);
+    if (!isReadOnly) {
+      setIsDragOver(true);
+    }
   };
 
   const handleDragLeave = (event) => {
@@ -95,9 +98,11 @@ const CustomFileUploadControl = (props) => {
   const handleDrop = (event) => {
     event.preventDefault();
     setIsDragOver(false);
-    const file = event.dataTransfer.files?.[0];
-    if (file) {
-      handleFileSelect(file);
+    if (!isReadOnly) {
+      const file = event.dataTransfer.files?.[0];
+      if (file) {
+        handleFileSelect(file);
+      }
     }
   };
 
@@ -134,9 +139,10 @@ const CustomFileUploadControl = (props) => {
               : 'background.paper',
           p: 3,
           textAlign: 'center',
-          cursor: 'pointer',
+          cursor: isReadOnly ? 'not-allowed' : 'pointer',
+          opacity: isReadOnly ? 0.6 : 1,
           transition: 'all 0.2s ease-in-out',
-          '&:hover': {
+          '&:hover': !isReadOnly && {
             borderColor: 'primary.main',
             backgroundColor: 'action.hover',
           },
@@ -144,7 +150,7 @@ const CustomFileUploadControl = (props) => {
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
-        onClick={() => inputRef.current?.click()}
+        onClick={() => !isReadOnly && inputRef.current?.click()}
       >
         <input
           ref={inputRef}
@@ -152,7 +158,7 @@ const CustomFileUploadControl = (props) => {
           accept={acceptedFileTypes}
           onChange={handleFileInputChange}
           style={{ display: 'none' }}
-          disabled={isUploading}
+          disabled={isUploading || isReadOnly}
         />
 
         {hasFile ? (
@@ -161,9 +167,11 @@ const CustomFileUploadControl = (props) => {
             <Typography variant="body2" sx={{ mt: 1, color: 'success.main' }}>
               {t('common.file_uploaded_successfully')}
             </Typography>
-            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-              {t('common.click_to_change_file')}
-            </Typography>
+            {!isReadOnly && (
+              <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                {t('common.click_to_change_file')}
+              </Typography>
+            )}
           </Box>
         ) : (
           <Box>
