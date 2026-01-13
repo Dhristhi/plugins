@@ -559,7 +559,7 @@ const App = ({ onExport, onSave, schemas = [], theme: customTheme } = {}) => {
   };
   const propertiesPanelTypo = { margin: 0, fontWeight: 600, color: 'grey.800' };
 
-  const propertiesPanelContent = { p: 3, pb: '100px' };
+  const propertiesPanelContent = { p: 2, pb: '100px' };
 
   const propertiesPanelFooter = {
     position: 'fixed',

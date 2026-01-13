@@ -14,27 +14,21 @@ export const buildUISchemaForArrayItems = (fieldsArray) => {
           nestedDetailElements = buildUISchemaForArrayItems(field.children);
         }
         return {
-          type: 'GroupWithIcon',
-          label: field.label,
-          elements: [
-            {
-              type: 'Control',
-              scope: `#/properties/${field.key}`,
-              options: {
-                ...field.uischema?.options,
-                showSortButtons: true,
-                ...(nestedDetailElements.length > 0 && {
-                  detail: {
-                    type: 'VerticalLayout',
-                    elements: nestedDetailElements,
-                  },
-                }),
-                ...(field.uischema?.options?.elementLabelProp && {
-                  elementLabelProp: field.uischema.options.elementLabelProp,
-                }),
+          type: 'Control',
+          scope: `#/properties/${field.key}`,
+          options: {
+            ...field.uischema?.options,
+            showSortButtons: true,
+            ...(nestedDetailElements.length > 0 && {
+              detail: {
+                type: 'VerticalLayout',
+                elements: nestedDetailElements,
               },
-            },
-          ],
+            }),
+            ...(field.uischema?.options?.elementLabelProp && {
+              elementLabelProp: field.uischema.options.elementLabelProp,
+            }),
+          },
         };
       } else {
         return {
@@ -92,10 +86,6 @@ export const buildUISchemaFromFields = (fieldsArray, parentKey = null) => {
           }
 
           return {
-            // type: 'GroupWithIcon',
-            // label: field.label,
-            // elements: [
-            //   {
             type: 'Control',
             scope: scope,
             options: {
@@ -109,8 +99,6 @@ export const buildUISchemaFromFields = (fieldsArray, parentKey = null) => {
                 },
               }),
             },
-            //   },
-            // ],
           };
         } else {
           const scope = parentKey

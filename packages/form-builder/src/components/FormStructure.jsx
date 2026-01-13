@@ -218,7 +218,7 @@ const SortableFieldItem = ({
                 size="small"
                 color={
                   isGroup || field.type === 'object'
-                    ? 'warning'
+                    ? 'yellow'
                     : field.type === 'array'
                       ? 'info'
                       : 'primary'
