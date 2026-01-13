@@ -18,9 +18,17 @@ import {
   Checkbox,
   RadioGroup,
   Radio,
+  InputAdornment,
 } from '@mui/material';
 import React, { useState, useEffect } from 'react';
-import { IconPlus, IconTrash, IconSettings, IconChevronDown, IconEdit } from '@tabler/icons-react';
+import {
+  IconPlus,
+  IconTrash,
+  IconSettings,
+  IconChevronDown,
+  IconEdit,
+  IconX,
+} from '@tabler/icons-react';
 
 import { defaultFieldTypes } from '../types';
 import IconSelector from '../utils/IconSelector';
@@ -805,6 +813,145 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                       margin="normal"
                       variant="outlined"
                       sx={outlinedTextFieldSx}
+                    />
+                  </Grid>
+                </Grid>
+              )}
+
+              {/* Date Range Validation */}
+              {(localField.schema?.format === 'date' ||
+                localField.schema?.format === 'date-time' ||
+                localField.schema?.format === 'datetime' ||
+                localField.type === 'date') && (
+                <Grid container spacing={2}>
+                  <Grid item xs={6}>
+                    <TextField
+                      label="Min Date"
+                      type={localField.uischema?.options?.includeTime ? 'datetime-local' : 'date'}
+                      fullWidth
+                      value={(() => {
+                        const minDate = localField.schema?.minimum;
+                        if (!minDate) return '';
+
+                        const includeTime = localField.uischema?.options?.includeTime;
+                        if (includeTime) {
+                          const date = new Date(minDate);
+                          if (!isNaN(date.getTime())) {
+                            const year = date.getFullYear();
+                            const month = String(date.getMonth() + 1).padStart(2, '0');
+                            const day = String(date.getDate()).padStart(2, '0');
+                            const hours = String(date.getHours()).padStart(2, '0');
+                            const minutes = String(date.getMinutes()).padStart(2, '0');
+                            return `${year}-${month}-${day}T${hours}:${minutes}`;
+                          }
+                        }
+
+                        return minDate ? minDate.split('T')[0] : '';
+                      })()}
+                      onChange={(e) => {
+                        let dateValue = e.target.value;
+
+                        if (dateValue) {
+                          const includeTime = localField.uischema?.options?.includeTime;
+                          if (includeTime) {
+                            const date = new Date(dateValue);
+                            dateValue = date.toISOString();
+                          }
+                        } else {
+                          dateValue = undefined;
+                        }
+
+                        handleSchemaUpdate({ minimum: dateValue });
+                      }}
+                      margin="normal"
+                      variant="outlined"
+                      helperText="Minimum allowed date"
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                      InputProps={{
+                        endAdornment: localField.schema?.minimum && (
+                          <InputAdornment position="end">
+                            <IconButton
+                              size="small"
+                              onClick={() => handleSchemaUpdate({ minimum: undefined })}
+                              edge="end"
+                              sx={{
+                                color: 'text.secondary',
+                                '&:hover': { color: 'error.main' },
+                              }}
+                            >
+                              <IconX size={16} />
+                            </IconButton>
+                          </InputAdornment>
+                        ),
+                      }}
+                      sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                    />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <TextField
+                      label="Max Date"
+                      type={localField.uischema?.options?.includeTime ? 'datetime-local' : 'date'}
+                      fullWidth
+                      value={(() => {
+                        const maxDate = localField.schema?.maximum;
+                        if (!maxDate) return '';
+
+                        const includeTime = localField.uischema?.options?.includeTime;
+                        if (includeTime) {
+                          const date = new Date(maxDate);
+                          if (!isNaN(date.getTime())) {
+                            const year = date.getFullYear();
+                            const month = String(date.getMonth() + 1).padStart(2, '0');
+                            const day = String(date.getDate()).padStart(2, '0');
+                            const hours = String(date.getHours()).padStart(2, '0');
+                            const minutes = String(date.getMinutes()).padStart(2, '0');
+                            return `${year}-${month}-${day}T${hours}:${minutes}`;
+                          }
+                        }
+
+                        return maxDate ? maxDate.split('T')[0] : '';
+                      })()}
+                      onChange={(e) => {
+                        let dateValue = e.target.value;
+
+                        if (dateValue) {
+                          const includeTime = localField.uischema?.options?.includeTime;
+                          if (includeTime) {
+                            const date = new Date(dateValue);
+                            dateValue = date.toISOString();
+                          }
+                        } else {
+                          dateValue = undefined;
+                        }
+
+                        handleSchemaUpdate({ maximum: dateValue });
+                      }}
+                      margin="normal"
+                      variant="outlined"
+                      helperText="Maximum allowed date"
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                      InputProps={{
+                        endAdornment: localField.schema?.maximum && (
+                          <InputAdornment position="end">
+                            <IconButton
+                              size="small"
+                              onClick={() => handleSchemaUpdate({ maximum: undefined })}
+                              edge="end"
+                              sx={{
+                                color: 'text.secondary',
+                                '&:hover': { color: 'error.main' },
+                              }}
+                            >
+                              <IconX size={16} />
+                            </IconButton>
+                          </InputAdornment>
+                        ),
+                      }}
+                      sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                     />
                   </Grid>
                 </Grid>
