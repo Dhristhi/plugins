@@ -18,6 +18,7 @@ import {
   Checkbox,
   RadioGroup,
   Radio,
+  FormHelperText,
 } from '@mui/material';
 import React, { useState, useEffect } from 'react';
 import { IconPlus, IconTrash, IconSettings, IconChevronDown, IconEdit } from '@tabler/icons-react';
@@ -988,7 +989,18 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                     }}
                     margin="normal"
                     variant="outlined"
-                    helperText="Default date value that will be pre-filled in the form"
+                    error={
+                      localField.required &&
+                      localField.uischema?.options?.readonly &&
+                      !localField.schema?.default
+                    }
+                    helperText={
+                      localField.required &&
+                      localField.uischema?.options?.readonly &&
+                      !localField.schema?.default
+                        ? 'Default value is required for required and read-only fields'
+                        : 'Default date value that will be pre-filled in the form'
+                    }
                     InputLabelProps={{
                       shrink: true,
                     }}
@@ -1020,32 +1032,64 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                       const valu1 = parseCommaSeparated(defaultValue);
                       let defaultArray = [];
                       if (!Array.isArray(valu1)) {
-                        defaultArray.push(defaultValue);
+                        if (defaultValue.trim()) {
+                          defaultArray.push(defaultValue);
+                        }
                       } else {
-                        defaultArray = valu1;
+                        defaultArray = valu1.filter((v) => v.trim());
                       }
-                      handleSchemaUpdate({ default: defaultArray });
+                      handleSchemaUpdate({
+                        default: defaultArray.length > 0 ? defaultArray : undefined,
+                      });
                     } else {
-                      handleSchemaUpdate({ default: defaultValue });
+                      handleSchemaUpdate({
+                        default: defaultValue.trim() ? defaultValue : undefined,
+                      });
                     }
                   }}
                   margin="normal"
                   variant="outlined"
-                  helperText="Initial value for this field"
+                  error={
+                    localField.required &&
+                    localField.uischema?.options?.readonly &&
+                    !localField.schema?.default
+                  }
+                  helperText={
+                    localField.required &&
+                    localField.uischema?.options?.readonly &&
+                    !localField.schema?.default
+                      ? 'Default value is required for required and read-only fields'
+                      : 'Initial value for this field'
+                  }
                   sx={outlinedTextFieldSx}
                 />
               ) : localField.type === 'checkbox' ? (
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={localField.schema?.default === true} // reflects builder default
-                      onChange={(e) => {
-                        handleSchemaUpdate({ default: e.target.checked });
-                      }}
-                    />
+                <FormControl
+                  error={
+                    localField.required &&
+                    localField.uischema?.options?.readonly &&
+                    localField.schema?.default !== true
                   }
-                  label="Checked by default"
-                />
+                >
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={localField.schema?.default === true} // reflects builder default
+                        onChange={(e) => {
+                          handleSchemaUpdate({ default: e.target.checked });
+                        }}
+                      />
+                    }
+                    label="Checked by default"
+                  />
+                  {localField.required &&
+                    localField.uischema?.options?.readonly &&
+                    localField.schema?.default !== true && (
+                      <FormHelperText>
+                        Checkbox must be checked for required and read-only fields
+                      </FormHelperText>
+                    )}
+                </FormControl>
               ) : null}
               {/* Element Label field for array of objects */}
               {localField.type === 'array' && (

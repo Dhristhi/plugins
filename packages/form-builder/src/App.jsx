@@ -740,7 +740,12 @@ const App = ({ onExport, onSave, schemas = [], theme: customTheme } = {}) => {
                   variant="contained"
                   color="primary"
                   onClick={handleSaveChanges}
-                  disabled={!hasUnsavedChanges}
+                  disabled={
+                    !hasUnsavedChanges ||
+                    (editingField?.required &&
+                      editingField?.uischema?.options?.readonly &&
+                      editingField?.schema?.default === undefined)
+                  }
                   fullWidth
                   sx={saveButton}
                 >
