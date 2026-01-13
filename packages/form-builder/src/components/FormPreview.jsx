@@ -156,7 +156,8 @@ const FormPreview = ({
           formState.data[key]?.length === 0 ||
           prop.type === 'boolean' ||
           prop.type === 'number' ||
-          (prop.type === 'string' && (prop.format === 'date' || prop.format === 'datetime')))
+          (prop.type === 'string' &&
+            (prop.format === 'date' || prop.format === 'date-time' || prop.format === 'datetime')))
       ) {
         formState.data[key] = prop.default;
       }
