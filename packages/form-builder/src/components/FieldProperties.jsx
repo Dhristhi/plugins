@@ -653,49 +653,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                     }}
                   />
                 </Box>
-
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={localField.uischema?.options?.collapsed || false}
-                      onChange={(e) => {
-                        const updatedUISchema = {
-                          ...localField.uischema,
-                          options: {
-                            ...localField.uischema?.options,
-                            collapsed: e.target.checked,
-                          },
-                        };
-                        handleUpdate({ uischema: updatedUISchema });
-                      }}
-                      color="primary"
-                    />
-                  }
-                  label="Collapsible Group"
-                  sx={collapsibleGroupSwitchSx}
-                />
-
-                {localField.uischema?.options?.collapsed && (
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={localField.uischema?.options?.showUnfocusedDescription || false}
-                        onChange={(e) => {
-                          const updatedUISchema = {
-                            ...localField.uischema,
-                            options: {
-                              ...localField.uischema?.options,
-                              showUnfocusedDescription: e.target.checked,
-                            },
-                          };
-                          handleUpdate({ uischema: updatedUISchema });
-                        }}
-                        color="primary"
-                      />
-                    }
-                    label="Start Collapsed"
-                  />
-                )}
               </>
             )}
           </Box>
@@ -726,7 +683,8 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
             <Box>
               {(localField.type === 'text' ||
                 localField.type === 'textarea' ||
-                localField.type === 'password') && (
+                localField.type === 'password' ||
+                localField.type === 'url') && (
                 <>
                   <Grid container spacing={2}>
                     <Grid item xs={6}>
@@ -740,8 +698,17 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                             minLength: e.target.value ? Number(e.target.value) : undefined,
                           })
                         }
+                        onKeyDown={(e) => {
+                          if (e.key === '-') {
+                            e.preventDefault();
+                          }
+                        }}
                         margin="normal"
                         variant="outlined"
+                        inputProps={{
+                          step: 1,
+                          min: 0,
+                        }}
                         sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                       />
                     </Grid>
@@ -756,8 +723,17 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                             maxLength: e.target.value ? Number(e.target.value) : undefined,
                           })
                         }
+                        onKeyDown={(e) => {
+                          if (e.key === '-') {
+                            e.preventDefault();
+                          }
+                        }}
                         margin="normal"
                         variant="outlined"
+                        inputProps={{
+                          step: 1,
+                          min: 0,
+                        }}
                         sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                       />
                     </Grid>
