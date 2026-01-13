@@ -113,8 +113,12 @@ export const customDateTester = rankWith(
     schemaMatches(
       (schema) =>
         schema.format === 'date' ||
+        schema.format === 'date-time' ||
         schema.format === 'datetime' ||
-        (schema.type === 'string' && (schema.format === 'date' || schema.format === 'datetime'))
+        (schema.type === 'string' &&
+          (schema.format === 'date' ||
+            schema.format === 'date-time' ||
+            schema.format === 'datetime'))
     )
   )
 );

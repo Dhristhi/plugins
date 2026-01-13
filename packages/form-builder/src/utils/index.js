@@ -181,8 +181,23 @@ const formatDateWithPattern = (date, pattern) => {
   let result = pattern;
 
   tokens.forEach((token) => {
-    const regex = new RegExp(token, 'g');
-    result = result.replace(regex, formatMap[token]);
+    if (token === 'MMMM' || token === 'MMM') {
+      // Month names - replace directly as they're already resolved
+      const regex = new RegExp(token, 'g');
+      result = result.replace(regex, formatMap[token]);
+    } else if (token.length > 1) {
+      // Multi-character tokens - replace directly
+      const regex = new RegExp(token, 'g');
+      result = result.replace(regex, formatMap[token]);
+    }
+  });
+
+  // Then process single-character tokens with more careful matching
+  tokens.forEach((token) => {
+    if (token.length === 1) {
+      const regex = new RegExp(`(?<![A-Za-z])${token}(?![A-Za-z])`, 'g');
+      result = result.replace(regex, formatMap[token]);
+    }
   });
 
   return result;

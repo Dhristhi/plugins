@@ -268,10 +268,10 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
     );
   }
 
-  const handleUpdate = (updates) => {
+  const handleUpdate = (updates, options = {}) => {
     const updatedField = { ...localField, ...updates };
     setLocalField(updatedField);
-    onFieldUpdate(updatedField);
+    onFieldUpdate(updatedField, options);
   };
 
   const handleSchemaUpdate = (schemaUpdates) => {
@@ -868,6 +868,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
             <Box>
               {/* Date Format Selector for Date Fields */}
               {localField.schema?.format === 'date' ||
+              localField.schema?.format === 'date-time' ||
               localField.schema?.format === 'datetime' ||
               localField.schema?.format === 'time' ||
               localField.type === 'date' ? (
@@ -966,7 +967,21 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                               dateTimeFormat: defaultFormat,
                             },
                           };
-                          handleUpdate({ uischema: updatedUISchema });
+
+                          // Update schema format based on includeTime and reset default value
+                          const updatedSchema = {
+                            ...localField.schema,
+                            format: includeTime ? 'date-time' : 'date',
+                            default: undefined, // Reset default value when toggling
+                          };
+
+                          handleUpdate(
+                            {
+                              uischema: updatedUISchema,
+                              schema: updatedSchema,
+                            },
+                            { resetFormData: true }
+                          );
                         }}
                         color="primary"
                       />
