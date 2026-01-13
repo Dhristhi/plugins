@@ -956,6 +956,49 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                   </Grid>
                 </Grid>
               )}
+              {(localField.type === 'array' ||
+                localField.type === 'array-strings' ||
+                localField.type === 'multiselect') && (
+                <Grid container spacing={2}>
+                  <Grid item xs={6}>
+                    <TextField
+                      label="Min Items"
+                      type="number"
+                      fullWidth
+                      value={localField.schema?.minItems || ''}
+                      onChange={(e) =>
+                        handleSchemaUpdate({
+                          minItems: e.target.value ? Number(e.target.value) : undefined,
+                        })
+                      }
+                      margin="normal"
+                      variant="outlined"
+                      helperText="Minimum number of items required in array"
+                      inputProps={{ min: 0 }}
+                      sx={outlinedTextFieldSx}
+                    />
+                  </Grid>
+
+                  <Grid item xs={6}>
+                    <TextField
+                      label="Max Items"
+                      type="number"
+                      fullWidth
+                      value={localField.schema?.maxItems || ''}
+                      onChange={(e) =>
+                        handleSchemaUpdate({
+                          maxItems: e.target.value ? Number(e.target.value) : undefined,
+                        })
+                      }
+                      margin="normal"
+                      variant="outlined"
+                      helperText="Maximum number of items allowed in array"
+                      inputProps={{ min: 0 }}
+                      sx={outlinedTextFieldSx}
+                    />
+                  </Grid>
+                </Grid>
+              )}
             </Box>
             <Box>
               {localField.type === 'file' && (
@@ -1188,7 +1231,8 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
               ) : // Default Value field for non-date fields
               localField.type !== 'array' &&
                 localField.type !== 'array-strings' &&
-                localField.type !== 'checkbox' ? (
+                localField.type !== 'checkbox' &&
+                localField.type !== 'file' ? (
                 <TextField
                   label="Default Value"
                   fullWidth
