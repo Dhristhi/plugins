@@ -218,6 +218,16 @@ const ActionButtons = ({
             <ListItemText primary="Delete" />
           </MenuItem>
         </Menu>
+        {/* Delete Confirmation Dialog */}
+        <Dialog open={confirmOpen} onClose={closeDeleteConfirm} maxWidth="xs" fullWidth>
+          <DialogTitle>Are you sure you want to delete this item?</DialogTitle>
+          <DialogActions>
+            <Button onClick={closeDeleteConfirm}>Cancel</Button>
+            <Button variant="contained" color="error" onClick={confirmDelete}>
+              Delete
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Box>
     );
   }

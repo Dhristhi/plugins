@@ -13,7 +13,7 @@ export const mapSchemaPropertyToFieldType = (property, defaultFieldTypes) => {
       if (format === 'email') {
         return defaultFieldTypes.find((ft) => ft.id === 'email') || defaultFieldTypes[0];
       }
-      if (format === 'date') {
+      if (format === 'date' || format === 'date-time') {
         return defaultFieldTypes.find((ft) => ft.id === 'date') || defaultFieldTypes[0];
       }
       if (maxLength && maxLength > 100) {

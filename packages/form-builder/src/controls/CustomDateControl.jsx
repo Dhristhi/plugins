@@ -9,6 +9,8 @@ const CustomDateControl = (props) => {
   const dateFormat = uischema?.options?.dateTimeFormat || 'friendly';
   const includeTime = uischema?.options?.includeTime || false;
   const isReadOnly = uischema?.options?.readonly;
+  const minDate = schema?.minimum;
+  const maxDate = schema?.maximum;
 
   const getDisplayValue = () => {
     if (!data) return '';
@@ -41,6 +43,42 @@ const CustomDateControl = (props) => {
     return includeTime ? 'datetime-local' : 'date';
   };
 
+  const getMinValue = () => {
+    if (!minDate) return undefined;
+
+    if (includeTime) {
+      const date = new Date(minDate);
+      if (!isNaN(date.getTime())) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        return `${year}-${month}-${day}T${hours}:${minutes}`;
+      }
+    }
+
+    return minDate ? minDate.split('T')[0] : undefined;
+  };
+
+  const getMaxValue = () => {
+    if (!maxDate) return undefined;
+
+    if (includeTime) {
+      const date = new Date(maxDate);
+      if (!isNaN(date.getTime())) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        return `${year}-${month}-${day}T${hours}:${minutes}`;
+      }
+    }
+
+    return maxDate ? maxDate.split('T')[0] : undefined;
+  };
+
   const formattedDisplay = getFormattedDisplayText();
 
   return (
@@ -51,9 +89,15 @@ const CustomDateControl = (props) => {
         fullWidth
         required={required}
         value={getDisplayValue()}
+        min={getMinValue()}
+        max={getMaxValue()}
         placeholder={undefined}
         InputProps={{
           placeholder: undefined,
+        }}
+        inputProps={{
+          min: getMinValue(),
+          max: getMaxValue(),
         }}
         onChange={(e) => {
           if (!isReadOnly) {
@@ -113,8 +157,12 @@ export const customDateTester = rankWith(
     schemaMatches(
       (schema) =>
         schema.format === 'date' ||
+        schema.format === 'date-time' ||
         schema.format === 'datetime' ||
-        (schema.type === 'string' && (schema.format === 'date' || schema.format === 'datetime'))
+        (schema.type === 'string' &&
+          (schema.format === 'date' ||
+            schema.format === 'date-time' ||
+            schema.format === 'datetime'))
     )
   )
 );

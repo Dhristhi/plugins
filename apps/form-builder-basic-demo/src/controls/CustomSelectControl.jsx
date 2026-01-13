@@ -12,6 +12,7 @@ import {
   FormLabel,
   FormControlLabel,
   Checkbox,
+  FormHelperText,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
@@ -29,7 +30,7 @@ const CustomSelectControl = (props) => {
   const [cascadingValue, setCascadingValue] = useState(undefined);
   const [showAllChips, setShowAllChips] = useState(false);
 
-  const { schema, uischema, path, handleChange, data, config } = props;
+  const { schema, uischema, path, handleChange, data, config, errors } = props;
   const { entity, key, value, query, cascadingKey, computedFields, multi } = uischema.options || {};
   const displayType = uischema.options?.displayType;
   const visibleChipsCount = uischema.options?.autocompleteProps?.limitTags;
@@ -187,6 +188,13 @@ const CustomSelectControl = (props) => {
     });
   };
 
+  // Use JSON Forms validation errors instead of custom validation
+  const hasError = errors && errors.length > 0;
+  const validationError = hasError ? errors : null;
+
+  // Check if field is readonly
+  const isReadOnly = uischema.options?.readonly || false;
+
   // Get the label using the translation system with memoization for performance
   const fieldLabel = useMemo(() => {
     // Get the field name from the path
@@ -208,7 +216,7 @@ const CustomSelectControl = (props) => {
 
   return multi ? (
     displayType === 'checkbox' ? (
-      <FormControl fullWidth>
+      <FormControl fullWidth error={hasError}>
         <FormLabel>{fieldLabel}</FormLabel>
         <Box sx={{ display: 'flex', flexDirection: 'row', gap: 2, flexWrap: 'wrap' }}>
           {options.map((opt) => {
@@ -219,7 +227,9 @@ const CustomSelectControl = (props) => {
                 control={
                   <Checkbox
                     checked={isChecked}
+                    disabled={isReadOnly}
                     onChange={(e) => {
+                      if (isReadOnly) return;
                       const currentValues = Array.isArray(data) ? data : [];
                       const newValues = e.target.checked
                         ? [...currentValues, opt.value]
@@ -234,15 +244,20 @@ const CustomSelectControl = (props) => {
             );
           })}
         </Box>
+        {hasError && <FormHelperText>{validationError}</FormHelperText>}
       </FormControl>
     ) : (
-      <FormControl fullWidth>
+      <FormControl fullWidth error={hasError}>
         <InputLabel>{fieldLabel}</InputLabel>
         <Select
           label={fieldLabel}
           multiple
+          disabled={isReadOnly}
           value={Array.isArray(data) ? data : []}
-          onChange={(e) => handleOnChange(e, e.target.value)}
+          onChange={(e) => {
+            if (isReadOnly) return;
+            handleOnChange(e, e.target.value);
+          }}
           renderValue={(selected) => {
             const visibleCount = showAllChips ? selected.length : visibleChipsCount;
             const hasMore = selected.length > visibleChipsCount;
@@ -254,11 +269,15 @@ const CustomSelectControl = (props) => {
                     <Chip
                       key={val}
                       label={opt ? opt.label : val}
-                      onDelete={() => {
-                        const newSelected = selected.filter((v) => v !== val);
-                        handleChange(path, newSelected);
-                        updateNestedValue(formData, path, newSelected);
-                      }}
+                      onDelete={
+                        isReadOnly
+                          ? undefined
+                          : () => {
+                              const newSelected = selected.filter((v) => v !== val);
+                              handleChange(path, newSelected);
+                              updateNestedValue(formData, path, newSelected);
+                            }
+                      }
                       onMouseDown={(e) => e.stopPropagation()}
                       sx={{ textTransform: 'capitalize' }}
                     />
@@ -296,6 +315,7 @@ const CustomSelectControl = (props) => {
             </MenuItem>
           ))}
         </Select>
+        {hasError && <FormHelperText>{validationError}</FormHelperText>}
       </FormControl>
     )
   ) : (
@@ -305,7 +325,7 @@ const CustomSelectControl = (props) => {
       schema={{ ...schema, title: fieldLabel }}
       options={options}
       uischema={uischema}
-      disabled={isLoading}
+      disabled={isLoading || isReadOnly}
       handleChange={handleOnChange}
     />
   );

@@ -14,11 +14,11 @@ import {
   AccordionDetails,
   Switch,
   Grid,
-  Slider,
   Checkbox,
+  InputAdornment,
 } from '@mui/material';
 import React, { useState, useEffect } from 'react';
-import { IconPlus, IconTrash, IconSettings, IconChevronDown } from '@tabler/icons-react';
+import { IconPlus, IconTrash, IconSettings, IconChevronDown, IconX } from '@tabler/icons-react';
 
 import { defaultFieldTypes } from '../types';
 import IconSelector from '../utils/IconSelector';
@@ -28,11 +28,22 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
   const [localField, setLocalField] = useState(null);
   const [enumOptions, setEnumOptions] = useState([]);
   const [newOption, setNewOption] = useState('');
+  const [enumDataType, setEnumDataType] = useState('string');
   const [selectedAccess, setSelectedAccess] = useState([]);
   const [layout, setLayout] = useState('');
   const [selectedIcon, setSelectedIcon] = useState('');
+  const [defaultInput, setDefaultInput] = useState(
+    Array.isArray(localField?.schema?.default)
+      ? localField.schema.default.join(', ')
+      : (localField?.schema?.default ?? '')
+  );
+  const [maxSizeInput, setMaxSizeInput] = useState('');
   const [isInsideArrayOfObjects, setIsInsideArrayOfObjects] = useState(false);
   const [parentArrayField, setParentArrayField] = useState(null);
+
+  useEffect(() => {
+    setMaxSizeInput(localField?.uischema?.options?.['ui:options']?.maxSize?.toString() || '');
+  }, [localField?.uischema?.options?.['ui:options']?.maxSize]);
 
   const FILE_TYPE_OPTIONS = [
     { label: '.pdf', value: 'application/pdf' },
@@ -141,6 +152,24 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
     updateChildren(arrayField.children);
   };
   useEffect(() => {
+    setDefaultInput(
+      Array.isArray(localField?.schema?.default)
+        ? localField.schema.default.join(', ')
+        : (localField?.schema?.default ?? '')
+    );
+  }, [localField?.schema?.default]);
+
+  // Helper function to convert value based on enum data type
+  const convertEnumValue = (value, type) => {
+    switch (type) {
+      case 'number':
+        return Number(value);
+      default:
+        return value;
+    }
+  };
+
+  useEffect(() => {
     if (field && fields) {
       // Check if field is inside an array of objects
       const parentArray = findParentArrayField(field.id, fields);
@@ -182,10 +211,25 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
       }
       if (field.schema.enum) {
         setEnumOptions([...field.schema.enum]);
+        // Detect enum data type from first value
+        const firstValue = field.schema.enum[0];
+        if (typeof firstValue === 'number') {
+          setEnumDataType('number');
+        } else {
+          setEnumDataType('string');
+        }
       } else if (field.schema.items?.enum) {
         setEnumOptions([...field.schema.items.enum]);
+        // Detect enum data type from first value
+        const firstValue = field.schema.items.enum[0];
+        if (typeof firstValue === 'number') {
+          setEnumDataType('number');
+        } else {
+          setEnumDataType('string');
+        }
       } else {
         setEnumOptions([]);
+        setEnumDataType('string');
       }
       setSelectedAccess(field.schema?.allowedAccess || []);
       setSelectedIcon(field.icon || '');
@@ -222,10 +266,10 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
     );
   }
 
-  const handleUpdate = (updates) => {
+  const handleUpdate = (updates, options = {}) => {
     const updatedField = { ...localField, ...updates };
     setLocalField(updatedField);
-    onFieldUpdate(updatedField);
+    onFieldUpdate(updatedField, options);
   };
 
   const handleSchemaUpdate = (schemaUpdates) => {
@@ -235,17 +279,22 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
 
   const handleAddOption = () => {
     if (newOption.trim()) {
-      const newOptions = [...enumOptions, newOption.trim()];
+      const convertedValue = convertEnumValue(newOption.trim(), enumDataType);
+      const newOptions = [...enumOptions, convertedValue];
       setEnumOptions(newOptions);
       if (localField.schema?.type === 'array' && localField.schema?.items) {
         handleSchemaUpdate({
           items: {
             ...localField.schema.items,
+            type: enumDataType,
             enum: newOptions,
           },
         });
       } else {
-        handleSchemaUpdate({ enum: newOptions });
+        handleSchemaUpdate({
+          type: enumDataType,
+          enum: newOptions,
+        });
       }
       setNewOption('');
     }
@@ -257,12 +306,11 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
     if (localField.schema?.type === 'array' && localField.schema?.items) {
       handleSchemaUpdate({
         items:
-          newOptions.length > 0
-            ? { ...localField.schema.items, enum: newOptions }
-            : { type: 'string' },
+          newOptions.length > 0 ? { type: enumDataType, enum: newOptions } : { type: 'string' },
       });
     } else {
       handleSchemaUpdate({
+        type: newOptions.length > 0 ? enumDataType : 'string',
         enum: newOptions.length > 0 ? newOptions : undefined,
       });
     }
@@ -467,6 +515,18 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
   const formControlLabelSx = { mb: 1, display: 'block' };
   const sliderContainerSx = { mt: 2 };
 
+  const parseCommaSeparated = (value) => {
+    if (typeof value !== 'string') return value;
+
+    let tempVal = value.includes(',') ? value.split(',').map((v) => v) : value;
+    let trimmed;
+    if (Array.isArray(tempVal)) {
+      trimmed = [...tempVal.map((item) => item.trim())];
+      return trimmed;
+    } else {
+      trimmed = tempVal.trim();
+    }
+  };
   return (
     <Box>
       {/* Basic Properties */}
@@ -573,49 +633,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                     }}
                   />
                 </Box>
-
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={localField.uischema?.options?.collapsed || false}
-                      onChange={(e) => {
-                        const updatedUISchema = {
-                          ...localField.uischema,
-                          options: {
-                            ...localField.uischema?.options,
-                            collapsed: e.target.checked,
-                          },
-                        };
-                        handleUpdate({ uischema: updatedUISchema });
-                      }}
-                      color="primary"
-                    />
-                  }
-                  label="Collapsible Group"
-                  sx={collapsibleGroupSwitchSx}
-                />
-
-                {localField.uischema?.options?.collapsed && (
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={localField.uischema?.options?.showUnfocusedDescription || false}
-                        onChange={(e) => {
-                          const updatedUISchema = {
-                            ...localField.uischema,
-                            options: {
-                              ...localField.uischema?.options,
-                              showUnfocusedDescription: e.target.checked,
-                            },
-                          };
-                          handleUpdate({ uischema: updatedUISchema });
-                        }}
-                        color="primary"
-                      />
-                    }
-                    label="Start Collapsed"
-                  />
-                )}
               </>
             )}
           </Box>
@@ -646,7 +663,8 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
             <Box>
               {(localField.type === 'text' ||
                 localField.type === 'textarea' ||
-                localField.type === 'password') && (
+                localField.type === 'password' ||
+                localField.type === 'url') && (
                 <>
                   <Grid container spacing={2}>
                     <Grid item xs={6}>
@@ -660,8 +678,17 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                             minLength: e.target.value ? Number(e.target.value) : undefined,
                           })
                         }
+                        onKeyDown={(e) => {
+                          if (e.key === '-') {
+                            e.preventDefault();
+                          }
+                        }}
                         margin="normal"
                         variant="outlined"
+                        inputProps={{
+                          step: 1,
+                          min: 0,
+                        }}
                         sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                       />
                     </Grid>
@@ -676,8 +703,17 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                             maxLength: e.target.value ? Number(e.target.value) : undefined,
                           })
                         }
+                        onKeyDown={(e) => {
+                          if (e.key === '-') {
+                            e.preventDefault();
+                          }
+                        }}
                         margin="normal"
                         variant="outlined"
+                        inputProps={{
+                          step: 1,
+                          min: 0,
+                        }}
                         sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                       />
                     </Grid>
@@ -753,6 +789,188 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                   </Grid>
                 </Grid>
               )}
+
+              {/* Date Range Validation */}
+              {(localField.schema?.format === 'date' ||
+                localField.schema?.format === 'date-time' ||
+                localField.schema?.format === 'datetime' ||
+                localField.type === 'date') && (
+                <Grid container spacing={2}>
+                  <Grid item xs={6}>
+                    <TextField
+                      label="Min Date"
+                      type={localField.uischema?.options?.includeTime ? 'datetime-local' : 'date'}
+                      fullWidth
+                      value={(() => {
+                        const minDate = localField.schema?.minimum;
+                        if (!minDate) return '';
+
+                        const includeTime = localField.uischema?.options?.includeTime;
+                        if (includeTime) {
+                          const date = new Date(minDate);
+                          if (!isNaN(date.getTime())) {
+                            const year = date.getFullYear();
+                            const month = String(date.getMonth() + 1).padStart(2, '0');
+                            const day = String(date.getDate()).padStart(2, '0');
+                            const hours = String(date.getHours()).padStart(2, '0');
+                            const minutes = String(date.getMinutes()).padStart(2, '0');
+                            return `${year}-${month}-${day}T${hours}:${minutes}`;
+                          }
+                        }
+
+                        return minDate ? minDate.split('T')[0] : '';
+                      })()}
+                      onChange={(e) => {
+                        let dateValue = e.target.value;
+
+                        if (dateValue) {
+                          const includeTime = localField.uischema?.options?.includeTime;
+                          if (includeTime) {
+                            const date = new Date(dateValue);
+                            dateValue = date.toISOString();
+                          }
+                        } else {
+                          dateValue = undefined;
+                        }
+
+                        handleSchemaUpdate({ minimum: dateValue });
+                      }}
+                      margin="normal"
+                      variant="outlined"
+                      helperText="Minimum allowed date"
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                      InputProps={{
+                        endAdornment: localField.schema?.minimum && (
+                          <InputAdornment position="end">
+                            <IconButton
+                              size="small"
+                              onClick={() => handleSchemaUpdate({ minimum: undefined })}
+                              edge="end"
+                              sx={{
+                                color: 'text.secondary',
+                                '&:hover': { color: 'error.main' },
+                              }}
+                            >
+                              <IconX size={16} />
+                            </IconButton>
+                          </InputAdornment>
+                        ),
+                      }}
+                      sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                    />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <TextField
+                      label="Max Date"
+                      type={localField.uischema?.options?.includeTime ? 'datetime-local' : 'date'}
+                      fullWidth
+                      value={(() => {
+                        const maxDate = localField.schema?.maximum;
+                        if (!maxDate) return '';
+
+                        const includeTime = localField.uischema?.options?.includeTime;
+                        if (includeTime) {
+                          const date = new Date(maxDate);
+                          if (!isNaN(date.getTime())) {
+                            const year = date.getFullYear();
+                            const month = String(date.getMonth() + 1).padStart(2, '0');
+                            const day = String(date.getDate()).padStart(2, '0');
+                            const hours = String(date.getHours()).padStart(2, '0');
+                            const minutes = String(date.getMinutes()).padStart(2, '0');
+                            return `${year}-${month}-${day}T${hours}:${minutes}`;
+                          }
+                        }
+
+                        return maxDate ? maxDate.split('T')[0] : '';
+                      })()}
+                      onChange={(e) => {
+                        let dateValue = e.target.value;
+
+                        if (dateValue) {
+                          const includeTime = localField.uischema?.options?.includeTime;
+                          if (includeTime) {
+                            const date = new Date(dateValue);
+                            dateValue = date.toISOString();
+                          }
+                        } else {
+                          dateValue = undefined;
+                        }
+
+                        handleSchemaUpdate({ maximum: dateValue });
+                      }}
+                      margin="normal"
+                      variant="outlined"
+                      helperText="Maximum allowed date"
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                      InputProps={{
+                        endAdornment: localField.schema?.maximum && (
+                          <InputAdornment position="end">
+                            <IconButton
+                              size="small"
+                              onClick={() => handleSchemaUpdate({ maximum: undefined })}
+                              edge="end"
+                              sx={{
+                                color: 'text.secondary',
+                                '&:hover': { color: 'error.main' },
+                              }}
+                            >
+                              <IconX size={16} />
+                            </IconButton>
+                          </InputAdornment>
+                        ),
+                      }}
+                      sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                    />
+                  </Grid>
+                </Grid>
+              )}
+              {(localField.type === 'array' ||
+                localField.type === 'array-strings' ||
+                localField.type === 'multiselect-dropdown') && (
+                <Grid container spacing={2}>
+                  <Grid item xs={6}>
+                    <TextField
+                      label="Min Items"
+                      type="number"
+                      fullWidth
+                      value={localField.schema?.minItems || ''}
+                      onChange={(e) =>
+                        handleSchemaUpdate({
+                          minItems: e.target.value ? Number(e.target.value) : undefined,
+                        })
+                      }
+                      margin="normal"
+                      variant="outlined"
+                      helperText="Minimum number of items required in array"
+                      inputProps={{ min: 0 }}
+                      sx={outlinedTextFieldSx}
+                    />
+                  </Grid>
+
+                  <Grid item xs={6}>
+                    <TextField
+                      label="Max Items"
+                      type="number"
+                      fullWidth
+                      value={localField.schema?.maxItems || ''}
+                      onChange={(e) =>
+                        handleSchemaUpdate({
+                          maxItems: e.target.value ? Number(e.target.value) : undefined,
+                        })
+                      }
+                      margin="normal"
+                      variant="outlined"
+                      helperText="Maximum number of items allowed in array"
+                      inputProps={{ min: 0 }}
+                      sx={outlinedTextFieldSx}
+                    />
+                  </Grid>
+                </Grid>
+              )}
             </Box>
             <Box>
               {localField.type === 'file' && (
@@ -763,15 +981,32 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                         label="Maximum File Size (MB)"
                         type="number"
                         fullWidth
-                        value={localField.uischema?.options?.['ui:options']?.maxSize || ''}
-                        onChange={(e) =>
+                        value={maxSizeInput}
+                        onChange={(e) => {
+                          setMaxSizeInput(e.target.value);
+                          const value = e.target.value;
                           handleUiOptionsUpdate({
-                            maxSize: e.target.value ? Number(e.target.value) : undefined,
-                          })
-                        }
+                            maxSize: value === '' ? undefined : Number(value),
+                          });
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === '-') {
+                            e.preventDefault();
+                          }
+                        }}
+                        onBlur={(e) => {
+                          const value = e.target.value;
+                          handleUiOptionsUpdate({
+                            maxSize: value === '' ? undefined : Number(value),
+                          });
+                        }}
                         margin="normal"
                         variant="outlined"
-                        helperText="Maximum allowed file size in megabytes (e.g., 5 = 5MB)"
+                        helperText="Maximum allowed file size in megabytes"
+                        inputProps={{
+                          step: 0.1,
+                          min: 0,
+                        }}
                         sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                       />
                     </Grid>
@@ -795,6 +1030,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
             <Box>
               {/* Date Format Selector for Date Fields */}
               {localField.schema?.format === 'date' ||
+              localField.schema?.format === 'date-time' ||
               localField.schema?.format === 'datetime' ||
               localField.schema?.format === 'time' ||
               localField.type === 'date' ? (
@@ -893,7 +1129,21 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                               dateTimeFormat: defaultFormat,
                             },
                           };
-                          handleUpdate({ uischema: updatedUISchema });
+
+                          // Update schema format based on includeTime and reset default value
+                          const updatedSchema = {
+                            ...localField.schema,
+                            format: includeTime ? 'date-time' : 'date',
+                            default: undefined, // Reset default value when toggling
+                          };
+
+                          handleUpdate(
+                            {
+                              uischema: updatedUISchema,
+                              schema: updatedSchema,
+                            },
+                            { resetFormData: true }
+                          );
                         }}
                         color="primary"
                       />
@@ -953,12 +1203,17 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
               ) : // Default Value field for non-date fields
               localField.type !== 'array' &&
                 localField.type !== 'array-strings' &&
-                localField.type !== 'checkbox' ? (
+                localField.type !== 'checkbox' &&
+                localField.type !== 'file' ? (
                 <TextField
                   label="Default Value"
                   fullWidth
-                  value={localField.schema?.default || ''}
+                  // value={localField.schema?.default || ''}
+                  value={defaultInput}
                   onChange={(e) => {
+                    setDefaultInput(e.target.value);
+                  }}
+                  onBlur={(e) => {
                     let defaultValue = e.target.value;
 
                     // Convert to appropriate type
@@ -971,8 +1226,13 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                       localField.type === 'multiselect-dropdown' ||
                       localField.type === 'multiselect-checkbox'
                     ) {
+                      const valu1 = parseCommaSeparated(defaultValue);
                       let defaultArray = [];
-                      defaultArray.push(defaultValue);
+                      if (!Array.isArray(valu1)) {
+                        defaultArray.push(defaultValue);
+                      } else {
+                        defaultArray = valu1;
+                      }
                       handleSchemaUpdate({ default: defaultArray });
                     } else {
                       handleSchemaUpdate({ default: defaultValue });
@@ -1120,32 +1380,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                   label="Make Field as Element Label"
                   sx={formControlLabelSx}
                 />
-              )}
-
-              {localField.type === 'textarea' && (
-                <Box sx={sliderContainerSx}>
-                  <Typography variant="body2" gutterBottom>
-                    Rows: {localField.uischema?.options?.rows || 3}
-                  </Typography>
-                  <Slider
-                    value={localField.uischema?.options?.rows || 3}
-                    onChange={(e, value) => {
-                      const updatedUISchema = {
-                        ...localField.uischema,
-                        options: {
-                          ...localField.uischema?.options,
-                          rows: value,
-                        },
-                      };
-                      handleUpdate({ uischema: updatedUISchema });
-                    }}
-                    min={1}
-                    max={10}
-                    step={1}
-                    marks
-                    valueLabelDisplay="auto"
-                  />
-                </Box>
               )}
 
               {/* File Upload Options */}
@@ -1302,6 +1536,67 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                     </Box>
                   ) : (
                     <>
+                      <FormControl fullWidth margin="normal">
+                        <InputLabel>Enum Data Type</InputLabel>
+                        <Select
+                          value={enumDataType}
+                          label="Enum Data Type"
+                          onChange={(e) => {
+                            const newType = e.target.value;
+                            setEnumDataType(newType);
+
+                            let convertedOptions;
+                            if (newType === 'number') {
+                              if (enumOptions.length === 0) {
+                                // If switching to number and no options exist, add default numeric options
+                                convertedOptions = [1, 2, 3];
+                              } else {
+                                // Convert existing options, but replace invalid numbers with defaults
+                                convertedOptions = enumOptions.map((option, index) => {
+                                  const converted = convertEnumValue(String(option), newType);
+                                  return isNaN(converted) ? index + 1 : converted;
+                                });
+                              }
+                            } else {
+                              // Convert existing options to new type (string)
+                              convertedOptions = enumOptions.map((option, index) => {
+                                // If converting numbers back to strings, create meaningful labels
+                                if (typeof option === 'number') {
+                                  return `Option ${option}`;
+                                }
+                                return convertEnumValue(String(option), newType);
+                              });
+                            }
+
+                            setEnumOptions(convertedOptions);
+
+                            // Update schema
+                            if (localField.schema?.type === 'array' && localField.schema?.items) {
+                              handleSchemaUpdate({
+                                items: {
+                                  ...localField.schema.items,
+                                  type: newType,
+                                  enum: convertedOptions,
+                                },
+                              });
+                            } else {
+                              handleSchemaUpdate({
+                                type: newType,
+                                enum: convertedOptions,
+                              });
+                            }
+                          }}
+                          sx={layoutSelectSx}
+                        >
+                          <MenuItem value="string">String</MenuItem>
+                          <MenuItem value="number">Number</MenuItem>
+                        </Select>
+                      </FormControl>
+
+                      <Typography variant="body2" sx={{ mt: 2, mb: 1, fontWeight: 500 }}>
+                        Add Enum
+                      </Typography>
+
                       <Box sx={optionInputRowSx}>
                         <TextField
                           label="New Option"
@@ -1326,7 +1621,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                         {enumOptions.map((option, index) => (
                           <Chip
                             key={index}
-                            label={option}
+                            label={String(option)}
                             onDelete={() => handleRemoveOption(index)}
                             deleteIcon={<IconTrash size={16} />}
                             variant="outlined"

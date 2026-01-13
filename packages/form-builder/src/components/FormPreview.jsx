@@ -24,7 +24,7 @@ const FormPreview = ({
   const [key, setKey] = useState(0); // Force re-render
   const [validationErrors, setValidationErrors] = useState([]);
   const isProgrammaticUpdateRef = useRef(false);
-
+  const userActions = useRef(false);
   const validateBox = {
     position: 'fixed',
     bottom: 0,
@@ -156,7 +156,8 @@ const FormPreview = ({
           formState.data[key]?.length === 0 ||
           prop.type === 'boolean' ||
           prop.type === 'number' ||
-          (prop.type === 'string' && (prop.format === 'date' || prop.format === 'datetime')))
+          (prop.type === 'string' &&
+            (prop.format === 'date' || prop.format === 'date-time' || prop.format === 'datetime')))
       ) {
         formState.data[key] = prop.default;
       }
@@ -165,15 +166,17 @@ const FormPreview = ({
   };
 
   const dataWithDefaults = useMemo(() => {
-    if (formState.data) {
+    if (!userActions.current) {
+      if (formState.data) {
+        return {
+          ...buildDefaultsFromSchema(),
+          ...formState.data,
+        };
+      }
       return {
         ...buildDefaultsFromSchema(),
-        ...formState.data,
       };
     }
-    return {
-      ...buildDefaultsFromSchema(),
-    };
   }, [formState.schema, formState.data]);
 
   return (
@@ -187,8 +190,6 @@ const FormPreview = ({
         showSchemaEditor={showSchemaEditor}
         setShowSchemaEditor={setShowSchemaEditor}
         exportForm={exportForm}
-        hasValidated={hasValidated}
-        setHasValidated={setHasValidated}
       />
       <Box sx={{ p: 2 }}>
         {formState.schema.properties && Object.keys(formState.schema.properties).length > 0 ? (
@@ -203,7 +204,7 @@ const FormPreview = ({
                 hideRequiredAsterisk: false,
               }}
               cells={getCells()}
-              data={dataWithDefaults}
+              data={dataWithDefaults ?? formState.data}
               renderers={getRenderers()}
               schema={formState.schema}
               uischema={formState.uischema}
@@ -214,7 +215,11 @@ const FormPreview = ({
                   isProgrammaticUpdateRef.current = false;
                   return;
                 }
-                onDataChange(data);
+
+                userActions.current = true;
+                if (data) {
+                  onDataChange(data);
+                }
                 // Perform real-time validation if validation mode is active
                 if (hasValidated) {
                   performValidation(data);

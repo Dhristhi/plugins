@@ -296,9 +296,17 @@ const App = ({ onExport, onSave, schemas = [], theme: customTheme } = {}) => {
     [addField]
   );
 
-  const handleFieldUpdate = useCallback((updatedField) => {
+  const handleFieldUpdate = useCallback((updatedField, options = {}) => {
     setEditingField(updatedField);
     setHasUnsavedChanges(true);
+
+    if (options.resetFormData && updatedField.key) {
+      setFormData((prevData) => {
+        const newData = { ...prevData };
+        delete newData[updatedField.key];
+        return newData;
+      });
+    }
   }, []);
 
   const handleSaveChanges = useCallback(() => {
@@ -588,6 +596,27 @@ const App = ({ onExport, onSave, schemas = [], theme: customTheme } = {}) => {
     flexBasis: '0%',
     overflow: 'auto',
   };
+
+  const resetForm = () => {
+    let data = {};
+    Object.entries(formState?.schema.properties).forEach(([key, prop]) => {
+      data[key] =
+        prop.type === 'boolean'
+          ? false
+          : prop.type === 'number'
+            ? 0
+            : prop.type === 'array'
+              ? []
+              : '';
+    });
+    setFormData(data);
+  };
+
+  useEffect(() => {
+    if (showFormPreview) {
+      resetForm();
+    }
+  }, [showFormPreview]);
 
   return (
     <ThemeProvider theme={appliedTheme}>
