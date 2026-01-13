@@ -186,9 +186,9 @@ export const defaultFieldTypes = [
     },
   },
   {
-    id: 'multiselect',
+    id: 'multiselect-dropdown',
     type: 'array',
-    label: 'Multi-Select',
+    label: 'Multi-Select Dropdown',
     icon: IconChevronDown,
     schema: {
       type: 'array',
@@ -204,9 +204,33 @@ export const defaultFieldTypes = [
       options: {
         multi: true,
         format: 'dynamicselect',
+        displayType: 'dropdown',
         autocompleteProps: {
           limitTags: 5,
         },
+      },
+    },
+  },
+  {
+    id: 'multiselect-checkbox',
+    type: 'array',
+    label: 'Multi-Select Checkbox',
+    icon: IconSquareCheck,
+    schema: {
+      type: 'array',
+      items: {
+        type: 'string',
+        enum: ['Option 1', 'Option 2', 'Option 3'],
+      },
+      uniqueItems: true,
+    },
+    uischema: {
+      type: 'Control',
+      scope: '#/properties/field',
+      options: {
+        multi: true,
+        format: 'dynamicselect',
+        displayType: 'checkbox',
       },
     },
   },
