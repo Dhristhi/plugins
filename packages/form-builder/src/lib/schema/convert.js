@@ -124,10 +124,10 @@ export const convertSchemaToFields = (schema, defaultFieldTypes, getNextId) => {
 
     if (property.type === 'array' && property.items && property.items.enum) {
       const multiselectType =
-        defaultFieldTypes.find((ft) => ft.id === 'multiselect') || defaultFieldTypes[0];
+        defaultFieldTypes.find((ft) => ft.id === 'multiselect-dropdown') || defaultFieldTypes[0];
       const newField = {
         id: `field_${uniqueId}`,
-        type: 'multiselect',
+        type: 'multiselect-dropdown',
         label,
         key,
         required: schema.required?.includes(key) || false,
@@ -140,6 +140,7 @@ export const convertSchemaToFields = (schema, defaultFieldTypes, getNextId) => {
             ...multiselectType.uischema.options,
             multi: true,
             format: 'dynamicselect',
+            displayType: 'dropdown',
           },
         },
         parentId: null,

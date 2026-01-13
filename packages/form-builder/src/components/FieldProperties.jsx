@@ -14,21 +14,11 @@ import {
   AccordionDetails,
   Switch,
   Grid,
-  Slider,
   Checkbox,
-  RadioGroup,
-  Radio,
   InputAdornment,
 } from '@mui/material';
 import React, { useState, useEffect } from 'react';
-import {
-  IconPlus,
-  IconTrash,
-  IconSettings,
-  IconChevronDown,
-  IconEdit,
-  IconX,
-} from '@tabler/icons-react';
+import { IconPlus, IconTrash, IconSettings, IconChevronDown, IconX } from '@tabler/icons-react';
 
 import { defaultFieldTypes } from '../types';
 import IconSelector from '../utils/IconSelector';
@@ -340,8 +330,11 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
       };
 
       // Preserve enum options and uischema options
-      if (hasEnumOptions && ['select', 'radio', 'multiselect'].includes(newTypeId)) {
-        if (newTypeId === 'multiselect') {
+      if (
+        hasEnumOptions &&
+        ['select', 'radio', 'multiselect-dropdown', 'multiselect-checkbox'].includes(newTypeId)
+      ) {
+        if (newTypeId === 'multiselect-dropdown' || newTypeId === 'multiselect-checkbox') {
           updatedField.schema.items = {
             type: 'string',
             enum: enumOptions,
@@ -352,6 +345,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
             updatedField.uischema.options = {
               ...updatedField.uischema.options,
               ...localField.uischema.options,
+              displayType: newTypeId === 'multiselect-dropdown' ? 'dropdown' : 'checkbox',
             };
           }
         } else {
@@ -367,7 +361,9 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
         setEnumOptions([...newFieldType.schema.enum]);
       } else if (newFieldType.schema.items?.enum) {
         setEnumOptions([...newFieldType.schema.items.enum]);
-      } else if (!['select', 'radio', 'multiselect'].includes(newTypeId)) {
+      } else if (
+        !['select', 'radio', 'multiselect-dropdown', 'multiselect-checkbox'].includes(newTypeId)
+      ) {
         setEnumOptions([]);
       }
     }
@@ -376,23 +372,37 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
   const getCompatibleFieldTypes = () => {
     const currentSchemaType = localField.schema?.type;
 
-    // Array fields with enum items (multiselect) can switch between multiselect and array
+    // Array fields with enum items (multiselect) can switch between multiselect types and array
     if (currentSchemaType === 'array' && localField.schema?.items?.enum) {
       return availableFieldTypes.filter(
-        (ft) => ft.id === 'multiselect' || ft.id === 'array' || ft.id === 'array-strings'
+        (ft) =>
+          ft.id === 'multiselect-dropdown' ||
+          ft.id === 'multiselect-checkbox' ||
+          ft.id === 'array' ||
+          ft.id === 'array-strings'
       );
     }
 
-    // Array fields without enum can switch between array and multiselect
+    // Array fields without enum can switch between array and multiselect types
     if (currentSchemaType === 'array') {
       return availableFieldTypes.filter(
-        (ft) => ft.id === 'array' || ft.id === 'multiselect' || ft.id === 'array-strings'
+        (ft) =>
+          ft.id === 'array' ||
+          ft.id === 'multiselect-dropdown' ||
+          ft.id === 'multiselect-checkbox' ||
+          ft.id === 'array-strings'
       );
     }
 
     return availableFieldTypes.filter((ft) => {
       // Don't allow converting to array types from other types
-      if (ft.id === 'array' || ft.id === 'multiselect' || ft.id === 'array-strings') return false;
+      if (
+        ft.id === 'array' ||
+        ft.id === 'multiselect-dropdown' ||
+        ft.id === 'multiselect-checkbox' ||
+        ft.id === 'array-strings'
+      )
+        return false;
 
       const targetSchemaType = ft.schema?.type;
 
@@ -405,14 +415,9 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
     });
   };
 
-  const getFieldTypeIcon = (typeId) => {
-    const fieldType = defaultFieldTypes.find((ft) => ft.id === typeId);
-    return fieldType?.icon || IconEdit;
-  };
-
   const availableFieldTypes = defaultFieldTypes.filter((ft) => !ft.isLayout);
   const hasEnumOptions =
-    ['select', 'radio', 'multiselect'].includes(localField.type) ||
+    ['select', 'radio', 'multiselect-dropdown', 'multiselect-checkbox'].includes(localField.type) ||
     (localField.schema?.type === 'array' &&
       !!localField.schema?.items &&
       localField.uischema?.options?.multi) ||
@@ -467,6 +472,10 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
   const accordionSx = {
     mb: 2,
     boxShadow: 1,
+    mx: -2,
+    '&.Mui-expanded': {
+      margin: '15px -15px',
+    },
   };
 
   const optionInputRowSx = {
@@ -503,45 +512,8 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
     },
   };
 
-  const captionTypographySx = { color: 'text.secondary', fontWeight: 600 };
-  const chipsContainerSx = { display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 };
   const formControlLabelSx = { mb: 1, display: 'block' };
   const sliderContainerSx = { mt: 2 };
-
-  const containerSx = {
-    mt: 3,
-    p: 2,
-    backgroundColor: 'grey.50',
-    borderRadius: 2,
-    border: '1px solid',
-    borderColor: 'grey.200',
-  };
-
-  const subtitleSx = {
-    gutterBottom: true,
-    color: 'grey.700',
-  };
-
-  const infoRowSx = {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 1,
-    mb: 1,
-  };
-
-  const bodyTextSx = {
-    color: 'grey.600',
-    mb: 1,
-  };
-
-  const italicTextSx = {
-    color: 'grey.500',
-    fontStyle: 'italic',
-  };
-
-  const textTransCaps = {
-    textTransform: 'capitalize',
-  };
 
   const parseCommaSeparated = (value) => {
     if (typeof value !== 'string') return value;
@@ -958,7 +930,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
               )}
               {(localField.type === 'array' ||
                 localField.type === 'array-strings' ||
-                localField.type === 'multiselect') && (
+                localField.type === 'multiselect-dropdown') && (
                 <Grid container spacing={2}>
                   <Grid item xs={6}>
                     <TextField
@@ -1250,7 +1222,10 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                     } else if (localField.type === 'checkbox') {
                       defaultValue = defaultValue.toLowerCase() === 'true';
                     }
-                    if (localField.type === 'multiselect') {
+                    if (
+                      localField.type === 'multiselect-dropdown' ||
+                      localField.type === 'multiselect-checkbox'
+                    ) {
                       const valu1 = parseCommaSeparated(defaultValue);
                       let defaultArray = [];
                       if (!Array.isArray(valu1)) {
@@ -1317,31 +1292,9 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                 sx={outlinedTextFieldSx}
               />
               {/* Multiselect Display Type */}
-              {localField.type === 'multiselect' && (
+              {(localField.type === 'multiselect-dropdown' ||
+                localField.type === 'multiselect-checkbox') && (
                 <>
-                  <FormControl fullWidth margin="normal">
-                    <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
-                      Display As
-                    </Typography>
-                    <RadioGroup
-                      row
-                      value={localField.uischema?.options?.displayType || 'dropdown'}
-                      onChange={(e) => {
-                        const updatedUISchema = {
-                          ...localField.uischema,
-                          options: {
-                            ...localField.uischema?.options,
-                            displayType: e.target.value,
-                          },
-                        };
-                        handleUpdate({ uischema: updatedUISchema });
-                      }}
-                    >
-                      <FormControlLabel value="dropdown" control={<Radio />} label="Dropdown" />
-                      <FormControlLabel value="checkbox" control={<Radio />} label="Checkboxes" />
-                    </RadioGroup>
-                  </FormControl>
-
                   {localField.uischema?.options?.displayType !== 'checkbox' && (
                     <TextField
                       label="Visible Chips Count"
@@ -1428,84 +1381,68 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                   sx={formControlLabelSx}
                 />
               )}
-            </Box>
-          </AccordionDetails>
-        </Accordion>
-      )}
-      {/* File Upload Options */}
-      {localField.type === 'file' && (
-        <Accordion sx={accordionSx}>
-          <AccordionSummary expandIcon={<IconChevronDown />}>
-            <Typography variant="subtitle1" fontWeight={600}>
-              File Upload Options
-            </Typography>
-          </AccordionSummary>
 
-          <AccordionDetails>
-            <Box>
-              <FormControl fullWidth>
-                <InputLabel id="allowed-file-types-label" shrink>
-                  Allowed File Types
-                </InputLabel>
+              {/* File Upload Options */}
+              {localField.type === 'file' && (
+                <FormControl fullWidth margin="normal">
+                  <InputLabel id="allowed-file-types-label" shrink>
+                    Allowed File Types
+                  </InputLabel>
 
-                <Select
-                  labelId="allowed-file-types-label"
-                  multiple
-                  displayEmpty
-                  label="Allowed File Types"
-                  value={
-                    localField.uischema?.options?.['ui:options']?.accept
-                      ? localField.uischema.options['ui:options'].accept.split(',').filter(Boolean)
-                      : []
-                  }
-                  onChange={(e) => {
-                    const values = e.target.value;
-                    handleUiOptionsUpdate({
-                      accept: values.length ? values.join(',') : undefined,
-                    });
-                  }}
-                  renderValue={(selected) => {
-                    if (selected.length === 0) {
-                      return (
-                        <Typography sx={{ color: 'text.disabled' }}>Select file types</Typography>
-                      );
+                  <Select
+                    labelId="allowed-file-types-label"
+                    multiple
+                    displayEmpty
+                    label="Allowed File Types"
+                    value={
+                      localField.uischema?.options?.['ui:options']?.accept
+                        ? localField.uischema.options['ui:options'].accept
+                            .split(',')
+                            .filter(Boolean)
+                        : []
                     }
-                    return selected
-                      .map((mime) => FILE_TYPE_OPTIONS.find((o) => o.value === mime)?.label)
-                      .join(', ');
-                  }}
-                  MenuProps={{
-                    PaperProps: {
-                      sx: {
-                        maxHeight: 240,
-                        minWidth: 280,
+                    onChange={(e) => {
+                      const values = e.target.value;
+                      handleUiOptionsUpdate({
+                        accept: values.length ? values.join(',') : undefined,
+                      });
+                    }}
+                    renderValue={(selected) => {
+                      if (selected.length === 0) {
+                        return (
+                          <Typography sx={{ color: 'text.disabled' }}>Select file types</Typography>
+                        );
+                      }
+                      return selected
+                        .map((mime) => FILE_TYPE_OPTIONS.find((o) => o.value === mime)?.label)
+                        .join(', ');
+                    }}
+                    MenuProps={{
+                      PaperProps: {
+                        sx: {
+                          maxHeight: 240,
+                          minWidth: 280,
+                        },
                       },
-                    },
-                  }}
-                >
-                  {FILE_TYPE_OPTIONS.map((option) => (
-                    <MenuItem key={option.value} value={option.value}>
-                      {option.label}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Box>
-          </AccordionDetails>
-        </Accordion>
-      )}
-      {/* Options for Select/Radio Fields */}
-      {hasEnumOptions && (
-        <Accordion defaultExpanded sx={accordionSx}>
-          <AccordionSummary expandIcon={<IconChevronDown />}>
-            <Typography variant="subtitle1" fontWeight={600}>
-              Enum Values
-            </Typography>
-          </AccordionSummary>
-          <AccordionDetails>
-            <Box>
-              {/* We will add dynamic API call in Phase 2 */}
-              {/* {(localField.type === 'select' ||
+                    }}
+                  >
+                    {FILE_TYPE_OPTIONS.map((option) => (
+                      <MenuItem key={option.value} value={option.value}>
+                        {option.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              )}
+
+              {/* Enum Values for Select/Radio/Multiselect Fields */}
+              {hasEnumOptions && (
+                <Box sx={{ mt: 2 }}>
+                  <Typography variant="body2" sx={{ mb: 2, fontWeight: 600 }}>
+                    Enum Values
+                  </Typography>
+                  {/* We will add dynamic API call in Phase 2 */}
+                  {/* {(localField.type === 'select' ||
                 localField.type === 'multiselect' ||
                 (localField.schema?.type === 'array' && localField.uischema?.options?.multi) ||
                 localField.uischema?.options?.format === 'dynamicselect') && (
@@ -1537,230 +1474,169 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                   sx={{ mb: 2 }}
                 />
               )} */}
-
-              {localField.uischema?.options?.entity !== undefined ? (
-                <Box>
-                  <TextField
-                    label="API Entity"
-                    fullWidth
-                    value={localField.uischema?.options?.entity || ''}
-                    onChange={(e) => {
-                      const updatedUISchema = {
-                        ...localField.uischema,
-                        options: {
-                          ...localField.uischema?.options,
-                          entity: e.target.value,
-                        },
-                      };
-                      handleUpdate({ uischema: updatedUISchema });
-                    }}
-                    margin="normal"
-                    variant="outlined"
-                    helperText="API endpoint name (e.g., countries, cities)"
-                    sx={outlinedTextFieldSx}
-                  />
-                  <TextField
-                    label="Value Field Name"
-                    fullWidth
-                    value={localField.uischema?.options?.key || ''}
-                    onChange={(e) => {
-                      const updatedUISchema = {
-                        ...localField.uischema,
-                        options: {
-                          ...localField.uischema?.options,
-                          key: e.target.value,
-                        },
-                      };
-                      handleUpdate({ uischema: updatedUISchema });
-                    }}
-                    margin="normal"
-                    variant="outlined"
-                    helperText="Field name for stored value (e.g., code, id). Leave empty for primitive arrays."
-                    sx={outlinedTextFieldSx}
-                  />
-                  <TextField
-                    label="Label Field Name"
-                    fullWidth
-                    value={localField.uischema?.options?.value || ''}
-                    onChange={(e) => {
-                      const updatedUISchema = {
-                        ...localField.uischema,
-                        options: {
-                          ...localField.uischema?.options,
-                          value: e.target.value,
-                        },
-                      };
-                      handleUpdate({ uischema: updatedUISchema });
-                    }}
-                    margin="normal"
-                    variant="outlined"
-                    helperText="Field name for display label (e.g., name, label). Leave empty for primitive arrays."
-                    sx={outlinedTextFieldSx}
-                  />
-                </Box>
-              ) : (
-                <>
-                  <FormControl fullWidth margin="normal">
-                    <InputLabel>Enum Data Type</InputLabel>
-                    <Select
-                      value={enumDataType}
-                      label="Enum Data Type"
-                      onChange={(e) => {
-                        const newType = e.target.value;
-                        setEnumDataType(newType);
-
-                        let convertedOptions;
-                        if (newType === 'number') {
-                          if (enumOptions.length === 0) {
-                            // If switching to number and no options exist, add default numeric options
-                            convertedOptions = [1, 2, 3];
-                          } else {
-                            // Convert existing options, but replace invalid numbers with defaults
-                            convertedOptions = enumOptions.map((option, index) => {
-                              const converted = convertEnumValue(String(option), newType);
-                              return isNaN(converted) ? index + 1 : converted;
-                            });
-                          }
-                        } else {
-                          // Convert existing options to new type (string)
-                          convertedOptions = enumOptions.map((option, index) => {
-                            // If converting numbers back to strings, create meaningful labels
-                            if (typeof option === 'number') {
-                              return `Option ${option}`;
-                            }
-                            return convertEnumValue(String(option), newType);
-                          });
-                        }
-
-                        setEnumOptions(convertedOptions);
-
-                        // Update schema
-                        if (localField.schema?.type === 'array' && localField.schema?.items) {
-                          handleSchemaUpdate({
-                            items: {
-                              ...localField.schema.items,
-                              type: newType,
-                              enum: convertedOptions,
+                  {localField.uischema?.options?.entity !== undefined ? (
+                    <Box>
+                      <TextField
+                        label="API Entity"
+                        fullWidth
+                        value={localField.uischema?.options?.entity || ''}
+                        onChange={(e) => {
+                          const updatedUISchema = {
+                            ...localField.uischema,
+                            options: {
+                              ...localField.uischema?.options,
+                              entity: e.target.value,
                             },
-                          });
-                        } else {
-                          handleSchemaUpdate({
-                            type: newType,
-                            enum: convertedOptions,
-                          });
-                        }
-                      }}
-                      sx={layoutSelectSx}
-                    >
-                      <MenuItem value="string">String</MenuItem>
-                      <MenuItem value="number">Number</MenuItem>
-                    </Select>
-                  </FormControl>
-
-                  <Typography variant="body2" sx={{ mt: 2, mb: 1, fontWeight: 500 }}>
-                    Add Enum
-                  </Typography>
-
-                  <Box sx={optionInputRowSx}>
-                    <TextField
-                      label="New Option"
-                      size="small"
-                      value={newOption}
-                      onChange={(e) => setNewOption(e.target.value)}
-                      onKeyPress={(e) => {
-                        if (e.key === 'Enter') {
-                          handleAddOption();
-                        }
-                      }}
-                      variant="outlined"
-                      sx={newOptionTextFieldSx}
-                    />
-
-                    <IconButton onClick={handleAddOption} sx={addOptionButtonSx}>
-                      <IconPlus size={20} />
-                    </IconButton>
-                  </Box>
-
-                  <Box sx={optionChipsWrapperSx}>
-                    {enumOptions.map((option, index) => (
-                      <Chip
-                        key={index}
-                        label={String(option)}
-                        onDelete={() => handleRemoveOption(index)}
-                        deleteIcon={<IconTrash size={16} />}
+                          };
+                          handleUpdate({ uischema: updatedUISchema });
+                        }}
+                        margin="normal"
                         variant="outlined"
-                        sx={optionChipSx}
+                        helperText="API endpoint name (e.g., countries, cities)"
+                        sx={outlinedTextFieldSx}
                       />
-                    ))}
-                  </Box>
-                </>
+                      <TextField
+                        label="Value Field Name"
+                        fullWidth
+                        value={localField.uischema?.options?.key || ''}
+                        onChange={(e) => {
+                          const updatedUISchema = {
+                            ...localField.uischema,
+                            options: {
+                              ...localField.uischema?.options,
+                              key: e.target.value,
+                            },
+                          };
+                          handleUpdate({ uischema: updatedUISchema });
+                        }}
+                        margin="normal"
+                        variant="outlined"
+                        helperText="Field name for stored value (e.g., code, id). Leave empty for primitive arrays."
+                        sx={outlinedTextFieldSx}
+                      />
+                      <TextField
+                        label="Label Field Name"
+                        fullWidth
+                        value={localField.uischema?.options?.value || ''}
+                        onChange={(e) => {
+                          const updatedUISchema = {
+                            ...localField.uischema,
+                            options: {
+                              ...localField.uischema?.options,
+                              value: e.target.value,
+                            },
+                          };
+                          handleUpdate({ uischema: updatedUISchema });
+                        }}
+                        margin="normal"
+                        variant="outlined"
+                        helperText="Field name for display label (e.g., name, label). Leave empty for primitive arrays."
+                        sx={outlinedTextFieldSx}
+                      />
+                    </Box>
+                  ) : (
+                    <>
+                      <FormControl fullWidth margin="normal">
+                        <InputLabel>Enum Data Type</InputLabel>
+                        <Select
+                          value={enumDataType}
+                          label="Enum Data Type"
+                          onChange={(e) => {
+                            const newType = e.target.value;
+                            setEnumDataType(newType);
+
+                            let convertedOptions;
+                            if (newType === 'number') {
+                              if (enumOptions.length === 0) {
+                                // If switching to number and no options exist, add default numeric options
+                                convertedOptions = [1, 2, 3];
+                              } else {
+                                // Convert existing options, but replace invalid numbers with defaults
+                                convertedOptions = enumOptions.map((option, index) => {
+                                  const converted = convertEnumValue(String(option), newType);
+                                  return isNaN(converted) ? index + 1 : converted;
+                                });
+                              }
+                            } else {
+                              // Convert existing options to new type (string)
+                              convertedOptions = enumOptions.map((option, index) => {
+                                // If converting numbers back to strings, create meaningful labels
+                                if (typeof option === 'number') {
+                                  return `Option ${option}`;
+                                }
+                                return convertEnumValue(String(option), newType);
+                              });
+                            }
+
+                            setEnumOptions(convertedOptions);
+
+                            // Update schema
+                            if (localField.schema?.type === 'array' && localField.schema?.items) {
+                              handleSchemaUpdate({
+                                items: {
+                                  ...localField.schema.items,
+                                  type: newType,
+                                  enum: convertedOptions,
+                                },
+                              });
+                            } else {
+                              handleSchemaUpdate({
+                                type: newType,
+                                enum: convertedOptions,
+                              });
+                            }
+                          }}
+                          sx={layoutSelectSx}
+                        >
+                          <MenuItem value="string">String</MenuItem>
+                          <MenuItem value="number">Number</MenuItem>
+                        </Select>
+                      </FormControl>
+
+                      <Typography variant="body2" sx={{ mt: 2, mb: 1, fontWeight: 500 }}>
+                        Add Enum
+                      </Typography>
+
+                      <Box sx={optionInputRowSx}>
+                        <TextField
+                          label="New Option"
+                          size="small"
+                          value={newOption}
+                          onChange={(e) => setNewOption(e.target.value)}
+                          onKeyPress={(e) => {
+                            if (e.key === 'Enter') {
+                              handleAddOption();
+                            }
+                          }}
+                          variant="outlined"
+                          sx={newOptionTextFieldSx}
+                        />
+
+                        <IconButton onClick={handleAddOption} sx={addOptionButtonSx}>
+                          <IconPlus size={20} />
+                        </IconButton>
+                      </Box>
+
+                      <Box sx={optionChipsWrapperSx}>
+                        {enumOptions.map((option, index) => (
+                          <Chip
+                            key={index}
+                            label={String(option)}
+                            onDelete={() => handleRemoveOption(index)}
+                            deleteIcon={<IconTrash size={16} />}
+                            variant="outlined"
+                            sx={optionChipSx}
+                          />
+                        ))}
+                      </Box>
+                    </>
+                  )}
+                </Box>
               )}
             </Box>
           </AccordionDetails>
         </Accordion>
       )}
-      {/* Advanced Options
-      {!isLayout && !isGroup && (
-        <Accordion sx={accordionSx}>
-          <AccordionSummary expandIcon={<IconChevronDown />}>
-            <Typography variant="subtitle1" fontWeight={600}>
-              Advanced Options
-            </Typography>
-          </AccordionSummary>
-          <AccordionDetails>
-            <Box>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={localField.uischema?.options?.readonly || false}
-                    onChange={(e) => {
-                      const updatedUISchema = {
-                        ...localField.uischema,
-                        options: {
-                          ...localField.uischema?.options,
-                          readonly: e.target.checked,
-                        },
-                      };
-                      handleUpdate({ uischema: updatedUISchema });
-                    }}
-                    color="primary"
-                  />
-                }
-                label="Read Only"
-                sx={formControlLabelSx}
-              />
-
-             
-
-      {localField.type === 'textarea' && (
-        <Box sx={sliderContainerSx}>
-          <Typography variant="body2" gutterBottom>
-            Rows: {localField.uischema?.options?.rows || 3}
-          </Typography>
-          <Slider
-            value={localField.uischema?.options?.rows || 3}
-            onChange={(e, value) => {
-              const updatedUISchema = {
-                ...localField.uischema,
-                options: {
-                  ...localField.uischema?.options,
-                  rows: value,
-                },
-              };
-              handleUpdate({ uischema: updatedUISchema });
-            }}
-            min={1}
-            max={10}
-            step={1}
-            marks
-            valueLabelDisplay="auto"
-          />
-        </Box>
-      )}
-    </Box>
-    //     </AccordionDetails>
-    //   </Accordion>
-    // )} */}
     </Box>
   );
 };
