@@ -31,6 +31,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
   const [localField, setLocalField] = useState(null);
   const [enumOptions, setEnumOptions] = useState([]);
   const [newOption, setNewOption] = useState('');
+  const [enumDataType, setEnumDataType] = useState('string');
   const [selectedAccess, setSelectedAccess] = useState([]);
   const [layout, setLayout] = useState('');
   const [selectedIcon, setSelectedIcon] = useState('');
@@ -39,8 +40,13 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
       ? localField.schema.default.join(', ')
       : (localField?.schema?.default ?? '')
   );
+  const [maxSizeInput, setMaxSizeInput] = useState('');
   const [isInsideArrayOfObjects, setIsInsideArrayOfObjects] = useState(false);
   const [parentArrayField, setParentArrayField] = useState(null);
+
+  useEffect(() => {
+    setMaxSizeInput(localField?.uischema?.options?.['ui:options']?.maxSize?.toString() || '');
+  }, [localField?.uischema?.options?.['ui:options']?.maxSize]);
 
   const FILE_TYPE_OPTIONS = [
     { label: '.pdf', value: 'application/pdf' },
@@ -156,6 +162,16 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
     );
   }, [localField?.schema?.default]);
 
+  // Helper function to convert value based on enum data type
+  const convertEnumValue = (value, type) => {
+    switch (type) {
+      case 'number':
+        return Number(value);
+      default:
+        return value;
+    }
+  };
+
   useEffect(() => {
     if (field && fields) {
       // Check if field is inside an array of objects
@@ -198,10 +214,25 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
       }
       if (field.schema.enum) {
         setEnumOptions([...field.schema.enum]);
+        // Detect enum data type from first value
+        const firstValue = field.schema.enum[0];
+        if (typeof firstValue === 'number') {
+          setEnumDataType('number');
+        } else {
+          setEnumDataType('string');
+        }
       } else if (field.schema.items?.enum) {
         setEnumOptions([...field.schema.items.enum]);
+        // Detect enum data type from first value
+        const firstValue = field.schema.items.enum[0];
+        if (typeof firstValue === 'number') {
+          setEnumDataType('number');
+        } else {
+          setEnumDataType('string');
+        }
       } else {
         setEnumOptions([]);
+        setEnumDataType('string');
       }
       setSelectedAccess(field.schema?.allowedAccess || []);
       setSelectedIcon(field.icon || '');
@@ -251,17 +282,22 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
 
   const handleAddOption = () => {
     if (newOption.trim()) {
-      const newOptions = [...enumOptions, newOption.trim()];
+      const convertedValue = convertEnumValue(newOption.trim(), enumDataType);
+      const newOptions = [...enumOptions, convertedValue];
       setEnumOptions(newOptions);
       if (localField.schema?.type === 'array' && localField.schema?.items) {
         handleSchemaUpdate({
           items: {
             ...localField.schema.items,
+            type: enumDataType,
             enum: newOptions,
           },
         });
       } else {
-        handleSchemaUpdate({ enum: newOptions });
+        handleSchemaUpdate({
+          type: enumDataType,
+          enum: newOptions,
+        });
       }
       setNewOption('');
     }
@@ -273,12 +309,11 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
     if (localField.schema?.type === 'array' && localField.schema?.items) {
       handleSchemaUpdate({
         items:
-          newOptions.length > 0
-            ? { ...localField.schema.items, enum: newOptions }
-            : { type: 'string' },
+          newOptions.length > 0 ? { type: enumDataType, enum: newOptions } : { type: 'string' },
       });
     } else {
       handleSchemaUpdate({
+        type: newOptions.length > 0 ? enumDataType : 'string',
         enum: newOptions.length > 0 ? newOptions : undefined,
       });
     }
@@ -809,15 +844,32 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                         label="Maximum File Size (MB)"
                         type="number"
                         fullWidth
-                        value={localField.uischema?.options?.['ui:options']?.maxSize || ''}
-                        onChange={(e) =>
+                        value={maxSizeInput}
+                        onChange={(e) => {
+                          setMaxSizeInput(e.target.value);
+                          const value = e.target.value;
                           handleUiOptionsUpdate({
-                            maxSize: e.target.value ? Number(e.target.value) : undefined,
-                          })
-                        }
+                            maxSize: value === '' ? undefined : Number(value),
+                          });
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === '-') {
+                            e.preventDefault();
+                          }
+                        }}
+                        onBlur={(e) => {
+                          const value = e.target.value;
+                          handleUiOptionsUpdate({
+                            maxSize: value === '' ? undefined : Number(value),
+                          });
+                        }}
                         margin="normal"
                         variant="outlined"
-                        helperText="Maximum allowed file size in megabytes (e.g., 5 = 5MB)"
+                        helperText="Maximum allowed file size in megabytes"
+                        inputProps={{
+                          step: 0.1,
+                          min: 0,
+                        }}
                         sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                       />
                     </Grid>
@@ -1238,32 +1290,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                   sx={formControlLabelSx}
                 />
               )}
-
-              {localField.type === 'textarea' && (
-                <Box sx={sliderContainerSx}>
-                  <Typography variant="body2" gutterBottom>
-                    Rows: {localField.uischema?.options?.rows || 3}
-                  </Typography>
-                  <Slider
-                    value={localField.uischema?.options?.rows || 3}
-                    onChange={(e, value) => {
-                      const updatedUISchema = {
-                        ...localField.uischema,
-                        options: {
-                          ...localField.uischema?.options,
-                          rows: value,
-                        },
-                      };
-                      handleUpdate({ uischema: updatedUISchema });
-                    }}
-                    min={1}
-                    max={10}
-                    step={1}
-                    marks
-                    valueLabelDisplay="auto"
-                  />
-                </Box>
-              )}
             </Box>
           </AccordionDetails>
         </Accordion>
@@ -1436,6 +1462,67 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                 </Box>
               ) : (
                 <>
+                  <FormControl fullWidth margin="normal">
+                    <InputLabel>Enum Data Type</InputLabel>
+                    <Select
+                      value={enumDataType}
+                      label="Enum Data Type"
+                      onChange={(e) => {
+                        const newType = e.target.value;
+                        setEnumDataType(newType);
+
+                        let convertedOptions;
+                        if (newType === 'number') {
+                          if (enumOptions.length === 0) {
+                            // If switching to number and no options exist, add default numeric options
+                            convertedOptions = [1, 2, 3];
+                          } else {
+                            // Convert existing options, but replace invalid numbers with defaults
+                            convertedOptions = enumOptions.map((option, index) => {
+                              const converted = convertEnumValue(String(option), newType);
+                              return isNaN(converted) ? index + 1 : converted;
+                            });
+                          }
+                        } else {
+                          // Convert existing options to new type (string)
+                          convertedOptions = enumOptions.map((option, index) => {
+                            // If converting numbers back to strings, create meaningful labels
+                            if (typeof option === 'number') {
+                              return `Option ${option}`;
+                            }
+                            return convertEnumValue(String(option), newType);
+                          });
+                        }
+
+                        setEnumOptions(convertedOptions);
+
+                        // Update schema
+                        if (localField.schema?.type === 'array' && localField.schema?.items) {
+                          handleSchemaUpdate({
+                            items: {
+                              ...localField.schema.items,
+                              type: newType,
+                              enum: convertedOptions,
+                            },
+                          });
+                        } else {
+                          handleSchemaUpdate({
+                            type: newType,
+                            enum: convertedOptions,
+                          });
+                        }
+                      }}
+                      sx={layoutSelectSx}
+                    >
+                      <MenuItem value="string">String</MenuItem>
+                      <MenuItem value="number">Number</MenuItem>
+                    </Select>
+                  </FormControl>
+
+                  <Typography variant="body2" sx={{ mt: 2, mb: 1, fontWeight: 500 }}>
+                    Add Enum
+                  </Typography>
+
                   <Box sx={optionInputRowSx}>
                     <TextField
                       label="New Option"
@@ -1460,7 +1547,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                     {enumOptions.map((option, index) => (
                       <Chip
                         key={index}
-                        label={option}
+                        label={String(option)}
                         onDelete={() => handleRemoveOption(index)}
                         deleteIcon={<IconTrash size={16} />}
                         variant="outlined"
