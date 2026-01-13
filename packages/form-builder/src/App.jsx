@@ -589,6 +589,27 @@ const App = ({ onExport, onSave, schemas = [], theme: customTheme } = {}) => {
     overflow: 'auto',
   };
 
+  const resetForm = () => {
+    let data = {};
+    Object.entries(formState?.schema.properties).forEach(([key, prop]) => {
+      data[key] =
+        prop.type === 'boolean'
+          ? false
+          : prop.type === 'number'
+            ? 0
+            : prop.type === 'array'
+              ? []
+              : '';
+    });
+    setFormData(data);
+  };
+
+  useEffect(() => {
+    if (showFormPreview) {
+      resetForm();
+    }
+  }, [showFormPreview]);
+
   return (
     <ThemeProvider theme={appliedTheme}>
       <CssBaseline />
