@@ -1246,32 +1246,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                   sx={formControlLabelSx}
                 />
               )}
-
-              {localField.type === 'textarea' && (
-                <Box sx={sliderContainerSx}>
-                  <Typography variant="body2" gutterBottom>
-                    Rows: {localField.uischema?.options?.rows || 3}
-                  </Typography>
-                  <Slider
-                    value={localField.uischema?.options?.rows || 3}
-                    onChange={(e, value) => {
-                      const updatedUISchema = {
-                        ...localField.uischema,
-                        options: {
-                          ...localField.uischema?.options,
-                          rows: value,
-                        },
-                      };
-                      handleUpdate({ uischema: updatedUISchema });
-                    }}
-                    min={1}
-                    max={10}
-                    step={1}
-                    marks
-                    valueLabelDisplay="auto"
-                  />
-                </Box>
-              )}
             </Box>
           </AccordionDetails>
         </Accordion>
