@@ -146,7 +146,6 @@ const FormPreview = ({
   const buildDefaultsFromSchema = () => {
     if (!formState.schema?.properties) return {};
     const data = {};
-    console.log('userActions', userActions.current);
     isProgrammaticUpdateRef.current = true;
     Object.entries(formState.schema.properties).forEach(([key, prop]) => {
       if (
@@ -167,7 +166,6 @@ const FormPreview = ({
   };
 
   const dataWithDefaults = useMemo(() => {
-    console.log('isProgrammaticUpdateRef.current', isProgrammaticUpdateRef.current, formState.data);
     if (!userActions.current) {
       if (formState.data) {
         return {
@@ -219,9 +217,7 @@ const FormPreview = ({
                 }
 
                 userActions.current = true;
-                console.log('on change action', userActions.current, data);
                 if (data) {
-                  console.log('in data');
                   onDataChange(data);
                 }
                 // Perform real-time validation if validation mode is active
