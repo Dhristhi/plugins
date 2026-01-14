@@ -332,7 +332,12 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
       // Preserve enum options and uischema options
       if (
         hasEnumOptions &&
-        ['select', 'radio', 'multiselect-dropdown', 'multiselect-checkbox'].includes(newTypeId)
+        [
+          'select-dropdown',
+          'select-radio',
+          'multiselect-dropdown',
+          'multiselect-checkbox',
+        ].includes(newTypeId)
       ) {
         if (newTypeId === 'multiselect-dropdown' || newTypeId === 'multiselect-checkbox') {
           updatedField.schema.items = {
@@ -350,6 +355,13 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
           }
         } else {
           updatedField.schema.enum = enumOptions;
+          // Set format for radio
+          if (newTypeId === 'select-radio') {
+            updatedField.uischema.options = {
+              ...updatedField.uischema.options,
+              format: 'radio',
+            };
+          }
         }
       }
 
@@ -362,7 +374,12 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
       } else if (newFieldType.schema.items?.enum) {
         setEnumOptions([...newFieldType.schema.items.enum]);
       } else if (
-        !['select', 'radio', 'multiselect-dropdown', 'multiselect-checkbox'].includes(newTypeId)
+        ![
+          'select-dropdown',
+          'select-radio',
+          'multiselect-dropdown',
+          'multiselect-checkbox',
+        ].includes(newTypeId)
       ) {
         setEnumOptions([]);
       }
@@ -417,7 +434,9 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
 
   const availableFieldTypes = defaultFieldTypes.filter((ft) => !ft.isLayout);
   const hasEnumOptions =
-    ['select', 'radio', 'multiselect-dropdown', 'multiselect-checkbox'].includes(localField.type) ||
+    ['select-dropdown', 'select-radio', 'multiselect-dropdown', 'multiselect-checkbox'].includes(
+      localField.type
+    ) ||
     (localField.schema?.type === 'array' &&
       !!localField.schema?.items &&
       localField.uischema?.options?.multi) ||
@@ -1217,7 +1236,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
 
                             setEnumOptions(convertedOptions);
 
-                            // Update schema
+                            // Update schema - preserve field type, only update enum items type
                             if (localField.schema?.type === 'array' && localField.schema?.items) {
                               handleSchemaUpdate({
                                 items: {
@@ -1228,7 +1247,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                               });
                             } else {
                               handleSchemaUpdate({
-                                type: newType,
                                 enum: convertedOptions,
                               });
                             }
