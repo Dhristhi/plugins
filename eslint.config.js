@@ -15,7 +15,7 @@ export default [
     files: [
       'src/**/*.{js,jsx,ts,tsx}',
       'packages/**/src/**/*.{js,jsx,ts,tsx}',
-      'apps/**/src/**/*.{js,jsx,ts,tsx}'
+      'examples/**/src/**/*.{js,jsx,ts,tsx}'
     ],
     languageOptions: {
       ecmaVersion: 2022,
@@ -46,7 +46,7 @@ export default [
     files: [
       'src/__tests__/**/*.{js,jsx,ts,tsx}',
       'packages/**/src/__tests__/**/*.{js,jsx,ts,tsx}',
-      'apps/**/src/__tests__/**/*.{js,jsx,ts,tsx}'
+      'examples/**/src/__tests__/**/*.{js,jsx,ts,tsx}'
     ],
     languageOptions: {
       ecmaVersion: 2022,

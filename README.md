@@ -155,7 +155,7 @@ export default function MyPage() {
 ## Architecture
 
 ```
-apps/
+examples/
   form-builder-basic-demo/
                         # Demo application (Vite)
 

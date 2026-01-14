@@ -4,7 +4,7 @@
   "packageManager": "yarn@1.22.22",
   "workspaces": [
     "packages/*",
-    "apps/*"
+    "examples/*"
   ],
   "scripts": {
     "dev": "yarn workspace form-builder-basic-demo dev",
@@ -26,7 +26,7 @@
     "packages/form-builder/**/*.{js,jsx,ts,tsx}": [
       "eslint --fix --max-warnings=0"
     ],
-    "{packages,apps}/**/*.{js,jsx,ts,tsx,css,md,json}": [
+    "{packages,examples}/**/*.{js,jsx,ts,tsx,css,md,json}": [
       "prettier --write"
     ]
   }
