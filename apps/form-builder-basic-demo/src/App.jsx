@@ -482,6 +482,34 @@ const schemas = [
           maxItems: 3,
           uniqueItems: true,
         },
+        textarea_field: {
+          type: 'string',
+          title: 'Textarea Field',
+          maxLength: 500,
+        },
+        password_field: {
+          type: 'string',
+          title: 'Password Field',
+          format: 'password',
+        },
+        multiselect_dropdown: {
+          type: 'array',
+          title: 'Multi-Select Dropdown',
+          items: {
+            type: 'string',
+            enum: ['Choice 1', 'Choice 2', 'Choice 3', 'Choice 4', 'Choice 5'],
+          },
+          uniqueItems: true,
+        },
+        multiselect_checkbox: {
+          type: 'array',
+          title: 'Multi-Select Checkbox',
+          items: {
+            type: 'string',
+            enum: ['Option A', 'Option B', 'Option C', 'Option D'],
+          },
+          uniqueItems: true,
+        },
       },
       required: [
         'string_basic',
