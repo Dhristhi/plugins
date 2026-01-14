@@ -1204,43 +1204,25 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                             const newType = e.target.value;
                             setEnumDataType(newType);
 
-                            let convertedOptions;
-                            if (newType === 'number') {
-                              if (enumOptions.length === 0) {
-                                // If switching to number and no options exist, add default numeric options
-                                convertedOptions = [1, 2, 3];
-                              } else {
-                                // Convert existing options, but replace invalid numbers with defaults
-                                convertedOptions = enumOptions.map((option, index) => {
-                                  const converted = convertEnumValue(String(option), newType);
-                                  return isNaN(converted) ? index + 1 : converted;
-                                });
-                              }
-                            } else {
-                              // Convert existing options to new type (string)
-                              convertedOptions = enumOptions.map((option) => {
-                                // If converting numbers back to strings, create meaningful labels
-                                if (typeof option === 'number') {
-                                  return `Option ${option}`;
-                                }
-                                return convertEnumValue(String(option), newType);
-                              });
-                            }
+                            // Reset to default options based on type
+                            const defaultOptions =
+                              newType === 'number'
+                                ? [1, 2, 3]
+                                : ['Option 1', 'Option 2', 'Option 3'];
+                            setEnumOptions(defaultOptions);
 
-                            setEnumOptions(convertedOptions);
-
-                            // Update schema - preserve field type, only update enum items type
+                            // Update schema with default options
                             if (localField.schema?.type === 'array' && localField.schema?.items) {
                               handleSchemaUpdate({
                                 items: {
-                                  ...localField.schema.items,
                                   type: newType,
-                                  enum: convertedOptions,
+                                  enum: defaultOptions,
                                 },
                               });
                             } else {
                               handleSchemaUpdate({
-                                enum: convertedOptions,
+                                type: newType,
+                                enum: defaultOptions,
                               });
                             }
                           }}
