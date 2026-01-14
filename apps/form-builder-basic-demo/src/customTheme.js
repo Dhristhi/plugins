@@ -135,6 +135,11 @@ const getCustomTheme = (mode = 'light') =>
               background: 'linear-gradient(45deg, #7b1fa2 30%, #9c27b0 90%)',
               boxShadow: '0 6px 16px rgba(156, 39, 176, 0.4)',
             },
+            '&:disabled': {
+              background: '#e0e0e0',
+              color: 'rgba(0, 0, 0, 0.26)',
+              boxShadow: 'none',
+            },
           },
         },
       },

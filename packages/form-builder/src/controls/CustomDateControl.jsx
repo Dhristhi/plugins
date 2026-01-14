@@ -122,7 +122,6 @@ const CustomDateControl = (props) => {
           }
           return undefined;
         })()}
-        margin="normal"
         variant="outlined"
         InputLabelProps={{
           shrink: true,
@@ -131,6 +130,13 @@ const CustomDateControl = (props) => {
         sx={{
           '& .MuiOutlinedInput-root': {
             borderRadius: 2,
+          },
+          '& .MuiInputLabel-root': {
+            // Adjust label positioning to match other fields
+            transform: 'translate(14px, -9px) scale(0.75)',
+            '&.Mui-focused': {
+              transform: 'translate(14px, -9px) scale(0.75)',
+            },
           },
         }}
       />

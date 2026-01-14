@@ -523,28 +523,33 @@ const App = ({ onExport, onSave, schemas = [], theme: customTheme } = {}) => {
     alignItems: 'center',
     gap: 1,
   };
-  const propertiesPanel = {
+  const propertiesPanel = (theme) => ({
     position: 'fixed',
     right: 0,
     top: 0,
     width: { xs: '100vw', sm: '400px', md: '480px' },
     height: '100vh',
-    background: 'white',
-    boxShadow: '-4px 0 25px -5px rgb(0 0 0 / 0.1), -2px 0 10px -5px rgb(0 0 0 / 0.04)',
+    bgcolor: 'background.paper',
+    background:
+      theme.palette.mode === 'dark'
+        ? 'linear-gradient(180deg, #2d1b69 0%, #2d1b69 100%)'
+        : '#ffffff',
+    boxShadow: '-4px 0 25px -5px rgba(0, 0, 0, 0.1), -2px 0 10px -5px rgba(0, 0, 0, 0.04)',
     zIndex: 1000,
     overflow: 'auto',
     borderLeft: 1,
-    borderColor: 'grey.200',
-  };
+    borderColor: 'divider',
+    opacity: 1,
+  });
 
   const propertiesPanelBox = {
     p: 3,
     borderBottom: 1,
-    borderColor: 'grey.200',
+    borderColor: 'divider',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: 'grey.50',
+    backgroundColor: 'action.hover',
   };
 
   const propertiesPanelButton = {
@@ -553,13 +558,18 @@ const App = ({ onExport, onSave, schemas = [], theme: customTheme } = {}) => {
     borderRadius: 1.5,
     color: 'grey.500',
     '&:hover': {
-      backgroundColor: 'grey.200',
-      color: 'grey.600',
+      backgroundColor: 'action.hover',
+      color: 'text.primary',
     },
   };
-  const propertiesPanelTypo = { margin: 0, fontWeight: 600, color: 'grey.800' };
+  const propertiesPanelTypo = { margin: 0, fontWeight: 600, color: 'text.primary' };
 
-  const propertiesPanelContent = { p: 2, pb: '100px' };
+  const propertiesPanelContent = {
+    p: 2,
+    pb: '100px',
+    bgcolor: 'background.paper',
+    minHeight: '100%',
+  };
 
   const propertiesPanelFooter = {
     position: 'fixed',
@@ -567,26 +577,41 @@ const App = ({ onExport, onSave, schemas = [], theme: customTheme } = {}) => {
     right: 0,
     width: { xs: '100vw', sm: '400px', md: '480px' },
     p: 2.5,
-    bgcolor: 'white',
+    bgcolor: 'background.paper',
     borderTop: 1,
-    borderColor: 'grey.200',
+    borderColor: 'divider',
     display: 'flex',
     gap: 2,
     boxShadow: '0 -2px 10px rgba(0,0,0,0.1)',
     zIndex: 10,
   };
 
-  const saveButton = { py: 1.5, textTransform: 'none', fontSize: '15px' };
+  const saveButton = {
+    py: 1.5,
+    fontSize: '15px',
+    transform: 'none',
+    transition: 'all 0.2s ease-in-out',
+    '&:hover': {
+      transform: 'translateY(-1px)',
+    },
+    '&:active': {
+      transform: 'translateY(0px)',
+    },
+  };
 
   const cancelButton = {
     py: 1.5,
-    textTransform: 'none',
     fontSize: '15px',
-    borderColor: 'primary.main',
-    color: 'primary.main',
+    borderWidth: 2,
+    transition: 'all 0.2s ease-in-out',
     '&:hover': {
-      borderColor: 'primary.dark',
+      transform: 'translateY(-1px)',
       backgroundColor: 'primary.light',
+      borderColor: 'primary.dark',
+      color: 'primary.dark',
+    },
+    '&:active': {
+      transform: 'translateY(0px)',
     },
   };
 
@@ -739,7 +764,7 @@ const App = ({ onExport, onSave, schemas = [], theme: customTheme } = {}) => {
 
           {/* Properties Panel */}
           {propertiesDrawerOpen && selectedField && (
-            <Box sx={propertiesPanel}>
+            <Box sx={(theme) => propertiesPanel(theme)}>
               <Box sx={propertiesPanelBox}>
                 <Typography variant="h6" sx={propertiesPanelTypo}>
                   {formTitle}
