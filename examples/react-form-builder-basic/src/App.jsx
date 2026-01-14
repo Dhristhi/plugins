@@ -1,4 +1,4 @@
-import FormBuilder, { configureControls } from '@dhristhi/form-builder';
+import FormBuilder, { configureControls } from '@dhristhi/react-form-builder';
 
 import CustomTextControl, {
   customTextTester,

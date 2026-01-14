@@ -16,9 +16,9 @@ If UI changes, add screenshots/GIFs.
 ## How to Test
 Steps to verify (monorepo):
 1. `yarn install`
-2. Run form-builder-basic: `yarn dev` (http://localhost:3000)
-3. Build library: `yarn workspace form-builder build`
-4. Optional tests: `yarn workspace form-builder test`
+2. Run react-form-builder-basic: `yarn dev` (http://localhost:3000)
+3. Build library: `yarn workspace react-form-builder build`
+4. Optional tests: `yarn workspace react-form-builder test`
 
 ## Checklist
 - [ ] Builds locally (`yarn build`)

@@ -10,17 +10,17 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      '@dhristhi/form-builder': resolve(__dirname, '../../packages/form-builder/src'),
+      '@dhristhi/react-form-builder': resolve(__dirname, '../../packages/react-form-builder/src'),
     },
   },
   optimizeDeps: {
-    exclude: ['@dhristhi/form-builder'],
+    exclude: ['@dhristhi/react-form-builder'],
   },
   server: {
     port: 3000,
     open: true,
     fs: {
-      allow: [resolve(__dirname, '../..'), resolve(__dirname, '../../packages/form-builder')],
+      allow: [resolve(__dirname, '../..'), resolve(__dirname, '../../packages/react-form-builder')],
     },
   },
 });

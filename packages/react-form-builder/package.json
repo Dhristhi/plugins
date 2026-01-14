@@ -1,5 +1,5 @@
 {
-  "name": "@dhristhi/form-builder",
+  "name": "@dhristhi/react-form-builder",
   "version": "0.0.2",
   "description": "A React form builder using JSON Forms with drag and drop functionality",
   "license": "MIT",
@@ -21,10 +21,10 @@
   "bugs": {
     "url": "https://github.com/dhristhi/plugins/issues"
   },
-  "homepage": "https://github.com/dhristhi/plugins/packages/form-builder#readme",
+  "homepage": "https://github.com/dhristhi/plugins/packages/react-form-builder#readme",
   "keywords": [
     "react",
-    "form-builder",
+    "react-form-builder",
     "jsonforms",
     "material-ui",
     "vite",

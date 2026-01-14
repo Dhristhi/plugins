@@ -15,7 +15,7 @@
     "examples/*"
   ],
   "scripts": {
-    "dev": "yarn workspace form-builder-basic dev",
+    "dev": "yarn workspace react-form-builder-basic dev",
     "build": "yarn workspaces run build",
     "test": "yarn workspaces run test",
     "lint": "yarn workspaces run lint",
@@ -31,7 +31,7 @@
     "prettier": "^3.3.3"
   },
   "lint-staged": {
-    "packages/form-builder/**/*.{js,jsx,ts,tsx}": [
+    "packages/react-form-builder/**/*.{js,jsx,ts,tsx}": [
       "eslint --fix --max-warnings=0"
     ],
     "{packages,examples}/**/*.{js,jsx,ts,tsx,css,md,json}": [

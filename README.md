@@ -17,7 +17,7 @@ This repository uses Yarn workspaces. Each workspace (package/app) has its own b
 
 ## Packages
 
-- Form builder: [packages/form-builder](packages/form-builder) — `@dhristhi/form-builder`
+- Form builder: [packages/react-form-builder](packages/react-form-builder) — `@dhristhi/react-form-builder`
 
 ## Quick Start
 
@@ -40,7 +40,7 @@ We welcome new workspaces (libraries, tools, examples). Please review:
 - [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) — community standards
 - [SECURITY.md](SECURITY.md) — reporting vulnerabilities
 
-To create a new workspace, follow the patterns in [packages/form-builder](packages/form-builder) and add your package under `packages/` with its own `package.json`, `src/`, and README.
+To create a new workspace, follow the patterns in [packages/react-form-builder](packages/react-form-builder) and add your package under `packages/` with its own `package.json`, `src/`, and README.
 
 ## Support
 

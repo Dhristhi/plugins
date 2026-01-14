@@ -13,7 +13,7 @@ export default defineConfig({
       entry: 'src/index.js',
       name: 'FormBuilder',
       fileName: 'index',
-      formats: ['es', 'umd']
+      formats: ['es', 'umd'],
     },
     rollupOptions: {
       external: [
@@ -33,7 +33,7 @@ export default defineConfig({
         '@emotion/styled',
         '@tabler/icons-react',
         'react-i18next',
-        'i18next'
+        'i18next',
       ],
       output: {
         exports: 'named',
@@ -53,14 +53,14 @@ export default defineConfig({
           '@jsonforms/material-renderers': 'JsonFormsMaterialRenderers',
           '@tabler/icons-react': 'TablerIconsReact',
           'react-i18next': 'ReactI18next',
-          i18next: 'I18next'
-        }
-      }
-    }
+          i18next: 'I18next',
+        },
+      },
+    },
   },
   test: {
     environment: 'jsdom',
     setupFiles: ['src/__tests__/setup.js'],
-    globals: true
-  }
+    globals: true,
+  },
 });

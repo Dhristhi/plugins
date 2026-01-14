@@ -5,7 +5,7 @@ A modern drag-and-drop form builder built with React 19, Material UI, and JSON F
 [![React](https://img.shields.io/badge/React-19-blue.svg)](https://reactjs.org/)
 [![Material-UI](https://img.shields.io/badge/Material--UI-6-blue.svg)](https://mui.com/)
 [![JSON Forms](https://img.shields.io/badge/JSON%20Forms-3.6-green.svg)](https://jsonforms.io/)
-[![npm](https://img.shields.io/npm/v/%40dhristhi%2Fform-builder.svg?logo=npm&color=cb3837)](https://www.npmjs.com/package/@dhristhi/form-builder)
+[![npm](https://img.shields.io/npm/v/%40dhristhi%2Fform-builder.svg?logo=npm&color=cb3837)](https://www.npmjs.com/package/@dhristhi/react-form-builder)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 ## Features
@@ -21,14 +21,14 @@ A modern drag-and-drop form builder built with React 19, Material UI, and JSON F
 Install and import the component:
 
 ```bash
-yarn add @dhristhi/form-builder
+yarn add @dhristhi/react-form-builder
 # or
-npm install @dhristhi/form-builder
+npm install @dhristhi/react-form-builder
 ```
 
 ```jsx
 import React from 'react';
-import { FormBuilder } from '@dhristhi/form-builder';
+import { FormBuilder } from '@dhristhi/react-form-builder';
 
 export default function MyPage() {
   return <FormBuilder />;
@@ -46,7 +46,7 @@ export default function MyPage() {
 ### Register Custom Field Types
 
 ```js
-import { registerFieldTypes } from '@dhristhi/form-builder';
+import { registerFieldTypes } from '@dhristhi/react-form-builder';
 
 registerFieldTypes([
   {
@@ -65,7 +65,7 @@ registerFieldTypes([
 Enable/disable built-in custom controls and add your own JSON Forms renderers:
 
 ```js
-import { configureControls } from '@dhristhi/form-builder';
+import { configureControls } from '@dhristhi/react-form-builder';
 
 // Call once before rendering <FormBuilder />
 configureControls({
@@ -95,7 +95,7 @@ Notes:
 Example:
 
 ```jsx
-import { FormBuilder } from '@dhristhi/form-builder';
+import { FormBuilder } from '@dhristhi/react-form-builder';
 
 function handleExport({ schema, uiSchema }) {
   // Persist to server or file
