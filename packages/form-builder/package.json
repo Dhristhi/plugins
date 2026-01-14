@@ -1,6 +1,6 @@
 {
   "name": "@dhristhi/form-builder",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A React form builder using JSON Forms with drag and drop functionality",
   "license": "MIT",
   "author": "Dhristhi Technologies",
