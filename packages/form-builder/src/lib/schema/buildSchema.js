@@ -8,6 +8,7 @@ export const buildSchemaFromFields = (fieldsArray, parentKey = null) => {
       properties[field.key] = {
         type: 'array',
         title: field.label,
+        uniqueItems: true,
         ...Object.fromEntries(Object.entries(field.schema || {}).filter(([key]) => key !== 'type')),
       };
 
