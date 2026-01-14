@@ -1,6 +1,6 @@
 {
   "name": "@dhristhi/form-builder",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "A React form builder using JSON Forms with drag and drop functionality",
   "license": "MIT",
   "author": "Dhristhi Technologies",
@@ -16,12 +16,12 @@
   "sideEffects": false,
   "repository": {
     "type": "git",
-    "url": "https://github.com/dhristhitechnologies/poc-form-builder.git"
+    "url": "git+ssh://git@github.com/dhristhi/plugins.git"
   },
   "bugs": {
-    "url": "https://github.com/dhristhitechnologies/poc-form-builder/issues"
+    "url": "https://github.com/dhristhi/plugins/issues"
   },
-  "homepage": "https://github.com/dhristhitechnologies/poc-form-builder#readme",
+  "homepage": "https://github.com/dhristhi/plugins/packages/form-builder#readme",
   "keywords": [
     "react",
     "form-builder",
@@ -31,7 +31,7 @@
     "drag-and-drop"
   ],
   "engines": {
-    "node": ">=18"
+    "node": ">=22"
   },
   "scripts": {
     "build": "vite build",
