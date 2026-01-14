@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "lint": "eslint --ext .js,.jsx src",
+    "test": "echo \"No tests in demo workspace\" && exit 0"
   },
   "dependencies": {
     "@dhristhi/form-builder": "1.0.0",

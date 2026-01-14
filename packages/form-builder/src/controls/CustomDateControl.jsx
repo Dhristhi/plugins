@@ -1,16 +1,17 @@
+import { TextField } from '@mui/material';
 import { withJsonFormsControlProps } from '@jsonforms/react';
 import { rankWith, isControl, and, schemaMatches } from '@jsonforms/core';
-import { TextField } from '@mui/material';
+
 import { formatDate } from '../utils';
 
 const CustomDateControl = (props) => {
-  const { data, handleChange, path, label, required, errors, uischema, config, schema } = props;
+  const { data, handleChange, path, label, required, errors, uischema, schema } = props;
 
-  const dateFormat = uischema?.options?.dateTimeFormat || 'friendly';
-  const includeTime = uischema?.options?.includeTime || false;
-  const isReadOnly = uischema?.options?.readonly;
   const minDate = schema?.minimum;
   const maxDate = schema?.maximum;
+  const isReadOnly = uischema?.options?.readonly;
+  const includeTime = uischema?.options?.includeTime || false;
+  const dateFormat = uischema?.options?.dateTimeFormat || 'friendly';
 
   const getDisplayValue = () => {
     if (!data) return '';

@@ -1,8 +1,8 @@
-import { useState, useMemo, useRef } from 'react';
 import { createAjv } from '@jsonforms/core';
 import { JsonForms } from '@jsonforms/react';
-import { IconEye, IconChecks } from '@tabler/icons-react';
+import { useState, useMemo, useRef } from 'react';
 import { Typography, Button, Box } from '@mui/material';
+import { IconEye, IconChecks } from '@tabler/icons-react';
 
 import CommonHeader from './CommonHeader';
 import { getRenderers, getCells, config } from '../controls/renders';
@@ -16,15 +16,15 @@ const FormPreview = ({
   setShowSchemaEditor,
   exportForm,
 }) => {
-  //const ajv = createAjv({ useDefaults: true });
-  const ajv = useMemo(() => createAjv({ useDefaults: 'empty' }), []);
   const formRef = useRef();
-
-  const [hasValidated, setHasValidated] = useState(false);
-  const [key, setKey] = useState(0); // Force re-render
-  const [validationErrors, setValidationErrors] = useState([]);
-  const isProgrammaticUpdateRef = useRef(false);
   const userActions = useRef(false);
+  const isProgrammaticUpdateRef = useRef(false);
+
+  const ajv = useMemo(() => createAjv({ useDefaults: 'empty' }), []);
+
+  const [key, setKey] = useState(0); // Force re-render
+  const [hasValidated, setHasValidated] = useState(false);
+  const [validationErrors, setValidationErrors] = useState([]);
   const validateBox = {
     position: 'fixed',
     bottom: 0,

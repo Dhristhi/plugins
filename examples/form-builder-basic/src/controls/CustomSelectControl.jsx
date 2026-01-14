@@ -68,7 +68,7 @@ const CustomSelectControl = (props) => {
       }
 
       if (entity) {
-        const updatedQuery = query?.replace(/:(\w+)/g, (match, key) => match) || '';
+        const updatedQuery = query?.replace(/:(\w+)/g, (match) => match) || '';
         const params = {
           page: 1,
           pageSize: 10000,
@@ -108,7 +108,7 @@ const CustomSelectControl = (props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [entity, key, value, query, schema, effectiveCascadingKey, selCascadingValue]);
 
-  const apiCall = async (entity, params) => {
+  const apiCall = async (entity) => {
     setIsLoading(true);
 
     try {

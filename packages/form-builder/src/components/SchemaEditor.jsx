@@ -39,6 +39,7 @@ const SchemaEditor = ({
       }
 
       setError(null);
+      // eslint-disable-next-line no-unused-vars
     } catch (err) {
       setError('Invalid JSON format');
     }

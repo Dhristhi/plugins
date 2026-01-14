@@ -19,12 +19,7 @@ export const updateNestedValue = (obj, path, newValue) => {
   }, obj);
 };
 
-export const formatDate = (
-  date,
-  dateTimeFormat = 'DD-MM-YYYY HH:mm',
-  includeTime = false,
-  timeFormat = '12h'
-) => {
+export const formatDate = (date, dateTimeFormat = 'DD-MM-YYYY HH:mm') => {
   if (!date || date === 'NA' || date === 'None') {
     return 'N/A';
   }
@@ -201,28 +196,6 @@ const formatDateWithPattern = (date, pattern) => {
   });
 
   return result;
-};
-
-// Helper function to format time only
-const formatTimeOnly = (date, timeFormat) => {
-  const hours24 = date.getHours();
-  const hours12 = hours24 % 12 || 12;
-  const minutes = date.getMinutes();
-  const seconds = date.getSeconds();
-  const ampm = hours24 >= 12 ? 'PM' : 'AM';
-
-  switch (timeFormat) {
-    case '12h':
-      return `${hours12}:${minutes.toString().padStart(2, '0')} ${ampm}`;
-    case '24h':
-      return `${hours24.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-    case '12h-seconds':
-      return `${hours12}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')} ${ampm}`;
-    case '24h-seconds':
-      return `${hours24.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-    default:
-      return `${hours12}:${minutes.toString().padStart(2, '0')} ${ampm}`;
-  }
 };
 
 //fix: prevent misinterpretation of text+number strings as dates in dynamic renders

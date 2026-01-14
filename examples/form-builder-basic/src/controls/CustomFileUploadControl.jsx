@@ -1,9 +1,9 @@
-import { useState, useCallback, useRef } from 'react';
-import { Box, Typography, Alert, FormHelperText } from '@mui/material';
-import { IconUpload, IconFile } from '@tabler/icons-react';
-import { and, isControl, optionIs, rankWith } from '@jsonforms/core';
-import { withJsonFormsControlProps } from '@jsonforms/react';
 import { useTranslation } from 'react-i18next';
+import { useState, useCallback, useRef } from 'react';
+import { IconUpload, IconFile } from '@tabler/icons-react';
+import { withJsonFormsControlProps } from '@jsonforms/react';
+import { and, isControl, optionIs, rankWith } from '@jsonforms/core';
+import { Box, Typography, Alert, FormHelperText } from '@mui/material';
 
 const CustomFileUploadControl = (props) => {
   const { t } = useTranslation();
@@ -68,6 +68,7 @@ const CustomFileUploadControl = (props) => {
           setLocalError('Failed to read the file.');
         };
         reader.readAsDataURL(file);
+        // eslint-disable-next-line no-unused-vars
       } catch (e) {
         setIsUploading(false);
         setLocalError('Unexpected error while processing the file.');

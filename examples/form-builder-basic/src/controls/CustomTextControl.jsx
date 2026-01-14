@@ -5,8 +5,6 @@ import { CircularProgress, TextField } from '@mui/material';
 import { and, isControl, optionIs, rankWith } from '@jsonforms/core';
 import { useJsonForms, withJsonFormsControlProps } from '@jsonforms/react';
 
-// import { useAuth, useToast } from "@/hooks";
-// import { searchByParams } from "@/services/entity.service";
 import { queryStringToObject, formatCurrencyAmount } from '../utils';
 
 // Extract MaterialTextControl from Unwrapped
@@ -14,12 +12,9 @@ const { MaterialTextControl } = Unwrapped;
 
 const CustomTextControl = (props) => {
   const params = useParams();
-  const { getUser } = useAuth();
   const { core } = useJsonForms();
-  const { enqueueToast } = useToast();
 
-  const uData = getUser();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading] = useState(false);
   const [displayValue, setDisplayValue] = useState('');
 
   const { schema, uischema, path, handleChange, data, label, required, errors, description } =
@@ -51,9 +46,7 @@ const CustomTextControl = (props) => {
     if (referencePath) {
       const fetchDefaults = async () => {
         const splitKey = referencePath?.split('.');
-        const updatedQuery =
-          // query?.replace(/:(\w+)/g, (match, key) => uData[key] || match) || "";
-          query?.replace(/:(\w+)/g, (match, key) => match) || '';
+        const updatedQuery = query?.replace(/:(\w+)/g, (match) => match) || '';
         const params = queryStringToObject(updatedQuery);
 
         if (splitKey?.length === 2) {
@@ -75,18 +68,8 @@ const CustomTextControl = (props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [referencePath, query]);
 
-  const apiCall = (entity, params) => {
-    // setIsLoading(true);
-    // return searchByParams(entity, params)
-    //   .then((res) => {
-    //     if (res.data?.data) {
-    //       return res.data.data;
-    //     }
-    //     return enqueueToast({ type: "error", message: res });
-    //   })
-    //   .catch((err) => enqueueToast({ type: "error", message: err }))
-    //   .finally(() => setIsLoading(false));
-  };
+  // eslint-disable-next-line no-unused-vars
+  const apiCall = (entity, params) => {};
 
   const toNumber = (value) => (value === '' ? undefined : Number(value));
 
