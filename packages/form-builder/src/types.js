@@ -172,9 +172,9 @@ export const defaultFieldTypes = [
     },
   },
   {
-    id: 'select',
+    id: 'select-dropdown',
     type: 'string',
-    label: 'Select',
+    label: 'Select Dropdown',
     icon: IconChevronDown,
     schema: {
       type: 'string',
@@ -183,6 +183,23 @@ export const defaultFieldTypes = [
     uischema: {
       type: 'Control',
       scope: '#/properties/field',
+    },
+  },
+  {
+    id: 'select-radio',
+    type: 'string',
+    label: 'Select Radio',
+    icon: IconCircleDot,
+    schema: {
+      type: 'string',
+      enum: ['Option 1', 'Option 2', 'Option 3'],
+    },
+    uischema: {
+      type: 'Control',
+      scope: '#/properties/field',
+      options: {
+        format: 'radio',
+      },
     },
   },
   {
@@ -234,23 +251,7 @@ export const defaultFieldTypes = [
       },
     },
   },
-  {
-    id: 'radio',
-    type: 'string',
-    label: 'Radio Group',
-    icon: IconCircleDot,
-    schema: {
-      type: 'string',
-      enum: ['Option 1', 'Option 2', 'Option 3'],
-    },
-    uischema: {
-      type: 'Control',
-      scope: '#/properties/field',
-      options: {
-        format: 'radio',
-      },
-    },
-  },
+
   {
     id: 'object',
     type: 'object',
