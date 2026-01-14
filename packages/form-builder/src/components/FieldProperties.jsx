@@ -243,7 +243,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
 
   const emptyStateTitleSx = {
     fontWeight: 500,
-    color: 'grey.400',
+    color: 'text.secondary',
   };
 
   const mb16 = {
