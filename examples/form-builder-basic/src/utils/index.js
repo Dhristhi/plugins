@@ -22,12 +22,7 @@ export const updateNestedValue = (obj, path, newValue) => {
   }, obj);
 };
 
-export const formatDate = (
-  date,
-  dateTimeFormat = 'DD-MM-YYYY HH:mm',
-  includeTime = false,
-  timeFormat = '12h'
-) => {
+export const formatDate = (date, dateTimeFormat = 'DD-MM-YYYY HH:mm') => {
   if (!date || date === 'NA' || date === 'None') {
     return 'N/A';
   }
@@ -72,14 +67,15 @@ export const formatDate = (
         return `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}-${d.getDate().toString().padStart(2, '0')}`;
 
       // Legacy time-included formats
-      case 'international-ui':
+      case 'international-ui': {
         const intlDay = d.getDate().toString().padStart(2, '0');
         const intlMonth = d.toLocaleDateString('en-US', { month: 'short' });
         const intlYear = d.getFullYear();
         const intlTime = `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
         return `${intlDay} ${intlMonth} ${intlYear}, ${intlTime}`;
+      }
 
-      case 'friendly-text':
+      case 'friendly-text': {
         const friendlyDate = d.toLocaleDateString('en-US', {
           month: 'long',
           day: 'numeric',
@@ -89,8 +85,9 @@ export const formatDate = (
         const minutes = d.getMinutes().toString().padStart(2, '0');
         const ampm = d.getHours() >= 12 ? 'PM' : 'AM';
         return `${friendlyDate} at ${hours12}:${minutes} ${ampm}`;
+      }
 
-      case 'dashboard':
+      case 'dashboard': {
         const dashDate = d.toLocaleDateString('en-US', {
           month: 'short',
           day: 'numeric',
@@ -98,14 +95,16 @@ export const formatDate = (
         });
         const dashTime = `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
         return `${dashDate} • ${dashTime}`;
+      }
 
-      case 'calendar':
+      case 'calendar': {
         const dayOfWeek = d.toLocaleDateString('en-US', { weekday: 'short' });
         const calDay = d.getDate();
         const calMonth = d.toLocaleDateString('en-US', { month: 'short' });
         const calYear = d.getFullYear();
         const calTime = `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
         return `${dayOfWeek}, ${calDay} ${calMonth} ${calYear}, ${calTime}`;
+      }
     }
   }
 
@@ -187,28 +186,6 @@ const formatDateWithPattern = (date, pattern) => {
   });
 
   return result;
-};
-
-// Helper function to format time only
-const formatTimeOnly = (date, timeFormat) => {
-  const hours24 = date.getHours();
-  const hours12 = hours24 % 12 || 12;
-  const minutes = date.getMinutes();
-  const seconds = date.getSeconds();
-  const ampm = hours24 >= 12 ? 'PM' : 'AM';
-
-  switch (timeFormat) {
-    case '12h':
-      return `${hours12}:${minutes.toString().padStart(2, '0')} ${ampm}`;
-    case '24h':
-      return `${hours24.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-    case '12h-seconds':
-      return `${hours12}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')} ${ampm}`;
-    case '24h-seconds':
-      return `${hours24.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-    default:
-      return `${hours12}:${minutes.toString().padStart(2, '0')} ${ampm}`;
-  }
 };
 
 //fix: prevent misinterpretation of text+number strings as dates in dynamic renders

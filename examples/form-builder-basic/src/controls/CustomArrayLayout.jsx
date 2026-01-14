@@ -1,18 +1,13 @@
-import { useTranslation } from 'react-i18next';
-import { useCallback, useEffect, useRef } from 'react';
-import { IconPlus, IconTrash } from '@tabler/icons-react';
-import { Box, IconButton, Tooltip, Grid } from '@mui/material';
-import {
-  composePaths,
-  createDefaultValue,
-  isObjectArrayWithNesting,
-  rankWith,
-} from '@jsonforms/core';
 import {
   JsonFormsDispatch,
   withJsonFormsContext,
   withJsonFormsArrayLayoutProps,
 } from '@jsonforms/react';
+import { useTranslation } from 'react-i18next';
+import { useCallback, useEffect, useRef } from 'react';
+import { IconPlus, IconTrash } from '@tabler/icons-react';
+import { Box, IconButton, Tooltip, Grid } from '@mui/material';
+import { rankWith, composePaths, createDefaultValue } from '@jsonforms/core';
 
 const withContextToCardRenderd = (Component) => {
   const WrappedComponent = ({ props }) => <Component {...props} />;
@@ -106,11 +101,11 @@ const CardRenderer = withCustomProps((props) => {
 export const ArrayLayoutRenderer = (props) => {
   const { t } = useTranslation();
   const { addItem, cells, data, enabled, path, removeItems, renderers, schema, uischema } = props;
-  const isAddable = uischema?.options?.addable !== false;
-  const autoScroll = uischema?.options?.autoScroll !== false;
+
   const lastAddedIndexRef = useRef(-1);
   const minItems = schema?.minItems || 0;
-  const emptyValue = uischema?.options?.emptyValue;
+  const isAddable = uischema?.options?.addable !== false;
+  const autoScroll = uischema?.options?.autoScroll !== false;
 
   const addItemCb = useCallback(
     (p, value) => {

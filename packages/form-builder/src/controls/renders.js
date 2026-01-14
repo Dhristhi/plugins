@@ -1,11 +1,11 @@
 import { materialCells, materialRenderers } from '@jsonforms/material-renderers';
 
-import CustomGroupLayoutRenderer, { customGroupLayoutTester } from './CustomGroupLayout';
-import CustomVerticalLayoutRenderer, { customVerticalLayoutTester } from './CustomVerticalLayout';
 import CustomHorizontalLayoutRenderer, {
   customHorizontalLayoutTester,
 } from './CustomHorizontalLayout';
 import CustomDateControl, { customDateTester } from './CustomDateControl';
+import CustomGroupLayoutRenderer, { customGroupLayoutTester } from './CustomGroupLayout';
+import CustomVerticalLayoutRenderer, { customVerticalLayoutTester } from './CustomVerticalLayout';
 
 // Internal registry of custom renderers with IDs for configuration
 const customRendererEntries = [

@@ -19,6 +19,19 @@ import {
 export const defaultFieldTypes = [
   // Layout Elements
   {
+    id: 'group',
+    type: 'group',
+    label: 'Group',
+    icon: IconBox,
+    isLayout: true,
+    schema: {},
+    uischema: {
+      type: 'Group',
+      label: 'Group Section',
+      elements: [],
+    },
+  },
+  {
     id: 'vertical-layout',
     type: 'layout',
     label: 'Vertical Layout',
@@ -39,19 +52,6 @@ export const defaultFieldTypes = [
     schema: {},
     uischema: {
       type: 'HorizontalLayout',
-      elements: [],
-    },
-  },
-  {
-    id: 'group',
-    type: 'group',
-    label: 'Group',
-    icon: IconBox,
-    isLayout: true,
-    schema: {},
-    uischema: {
-      type: 'Group',
-      label: 'Group Section',
       elements: [],
     },
   },

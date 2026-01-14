@@ -1,7 +1,7 @@
-import React from 'react';
-import { render, screen } from '@testing-library/react';
 import { vi } from 'vitest';
 import { IconEye } from '@tabler/icons-react';
+import { render, screen } from '@testing-library/react';
+
 import CommonHeader from '../components/CommonHeader';
 
 describe('CommonHeader', () => {

@@ -29,11 +29,13 @@ export default [
       'react-refresh': reactRefreshPlugin
     },
     rules: {
-      'no-unused-vars': 'off',
       'no-undef': 'off',
-      'react/react-in-jsx-scope': 'off',
+      'no-unused-vars': 'warn',
       'react/prop-types': 'off',
-      'react-hooks/rules-of-hooks': 'off',
+      // Mark variables used in JSX as used to avoid false "unused" reports
+      'react/jsx-uses-vars': 'warn',
+      'react/react-in-jsx-scope': 'off',
+      'react-hooks/rules-of-hooks': 'warn',
       'react-hooks/exhaustive-deps': 'off',
       'react-refresh/only-export-components': 'off'
       

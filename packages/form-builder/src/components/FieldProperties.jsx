@@ -17,7 +17,7 @@ import {
   Checkbox,
   InputAdornment,
 } from '@mui/material';
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { IconPlus, IconTrash, IconSettings, IconChevronDown, IconX } from '@tabler/icons-react';
 
 import { defaultFieldTypes } from '../types';
@@ -25,21 +25,20 @@ import IconSelector from '../utils/IconSelector';
 import { updateFieldById } from '../lib/structure/treeOps';
 
 const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
+  const [layout, setLayout] = useState('');
+  const [newOption, setNewOption] = useState('');
   const [localField, setLocalField] = useState(null);
   const [enumOptions, setEnumOptions] = useState([]);
-  const [newOption, setNewOption] = useState('');
-  const [enumDataType, setEnumDataType] = useState('string');
-  const [selectedAccess, setSelectedAccess] = useState([]);
-  const [layout, setLayout] = useState('');
   const [selectedIcon, setSelectedIcon] = useState('');
+  const [maxSizeInput, setMaxSizeInput] = useState('');
+  const [enumDataType, setEnumDataType] = useState('string');
   const [defaultInput, setDefaultInput] = useState(
     Array.isArray(localField?.schema?.default)
       ? localField.schema.default.join(', ')
       : (localField?.schema?.default ?? '')
   );
-  const [maxSizeInput, setMaxSizeInput] = useState('');
-  const [isInsideArrayOfObjects, setIsInsideArrayOfObjects] = useState(false);
   const [parentArrayField, setParentArrayField] = useState(null);
+  const [isInsideArrayOfObjects, setIsInsideArrayOfObjects] = useState(false);
 
   useEffect(() => {
     setMaxSizeInput(localField?.uischema?.options?.['ui:options']?.maxSize?.toString() || '');
@@ -231,7 +230,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
         setEnumOptions([]);
         setEnumDataType('string');
       }
-      setSelectedAccess(field.schema?.allowedAccess || []);
       setSelectedIcon(field.icon || '');
     }
   }, [field, fields, onFieldUpdate]);
@@ -484,10 +482,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
     mt: 2,
   };
 
-  const collapsibleGroupSwitchSx = {
-    mt: 1,
-  };
-
   const accordionSx = {
     mb: 2,
     borderRadius: 0,
@@ -556,7 +550,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
   };
 
   const formControlLabelSx = { mb: 1, display: 'block' };
-  const sliderContainerSx = { mt: 2 };
 
   const parseCommaSeparated = (value) => {
     if (typeof value !== 'string') return value;

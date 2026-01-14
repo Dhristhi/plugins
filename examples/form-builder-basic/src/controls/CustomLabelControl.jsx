@@ -1,7 +1,7 @@
 import { JSONTree } from 'react-json-tree';
 import { withJsonFormsControlProps } from '@jsonforms/react';
-import { Chip, Grid, Box, Typography, styled, alpha, useTheme } from '@mui/material';
 import { and, isControl, optionIs, rankWith } from '@jsonforms/core';
+import { Chip, Grid, Box, Typography, styled, alpha, useTheme } from '@mui/material';
 
 import { formatDate, isValidDateString, formatCurrencyAmount } from '../utils';
 

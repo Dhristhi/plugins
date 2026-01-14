@@ -1,4 +1,4 @@
-import { IconHammer, IconX } from '@tabler/icons-react';
+import { IconX } from '@tabler/icons-react';
 import { restrictToWindowEdges } from '@dnd-kit/modifiers';
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
@@ -164,9 +164,7 @@ const App = ({ onExport, onSave, schemas = [], theme: customTheme } = {}) => {
   }, [formData?.plan, formData?.tier]);
 
   const schemaData = useMemo(() => {
-    // console.log('Fields passed to buildSchemaFromFields:', JSON.stringify(fields, null, 2));
     const result = buildSchemaFromFields(fields);
-    // console.log('Generated Schema Data:', JSON.stringify(result, null, 2));
     return result;
   }, [fields]);
 
@@ -186,21 +184,13 @@ const App = ({ onExport, onSave, schemas = [], theme: customTheme } = {}) => {
         ? { required: schemaData.required }
         : {}),
     };
-    // console.log('Final Schema in formState:', JSON.stringify(schema, null, 2));
+
     return {
       schema,
       uischema: baseUiSchema,
       data: formData,
     };
   }, [schemaData, baseUiSchema, formData]);
-
-  // // Notify consumer when schema or uischema changes
-  // useEffect(() => {
-  //   if (typeof onSave === 'function') {
-  //     onSave(formState.schema, formState.uischema);
-  //   }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [formState.schema, formState.uischema]);
 
   const addField = useCallback((fieldType, parentId, index) => {
     // Create a unique operation ID to prevent duplicates
@@ -467,26 +457,6 @@ const App = ({ onExport, onSave, schemas = [], theme: customTheme } = {}) => {
       `linear-gradient(135deg, ${theme.palette.grey[50]} 0%, ${theme.palette.grey[200]} 100%)`,
   };
 
-  const headerBox = {
-    background: (theme) =>
-      `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-    color: 'primary.contrastText',
-    p: 2,
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    boxShadow: 4,
-  };
-
-  const headerBoxInner = { display: 'flex', alignItems: 'center', gap: 2 };
-
-  const headerTypography = {
-    margin: 0,
-    fontSize: { xs: '20px', sm: '28px' },
-    fontWeight: 600,
-    letterSpacing: '-0.02em',
-  };
-
   const mainBox = {
     display: 'flex',
     flex: 1,
@@ -660,16 +630,6 @@ const App = ({ onExport, onSave, schemas = [], theme: customTheme } = {}) => {
       >
         <SortableContext items={getAllFieldIds(fields)} strategy={verticalListSortingStrategy}>
           <Box sx={baseBox}>
-            {/* Header */}
-            <Box sx={headerBox}>
-              <Box sx={headerBoxInner}>
-                <IconHammer size={28} />
-                <Typography variant="h5" sx={headerTypography}>
-                  Form Builder
-                </Typography>
-              </Box>
-            </Box>
-
             {/* Main Content */}
             <Box sx={mainBox}>
               {/* Left Sidebar - Field Palette */}
