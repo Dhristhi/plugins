@@ -297,6 +297,10 @@ const App = ({ onExport, onSave, schemas = [], theme: customTheme } = {}) => {
   );
 
   const handleFieldUpdate = useCallback((updatedField, options = {}) => {
+    if (updatedField?.defaultvalueUpdate) {
+      setHasUnsavedChanges(true);
+      return;
+    }
     setEditingField(updatedField);
     setHasUnsavedChanges(true);
 
