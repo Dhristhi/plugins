@@ -123,11 +123,18 @@ export const convertSchemaToFields = (schema, defaultFieldTypes, getNextId) => {
     }
 
     if (property.type === 'array' && property.items && property.items.enum) {
+      // Check if field name suggests checkbox display (heuristic approach)
+      const useCheckboxDisplay = key.includes('checkbox');
+      const multiselectTypeId = useCheckboxDisplay
+        ? 'multiselect-checkbox'
+        : 'multiselect-dropdown';
+      const displayType = useCheckboxDisplay ? 'checkbox' : 'dropdown';
+
       const multiselectType =
-        defaultFieldTypes.find((ft) => ft.id === 'multiselect-dropdown') || defaultFieldTypes[0];
+        defaultFieldTypes.find((ft) => ft.id === multiselectTypeId) || defaultFieldTypes[0];
       const newField = {
         id: `field_${uniqueId}`,
-        type: 'multiselect-dropdown',
+        type: multiselectTypeId,
         label,
         key,
         required: schema.required?.includes(key) || false,
@@ -140,7 +147,7 @@ export const convertSchemaToFields = (schema, defaultFieldTypes, getNextId) => {
             ...multiselectType.uischema.options,
             multi: true,
             format: 'dynamicselect',
-            displayType: 'dropdown',
+            displayType: displayType,
           },
         },
         parentId: null,
