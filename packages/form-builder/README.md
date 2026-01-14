@@ -1,4 +1,4 @@
-# React Form Builder — @dhristhi/form-builder
+# React Form Builder
 
 A modern drag-and-drop form builder built with React 19, Material UI, and JSON Forms. Design forms visually, preview them live, and export JSON Schema + UI Schema.
 
@@ -8,36 +8,15 @@ A modern drag-and-drop form builder built with React 19, Material UI, and JSON F
 [![npm](https://img.shields.io/npm/v/%40dhristhi%2Fform-builder.svg?logo=npm&color=cb3837)](https://www.npmjs.com/package/@dhristhi/form-builder)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-## Screenshots
+## Features
 
-Coming soon.
+- Drag & Drop builder with nested layouts
+- Property editor for field configuration
+- Schema editor (JSON Schema & UI Schema)
+- Live preview with JSON Forms
+- Export/import schemas
 
 ## Quick Start
-
-- Requirements: Node ≥ 22, Yarn Classic (1.x) workspaces.
-
-Install dependencies and start the demo app:
-
-```bash
-yarn install
-yarn dev
-# Opens http://localhost:5173 (Vite demo)
-```
-
-Build and test the library package:
-
-```bash
-# Build the library
-yarn workspace @dhristhi/form-builder build
-
-# Run unit tests (vitest)
-yarn workspace @dhristhi/form-builder test
-
-# Lint all workspaces
-yarn lint
-```
-
-## Use in Your App
 
 Install and import the component:
 
@@ -55,16 +34,6 @@ export default function MyPage() {
   return <FormBuilder />;
 }
 ```
-
-Peer dependencies expected in the host app:
-
-- React and ReactDOM (≥ 18)
-- @mui/material, @mui/icons-material, @mui/system (≥ 6)
-- @jsonforms/core, @jsonforms/react, @jsonforms/material-renderers (≥ 3.6)
-- @dnd-kit/core, @dnd-kit/sortable, @dnd-kit/modifiers (≥ listed versions)
-- @emotion/react, @emotion/styled
-- @tabler/icons-react
-- i18next and react-i18next
 
 ## API & Extensibility
 
@@ -155,33 +124,6 @@ export default function MyPage() {
   );
 }
 ```
-
-## Development
-
-```bash
-# Run the demo app
-yarn dev
-
-# Lint all workspaces
-yarn lint
-
-# Test the library
-yarn workspace @dhristhi/form-builder test
-
-# Build the library
-yarn workspace @dhristhi/form-builder build
-
-# Build all workspaces
-yarn build
-```
-
-## Features
-
-- Drag & Drop builder with nested layouts
-- Live preview with JSON Forms
-- Property editor for field configuration
-- Schema editor (JSON Schema & UI Schema)
-- Export/import schemas
 
 ## License
 
