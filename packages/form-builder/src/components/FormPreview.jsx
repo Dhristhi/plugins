@@ -56,40 +56,34 @@ const FormPreview = ({
     return true;
   };
 
+  const getValueByPath = (obj, path) => {
+    if (!path) return obj;
+    const keys = path.replace(/^\//, '').split('/');
+    let value = obj;
+    for (const key of keys) {
+      if (value === undefined || value === null) return undefined;
+      value = value[key];
+    }
+    return value;
+  };
+
   const filterErrors = (errors, data, schema) => {
     const filteredErrors = [];
 
-    // Handle required field errors
-    const requiredErrors = errors.filter((err) => err.keyword === 'required');
-    requiredErrors.forEach((error) => {
-      const fieldKey = error.params?.missingProperty;
-      if (fieldKey) {
-        const fieldValue = data[fieldKey];
-        const hasContent = hasFieldContent(fieldValue);
-        const isRequired = schema.required && schema.required.includes(fieldKey);
-
-        if (isRequired && !hasContent) {
-          // Create error with correct instancePath for the field
-          filteredErrors.push({
-            ...error,
-            instancePath: `/${fieldKey}`,
-          });
-        }
-      }
-    });
-
-    // Handle field-specific validation errors (format, pattern, etc.)
-    const fieldErrors = errors.filter((err) => err.keyword !== 'required');
-    fieldErrors.forEach((error) => {
-      const fieldPath = error.instancePath || '';
-      const fieldKey = fieldPath.replace(/^\//, '');
-
-      if (fieldKey) {
-        const fieldValue = data[fieldKey];
-        const hasContent = hasFieldContent(fieldValue);
-
-        // Only show validation errors if field has content
-        if (hasContent) {
+    errors.forEach((error) => {
+      if (error.keyword === 'required') {
+        // Handle required errors for both root and nested fields
+        filteredErrors.push(error);
+      } else {
+        // Handle other validation errors - only show if field has content
+        const fieldPath = error.instancePath || '';
+        if (fieldPath) {
+          const fieldValue = getValueByPath(data, fieldPath);
+          const hasContent = hasFieldContent(fieldValue);
+          if (hasContent) {
+            filteredErrors.push(error);
+          }
+        } else {
           filteredErrors.push(error);
         }
       }
@@ -98,22 +92,39 @@ const FormPreview = ({
     return filteredErrors;
   };
 
-  const performValidation = (data = formState.data) => {
-    // Create validation data where empty strings become undefined for required validation
-    const validationData = { ...data };
-    Object.keys(validationData).forEach((key) => {
-      if (
-        validationData[key] === '' ||
-        validationData[key] === null ||
-        (Array.isArray(validationData[key]) && validationData[key].length === 0) ||
-        validationData[key] === false
-      ) {
-        delete validationData[key];
-      }
-    });
+  const cleanDataForValidation = (data) => {
+    if (Array.isArray(data)) {
+      return data.map(item => cleanDataForValidation(item));
+    }
+    
+    if (data && typeof data === 'object') {
+      const cleaned = {};
+      Object.keys(data).forEach(key => {
+        const value = data[key];
+        
+        if (value === '' || value === null || value === undefined) {
+          return; // Remove empty values
+        }
+        
+        if (Array.isArray(value)) {
+          cleaned[key] = cleanDataForValidation(value);
+        } else if (typeof value === 'object') {
+          cleaned[key] = cleanDataForValidation(value);
+        } else {
+          cleaned[key] = value;
+        }
+      });
+      return cleaned;
+    }
+    
+    return data;
+  };
 
+  const performValidation = (data = formState.data) => {
+    const cleanedData = cleanDataForValidation(data);
+    
     const validate = ajv.compile(formState.schema);
-    const isValid = validate(validationData);
+    const isValid = validate(cleanedData);
 
     if (!isValid && validate.errors) {
       const transformedErrors = validate.errors.map((error) => ({
