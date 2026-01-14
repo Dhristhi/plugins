@@ -109,7 +109,6 @@ Notes:
 
 ### Props
 
-- **`onSchemaChange(schema, uiSchema)`**: Called whenever the builder’s schema or UI schema changes.
 - **`onExport({ schema, uiSchema })`**: If provided, overrides default JSON download and delivers the export payload to your handler.
 - **`theme`**: Custom MUI theme instance to style the builder.
 - **`schemas`**: Custom list of sample templates `{ id, name, description?, schema }` used by the template picker and loader.
@@ -130,7 +129,6 @@ function handleExport({ schema, uiSchema }) {
 export default function MyPage() {
   return (
     <FormBuilder
-      onSchemaChange={handleSchemaChange}
       onExport={handleExport}
       schemas={[
         {

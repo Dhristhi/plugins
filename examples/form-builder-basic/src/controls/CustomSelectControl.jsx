@@ -85,7 +85,6 @@ const CustomSelectControl = (props) => {
             value: r[key],
             raw: r,
           }));
-          console.log('Fetched options:', newOptions);
           setOptions(newOptions);
         }
       } else {

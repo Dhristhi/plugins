@@ -1,10 +1,5 @@
 import FormBuilder, { configureControls } from '@dhristhi/form-builder';
-import { customTheme } from './customTheme';
-import CustomInfoAlert, { customInfoAlertTester } from './controls/CustomInfoAlert';
-import customSelectControl, { customSelectTester } from './controls/CustomSelectControl';
-import CustomFileUploadControl, {
-  customFileUploadTester,
-} from './controls/CustomFileUploadControl';
+
 import CustomTextControl, {
   customTextTester,
   customCurrencyTester,
@@ -13,14 +8,18 @@ import CustomLabelControl, {
   customLabelTester,
   customImageTester,
 } from './controls/CustomLabelControl';
+import CustomFileUploadControl, {
+  customFileUploadTester,
+} from './controls/CustomFileUploadControl';
 import CustomDownloadFileControl, {
   customDownloadFileTester,
 } from './controls/CustomDownloadFileControl';
-
-import ArrayLayoutRenderer, { customArrayLayoutTester } from './controls/CustomArrayLayout';
 import CustomAccordionGroupLayoutRenderer, {
   customAccordionGroupLayoutTester,
 } from './controls/CustomAccordionGroupLayout';
+import CustomInfoAlert, { customInfoAlertTester } from './controls/CustomInfoAlert';
+import customSelectControl, { customSelectTester } from './controls/CustomSelectControl';
+import ArrayLayoutRenderer, { customArrayLayoutTester } from './controls/CustomArrayLayout';
 
 // Internal registry of custom renderers with IDs for configuration
 export const customRendererEntries = [
@@ -1240,7 +1239,7 @@ const schemas = [
   },
 ];
 
-export default function DemoApp() {
+export default function App() {
   const handleSchemaSave = (schema, uischema) => {
     console.log('Schema changed:', { schema, uischema });
   };

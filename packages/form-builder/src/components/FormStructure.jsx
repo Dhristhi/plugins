@@ -535,7 +535,6 @@ const FormStructure = ({
             isEmpty={true}
             onAddField={() => {
               // Could add a default field here if needed
-              console.log('Add field to empty form');
             }}
           />
         ) : (
