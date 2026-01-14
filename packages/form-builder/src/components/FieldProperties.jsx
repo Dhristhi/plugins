@@ -547,7 +547,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
 
   const optionChipSx = {
     borderRadius: 1.5,
-    textTransform: 'capitalize',
     '& .MuiChip-deleteIcon': {
       color: 'error.main',
       '&:hover': {
@@ -898,6 +897,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                   value={defaultInput}
                   onChange={(e) => {
                     setDefaultInput(e.target.value);
+                    onFieldUpdate({ defaultvalueUpdate: true });
                   }}
                   onBlur={(e) => {
                     let defaultValue = e.target.value;

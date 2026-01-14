@@ -40,7 +40,14 @@ const CustomDateControl = (props) => {
   };
 
   const getInputType = () => {
-    return includeTime ? 'datetime-local' : 'date';
+    if (isReadOnly) {
+      return 'text';
+    }
+    if (includeTime) {
+      return 'datetime-local';
+    }
+    return 'date';
+    //return includeTime ? 'datetime-local' : 'date';
   };
 
   const getMinValue = () => {
