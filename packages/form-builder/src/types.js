@@ -278,6 +278,7 @@ export const defaultFieldTypes = [
       items: {
         type: 'string',
       },
+      uniqueItems: true,
     },
     uischema: {
       type: 'Control',
@@ -300,6 +301,7 @@ export const defaultFieldTypes = [
       items: {
         type: 'string',
       },
+      uniqueItems: true,
     },
     uischema: {
       type: 'Control',
