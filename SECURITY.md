@@ -6,7 +6,7 @@ We aim to keep `main` stable. Report vulnerabilities against the latest commit o
 
 ## Reporting a Vulnerability
 
-- Please email security reports to security@dhristhi.tech (or your preferred address).
+- Please email security reports to office@dhristhi.com (or your preferred address).
 - Do not open public issues for security vulnerabilities.
 - Include details to reproduce, potential impact, and any available patches or mitigations.
 
