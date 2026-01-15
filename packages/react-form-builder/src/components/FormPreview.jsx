@@ -66,13 +66,11 @@ const FormPreview = ({
       if (fieldKey) {
         const fieldValue = data[fieldKey];
         const hasContent = hasFieldContent(fieldValue);
-        const isRequired = schema.required && schema.required.includes(fieldKey);
 
-        if (isRequired && !hasContent) {
+        if (!hasContent) {
           // Create error with correct instancePath for the field
           filteredErrors.push({
             ...error,
-            instancePath: `/${fieldKey}`,
           });
         }
       }
