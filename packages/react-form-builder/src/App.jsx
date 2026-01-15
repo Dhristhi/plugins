@@ -18,12 +18,12 @@ import SchemaEditor from './components/SchemaEditor';
 import FormStructure from './components/FormStructure';
 import FieldProperties from './components/FieldProperties';
 
-import './lib/registry/init';
 import { exportFormData } from './lib/export/exportForm';
 import { customCollisionDetection } from './lib/dnd/collision';
 import { initializeNestedFormData } from './lib/data/initData';
 import { buildUISchemaFromFields } from './lib/schema/uiSchema';
 import { buildSchemaFromFields } from './lib/schema/buildSchema';
+import { bootstrapDefaultFieldTypes } from './lib/registry/init';
 import { getFieldTypes, getFieldTypeById } from './lib/registry/fieldRegistry';
 import { convertSchemaToFields as convertSchemaToFieldsLib } from './lib/schema/convert';
 import {
@@ -97,6 +97,8 @@ const defaultTheme = createTheme({
 });
 
 const App = ({ onExport, onSave, schemas = [], theme: customTheme } = {}) => {
+  // Ensure default field types are registered at app startup
+  bootstrapDefaultFieldTypes();
   const [fields, setFields] = useState([]);
   const [formData, setFormData] = useState({});
   const [selectedField, setSelectedField] = useState(null);
