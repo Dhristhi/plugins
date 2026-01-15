@@ -683,9 +683,6 @@ const schemas = [
           properties: {
             first_name: {
               type: 'string',
-              isTitle: true,
-              tableView: true,
-              showAvatar: true,
               picturePath: 'personal_info.profile_picture',
               title: 'First Name',
             },
@@ -695,8 +692,6 @@ const schemas = [
             },
             last_name: {
               type: 'string',
-              isTitle: true,
-              tableView: true,
               title: 'Last Name',
             },
             blood_group: {
@@ -1023,7 +1018,6 @@ const schemas = [
             employeeid: {
               type: 'string',
               title: 'Employee Id',
-              tableView: true,
               isSubTitle: true,
             },
             joining_date: {
@@ -1046,7 +1040,7 @@ const schemas = [
                 },
                 title: {
                   type: 'string',
-                  tableView: true,
+
                   title: 'Job Role',
                 },
               },
@@ -1055,17 +1049,14 @@ const schemas = [
             designation: {
               type: 'string',
               title: 'Designation',
-              tableView: true,
             },
             office_location: {
               type: 'string',
               title: 'Office Location',
-              tableView: true,
               isSubTitle: true,
             },
             salary: {
               type: 'object',
-              tableView: true,
               title: 'Salary Details',
               properties: {
                 currency: {
@@ -1141,7 +1132,7 @@ const schemas = [
                   name: {
                     type: 'string',
                     title: 'Account Name',
-                    tableView: true,
+
                     isSubTitle: true,
                   },
                   start_date: {
@@ -1167,7 +1158,6 @@ const schemas = [
                         name: {
                           type: 'string',
                           title: 'Project Name',
-                          tableView: true,
                         },
                         start_date: {
                           type: 'string',
@@ -1203,14 +1193,13 @@ const schemas = [
         skills: {
           type: 'array',
           title: 'Skills',
-          tableView: true,
+
           items: {
             type: 'object',
             properties: {
               skill: {
                 type: 'string',
                 title: 'Skills',
-                tableView: true,
               },
               self: {
                 type: 'number',

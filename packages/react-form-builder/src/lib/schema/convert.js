@@ -2,10 +2,11 @@ export const mapSchemaPropertyToFieldType = (property, defaultFieldTypes) => {
   const { type, enum: enumValues, format, maxLength } = property || {};
 
   if (Array.isArray(enumValues) && enumValues.length > 0) {
+    // Use the actual select field type IDs defined in defaultFieldTypes
     if (enumValues.length <= 3) {
-      return defaultFieldTypes.find((ft) => ft.id === 'radio') || defaultFieldTypes[0];
+      return defaultFieldTypes.find((ft) => ft.id === 'select-radio') || defaultFieldTypes[0];
     }
-    return defaultFieldTypes.find((ft) => ft.id === 'select') || defaultFieldTypes[0];
+    return defaultFieldTypes.find((ft) => ft.id === 'select-dropdown') || defaultFieldTypes[0];
   }
 
   switch (type) {
