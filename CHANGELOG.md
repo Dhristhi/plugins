@@ -64,3 +64,14 @@ Overall, this release establishes a solid foundation with broad field support, f
 
 ### Notes
 - Bumped package version to `0.0.3` for release.
+
+
+## [0.0.4] - 2026-01-16
+### Added
+- Introduced two new custom controls to extend json forms ui controls
+
+### Changed
+- Fixed enum dropdown rendering issue
+
+### Notes
+- Bumped package version to `0.0.4` for release.
