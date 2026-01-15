@@ -99,6 +99,7 @@ const defaultTheme = createTheme({
 const App = ({ onExport, onSave, schemas = [], theme: customTheme } = {}) => {
   // Ensure default field types are registered at app startup
   bootstrapDefaultFieldTypes();
+
   const [fields, setFields] = useState([]);
   const [formData, setFormData] = useState({});
   const [selectedField, setSelectedField] = useState(null);
