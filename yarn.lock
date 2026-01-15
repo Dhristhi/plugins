@@ -376,6 +376,30 @@
   dependencies:
     "@date-io/core" "^3.2.0"
 
+"@dhristhi/react-form-builder@0.0.2":
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/@dhristhi/react-form-builder/-/react-form-builder-0.0.2.tgz#6d9ee44d320966e55effae21694146c3a0c79b7c"
+  integrity sha512-Ta8beTBERrslLx5PgKTblw7DJu9oXLECVm24Py3gOC5S5R5t0i3zRoX7ruJLYSIQyYoDgOWRTFtGgzK80u0BBg==
+  dependencies:
+    "@dnd-kit/core" "^6.3.1"
+    "@dnd-kit/modifiers" "^9.0.0"
+    "@dnd-kit/sortable" "^10.0.0"
+    "@dnd-kit/utilities" "^3.2.2"
+    "@emotion/react" "^11.14.0"
+    "@emotion/styled" "^11.14.1"
+    "@jsonforms/core" "^3.6.0"
+    "@jsonforms/material-renderers" "^3.6.0"
+    "@jsonforms/react" "^3.6.0"
+    "@mui/icons-material" "^6.5.0"
+    "@mui/material" "^6.5.0"
+    "@mui/styled-engine" "^7.3.5"
+    "@mui/system" "^7.3.5"
+    "@mui/x-date-pickers" "^8.19.0"
+    "@vitejs/plugin-react" "^5.1.1"
+    react "^19.2.0"
+    react-dom "^19.2.0"
+    vite "^7.2.4"
+
 "@dnd-kit/accessibility@^3.1.1":
   version "3.1.1"
   resolved "https://registry.yarnpkg.com/@dnd-kit/accessibility/-/accessibility-3.1.1.tgz#3b4202bd6bb370a0730f6734867785919beac6af"
