@@ -56,7 +56,7 @@ const FormPreview = ({
     return true;
   };
 
-  const filterErrors = (errors, data, schema) => {
+  const filterErrors = (errors, data) => {
     const filteredErrors = [];
 
     // Handle required field errors
@@ -123,7 +123,7 @@ const FormPreview = ({
         data: error.data,
       }));
 
-      const filteredErrors = filterErrors(transformedErrors, data, formState.schema);
+      const filteredErrors = filterErrors(transformedErrors, data);
       setValidationErrors(filteredErrors);
     } else {
       setValidationErrors([]);
