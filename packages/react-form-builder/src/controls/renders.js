@@ -4,13 +4,17 @@ import CustomHorizontalLayoutRenderer, {
   customHorizontalLayoutTester,
 } from './CustomHorizontalLayout';
 import CustomDateControl, { customDateTester } from './CustomDateControl';
+import customSelectControl, { customSelectTester } from './CustomSelectControl';
 import CustomGroupLayoutRenderer, { customGroupLayoutTester } from './CustomGroupLayout';
+import CustomFileUploadControl, { customFileUploadTester } from './CustomFileUploadControl';
 import CustomVerticalLayoutRenderer, { customVerticalLayoutTester } from './CustomVerticalLayout';
 
 // Internal registry of custom renderers with IDs for configuration
 const customRendererEntries = [
+  { id: 'select', tester: customSelectTester, renderer: customSelectControl },
   { id: 'dateControl', tester: customDateTester, renderer: CustomDateControl },
-  { id: 'groupLayout', tester: customGroupLayoutTester, renderer: CustomGroupLayoutRenderer },
+  { id: 'fileUpload', tester: customFileUploadTester, renderer: CustomFileUploadControl },
+
   {
     id: 'verticalLayout',
     tester: customVerticalLayoutTester,
@@ -21,6 +25,7 @@ const customRendererEntries = [
     tester: customHorizontalLayoutTester,
     renderer: CustomHorizontalLayoutRenderer,
   },
+  { id: 'groupLayout', tester: customGroupLayoutTester, renderer: CustomGroupLayoutRenderer },
 ];
 
 let enabledRendererIds = new Set(customRendererEntries.map((r) => r.id));

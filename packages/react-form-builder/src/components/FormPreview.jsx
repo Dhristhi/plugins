@@ -1,8 +1,8 @@
 import { createAjv } from '@jsonforms/core';
 import { JsonForms } from '@jsonforms/react';
+import { IconEye } from '@tabler/icons-react';
 import { useState, useMemo, useRef } from 'react';
 import { Typography, Button, Box } from '@mui/material';
-import { IconEye, IconChecks } from '@tabler/icons-react';
 
 import CommonHeader from './CommonHeader';
 import { getRenderers, getCells, config } from '../controls/renders';
@@ -223,10 +223,6 @@ const FormPreview = ({
                   performValidation(data);
                 }
               }}
-              // i18n={{
-              //   locale: i18n.language,
-              //   translate: (key, defaultMessage) => getTranslation(key, 'label', defaultMessage),
-              // }}
             />
           </div>
         ) : (
@@ -237,11 +233,7 @@ const FormPreview = ({
       </Box>
       {formState.schema.properties && Object.keys(formState.schema.properties).length > 0 && (
         <Box sx={validateBox}>
-          <Button
-            onClick={toggleValidateButton}
-            variant="contained"
-            startIcon={<IconChecks size={16} />}
-          >
+          <Button onClick={toggleValidateButton} variant="contained">
             Validate
           </Button>
         </Box>

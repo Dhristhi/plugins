@@ -1,4 +1,3 @@
-import { useTranslation } from 'react-i18next';
 import { useState, useCallback, useRef } from 'react';
 import { IconUpload, IconFile } from '@tabler/icons-react';
 import { withJsonFormsControlProps } from '@jsonforms/react';
@@ -6,21 +5,20 @@ import { and, isControl, optionIs, rankWith } from '@jsonforms/core';
 import { Box, Typography, Alert, FormHelperText } from '@mui/material';
 
 const CustomFileUploadControl = (props) => {
-  const { t } = useTranslation();
-
   const { data, handleChange, path, errors, uischema, schema, label } = props;
 
+  const [localError, setLocalError] = useState(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  const [localError, setLocalError] = useState(null);
 
-  // Accept images by default; allow override via uischema.options.accept
-  const acceptedFileTypes = uischema?.options?.['ui:options']?.accept;
-  const maxFileSize = uischema?.options?.['ui:options']?.maxSize;
   const isReadOnly = uischema?.options?.readonly || false;
+  const maxFileSize = uischema?.options?.['ui:options']?.maxSize;
+  const acceptedFileTypes = uischema?.options?.['ui:options']?.accept;
 
   function getAllowedMimes(acceptedFileTypes) {
-    if (!acceptedFileTypes?.trim()) return [];
+    if (!acceptedFileTypes?.trim()) {
+      return [];
+    }
 
     return acceptedFileTypes
       .split(',')
@@ -44,7 +42,9 @@ const CustomFileUploadControl = (props) => {
 
   const handleFileSelect = useCallback(
     async (file) => {
-      if (!file) return;
+      if (!file) {
+        return;
+      }
 
       const allowedMimes = getAllowedMimes(acceptedFileTypes);
       const error = validateFile(file, allowedMimes, maxFileSize);
@@ -54,8 +54,10 @@ const CustomFileUploadControl = (props) => {
         handleChange(path, null);
         return;
       }
+
       setLocalError(null);
       setIsUploading(true);
+
       try {
         const reader = new FileReader();
         reader.onload = (event) => {
@@ -107,11 +109,9 @@ const CustomFileUploadControl = (props) => {
     }
   };
 
-  // JSON Forms provides `errors` as a string; use it directly
   const jsonFormsError = typeof errors === 'string' ? errors : '';
   const hasError = Boolean(jsonFormsError) || Boolean(localError);
 
-  // Consider a data URL present if it starts with an image data prefix
   const hasFile = typeof data === 'string' && data.startsWith('data:');
 
   return (
@@ -148,17 +148,17 @@ const CustomFileUploadControl = (props) => {
             backgroundColor: 'action.hover',
           },
         }}
+        onDrop={handleDrop}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
         onClick={() => !isReadOnly && inputRef.current?.click()}
       >
         <input
-          ref={inputRef}
           type="file"
+          ref={inputRef}
           accept={acceptedFileTypes}
-          onChange={handleFileInputChange}
           style={{ display: 'none' }}
+          onChange={handleFileInputChange}
           disabled={isUploading || isReadOnly}
         />
 
@@ -166,11 +166,11 @@ const CustomFileUploadControl = (props) => {
           <Box>
             <IconFile size={32} color="currentColor" />
             <Typography variant="body2" sx={{ mt: 1, color: 'success.main' }}>
-              {t('common.file_uploaded_successfully')}
+              File uploaded successfully!
             </Typography>
             {!isReadOnly && (
               <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                {t('common.click_to_change_file')}
+                Click to change file
               </Typography>
             )}
           </Box>
@@ -178,15 +178,14 @@ const CustomFileUploadControl = (props) => {
           <Box>
             <IconUpload size={32} color="currentColor" />
             <Typography variant="body2" sx={{ mt: 1, color: 'text.primary' }}>
-              {isUploading ? t('common.uploading_logo') : t('common.upload_logo')}
+              {isUploading ? 'Uploading...' : 'Upload'}
             </Typography>
             <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-              {/* Drag and drop or click to select */}
-              {t('common.drag_and_drop')}
+              Drag and drop or click to select
             </Typography>
             {acceptedFileTypes && (
               <Typography variant="caption" sx={{ display: 'block', color: 'text.secondary' }}>
-                {t('common.accepted_formats')} {acceptedFileTypes}
+                Accepted Formats: {acceptedFileTypes}
               </Typography>
             )}
           </Box>
