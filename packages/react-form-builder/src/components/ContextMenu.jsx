@@ -1,9 +1,4 @@
-import {
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  FileCopy as CopyIcon,
-  ContentCut as CutIcon,
-} from '@mui/icons-material';
+import { IconEdit, IconTrash, IconCopy, IconScissors } from '@tabler/icons-react';
 import { Menu, MenuItem, ListItemIcon, ListItemText, Divider, Typography } from '@mui/material';
 
 import { defaultFieldTypes } from '../types';
@@ -65,21 +60,21 @@ const ContextMenu = ({
       {/* Field Actions */}
       <MenuItem onClick={() => handleAction(onEditField)}>
         <ListItemIcon>
-          <EditIcon fontSize="small" />
+          <IconEdit size={18} />
         </ListItemIcon>
         <ListItemText primary="Edit Properties" />
       </MenuItem>
 
       <MenuItem onClick={() => handleAction(onCopyField)}>
         <ListItemIcon>
-          <CopyIcon fontSize="small" />
+          <IconCopy size={18} />
         </ListItemIcon>
         <ListItemText primary="Copy" />
       </MenuItem>
 
       <MenuItem onClick={() => handleAction(onCutField)}>
         <ListItemIcon>
-          <CutIcon fontSize="small" />
+          <IconScissors size={18} />
         </ListItemIcon>
         <ListItemText primary="Cut" />
       </MenuItem>
@@ -147,8 +142,8 @@ const ContextMenu = ({
       )}
 
       <MenuItem onClick={() => handleAction(onDeleteField)} sx={{ color: 'error.main' }}>
-        <ListItemIcon>
-          <DeleteIcon fontSize="small" color="error" />
+        <ListItemIcon sx={{ color: 'error.main' }}>
+          <IconTrash size={18} />
         </ListItemIcon>
         <ListItemText primary="Delete" />
       </MenuItem>
