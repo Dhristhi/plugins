@@ -57,6 +57,19 @@ export const defaultFieldTypes = [
   },
   // Form Fields
   {
+    id: 'number',
+    type: 'number',
+    label: 'Number',
+    icon: IconHash,
+    schema: {
+      type: 'number',
+    },
+    uischema: {
+      type: 'Control',
+      scope: '#/properties/field',
+    },
+  },
+  {
     id: 'text',
     type: 'string',
     label: 'Text Input',
@@ -83,19 +96,6 @@ export const defaultFieldTypes = [
       options: {
         multi: true,
       },
-    },
-  },
-  {
-    id: 'number',
-    type: 'number',
-    label: 'Number',
-    icon: IconHash,
-    schema: {
-      type: 'number',
-    },
-    uischema: {
-      type: 'Control',
-      scope: '#/properties/field',
     },
   },
   {
@@ -159,6 +159,27 @@ export const defaultFieldTypes = [
     },
   },
   {
+    id: 'file',
+    type: 'string',
+    label: 'File Upload',
+    icon: IconFileText,
+    schema: {
+      type: 'string',
+      format: 'data-url',
+      title: 'Upload File',
+    },
+    uischema: {
+      type: 'Control',
+      scope: '#/properties/field',
+      options: {
+        'ui:widget': 'file',
+        'ui:options': {
+          accept: '',
+        },
+      },
+    },
+  },
+  {
     id: 'checkbox',
     type: 'boolean',
     label: 'Checkbox',
@@ -172,66 +193,9 @@ export const defaultFieldTypes = [
     },
   },
   {
-    id: 'select-dropdown',
-    type: 'string',
-    label: 'Select Dropdown',
-    icon: IconChevronDown,
-    schema: {
-      type: 'string',
-      enum: ['Option 1', 'Option 2', 'Option 3'],
-    },
-    uischema: {
-      type: 'Control',
-      scope: '#/properties/field',
-    },
-  },
-  {
-    id: 'select-radio',
-    type: 'string',
-    label: 'Select Radio',
-    icon: IconCircleDot,
-    schema: {
-      type: 'string',
-      enum: ['Option 1', 'Option 2', 'Option 3'],
-    },
-    uischema: {
-      type: 'Control',
-      scope: '#/properties/field',
-      options: {
-        format: 'radio',
-      },
-    },
-  },
-  {
-    id: 'multiselect-dropdown',
+    id: 'multicheckbox',
     type: 'array',
-    label: 'Multi-Select Dropdown',
-    icon: IconChevronDown,
-    schema: {
-      type: 'array',
-      items: {
-        type: 'string',
-        enum: ['Option 1', 'Option 2', 'Option 3'],
-      },
-      uniqueItems: true,
-    },
-    uischema: {
-      type: 'Control',
-      scope: '#/properties/field',
-      options: {
-        multi: true,
-        format: 'dynamicselect',
-        displayType: 'dropdown',
-        autocompleteProps: {
-          limitTags: 5,
-        },
-      },
-    },
-  },
-  {
-    id: 'multiselect-checkbox',
-    type: 'array',
-    label: 'Multi-Select Checkbox',
+    label: 'Multi Checkbox',
     icon: IconSquareCheck,
     schema: {
       type: 'array',
@@ -246,8 +210,65 @@ export const defaultFieldTypes = [
       scope: '#/properties/field',
       options: {
         multi: true,
-        format: 'dynamicselect',
+        format: 'select',
         displayType: 'checkbox',
+      },
+    },
+  },
+  {
+    id: 'select',
+    type: 'string',
+    label: 'Select',
+    icon: IconChevronDown,
+    schema: {
+      type: 'string',
+      enum: ['Option 1', 'Option 2', 'Option 3'],
+    },
+    uischema: {
+      type: 'Control',
+      scope: '#/properties/field',
+    },
+  },
+  {
+    id: 'multiselect',
+    type: 'array',
+    label: 'Multi-Select',
+    icon: IconChevronDown,
+    schema: {
+      type: 'array',
+      items: {
+        type: 'string',
+        enum: ['Option 1', 'Option 2', 'Option 3'],
+      },
+      uniqueItems: true,
+    },
+    uischema: {
+      type: 'Control',
+      scope: '#/properties/field',
+      options: {
+        multi: true,
+        format: 'select',
+        displayType: 'dropdown',
+        autocompleteProps: {
+          limitTags: 5,
+        },
+      },
+    },
+  },
+  {
+    id: 'radio',
+    type: 'string',
+    label: 'Radio Buttons',
+    icon: IconCircleDot,
+    schema: {
+      type: 'string',
+      enum: ['Option 1', 'Option 2', 'Option 3'],
+    },
+    uischema: {
+      type: 'Control',
+      scope: '#/properties/field',
+      options: {
+        format: 'radio',
       },
     },
   },
@@ -269,6 +290,23 @@ export const defaultFieldTypes = [
     },
   },
   {
+    id: 'array-strings',
+    type: 'array',
+    label: 'Array of Strings',
+    icon: IconList,
+    schema: {
+      type: 'array',
+      items: {
+        type: 'string',
+      },
+      uniqueItems: true,
+    },
+    uischema: {
+      type: 'Control',
+      scope: '#/properties/field',
+    },
+  },
+  {
     id: 'array',
     type: 'array',
     label: 'Array of Objects',
@@ -287,44 +325,6 @@ export const defaultFieldTypes = [
         detail: {
           type: 'VerticalLayout',
           elements: [],
-        },
-      },
-    },
-  },
-  {
-    id: 'array-strings',
-    type: 'array',
-    label: 'Array of Strings',
-    icon: IconList,
-    schema: {
-      type: 'array',
-      items: {
-        type: 'string',
-      },
-      uniqueItems: true,
-    },
-    uischema: {
-      type: 'Control',
-      scope: '#/properties/field',
-    },
-  },
-  {
-    id: 'file',
-    type: 'string',
-    label: 'File Upload',
-    icon: IconFileText,
-    schema: {
-      type: 'string',
-      format: 'data-url',
-      title: 'Upload File',
-    },
-    uischema: {
-      type: 'Control',
-      scope: '#/properties/field',
-      options: {
-        'ui:widget': 'file',
-        'ui:options': {
-          accept: '',
         },
       },
     },

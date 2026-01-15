@@ -330,14 +330,9 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
       // Preserve enum options and uischema options
       if (
         hasEnumOptions &&
-        [
-          'select-dropdown',
-          'select-radio',
-          'multiselect-dropdown',
-          'multiselect-checkbox',
-        ].includes(newTypeId)
+        ['select', 'radio', 'multiselect', 'multicheckbox'].includes(newTypeId)
       ) {
-        if (newTypeId === 'multiselect-dropdown' || newTypeId === 'multiselect-checkbox') {
+        if (newTypeId === 'multiselect' || newTypeId === 'multicheckbox') {
           updatedField.schema.items = {
             type: 'string',
             enum: enumOptions,
@@ -348,13 +343,13 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
             updatedField.uischema.options = {
               ...updatedField.uischema.options,
               ...localField.uischema.options,
-              displayType: newTypeId === 'multiselect-dropdown' ? 'dropdown' : 'checkbox',
+              displayType: newTypeId === 'multiselect' ? 'dropdown' : 'checkbox',
             };
           }
         } else {
           updatedField.schema.enum = enumOptions;
           // Set format for radio
-          if (newTypeId === 'select-radio') {
+          if (newTypeId === 'radio') {
             updatedField.uischema.options = {
               ...updatedField.uischema.options,
               format: 'radio',
@@ -371,14 +366,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
         setEnumOptions([...newFieldType.schema.enum]);
       } else if (newFieldType.schema.items?.enum) {
         setEnumOptions([...newFieldType.schema.items.enum]);
-      } else if (
-        ![
-          'select-dropdown',
-          'select-radio',
-          'multiselect-dropdown',
-          'multiselect-checkbox',
-        ].includes(newTypeId)
-      ) {
+      } else if (!['select', 'radio', 'multiselect', 'multicheckbox'].includes(newTypeId)) {
         setEnumOptions([]);
       }
     }
@@ -391,8 +379,8 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
     if (currentSchemaType === 'array' && localField.schema?.items?.enum) {
       return availableFieldTypes.filter(
         (ft) =>
-          ft.id === 'multiselect-dropdown' ||
-          ft.id === 'multiselect-checkbox' ||
+          ft.id === 'multiselect' ||
+          ft.id === 'multicheckbox' ||
           ft.id === 'array' ||
           ft.id === 'array-strings'
       );
@@ -403,8 +391,8 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
       return availableFieldTypes.filter(
         (ft) =>
           ft.id === 'array' ||
-          ft.id === 'multiselect-dropdown' ||
-          ft.id === 'multiselect-checkbox' ||
+          ft.id === 'multiselect' ||
+          ft.id === 'multicheckbox' ||
           ft.id === 'array-strings'
       );
     }
@@ -413,8 +401,8 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
       // Don't allow converting to array types from other types
       if (
         ft.id === 'array' ||
-        ft.id === 'multiselect-dropdown' ||
-        ft.id === 'multiselect-checkbox' ||
+        ft.id === 'multiselect' ||
+        ft.id === 'multicheckbox' ||
         ft.id === 'array-strings'
       )
         return false;
@@ -432,13 +420,11 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
 
   const availableFieldTypes = defaultFieldTypes.filter((ft) => !ft.isLayout);
   const hasEnumOptions =
-    ['select-dropdown', 'select-radio', 'multiselect-dropdown', 'multiselect-checkbox'].includes(
-      localField.type
-    ) ||
+    ['select', 'radio', 'multiselect', 'multicheckbox'].includes(localField.type) ||
     (localField.schema?.type === 'array' &&
       !!localField.schema?.items &&
       localField.uischema?.options?.multi) ||
-    localField.uischema?.options?.format === 'dynamicselect';
+    localField.uischema?.options?.format === 'select';
 
   const isGroup = localField.uischema?.type === 'Group';
   const isLayout = localField.isLayout && localField.uischema?.type !== 'Group';
@@ -901,10 +887,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                     } else if (localField.type === 'checkbox') {
                       defaultValue = defaultValue.toLowerCase() === 'true';
                     }
-                    if (
-                      localField.type === 'multiselect-dropdown' ||
-                      localField.type === 'multiselect-checkbox'
-                    ) {
+                    if (localField.type === 'multiselect' || localField.type === 'multicheckbox') {
                       const valu1 = parseCommaSeparated(defaultValue);
                       let defaultArray = [];
                       if (!Array.isArray(valu1)) {
@@ -971,8 +954,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                 sx={outlinedTextFieldSx}
               />
               {/* Multiselect Display Type */}
-              {(localField.type === 'multiselect-dropdown' ||
-                localField.type === 'multiselect-checkbox') && (
+              {(localField.type === 'multiselect' || localField.type === 'multicheckbox') && (
                 <>
                   {localField.uischema?.options?.displayType !== 'checkbox' && (
                     <TextField
@@ -1100,39 +1082,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                   <Typography variant="body2" sx={{ mb: 2, fontWeight: 600 }}>
                     Enum Values
                   </Typography>
-                  {/* We will add dynamic API call in Phase 2 */}
-                  {/* {(localField.type === 'select' ||
-                localField.type === 'multiselect' ||
-                (localField.schema?.type === 'array' && localField.uischema?.options?.multi) ||
-                localField.uischema?.options?.format === 'dynamicselect') && (
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={localField.uischema?.options?.entity !== undefined}
-                      onChange={(e) => {
-                        const isDynamic = e.target.checked;
-                        const isMultiSelect =
-                          localField.type === 'multiselect' || localField.schema?.type === 'array';
-                        const updatedUISchema = {
-                          ...localField.uischema,
-                          options: {
-                            ...localField.uischema?.options,
-                            format: isDynamic ? 'dynamicselect' : undefined,
-                            multi: isMultiSelect ? true : undefined,
-                            entity: isDynamic ? '' : undefined,
-                            key: isDynamic ? '' : undefined,
-                            value: isDynamic ? '' : undefined,
-                          },
-                        };
-                        handleUpdate({ uischema: updatedUISchema });
-                      }}
-                      color="primary"
-                    />
-                  }
-                  label="Use Dynamic Data (API)"
-                  sx={{ mb: 2 }}
-                />
-              )} */}
                   {localField.uischema?.options?.entity !== undefined ? (
                     <Box>
                       <TextField
@@ -1569,7 +1518,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
               )}
               {(localField.type === 'array' ||
                 localField.type === 'array-strings' ||
-                localField.type === 'multiselect-dropdown') && (
+                localField.type === 'multiselect') && (
                 <Grid container spacing={2}>
                   <Grid item xs={6}>
                     <TextField

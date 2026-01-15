@@ -8,9 +8,6 @@ import CustomLabelControl, {
   customLabelTester,
   customImageTester,
 } from './controls/CustomLabelControl';
-import CustomFileUploadControl, {
-  customFileUploadTester,
-} from './controls/CustomFileUploadControl';
 import CustomDownloadFileControl, {
   customDownloadFileTester,
 } from './controls/CustomDownloadFileControl';
@@ -18,7 +15,6 @@ import CustomAccordionGroupLayoutRenderer, {
   customAccordionGroupLayoutTester,
 } from './controls/CustomAccordionGroupLayout';
 import CustomInfoAlert, { customInfoAlertTester } from './controls/CustomInfoAlert';
-import customSelectControl, { customSelectTester } from './controls/CustomSelectControl';
 import ArrayLayoutRenderer, { customArrayLayoutTester } from './controls/CustomArrayLayout';
 
 // Internal registry of custom renderers with IDs for configuration
@@ -28,9 +24,7 @@ export const customRendererEntries = [
   { id: 'label', tester: customLabelTester, renderer: CustomLabelControl },
   { id: 'image', tester: customImageTester, renderer: CustomLabelControl },
   { id: 'infoAlert', tester: customInfoAlertTester, renderer: CustomInfoAlert },
-  { id: 'select', tester: customSelectTester, renderer: customSelectControl },
   { id: 'downloadFile', tester: customDownloadFileTester, renderer: CustomDownloadFileControl },
-  { id: 'fileUpload', tester: customFileUploadTester, renderer: CustomFileUploadControl },
   { id: 'arrayLayout', tester: customArrayLayoutTester, renderer: ArrayLayoutRenderer },
   {
     id: 'accordionGroupLayout',
@@ -493,7 +487,7 @@ const schemas = [
         },
         multiselect_dropdown: {
           type: 'array',
-          title: 'Multi-Select Dropdown',
+          title: 'Multi-Select',
           items: {
             type: 'string',
             enum: ['Choice 1', 'Choice 2', 'Choice 3', 'Choice 4', 'Choice 5'],

@@ -4,9 +4,9 @@ export const mapSchemaPropertyToFieldType = (property, defaultFieldTypes) => {
   if (Array.isArray(enumValues) && enumValues.length > 0) {
     // Use the actual select field type IDs defined in defaultFieldTypes
     if (enumValues.length <= 3) {
-      return defaultFieldTypes.find((ft) => ft.id === 'select-radio') || defaultFieldTypes[0];
+      return defaultFieldTypes.find((ft) => ft.id === 'radio') || defaultFieldTypes[0];
     }
-    return defaultFieldTypes.find((ft) => ft.id === 'select-dropdown') || defaultFieldTypes[0];
+    return defaultFieldTypes.find((ft) => ft.id === 'select') || defaultFieldTypes[0];
   }
 
   switch (type) {
@@ -126,9 +126,7 @@ export const convertSchemaToFields = (schema, defaultFieldTypes, getNextId) => {
     if (property.type === 'array' && property.items && property.items.enum) {
       // Check if field name suggests checkbox display (heuristic approach)
       const useCheckboxDisplay = key.includes('checkbox');
-      const multiselectTypeId = useCheckboxDisplay
-        ? 'multiselect-checkbox'
-        : 'multiselect-dropdown';
+      const multiselectTypeId = useCheckboxDisplay ? 'multicheckbox' : 'multiselect';
       const displayType = useCheckboxDisplay ? 'checkbox' : 'dropdown';
 
       const multiselectType =
@@ -147,7 +145,7 @@ export const convertSchemaToFields = (schema, defaultFieldTypes, getNextId) => {
           options: {
             ...multiselectType.uischema.options,
             multi: true,
-            format: 'dynamicselect',
+            format: 'select',
             displayType: displayType,
           },
         },
