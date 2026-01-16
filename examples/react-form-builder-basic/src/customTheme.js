@@ -65,6 +65,8 @@ const getCustomTheme = (mode = 'light') =>
               900: '#212121',
             },
       drawerLabel: mode === 'dark' ? '#e1bee7' : '#6a1b9a',
+      // Custom color for layout text in light mode
+      layoutText: mode === 'light' ? '#ffffff' : undefined,
       gradient:
         mode === 'dark'
           ? {
@@ -117,6 +119,28 @@ const getCustomTheme = (mode = 'light') =>
       borderRadius: 12,
     },
     components: {
+      MuiCssBaseline: {
+        styleOverrides: {
+          body: {
+            // Global CSS for layout containers
+            '& .layout-container, & [data-layout="vertical"], & [data-layout="horizontal"]': {
+              '& *': mode === 'light' ? { color: 'white !important' } : {},
+              '& .MuiTypography-root': mode === 'light' ? { color: 'white !important' } : {},
+              '& .MuiChip-root':
+                mode === 'light'
+                  ? {
+                      color: 'white !important',
+                      backgroundColor: 'rgba(255, 255, 255, 0.1) !important',
+                    }
+                  : {},
+              '& .MuiChip-label': mode === 'light' ? { color: 'white !important' } : {},
+              '& span': mode === 'light' ? { color: 'white !important' } : {},
+              '& div': mode === 'light' ? { color: 'white !important' } : {},
+              '& p': mode === 'light' ? { color: 'white !important' } : {},
+            },
+          },
+        },
+      },
       MuiButton: {
         styleOverrides: {
           root: {
@@ -214,6 +238,133 @@ const getCustomTheme = (mode = 'light') =>
                 ? '0 2px 8px rgba(186, 104, 200, 0.3)'
                 : '0 2px 8px rgba(156, 39, 176, 0.1)',
             backgroundColor: mode === 'dark' ? 'rgba(45, 27, 105, 0.6)' : undefined,
+          },
+        },
+      },
+      // Custom component styling for layout components
+      MuiGrid: {
+        styleOverrides: {
+          root: {
+            // Apply white text color for vertical and horizontal layouts in light mode
+            '&.layout-container': {
+              color: mode === 'light' ? 'white !important' : undefined,
+              // Target all text elements within layout containers
+              '& *': {
+                color: mode === 'light' ? 'white !important' : undefined,
+              },
+              '& .MuiTypography-root': {
+                color: mode === 'light' ? 'white !important' : undefined,
+              },
+              '& .MuiFormLabel-root': {
+                color: mode === 'light' ? 'white !important' : undefined,
+              },
+              '& .MuiInputLabel-root': {
+                color: mode === 'light' ? 'white !important' : undefined,
+              },
+              '& .MuiFormControlLabel-label': {
+                color: mode === 'light' ? 'white !important' : undefined,
+              },
+              '& .MuiFormHelperText-root': {
+                color: mode === 'light' ? 'rgba(255, 255, 255, 0.7) !important' : undefined,
+              },
+              '& .MuiChip-label': {
+                color: mode === 'light' ? 'white !important' : undefined,
+              },
+              '& .MuiChip-root': {
+                color: mode === 'light' ? 'white !important' : undefined,
+                backgroundColor:
+                  mode === 'light' ? 'rgba(255, 255, 255, 0.1) !important' : undefined,
+              },
+              // Target span elements that might contain text
+              '& span': {
+                color: mode === 'light' ? 'white !important' : undefined,
+              },
+              // Target div elements that might contain text
+              '& div': {
+                color: mode === 'light' ? 'white !important' : undefined,
+              },
+              // Target p elements
+              '& p': {
+                color: mode === 'light' ? 'white !important' : undefined,
+              },
+            },
+            '&.vertical-layout-container, &.horizontal-layout-container': {
+              color: mode === 'light' ? 'white !important' : undefined,
+              '& *': {
+                color: mode === 'light' ? 'white !important' : undefined,
+              },
+            },
+            // Also target by data attributes
+            '&[data-layout="vertical"], &[data-layout="horizontal"]': {
+              color: mode === 'light' ? 'white !important' : undefined,
+              '& *': {
+                color: mode === 'light' ? 'white !important' : undefined,
+              },
+            },
+          },
+        },
+      },
+      // Chip specific overrides
+      MuiChip: {
+        styleOverrides: {
+          root: {
+            '.layout-container &': {
+              color: mode === 'light' ? 'white !important' : undefined,
+              backgroundColor: mode === 'light' ? 'rgba(255, 255, 255, 0.1) !important' : undefined,
+              '& .MuiChip-label': {
+                color: mode === 'light' ? 'white !important' : undefined,
+              },
+            },
+            // Also for data attribute targeting
+            '[data-layout] &': {
+              color: mode === 'light' ? 'white !important' : undefined,
+              backgroundColor: mode === 'light' ? 'rgba(255, 255, 255, 0.1) !important' : undefined,
+              '& .MuiChip-label': {
+                color: mode === 'light' ? 'white !important' : undefined,
+              },
+            },
+          },
+          colorPrimary: {
+            '.layout-container &, [data-layout] &': {
+              background: mode === 'light' ? 'rgba(255, 255, 255, 0.2) !important' : undefined,
+              color: mode === 'light' ? 'white !important' : undefined,
+              '& .MuiChip-label': {
+                color: mode === 'light' ? 'white !important' : undefined,
+              },
+            },
+          },
+        },
+      },
+      // Global overrides for layout containers
+      MuiFormControl: {
+        styleOverrides: {
+          root: {
+            '.layout-container &, [data-layout] &': {
+              color: mode === 'light' ? 'white !important' : undefined,
+              '& .MuiFormLabel-root': {
+                color: mode === 'light' ? 'white !important' : undefined,
+              },
+              '& .MuiInputLabel-root': {
+                color: mode === 'light' ? 'white !important' : undefined,
+              },
+              '& *': {
+                color: mode === 'light' ? 'white !important' : undefined,
+              },
+            },
+          },
+        },
+      },
+      // Typography overrides for layout containers
+      MuiTypography: {
+        styleOverrides: {
+          root: {
+            '.layout-container &, [data-layout] &': {
+              color: mode === 'light' ? 'white !important' : undefined,
+            },
+            // Global override for layout typography
+            '&.layout-text': {
+              color: mode === 'light' ? 'white !important' : undefined,
+            },
           },
         },
       },

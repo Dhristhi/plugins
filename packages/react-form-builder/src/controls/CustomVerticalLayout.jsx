@@ -10,6 +10,8 @@ const CustomVerticalLayoutRenderer = (props) => {
   return (
     <Grid
       container
+      className="layout-container vertical-layout-container"
+      data-layout="vertical"
       spacing={['groupwithicon', 'accordiongroup'].includes(layout[0]?.type?.toLowerCase()) ? 0 : 1}
     >
       {layout?.map((element, index) => {
