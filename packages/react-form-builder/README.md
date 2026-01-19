@@ -6,7 +6,7 @@ A modern drag-and-drop form builder built with React 19, Material UI, and JSON F
 [![Material-UI](https://img.shields.io/badge/Material--UI-6-blue.svg)](https://mui.com/)
 [![JSON Forms](https://img.shields.io/badge/JSON%20Forms-3.6-green.svg)](https://jsonforms.io/)
 [![npm](https://img.shields.io/npm/v/%40dhristhi%2Freact-form-builder.svg?logo=npm&color=cb3837)](https://www.npmjs.com/package/@dhristhi/react-form-builder)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
 ## Features
 
@@ -127,7 +127,7 @@ export default function MyPage() {
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+Apache 2.0 — see [LICENSE](LICENSE).
 
 ## Acknowledgments
 
