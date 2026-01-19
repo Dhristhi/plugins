@@ -96,6 +96,31 @@ const FormPreview = ({
     return filteredErrors;
   };
 
+  const validatePasswordConfirmation = (data, schema) => {
+    const errors = [];
+
+    Object.keys(schema.properties || {}).forEach((key) => {
+      if (key.endsWith('_confirm')) {
+        const passwordKey = key.replace('_confirm', '');
+        const password = data[passwordKey];
+        const confirmPassword = data[key];
+
+        if (password && confirmPassword && password !== confirmPassword) {
+          errors.push({
+            instancePath: `/${key}`,
+            schemaPath: `#/properties/${key}`,
+            keyword: 'const',
+            params: { allowedValue: password },
+            message: 'Passwords do not match',
+            data: confirmPassword,
+          });
+        }
+      }
+    });
+
+    return errors;
+  };
+
   const performValidation = (data = formState.data) => {
     // Create validation data where empty strings become undefined for required validation
     const validationData = { ...data };
@@ -112,6 +137,7 @@ const FormPreview = ({
 
     const validate = ajv.compile(formState.schema);
     const isValid = validate(validationData);
+    let allErrors = [];
 
     if (!isValid && validate.errors) {
       const transformedErrors = validate.errors.map((error) => ({
@@ -124,10 +150,14 @@ const FormPreview = ({
       }));
 
       const filteredErrors = filterErrors(transformedErrors, data);
-      setValidationErrors(filteredErrors);
-    } else {
-      setValidationErrors([]);
+      allErrors = [...filteredErrors];
     }
+
+    // Add password confirmation validation
+    const passwordErrors = validatePasswordConfirmation(data, formState.schema);
+    allErrors = [...allErrors, ...passwordErrors];
+
+    setValidationErrors(allErrors);
   };
 
   const toggleValidateButton = () => {

@@ -8,12 +8,14 @@ import customSelectControl, { customSelectTester } from './CustomSelectControl';
 import CustomGroupLayoutRenderer, { customGroupLayoutTester } from './CustomGroupLayout';
 import CustomFileUploadControl, { customFileUploadTester } from './CustomFileUploadControl';
 import CustomVerticalLayoutRenderer, { customVerticalLayoutTester } from './CustomVerticalLayout';
+import CustomPasswordControl, { customPasswordTester } from './CustomPasswordControl';
 
 // Internal registry of custom renderers with IDs for configuration
 const customRendererEntries = [
   { id: 'select', tester: customSelectTester, renderer: customSelectControl },
   { id: 'dateControl', tester: customDateTester, renderer: CustomDateControl },
   { id: 'fileUpload', tester: customFileUploadTester, renderer: CustomFileUploadControl },
+  { id: 'password', tester: customPasswordTester, renderer: CustomPasswordControl },
 
   {
     id: 'verticalLayout',
