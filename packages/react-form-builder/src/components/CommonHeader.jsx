@@ -1,4 +1,4 @@
-import { IconEye, IconCode, IconRestore, IconTrash } from '@tabler/icons-react';
+import { IconEye, IconCode } from '@tabler/icons-react';
 import { Box, Typography, Button, ButtonGroup } from '@mui/material';
 
 const headerContainerSx = {
@@ -61,10 +61,6 @@ const CommonHeader = ({
   setShowFormPreview,
   showSchemaEditor,
   setShowSchemaEditor,
-  onReset,
-  hasOriginalSchema,
-  onClearAll,
-  hasFields,
 }) => {
   return (
     <Box sx={headerContainerSx}>
@@ -110,21 +106,6 @@ const CommonHeader = ({
             >
               Schema
             </Button>
-
-            {hasOriginalSchema ? (
-              <Button onClick={onReset} variant="outlined" startIcon={<IconRestore size={16} />}>
-                Reset
-              </Button>
-            ) : hasFields && onClearAll ? (
-              <Button
-                onClick={onClearAll}
-                variant="outlined"
-                color="error"
-                startIcon={<IconTrash size={16} />}
-              >
-                Clear All
-              </Button>
-            ) : null}
           </ButtonGroup>
         </Box>
       </Box>
