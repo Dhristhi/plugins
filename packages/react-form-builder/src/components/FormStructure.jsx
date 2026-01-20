@@ -439,6 +439,9 @@ const FormStructure = ({
   showSchemaEditor,
   setShowSchemaEditor,
   exportForm,
+  onReset,
+  hasOriginalSchema,
+  onClearAll,
 }) => {
   const moveField = (fieldId, direction, parentId) => {
     const newFields = [...fields];
@@ -524,6 +527,10 @@ const FormStructure = ({
         showSchemaEditor={showSchemaEditor}
         setShowSchemaEditor={setShowSchemaEditor}
         exportForm={exportForm}
+        onReset={onReset}
+        hasOriginalSchema={hasOriginalSchema}
+        onClearAll={onClearAll}
+        hasFields={fields.length > 0}
       />
 
       <Box sx={nestedBox}>
