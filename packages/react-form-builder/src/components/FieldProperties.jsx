@@ -985,6 +985,23 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                   )}
                 </>
               )}
+              {/* Password Confirmation Toggle */}
+              {localField.type === 'password' && (
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={localField.requireConfirmation || false}
+                      onChange={(e) => {
+                        handleUpdate({ requireConfirmation: e.target.checked });
+                      }}
+                      color="primary"
+                    />
+                  }
+                  label="Require Password Confirmation"
+                  sx={formControlLabelSx}
+                />
+              )}
+
               {/* Make Field as Element Label switch - only for fields inside array of objects */}
               {isInsideArrayOfObjects && !isLayout && !isGroup && (
                 <FormControlLabel
