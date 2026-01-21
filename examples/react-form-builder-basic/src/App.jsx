@@ -422,6 +422,18 @@ const schemas = [
           maxItems: 5,
           uniqueItems: true,
         },
+        array_numbers: {
+          type: 'array',
+          title: 'Array of Numbers',
+          items: {
+            type: 'number',
+            minimum: 1,
+            maximum: 100,
+          },
+          minItems: 1,
+          maxItems: 10,
+          uniqueItems: true,
+        },
         array_objects: {
           type: 'array',
           title: 'Array of Objects',
@@ -510,6 +522,7 @@ const schemas = [
         'number_basic',
         'boolean_basic',
         'array_strings',
+        'array_numbers',
         'array_objects',
       ],
       additionalProperties: false,

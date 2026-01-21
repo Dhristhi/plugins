@@ -382,7 +382,8 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
           ft.id === 'multiselect' ||
           ft.id === 'multicheckbox' ||
           ft.id === 'array' ||
-          ft.id === 'array-strings'
+          ft.id === 'array-strings' ||
+          ft.id === 'array-numbers'
       );
     }
 
@@ -393,7 +394,8 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
           ft.id === 'array' ||
           ft.id === 'multiselect' ||
           ft.id === 'multicheckbox' ||
-          ft.id === 'array-strings'
+          ft.id === 'array-strings' ||
+          ft.id === 'array-numbers'
       );
     }
 
@@ -403,7 +405,8 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
         ft.id === 'array' ||
         ft.id === 'multiselect' ||
         ft.id === 'multicheckbox' ||
-        ft.id === 'array-strings'
+        ft.id === 'array-strings' ||
+        ft.id === 'array-numbers'
       )
         return false;
 
@@ -867,6 +870,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
               ) : // Default Value field for non-date fields
               localField.type !== 'array' &&
                 localField.type !== 'array-strings' &&
+                localField.type !== 'array-numbers' &&
                 localField.type !== 'checkbox' &&
                 localField.type !== 'file' ? (
                 <TextField
@@ -1537,6 +1541,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
               )}
               {(localField.type === 'array' ||
                 localField.type === 'array-strings' ||
+                localField.type === 'array-numbers' ||
                 localField.type === 'multiselect') && (
                 <Grid container spacing={2}>
                   <Grid item xs={6}>
