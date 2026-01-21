@@ -32,7 +32,6 @@ const CustomPasswordControl = ({
       required={required}
       variant="outlined"
       fullWidth
-      margin="normal"
       style={{ display: visible ? 'block' : 'none' }}
       InputProps={{
         endAdornment: (
