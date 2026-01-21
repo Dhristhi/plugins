@@ -31,12 +31,32 @@ export const buildSchemaFromFields = (fieldsArray, parentKey = null) => {
         required.push(field.key);
       }
     } else if (!field.isLayout) {
-      properties[field.key] = {
-        ...field.schema,
-        title: field.label,
-      };
-      if (field.required) {
-        required.push(field.key);
+      // Handle password confirmation
+      if (field.type === 'password' && field.requireConfirmation) {
+        // Add main password field
+        properties[field.key] = {
+          ...field.schema,
+          title: field.label,
+        };
+
+        // Add confirm password field
+        properties[`${field.key}_confirm`] = {
+          type: 'string',
+          format: 'password',
+          title: `Confirm ${field.label}`,
+        };
+
+        if (field.required) {
+          required.push(field.key, `${field.key}_confirm`);
+        }
+      } else {
+        properties[field.key] = {
+          ...field.schema,
+          title: field.label,
+        };
+        if (field.required) {
+          required.push(field.key);
+        }
       }
     } else if (field.type === 'object') {
       const childSchema = field.children

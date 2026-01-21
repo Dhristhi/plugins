@@ -2,7 +2,7 @@
 
 Dhristhi-maintained tools and packages. This repository hosts multiple workspaces such as libraries and ui components.
 
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
 ## What is this repository?
 
@@ -48,4 +48,4 @@ Open an issue in this repository with details and steps to reproduce.
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+Apache 2.0 — see [LICENSE](LICENSE).

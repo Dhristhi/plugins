@@ -11,7 +11,7 @@
     "test": "echo \"No tests in demo workspace\" && exit 0"
   },
   "dependencies": {
-    "@dhristhi/react-form-builder": "^0.0.3",
+    "@dhristhi/react-form-builder": "^0.0.5",
     "@emotion/react": "^11.14.0",
     "@jsonforms/core": "^3.6.0",
     "@jsonforms/material-renderers": "^3.6.0",
