@@ -1,5 +1,4 @@
 import { createTheme } from '@mui/material/styles';
-import { dark } from '@mui/material/styles/createPalette';
 
 const getCustomTheme = (mode = 'light') =>
   createTheme({
