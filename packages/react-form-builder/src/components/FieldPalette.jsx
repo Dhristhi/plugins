@@ -101,14 +101,23 @@ const DraggableFieldItem = ({ fieldType }) => {
   );
 };
 
-const FieldPalette = ({ onLoadSchema, schemas = [] }) => {
-  const [selectedSchema, setSelectedSchema] = useState('');
+const FieldPalette = ({ onLoadSchema, schemas = [], loadedSchemaId = '' }) => {
+  const [selectedSchema, setSelectedSchema] = useState(loadedSchemaId);
+
+  React.useEffect(() => {
+    setSelectedSchema(loadedSchemaId);
+  }, [loadedSchemaId]);
 
   const handleSchemaChange = (event) => {
     const schemaId = event.target.value;
-    setSelectedSchema(schemaId);
     if (schemaId && onLoadSchema) {
-      onLoadSchema(schemaId);
+      const shouldUpdate = onLoadSchema(schemaId);
+      // Only update selection if loading was successful (no confirmation needed)
+      if (shouldUpdate) {
+        setSelectedSchema(schemaId);
+      }
+    } else {
+      setSelectedSchema(schemaId);
     }
   };
 
