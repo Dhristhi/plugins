@@ -888,7 +888,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                     let defaultValue = e.target.value;
 
                     // Convert to appropriate type
-                    if (localField.type === 'number') {
+                    if (localField.type === 'number' || localField.type === 'integer') {
                       defaultValue = defaultValue ? Number(defaultValue) : undefined;
                     } else if (localField.type === 'checkbox') {
                       defaultValue = defaultValue.toLowerCase() === 'true';
@@ -1363,7 +1363,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                   sx={outlinedTextFieldSx}
                 />
               )}
-              {localField.type === 'number' && (
+              {(localField.type === 'number' || localField.type === 'integer') && (
                 <Grid container spacing={2}>
                   <Grid item xs={6}>
                     <TextField
@@ -1378,6 +1378,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                       }
                       margin="normal"
                       variant="outlined"
+                      inputProps={localField.type === 'integer' ? { step: 1 } : {}}
                       sx={outlinedTextFieldSx}
                     />
                   </Grid>
@@ -1395,6 +1396,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                       }
                       margin="normal"
                       variant="outlined"
+                      inputProps={localField.type === 'integer' ? { step: 1 } : {}}
                       sx={outlinedTextFieldSx}
                     />
                   </Grid>
