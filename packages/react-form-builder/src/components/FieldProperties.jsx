@@ -616,6 +616,26 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
 
             {isGroup && (
               <>
+                <TextField
+                  label="Group Name"
+                  fullWidth
+                  value={localField.label}
+                  onChange={(e) => {
+                    const newLabel = e.target.value;
+                    const updatedUISchema = {
+                      ...localField.uischema,
+                      label: newLabel,
+                    };
+                    handleUpdate({
+                      label: newLabel,
+                      uischema: updatedUISchema,
+                    });
+                  }}
+                  margin="normal"
+                  variant="outlined"
+                  helperText="Displayed as the group header"
+                  sx={outlinedTextFieldSx}
+                />
                 <Box sx={iconSelectorContainerSx}>
                   <IconSelector
                     value={selectedIcon}
@@ -662,32 +682,18 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                 sx={formControlLabelSx}
               />
 
-              {/* Show label field only for groups and non-layout fields */}
-              {!isLayout && (
+              {/* Show label field only for non-layout and non-group fields */}
+              {!isLayout && !isGroup && (
                 <TextField
-                  label={isGroup ? 'Group Title' : 'Label'}
+                  label="Label"
                   fullWidth
                   value={localField.label}
                   onChange={(e) => {
-                    const newLabel = e.target.value;
-                    if (isGroup) {
-                      const updatedUISchema = {
-                        ...localField.uischema,
-                        label: newLabel,
-                      };
-                      handleUpdate({
-                        label: newLabel,
-                        uischema: updatedUISchema,
-                      });
-                    } else {
-                      handleUpdate({ label: newLabel });
-                    }
+                    handleUpdate({ label: e.target.value });
                   }}
                   margin="normal"
                   variant="outlined"
-                  helperText={
-                    isGroup ? 'Displayed as the group header' : 'The display label for this field'
-                  }
+                  helperText="The display label for this field"
                   sx={outlinedTextFieldSx}
                 />
               )}
