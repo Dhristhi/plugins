@@ -442,6 +442,7 @@ const FormStructure = ({
   onReset,
   hasOriginalSchema,
   onClearAll,
+  propertiesDrawerOpen,
 }) => {
   const moveField = (fieldId, direction, parentId) => {
     const newFields = [...fields];
@@ -516,19 +517,20 @@ const FormStructure = ({
 
   const nestedBox = {
     p: { xs: 1, sm: 2 },
-    paddingBottom: hasOriginalSchema || fields.length > 0 ? '80px' : '0',
+    paddingBottom: hasOriginalSchema || fields.length > 0 ? '100px' : '0',
   };
 
   const actionBox = {
     position: 'fixed',
     bottom: 0,
     left: { xs: 0, md: 320 },
-    width: { xs: '100%', md: `calc(100% - 320px)` },
+    right: propertiesDrawerOpen ? { xs: 0, sm: 400, md: 480 } : 0,
+    width: 'auto',
     height: 64,
     backgroundColor: 'background.paper',
     borderTop: '1px solid',
     borderColor: 'grey.200',
-    zIndex: (theme) => theme.zIndex.drawer + 1,
+    zIndex: (theme) => theme.zIndex.drawer - 1,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'flex-end',
