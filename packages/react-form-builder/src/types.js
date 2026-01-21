@@ -14,6 +14,7 @@ import {
   IconList,
   IconEye,
   IconLink,
+  IconNumbers,
 } from '@tabler/icons-react';
 
 export const defaultFieldTypes = [
@@ -63,6 +64,19 @@ export const defaultFieldTypes = [
     icon: IconHash,
     schema: {
       type: 'number',
+    },
+    uischema: {
+      type: 'Control',
+      scope: '#/properties/field',
+    },
+  },
+  {
+    id: 'integer',
+    type: 'integer',
+    label: 'Integer',
+    icon: IconNumbers,
+    schema: {
+      type: 'integer',
     },
     uischema: {
       type: 'Control',
