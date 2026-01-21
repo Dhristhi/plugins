@@ -1,4 +1,5 @@
 import { createTheme } from '@mui/material/styles';
+import { dark } from '@mui/material/styles/createPalette';
 
 const getCustomTheme = (mode = 'light') =>
   createTheme({
@@ -215,13 +216,49 @@ const getCustomTheme = (mode = 'light') =>
           root: {
             borderRadius: 8,
             fontWeight: 500,
+            '.layout-container &': {
+              color: mode === 'light' ? 'white !important' : undefined,
+              backgroundColor: mode === 'light' ? 'transparent !important' : undefined,
+              '& .MuiChip-label': {
+                color: mode === 'light' ? 'white !important' : undefined,
+              },
+            },
+            '[data-layout] &': {
+              color: mode === 'light' ? 'white !important' : undefined,
+              backgroundColor: mode === 'light' ? 'transparent !important' : undefined,
+              '& .MuiChip-label': {
+                color: mode === 'light' ? 'white !important' : undefined,
+              },
+            },
           },
           colorPrimary: {
             background:
               mode === 'dark'
                 ? 'linear-gradient(45deg, #7b1fa2 30%, #9c27b0 90%)'
-                : 'linear-gradient(45deg, #ba68c8 30%, #e1bee7 90%)',
+                : 'linear-gradient(45deg, #7b1fa2 30%, #9c27b0 90%)',
             color: mode === 'dark' ? '#e1bee7' : '#7b1fa2',
+            '.layout-container &, [data-layout] &': {
+              background: mode === 'light' ? 'transparent !important' : undefined,
+              color: mode === 'light' ? 'white !important' : undefined,
+              '& .MuiChip-label': {
+                color: mode === 'light' ? 'white !important' : undefined,
+              },
+            },
+          },
+          colorDefault: {
+            '.layout-container &, [data-layout] &': {
+              background: mode === 'light' ? 'white !important' : undefined,
+              color: mode === 'light' ? 'white !important' : undefined,
+              '& .MuiChip-label': {
+                color: mode === 'light' ? 'white !important' : undefined,
+              },
+            },
+          },
+          label: {
+            color: mode === 'light' ? '#ffffff !important' : undefined,
+          },
+          labelSmall: {
+            color: mode === 'light' ? '#ffffff !important' : undefined,
           },
         },
       },
@@ -298,37 +335,6 @@ const getCustomTheme = (mode = 'light') =>
             '&[data-layout="vertical"], &[data-layout="horizontal"]': {
               color: mode === 'light' ? 'white !important' : undefined,
               '& *': {
-                color: mode === 'light' ? 'white !important' : undefined,
-              },
-            },
-          },
-        },
-      },
-      // Chip specific overrides
-      MuiChip: {
-        styleOverrides: {
-          root: {
-            '.layout-container &': {
-              color: mode === 'light' ? 'white !important' : undefined,
-              backgroundColor: mode === 'light' ? 'rgba(255, 255, 255, 0.1) !important' : undefined,
-              '& .MuiChip-label': {
-                color: mode === 'light' ? 'white !important' : undefined,
-              },
-            },
-            // Also for data attribute targeting
-            '[data-layout] &': {
-              color: mode === 'light' ? 'white !important' : undefined,
-              backgroundColor: mode === 'light' ? 'rgba(255, 255, 255, 0.1) !important' : undefined,
-              '& .MuiChip-label': {
-                color: mode === 'light' ? 'white !important' : undefined,
-              },
-            },
-          },
-          colorPrimary: {
-            '.layout-container &, [data-layout] &': {
-              background: mode === 'light' ? 'rgba(255, 255, 255, 0.2) !important' : undefined,
-              color: mode === 'light' ? 'white !important' : undefined,
-              '& .MuiChip-label': {
                 color: mode === 'light' ? 'white !important' : undefined,
               },
             },
