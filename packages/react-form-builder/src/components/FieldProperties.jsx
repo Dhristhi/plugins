@@ -683,7 +683,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
               />
 
               {/* Show label field only for non-layout and non-group fields */}
-              {!isLayout && !isGroup && (
+              {localField.type !== 'layout' && localField.type !== 'group' && (
                 <TextField
                   label="Label"
                   fullWidth
