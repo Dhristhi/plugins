@@ -14,7 +14,7 @@ import {
 } from '@tabler/icons-react';
 import { Fragment, useState } from 'react';
 import * as TablerIcons from '@tabler/icons-react';
-import { Box, Paper, Typography, Chip, useTheme } from '@mui/material';
+import { Box, Paper, Typography, Chip, useTheme, Button } from '@mui/material';
 import { useSortable, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 
 import ContextMenu from './ContextMenu';
@@ -439,6 +439,9 @@ const FormStructure = ({
   showSchemaEditor,
   setShowSchemaEditor,
   exportForm,
+  onReset,
+  hasOriginalSchema,
+  onClearAll,
 }) => {
   const moveField = (fieldId, direction, parentId) => {
     const newFields = [...fields];
@@ -511,7 +514,26 @@ const FormStructure = ({
     onFieldsChange(newFields);
   };
 
-  const nestedBox = { p: { xs: 1, sm: 2 } };
+  const nestedBox = {
+    p: { xs: 1, sm: 2 },
+    paddingBottom: hasOriginalSchema || fields.length > 0 ? '80px' : '0',
+  };
+
+  const actionBox = {
+    position: 'fixed',
+    bottom: 0,
+    left: { xs: 0, md: 320 },
+    width: { xs: '100%', md: `calc(100% - 320px)` },
+    height: 64,
+    backgroundColor: 'background.paper',
+    borderTop: '1px solid',
+    borderColor: 'grey.200',
+    zIndex: (theme) => theme.zIndex.drawer + 1,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    px: 3,
+  };
 
   return (
     <Box>
@@ -562,6 +584,20 @@ const FormStructure = ({
           </SortableContext>
         )}
       </Box>
+
+      {(hasOriginalSchema || fields.length > 0) && (
+        <Box sx={actionBox}>
+          {hasOriginalSchema ? (
+            <Button onClick={onReset} variant="contained">
+              Reset
+            </Button>
+          ) : (
+            <Button onClick={onClearAll} variant="contained" color="error">
+              Clear All
+            </Button>
+          )}
+        </Box>
+      )}
     </Box>
   );
 };

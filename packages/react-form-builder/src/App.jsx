@@ -108,6 +108,7 @@ const App = ({ onExport, onSave, schemas = [], theme: customTheme } = {}) => {
   const [showFormPreview, setShowFormPreview] = useState(false);
   const [showSchemaEditor, setShowSchemaEditor] = useState(false);
   const [propertiesDrawerOpen, setPropertiesDrawerOpen] = useState(false);
+  const [originalFields, setOriginalFields] = useState(null);
 
   const appliedTheme = customTheme || defaultTheme;
 
@@ -433,6 +434,7 @@ const App = ({ onExport, onSave, schemas = [], theme: customTheme } = {}) => {
       if (selectedSchema && selectedSchema.schema) {
         const convertedFields = convertSchemaToFields(selectedSchema.schema);
         setFields(convertedFields);
+        setOriginalFields(JSON.parse(JSON.stringify(convertedFields)));
         setFormData({});
         setSelectedField(null);
         setPropertiesDrawerOpen(false);
@@ -440,6 +442,23 @@ const App = ({ onExport, onSave, schemas = [], theme: customTheme } = {}) => {
     },
     [convertSchemaToFields]
   );
+
+  const handleResetToOriginal = useCallback(() => {
+    if (originalFields) {
+      setFields(JSON.parse(JSON.stringify(originalFields)));
+      setFormData({});
+      setSelectedField(null);
+      setPropertiesDrawerOpen(false);
+    }
+  }, [originalFields]);
+
+  const handleClearAll = useCallback(() => {
+    setFields([]);
+    setFormData({});
+    setSelectedField(null);
+    setPropertiesDrawerOpen(false);
+    setOriginalFields(null);
+  }, []);
 
   const isGroup = selectedField?.uischema?.type === 'Group';
 
@@ -700,6 +719,9 @@ const App = ({ onExport, onSave, schemas = [], theme: customTheme } = {}) => {
                         showSchemaEditor={showSchemaEditor}
                         setShowSchemaEditor={setShowSchemaEditor}
                         exportForm={exportForm}
+                        onReset={handleResetToOriginal}
+                        hasOriginalSchema={!!originalFields}
+                        onClearAll={handleClearAll}
                       />
                     )}
                   </Box>
