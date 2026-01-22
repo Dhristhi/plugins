@@ -479,34 +479,20 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
     // Array fields with enum items (multiselect) can switch between multiselect types and array
     if (currentSchemaType === 'array' && localField.schema?.items?.enum) {
       return availableFieldTypes.filter(
-        (ft) =>
-          ft.id === 'multiselect' ||
-          ft.id === 'multicheckbox' ||
-          ft.id === 'array' ||
-          ft.id === 'array-strings'
+        (ft) => ft.id === 'multiselect' || ft.id === 'multicheckbox' || ft.id === 'array'
       );
     }
 
     // Array fields without enum can switch between array and multiselect types
     if (currentSchemaType === 'array') {
       return availableFieldTypes.filter(
-        (ft) =>
-          ft.id === 'array' ||
-          ft.id === 'multiselect' ||
-          ft.id === 'multicheckbox' ||
-          ft.id === 'array-strings'
+        (ft) => ft.id === 'array' || ft.id === 'multiselect' || ft.id === 'multicheckbox'
       );
     }
 
     return availableFieldTypes.filter((ft) => {
       // Don't allow converting to array types from other types
-      if (
-        ft.id === 'array' ||
-        ft.id === 'multiselect' ||
-        ft.id === 'multicheckbox' ||
-        ft.id === 'array-strings'
-      )
-        return false;
+      if (ft.id === 'array' || ft.id === 'multiselect' || ft.id === 'multicheckbox') return false;
 
       const targetSchemaType = ft.schema?.type;
 
@@ -732,6 +718,26 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
 
             {isGroup && (
               <>
+                <TextField
+                  label="Group Name"
+                  fullWidth
+                  value={localField.label}
+                  onChange={(e) => {
+                    const newLabel = e.target.value;
+                    const updatedUISchema = {
+                      ...localField.uischema,
+                      label: newLabel,
+                    };
+                    handleUpdate({
+                      label: newLabel,
+                      uischema: updatedUISchema,
+                    });
+                  }}
+                  margin="normal"
+                  variant="outlined"
+                  helperText="Displayed as the group header"
+                  sx={outlinedTextFieldSx}
+                />
                 <Box sx={iconSelectorContainerSx}>
                   <IconSelector
                     value={selectedIcon}
@@ -1045,32 +1051,18 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                 sx={formControlLabelSx}
               />
 
-              {/* Show label field only for groups and non-layout fields */}
-              {!isLayout && (
+              {/* Show label field only for non-layout and non-group fields */}
+              {localField.type !== 'layout' && localField.type !== 'group' && (
                 <TextField
-                  label={isGroup ? 'Group Title' : 'Label'}
+                  label="Label"
                   fullWidth
                   value={localField.label}
                   onChange={(e) => {
-                    const newLabel = e.target.value;
-                    if (isGroup) {
-                      const updatedUISchema = {
-                        ...localField.uischema,
-                        label: newLabel,
-                      };
-                      handleUpdate({
-                        label: newLabel,
-                        uischema: updatedUISchema,
-                      });
-                    } else {
-                      handleUpdate({ label: newLabel });
-                    }
+                    handleUpdate({ label: e.target.value });
                   }}
                   margin="normal"
                   variant="outlined"
-                  helperText={
-                    isGroup ? 'Displayed as the group header' : 'The display label for this field'
-                  }
+                  helperText="The display label for this field"
                   sx={outlinedTextFieldSx}
                 />
               )}
@@ -1249,7 +1241,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                 </>
               ) : // Default Value field for non-date fields
               localField.type !== 'array' &&
-                localField.type !== 'array-strings' &&
                 localField.type !== 'checkbox' &&
                 localField.type !== 'file' ? (
                 <TextField
@@ -1265,7 +1256,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                     let defaultValue = e.target.value;
 
                     // Convert to appropriate type
-                    if (localField.type === 'number') {
+                    if (localField.type === 'number' || localField.type === 'integer') {
                       defaultValue = defaultValue ? Number(defaultValue) : undefined;
                     } else if (localField.type === 'checkbox') {
                       defaultValue = defaultValue.toLowerCase() === 'true';
@@ -1301,8 +1292,69 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                   label="Checked by default"
                 />
               ) : null}
-              {/* Element Label field for array of objects */}
+              {/* Array Item Type Selector */}
               {localField.type === 'array' && (
+                <FormControl fullWidth margin="normal">
+                  <InputLabel>Array Item Type</InputLabel>
+                  <Select
+                    value={localField.schema?.items?.type || 'string'}
+                    label="Array Item Type"
+                    onChange={(e) => {
+                      const itemType = e.target.value;
+                      let updatedSchema = { ...localField.schema };
+
+                      if (itemType === 'object') {
+                        // For objects, set up the structure with detail layout
+                        updatedSchema.items = {
+                          type: 'object',
+                          properties: {},
+                        };
+
+                        const updatedUISchema = {
+                          ...localField.uischema,
+                          options: {
+                            ...localField.uischema?.options,
+                            detail: {
+                              type: 'VerticalLayout',
+                              elements: [],
+                            },
+                          },
+                        };
+
+                        handleUpdate({
+                          schema: updatedSchema,
+                          uischema: updatedUISchema,
+                        });
+                      } else {
+                        // For primitive types (string/number), remove object-specific properties
+                        updatedSchema.items = { type: itemType };
+
+                        const updatedUISchema = {
+                          ...localField.uischema,
+                          options: {
+                            ...localField.uischema?.options,
+                            detail: undefined,
+                            elementLabelProp: undefined,
+                          },
+                        };
+
+                        handleUpdate({
+                          schema: updatedSchema,
+                          uischema: updatedUISchema,
+                        });
+                      }
+                    }}
+                    sx={layoutSelectSx}
+                  >
+                    <MenuItem value="string">String</MenuItem>
+                    <MenuItem value="number">Number</MenuItem>
+                    <MenuItem value="object">Object</MenuItem>
+                  </Select>
+                </FormControl>
+              )}
+
+              {/* Element Label field for array of objects */}
+              {localField.type === 'array' && localField.schema?.items?.type === 'object' && (
                 <TextField
                   label="Element Label"
                   fullWidth
@@ -1368,6 +1420,23 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                   )}
                 </>
               )}
+              {/* Password Confirmation Toggle */}
+              {localField.type === 'password' && (
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={localField.requireConfirmation || false}
+                      onChange={(e) => {
+                        handleUpdate({ requireConfirmation: e.target.checked });
+                      }}
+                      color="primary"
+                    />
+                  }
+                  label="Require Password Confirmation"
+                  sx={formControlLabelSx}
+                />
+              )}
+
               {/* Make Field as Element Label switch - only for fields inside array of objects */}
               {isInsideArrayOfObjects && !isLayout && !isGroup && (
                 <FormControlLabel
@@ -1723,7 +1792,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                   sx={outlinedTextFieldSx}
                 />
               )}
-              {localField.type === 'number' && (
+              {(localField.type === 'number' || localField.type === 'integer') && (
                 <Grid container spacing={2}>
                   <Grid item xs={6}>
                     <TextField
@@ -1738,6 +1807,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                       }
                       margin="normal"
                       variant="outlined"
+                      inputProps={localField.type === 'integer' ? { step: 1 } : {}}
                       sx={outlinedTextFieldSx}
                     />
                   </Grid>
@@ -1755,6 +1825,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                       }
                       margin="normal"
                       variant="outlined"
+                      inputProps={localField.type === 'integer' ? { step: 1 } : {}}
                       sx={outlinedTextFieldSx}
                     />
                   </Grid>
@@ -1899,9 +1970,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                   </Grid>
                 </Grid>
               )}
-              {(localField.type === 'array' ||
-                localField.type === 'array-strings' ||
-                localField.type === 'multiselect') && (
+              {(localField.type === 'array' || localField.type === 'multiselect') && (
                 <Grid container spacing={2}>
                   <Grid item xs={6}>
                     <TextField

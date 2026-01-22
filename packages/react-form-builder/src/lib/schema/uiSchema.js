@@ -168,8 +168,7 @@ export const buildUISchemaFromFields = (fieldsArray, parentKey = null) => {
     .filter((field) => {
       return !field.uischema?.options?.hidden;
     })
-    .map((field) => {
-      console.log('field', field);
+    .flatMap((field) => {
       if (field.isLayout) {
         const uischema = {};
 
@@ -196,8 +195,34 @@ export const buildUISchemaFromFields = (fieldsArray, parentKey = null) => {
           uischema.options = field.uischema.options;
         }
 
-        return uischema;
+        return [uischema];
       } else {
+        // Handle password confirmation
+        if (field.type === 'password' && field.requireConfirmation) {
+          const scope = parentKey
+            ? `#/properties/${parentKey}/properties/${field.key}`
+            : `#/properties/${field.key}`;
+          const confirmScope = parentKey
+            ? `#/properties/${parentKey}/properties/${field.key}_confirm`
+            : `#/properties/${field.key}_confirm`;
+
+          return [
+            {
+              ...field.uischema,
+              scope: scope,
+              label: field.label,
+            },
+            {
+              type: 'Control',
+              scope: confirmScope,
+              label: `Confirm ${field.label}`,
+              options: {
+                format: 'password',
+              },
+            },
+          ];
+        }
+
         if (field.type === 'array') {
           const scope = parentKey
             ? `#/properties/${parentKey}/properties/${field.key}`
@@ -208,21 +233,23 @@ export const buildUISchemaFromFields = (fieldsArray, parentKey = null) => {
             detailElements = buildUISchemaForArrayItems(field.children);
           }
 
-          return {
-            type: 'Control',
-            scope: scope,
-            options: {
-              addable: true,
-              ...field.uischema?.options,
-              showSortButtons: true,
-              ...(detailElements.length > 0 && {
-                detail: {
-                  type: 'VerticalLayout',
-                  elements: detailElements,
-                },
-              }),
+          return [
+            {
+              type: 'Control',
+              scope: scope,
+              options: {
+                addable: true,
+                ...field.uischema?.options,
+                showSortButtons: true,
+                ...(detailElements.length > 0 && {
+                  detail: {
+                    type: 'VerticalLayout',
+                    elements: detailElements,
+                  },
+                }),
+              },
             },
-          };
+          ];
         } else {
           let rule = {};
           if (field.visibility) {

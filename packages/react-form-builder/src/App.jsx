@@ -2,7 +2,19 @@ import { IconX } from '@tabler/icons-react';
 import { restrictToWindowEdges } from '@dnd-kit/modifiers';
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { ThemeProvider, createTheme, CssBaseline, Box, Button, Typography } from '@mui/material';
+import {
+  ThemeProvider,
+  createTheme,
+  CssBaseline,
+  Box,
+  Button,
+  Typography,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  DialogContentText,
+} from '@mui/material';
 import {
   DndContext,
   DragOverlay,
@@ -108,6 +120,8 @@ const App = ({ onExport, onSave, schemas = [], theme: customTheme } = {}) => {
   const [showFormPreview, setShowFormPreview] = useState(false);
   const [showSchemaEditor, setShowSchemaEditor] = useState(false);
   const [propertiesDrawerOpen, setPropertiesDrawerOpen] = useState(false);
+  const [confirmDialog, setConfirmDialog] = useState({ open: false, schemaId: null });
+  const [loadedSchemaId, setLoadedSchemaId] = useState('');
 
   const appliedTheme = customTheme || defaultTheme;
 
@@ -429,17 +443,55 @@ const App = ({ onExport, onSave, schemas = [], theme: customTheme } = {}) => {
 
   const handleLoadSchemaFromPalette = useCallback(
     (schemaId) => {
+      if (fields.length > 0) {
+        setConfirmDialog({ open: true, schemaId });
+        return false;
+      }
+      loadSchema(schemaId);
+      return true;
+    },
+    [fields]
+  );
+
+  const loadSchema = useCallback(
+    (schemaId) => {
       const selectedSchema = schemas.find((s) => s.id === schemaId);
-      if (selectedSchema && selectedSchema.schema) {
+      if (selectedSchema?.schema) {
         const convertedFields = convertSchemaToFields(selectedSchema.schema);
         setFields(convertedFields);
         setFormData({});
         setSelectedField(null);
         setPropertiesDrawerOpen(false);
+        setLoadedSchemaId(schemaId);
       }
+      setConfirmDialog({ open: false, schemaId: null });
     },
-    [convertSchemaToFields]
+    [schemas, convertSchemaToFields]
   );
+
+  const handleConfirmLoadSchema = useCallback(() => {
+    if (confirmDialog.schemaId) {
+      loadSchema(confirmDialog.schemaId);
+    }
+  }, [confirmDialog.schemaId, loadSchema]);
+
+  const handleCancelLoadSchema = useCallback(() => {
+    setConfirmDialog({ open: false, schemaId: null });
+  }, []);
+
+  const handleResetToOriginal = useCallback(() => {
+    if (loadedSchemaId) {
+      loadSchema(loadedSchemaId);
+    }
+  }, [loadedSchemaId, loadSchema]);
+
+  const handleClearAll = useCallback(() => {
+    setFields([]);
+    setFormData({});
+    setSelectedField(null);
+    setPropertiesDrawerOpen(false);
+    setLoadedSchemaId('');
+  }, []);
 
   const isGroup = selectedField?.uischema?.type === 'Group';
 
@@ -543,24 +595,22 @@ const App = ({ onExport, onSave, schemas = [], theme: customTheme } = {}) => {
 
   const propertiesPanelContent = {
     p: 2,
-    pb: '100px',
     bgcolor: 'background.paper',
     minHeight: '100%',
   };
 
   const propertiesPanelFooter = {
-    position: 'fixed',
-    bottom: 0,
-    right: 0,
-    width: { xs: '100vw', sm: '400px', md: '480px' },
-    p: 2.5,
+    p: '10px',
     bgcolor: 'background.paper',
     borderTop: 1,
     borderColor: 'divider',
     display: 'flex',
     gap: 2,
     boxShadow: '0 -2px 10px rgba(0,0,0,0.1)',
+    position: 'sticky',
+    bottom: 0,
     zIndex: 10,
+    height: 64,
   };
 
   const saveButton = {
@@ -645,6 +695,7 @@ const App = ({ onExport, onSave, schemas = [], theme: customTheme } = {}) => {
                     name: s.name,
                     description: s.description,
                   }))}
+                  loadedSchemaId={loadedSchemaId}
                 />{' '}
               </Box>
 
@@ -700,6 +751,10 @@ const App = ({ onExport, onSave, schemas = [], theme: customTheme } = {}) => {
                         showSchemaEditor={showSchemaEditor}
                         setShowSchemaEditor={setShowSchemaEditor}
                         exportForm={exportForm}
+                        onReset={handleResetToOriginal}
+                        hasOriginalSchema={!!loadedSchemaId}
+                        onClearAll={handleClearAll}
+                        propertiesDrawerOpen={propertiesDrawerOpen}
                       />
                     )}
                   </Box>
@@ -781,6 +836,29 @@ const App = ({ onExport, onSave, schemas = [], theme: customTheme } = {}) => {
           )}
         </SortableContext>
       </DndContext>
+
+      {/* Confirmation Dialog */}
+      <Dialog
+        open={confirmDialog.open}
+        onClose={handleCancelLoadSchema}
+        aria-labelledby="confirm-dialog-title"
+        aria-describedby="confirm-dialog-description"
+      >
+        <DialogTitle id="confirm-dialog-title">Load New Schema?</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="confirm-dialog-description">
+            By this action, current changes will be discarded. Do you want to continue?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancelLoadSchema} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleConfirmLoadSchema} variant="contained" autoFocus>
+            Continue
+          </Button>
+        </DialogActions>
+      </Dialog>
     </ThemeProvider>
   );
 };
