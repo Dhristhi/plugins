@@ -5,14 +5,14 @@ import { rankWith, isControl, and, schemaMatches } from '@jsonforms/core';
 import { formatDate } from '../utils';
 
 const CustomDateControl = (props) => {
-  const { data, handleChange, path, label, required, errors, uischema, schema } = props;
+  console.log('props', props);
+  const { data, handleChange, path, label, required, errors, uischema, schema, visible } = props;
 
   const minDate = schema?.minimum;
   const maxDate = schema?.maximum;
   const isReadOnly = uischema?.options?.readonly;
   const includeTime = uischema?.options?.includeTime || false;
   const dateFormat = uischema?.options?.dateTimeFormat || 'friendly';
-
   const getDisplayValue = () => {
     if (!data) return '';
 
@@ -88,6 +88,7 @@ const CustomDateControl = (props) => {
   };
 
   const formattedDisplay = getFormattedDisplayText();
+  if (!visible) return null;
 
   return (
     <div>

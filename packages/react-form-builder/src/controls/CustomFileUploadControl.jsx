@@ -5,7 +5,7 @@ import { and, isControl, optionIs, rankWith } from '@jsonforms/core';
 import { Box, Typography, Alert, FormHelperText } from '@mui/material';
 
 const CustomFileUploadControl = (props) => {
-  const { data, handleChange, path, errors, uischema, schema, label } = props;
+  const { data, handleChange, path, errors, uischema, schema, label, visible } = props;
 
   const [localError, setLocalError] = useState(null);
   const [isDragOver, setIsDragOver] = useState(false);
@@ -14,7 +14,6 @@ const CustomFileUploadControl = (props) => {
   const isReadOnly = uischema?.options?.readonly || false;
   const maxFileSize = uischema?.options?.['ui:options']?.maxSize;
   const acceptedFileTypes = uischema?.options?.['ui:options']?.accept;
-
   function getAllowedMimes(acceptedFileTypes) {
     if (!acceptedFileTypes?.trim()) {
       return [];
@@ -113,6 +112,7 @@ const CustomFileUploadControl = (props) => {
   const hasError = Boolean(jsonFormsError) || Boolean(localError);
 
   const hasFile = typeof data === 'string' && data.startsWith('data:');
+  if (!visible) return null;
 
   return (
     <Box sx={{ mb: 2 }}>
