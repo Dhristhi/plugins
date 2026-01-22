@@ -2,10 +2,63 @@ import { createAjv } from '@jsonforms/core';
 import { JsonForms } from '@jsonforms/react';
 import { IconEye } from '@tabler/icons-react';
 import { useState, useMemo, useRef } from 'react';
-import { Typography, Button, Box } from '@mui/material';
+import { Typography, Button, Box, Tooltip, IconButton } from '@mui/material';
 
 import CommonHeader from './CommonHeader';
 import { getRenderers, getCells, config } from '../controls/renders';
+import { IconDeviceDesktop, IconDeviceTablet, IconDeviceMobile } from '@tabler/icons-react';
+import { IFrameRenderer } from './IFrameRenderer';
+import { useTheme } from '@mui/material/styles';
+
+const PREVIEW_MODES = {
+  desktop: {
+    label: 'Desktop',
+    width: '100%',
+    icon: 'desktop',
+  },
+  tablet: {
+    label: 'Tablet',
+    width: 768,
+    icon: 'tablet',
+  },
+  mobile: {
+    label: 'Mobile',
+    width: 375,
+    icon: 'mobile',
+  },
+};
+
+function FormResponsivePreview({ mode, children }) {
+  const { width } = PREVIEW_MODES[mode];
+  const theme = useTheme();
+  return (
+    <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+      <IFrameRenderer width={width} theme={theme}>
+        {children}
+      </IFrameRenderer>
+    </Box>
+  );
+}
+
+const icons = {
+  desktop: <IconDeviceDesktop />,
+  tablet: <IconDeviceTablet />,
+  mobile: <IconDeviceMobile />,
+};
+
+function PreviewToolbar({ mode, onChange }) {
+  return (
+    <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center', alignItems: 'center' }}>
+      {Object.entries(PREVIEW_MODES).map(([key, cfg]) => (
+        <Tooltip key={key} title={cfg.label}>
+          <IconButton onClick={() => onChange(key)} color={mode === key ? 'primary' : 'default'}>
+            {icons[key]}
+          </IconButton>
+        </Tooltip>
+      ))}
+    </Box>
+  );
+}
 
 const FormPreview = ({
   formState,
@@ -40,6 +93,7 @@ const FormPreview = ({
     justifyContent: 'flex-end',
     px: 3,
   };
+  const [mode, setMode] = useState('desktop');
 
   const hasFieldContent = (value) => {
     if (value === undefined || value === null || value === '') {
@@ -222,38 +276,43 @@ const FormPreview = ({
       <Box sx={{ p: 2 }}>
         {formState.schema.properties && Object.keys(formState.schema.properties).length > 0 ? (
           <div ref={formRef}>
-            <JsonForms
-              key={key} // Force re-render when validation state changes
-              ajv={ajv}
-              config={{
-                ...config,
-                showUnfocusedDescription: hasValidated,
-                trim: false,
-                hideRequiredAsterisk: false,
-              }}
-              cells={getCells()}
-              data={dataWithDefaults ?? formState.data}
-              renderers={getRenderers()}
-              schema={formState.schema}
-              uischema={formState.uischema}
-              validationMode="NoValidation"
-              additionalErrors={hasValidated ? validationErrors : []}
-              onChange={({ data }) => {
-                if (isProgrammaticUpdateRef.current) {
-                  isProgrammaticUpdateRef.current = false;
-                  return;
-                }
+            <PreviewToolbar mode={mode} onChange={setMode} />
+            <FormResponsivePreview mode={mode}>
+              <Box sx={{ p: 2 }}>
+                <JsonForms
+                  key={key} // Force re-render when validation state changes
+                  ajv={ajv}
+                  config={{
+                    ...config,
+                    showUnfocusedDescription: hasValidated,
+                    trim: false,
+                    hideRequiredAsterisk: false,
+                  }}
+                  cells={getCells()}
+                  data={dataWithDefaults ?? formState.data}
+                  renderers={getRenderers()}
+                  schema={formState.schema}
+                  uischema={formState.uischema}
+                  validationMode="NoValidation"
+                  additionalErrors={hasValidated ? validationErrors : []}
+                  onChange={({ data }) => {
+                    if (isProgrammaticUpdateRef.current) {
+                      isProgrammaticUpdateRef.current = false;
+                      return;
+                    }
 
-                userActions.current = true;
-                if (data) {
-                  onDataChange(data);
-                }
-                // Perform real-time validation if validation mode is active
-                if (hasValidated) {
-                  performValidation(data);
-                }
-              }}
-            />
+                    userActions.current = true;
+                    if (data) {
+                      onDataChange(data);
+                    }
+                    // Perform real-time validation if validation mode is active
+                    if (hasValidated) {
+                      performValidation(data);
+                    }
+                  }}
+                />
+              </Box>
+            </FormResponsivePreview>
           </div>
         ) : (
           <Typography variant="body2" color="textSecondary">

@@ -283,7 +283,7 @@ const App = ({ onExport, onSave, schemas = [], theme: customTheme } = {}) => {
     setEditingField(newField);
     setHasUnsavedChanges(false);
     if (!fieldType.isLayout) {
-      setPropertiesDrawerOpen(true);
+      //setPropertiesDrawerOpen(true);
     }
   }, []);
 
