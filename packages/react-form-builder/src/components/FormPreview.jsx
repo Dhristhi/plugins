@@ -1,6 +1,7 @@
 import { createAjv } from '@jsonforms/core';
 import { JsonForms } from '@jsonforms/react';
 import { IconEye } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 import { useState, useMemo, useRef } from 'react';
 import { Typography, Button, Box } from '@mui/material';
 
@@ -19,6 +20,8 @@ const FormPreview = ({
   const formRef = useRef();
   const userActions = useRef(false);
   const isProgrammaticUpdateRef = useRef(false);
+
+  const { t } = useTranslation();
 
   const ajv = useMemo(() => createAjv({ useDefaults: 'empty' }), []);
 
@@ -210,8 +213,8 @@ const FormPreview = ({
   return (
     <Box sx={{ paddingBottom: '64px' }}>
       <CommonHeader
-        title="Form Preview"
-        description="Test your form and see how it will look to users"
+        title={t('formPreview')}
+        description={t('testYourForm')}
         icon={IconEye}
         showFormPreview={showFormPreview}
         setShowFormPreview={setShowFormPreview}
@@ -257,14 +260,14 @@ const FormPreview = ({
           </div>
         ) : (
           <Typography variant="body2" color="textSecondary">
-            No fields added yet. Start by adding fields from the palette.
+            {t('noFieldsAdded')}
           </Typography>
         )}
       </Box>
       {formState.schema.properties && Object.keys(formState.schema.properties).length > 0 && (
         <Box sx={validateBox}>
           <Button onClick={toggleValidateButton} variant="contained">
-            Validate
+            {t('validate')}
           </Button>
         </Box>
       )}

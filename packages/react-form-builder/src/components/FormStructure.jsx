@@ -1,5 +1,6 @@
 import { CSS } from '@dnd-kit/utilities';
 import { useDroppable } from '@dnd-kit/core';
+import { useTranslation } from 'react-i18next';
 import {
   IconGripVertical,
   IconBox,
@@ -33,6 +34,7 @@ const SortableFieldItem = ({
   deleteField,
   selectedField,
 }) => {
+  const { t } = useTranslation();
   const [contextMenu, setContextMenu] = useState(null);
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
@@ -210,9 +212,9 @@ const SortableFieldItem = ({
               <Chip
                 label={
                   isGroup || field.type === 'object'
-                    ? 'Group'
+                    ? t('group')
                     : field.type === 'array'
-                      ? 'Array'
+                      ? t('array')
                       : field.uischema?.type || 'Layout'
                 }
                 size="small"
@@ -236,11 +238,11 @@ const SortableFieldItem = ({
 
             {field.uischema?.options?.hidden && (
               <Chip
-                label="Hidden"
                 size="small"
                 color="secondary"
-                variant="outlined"
                 sx={hiddenChipSx}
+                variant="outlined"
+                label={t('hidden')}
               />
             )}
 
@@ -316,6 +318,7 @@ const SortableFieldItem = ({
 
 // Drop zone component
 const DropZone = ({ parentId, index, accepts, isEmpty = false, onAddField }) => {
+  const { t } = useTranslation();
   const { isOver, setNodeRef } = useDroppable({
     id: `drop-${parentId || 'root'}-${index}`,
     data: {
@@ -366,12 +369,12 @@ const DropZone = ({ parentId, index, accepts, isEmpty = false, onAddField }) => 
         <Box sx={dropZoneHeaderSx}>
           {isOver ? <IconTarget size={20} /> : <IconPlus size={20} />}
           <Typography variant="body2" sx={dropZoneTitleSx}>
-            {isOver ? 'Drop here!' : 'No fields yet'}
+            {isOver ? t('dropHere') : t('noFieldsYet')}
           </Typography>
         </Box>
 
         <Typography variant="caption" color="textSecondary">
-          {isOver ? 'Release to add item' : 'Drag fields from the palette '}
+          {isOver ? t('releaseToAdd') : t('dragFields')}
         </Typography>
       </Box>
     );
@@ -415,11 +418,11 @@ const DropZone = ({ parentId, index, accepts, isEmpty = false, onAddField }) => 
       <Typography variant="caption" sx={compactDropZoneTextSx(isOver)}>
         {isOver ? (
           <>
-            <IconTarget size={14} /> DROP HERE
+            <IconTarget size={14} /> {t('dropHere').toUpperCase()}
           </>
         ) : (
           <>
-            <IconPlus size={14} /> Drop items here
+            <IconPlus size={14} /> {t('dropItemsHere')}
           </>
         )}
       </Typography>
@@ -444,6 +447,7 @@ const FormStructure = ({
   onClearAll,
   propertiesDrawerOpen,
 }) => {
+  const { t } = useTranslation();
   const moveField = (fieldId, direction, parentId) => {
     const newFields = [...fields];
 
@@ -540,8 +544,8 @@ const FormStructure = ({
   return (
     <Box>
       <CommonHeader
-        title="Form Design"
-        description="Drag fields and layouts to organize your form"
+        title={t('formDesign')}
+        description={t('dragFieldsDescription')}
         icon={IconForms}
         showFormPreview={showFormPreview}
         setShowFormPreview={setShowFormPreview}
@@ -591,11 +595,11 @@ const FormStructure = ({
         <Box sx={actionBox}>
           {hasOriginalSchema ? (
             <Button onClick={onReset} variant="contained">
-              Reset
+              {t('reset')}
             </Button>
           ) : (
             <Button onClick={onClearAll} variant="contained" color="error">
-              Clear All
+              {t('clearAll')}
             </Button>
           )}
         </Box>

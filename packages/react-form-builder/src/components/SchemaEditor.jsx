@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { IconCode } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 import { Typography, TextField, Button, Box } from '@mui/material';
 
 import CommonHeader from './CommonHeader';
@@ -14,6 +15,7 @@ const SchemaEditor = ({
   exportForm,
   onSave,
 }) => {
+  const { t } = useTranslation();
   const [schemaText, setSchemaText] = useState('');
   const [uischemaText, setUischemaText] = useState('');
   const [error, setError] = useState(null);
@@ -41,7 +43,7 @@ const SchemaEditor = ({
       setError(null);
       // eslint-disable-next-line no-unused-vars
     } catch (err) {
-      setError('Invalid JSON format');
+      setError(t('invalidJson'));
     }
   };
 
@@ -97,8 +99,8 @@ const SchemaEditor = ({
   return (
     <Box sx={rootContainerSx}>
       <CommonHeader
-        title="Schema Editor"
-        description="View and edit the JSON schema and UI schema"
+        title={t('schemaEditor')}
+        description={t('viewEditSchema')}
         icon={IconCode}
         showFormPreview={showFormPreview}
         setShowFormPreview={setShowFormPreview}
@@ -119,7 +121,7 @@ const SchemaEditor = ({
         <Box display="flex" gap={2} sx={editorsRowSx}>
           <Box flex={1} sx={editorColumnSx}>
             <Typography variant="subtitle2" gutterBottom>
-              JSON Schema
+              {t('jsonSchema')}
             </Typography>
             <TextField
               multiline
@@ -136,7 +138,7 @@ const SchemaEditor = ({
 
           <Box flex={1} sx={editorColumnSx}>
             <Typography variant="subtitle2" gutterBottom>
-              UI Schema
+              {t('uiSchema')}
             </Typography>
             <TextField
               multiline
@@ -154,7 +156,7 @@ const SchemaEditor = ({
 
         <Box display="flex" gap={2} alignItems="center">
           <Button variant="contained" onClick={handleApply}>
-            Apply Changes
+            {t('applyChanges')}
           </Button>
         </Box>
       </Box>

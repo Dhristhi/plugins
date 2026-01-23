@@ -17,6 +17,8 @@ import CustomAccordionGroupLayoutRenderer, {
 import CustomInfoAlert, { customInfoAlertTester } from './controls/CustomInfoAlert';
 import ArrayLayoutRenderer, { customArrayLayoutTester } from './controls/CustomArrayLayout';
 
+import mr from './locales/mr.json';
+
 // Internal registry of custom renderers with IDs for configuration
 export const customRendererEntries = [
   { id: 'currencyText', tester: customCurrencyTester, renderer: CustomTextControl },
@@ -1229,7 +1231,13 @@ export default function App() {
   //You can Pass theme={customTheme} to FormBuilder to apply the custom theme
   return (
     <div style={{ width: '100vw', height: '100vh' }}>
-      <FormBuilder schemas={schemas} onSave={handleSchemaSave} />
+      <FormBuilder
+        schemas={schemas}
+        defaultLanguage="en"
+        selectedLanguage="en"
+        onSave={handleSchemaSave}
+        translationResources={{ mr: { translation: mr } }}
+      />
     </div>
   );
 }

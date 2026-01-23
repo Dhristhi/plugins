@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Typography,
   Box,
@@ -16,6 +17,7 @@ import '../lib/registry/init';
 import { getFieldTypes } from '../lib/registry/fieldRegistry';
 
 const DraggableFieldItem = ({ fieldType }) => {
+  const { t } = useTranslation();
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: fieldType.id,
     data: {
@@ -90,11 +92,11 @@ const DraggableFieldItem = ({ fieldType }) => {
 
       <Box sx={{ flex: 1 }}>
         <Typography variant="body2" sx={labelSx}>
-          {fieldType.label}
+          {fieldType.labelKey ? t(fieldType.labelKey) : fieldType.label}
         </Typography>
 
         <Typography variant="caption" color="textSecondary" sx={captionSx}>
-          {fieldType.isLayout ? 'Layout Container' : 'Form Input'}
+          {fieldType.isLayout ? t('layoutContainer') : t('formInput')}
         </Typography>
       </Box>
     </Paper>
@@ -102,6 +104,7 @@ const DraggableFieldItem = ({ fieldType }) => {
 };
 
 const FieldPalette = ({ onLoadSchema, schemas = [], loadedSchemaId = '' }) => {
+  const { t } = useTranslation();
   const [selectedSchema, setSelectedSchema] = useState(loadedSchemaId);
 
   React.useEffect(() => {
@@ -179,20 +182,20 @@ const FieldPalette = ({ onLoadSchema, schemas = [], loadedSchemaId = '' }) => {
           <IconClipboard size={20} />
         </Box>
         <Typography variant="subtitle1" sx={sectionTitleSx}>
-          Form Templates
+          {t('formTemplates')}
         </Typography>
       </Box>
 
       <FormControl fullWidth size="small" sx={{ mb: 3 }}>
-        <InputLabel>Choose Template</InputLabel>
+        <InputLabel>{t('chooseTemplate')}</InputLabel>
         <Select
           value={selectedSchema}
-          label="Choose Template"
+          label={t('chooseTemplate')}
           onChange={handleSchemaChange}
           sx={selectSx}
         >
           <MenuItem value="">
-            <em>Select a template...</em>
+            <em>{t('selectTemplate')}</em>
           </MenuItem>
 
           {schemas.map((schema) => (
@@ -218,12 +221,12 @@ const FieldPalette = ({ onLoadSchema, schemas = [], loadedSchemaId = '' }) => {
           <IconLayersLinked size={20} />
         </Box>
         <Typography variant="subtitle1" sx={sectionTitleSx}>
-          Layouts
+          {t('layouts')}
         </Typography>
       </Box>
 
       <Typography variant="body2" sx={helperTextSx}>
-        Organize fields with containers
+        {t('organizeFields')}
       </Typography>
 
       <Box sx={{ mb: 3 }}>
@@ -240,12 +243,12 @@ const FieldPalette = ({ onLoadSchema, schemas = [], loadedSchemaId = '' }) => {
           <IconForms size={20} />
         </Box>
         <Typography variant="subtitle1" sx={sectionTitleSx}>
-          Form Fields
+          {t('formFields')}
         </Typography>
       </Box>
 
       <Typography variant="body2" sx={helperTextSx}>
-        Input controls for data collection
+        {t('inputControls')}
       </Typography>
 
       <Box>
