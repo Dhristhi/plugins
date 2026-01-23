@@ -322,7 +322,7 @@ export const defaultFieldTypes = [
     },
   },
   {
-    id: 'array-strings',
+    id: 'array',
     type: 'array',
     labelKey: 'fieldType_arrayStrings',
     label: 'Array of Strings',

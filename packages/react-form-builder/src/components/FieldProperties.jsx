@@ -380,34 +380,20 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
     // Array fields with enum items (multiselect) can switch between multiselect types and array
     if (currentSchemaType === 'array' && localField.schema?.items?.enum) {
       return availableFieldTypes.filter(
-        (ft) =>
-          ft.id === 'multiselect' ||
-          ft.id === 'multicheckbox' ||
-          ft.id === 'array' ||
-          ft.id === 'array-strings'
+        (ft) => ft.id === 'multiselect' || ft.id === 'multicheckbox' || ft.id === 'array'
       );
     }
 
     // Array fields without enum can switch between array and multiselect types
     if (currentSchemaType === 'array') {
       return availableFieldTypes.filter(
-        (ft) =>
-          ft.id === 'array' ||
-          ft.id === 'multiselect' ||
-          ft.id === 'multicheckbox' ||
-          ft.id === 'array-strings'
+        (ft) => ft.id === 'array' || ft.id === 'multiselect' || ft.id === 'multicheckbox'
       );
     }
 
     return availableFieldTypes.filter((ft) => {
       // Don't allow converting to array types from other types
-      if (
-        ft.id === 'array' ||
-        ft.id === 'multiselect' ||
-        ft.id === 'multicheckbox' ||
-        ft.id === 'array-strings'
-      )
-        return false;
+      if (ft.id === 'array' || ft.id === 'multiselect' || ft.id === 'multicheckbox') return false;
 
       const targetSchemaType = ft.schema?.type;
 
@@ -874,7 +860,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                 </>
               ) : // Default Value field for non-date fields
               localField.type !== 'array' &&
-                localField.type !== 'array-strings' &&
                 localField.type !== 'checkbox' &&
                 localField.type !== 'file' ? (
                 <TextField
@@ -926,8 +911,69 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                   label={t('checkedByDefault')}
                 />
               ) : null}
-              {/* Element Label field for array of objects */}
+              {/* Array Item Type Selector */}
               {localField.type === 'array' && (
+                <FormControl fullWidth margin="normal">
+                  <InputLabel>Array Item Type</InputLabel>
+                  <Select
+                    value={localField.schema?.items?.type || 'string'}
+                    label="Array Item Type"
+                    onChange={(e) => {
+                      const itemType = e.target.value;
+                      let updatedSchema = { ...localField.schema };
+
+                      if (itemType === 'object') {
+                        // For objects, set up the structure with detail layout
+                        updatedSchema.items = {
+                          type: 'object',
+                          properties: {},
+                        };
+
+                        const updatedUISchema = {
+                          ...localField.uischema,
+                          options: {
+                            ...localField.uischema?.options,
+                            detail: {
+                              type: 'VerticalLayout',
+                              elements: [],
+                            },
+                          },
+                        };
+
+                        handleUpdate({
+                          schema: updatedSchema,
+                          uischema: updatedUISchema,
+                        });
+                      } else {
+                        // For primitive types (string/number), remove object-specific properties
+                        updatedSchema.items = { type: itemType };
+
+                        const updatedUISchema = {
+                          ...localField.uischema,
+                          options: {
+                            ...localField.uischema?.options,
+                            detail: undefined,
+                            elementLabelProp: undefined,
+                          },
+                        };
+
+                        handleUpdate({
+                          schema: updatedSchema,
+                          uischema: updatedUISchema,
+                        });
+                      }
+                    }}
+                    sx={layoutSelectSx}
+                  >
+                    <MenuItem value="string">String</MenuItem>
+                    <MenuItem value="number">Number</MenuItem>
+                    <MenuItem value="object">Object</MenuItem>
+                  </Select>
+                </FormControl>
+              )}
+
+              {/* Element Label field for array of objects */}
+              {localField.type === 'array' && localField.schema?.items?.type === 'object' && (
                 <TextField
                   label={t('elementLabel')}
                   fullWidth
@@ -1545,9 +1591,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                   </Grid>
                 </Grid>
               )}
-              {(localField.type === 'array' ||
-                localField.type === 'array-strings' ||
-                localField.type === 'multiselect') && (
+              {(localField.type === 'array' || localField.type === 'multiselect') && (
                 <Grid container spacing={2}>
                   <Grid item xs={6}>
                     <TextField
