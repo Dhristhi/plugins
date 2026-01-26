@@ -15,6 +15,12 @@ const CustomFileUploadControl = (props) => {
   const maxFileSize = uischema?.options?.['ui:options']?.maxSize;
   const acceptedFileTypes = uischema?.options?.['ui:options']?.accept;
 
+  // Helper function to check if the data URL represents an image
+  const isImageDataUrl = (dataUrl) => {
+    if (!dataUrl || typeof dataUrl !== 'string') return false;
+    return dataUrl.startsWith('data:image/');
+  };
+
   function getAllowedMimes(acceptedFileTypes) {
     if (!acceptedFileTypes?.trim()) {
       return [];
@@ -113,6 +119,50 @@ const CustomFileUploadControl = (props) => {
   const hasError = Boolean(jsonFormsError) || Boolean(localError);
 
   const hasFile = typeof data === 'string' && data.startsWith('data:');
+  const isImage = hasFile && isImageDataUrl(data);
+
+  // In read-only mode with an image, show a cleaner preview layout
+  if (isReadOnly && isImage) {
+    return (
+      <Box sx={{ mb: 2 }}>
+        {label && (
+          <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
+            {label}
+          </Typography>
+        )}
+        <Box
+          sx={{
+            border: '1px solid',
+            borderColor: 'divider',
+            borderRadius: 2,
+            p: 2,
+            backgroundColor: 'background.paper',
+            textAlign: 'center',
+          }}
+        >
+          <Box
+            component="img"
+            src={data}
+            alt="Image preview"
+            sx={{
+              maxWidth: '100%',
+              maxHeight: '300px',
+              width: 'auto',
+              height: 'auto',
+              borderRadius: 1,
+              objectFit: 'contain',
+            }}
+            onError={(e) => {
+              e.target.style.display = 'none';
+            }}
+          />
+        </Box>
+        {schema?.description && (
+          <FormHelperText sx={{ mt: 1, mx: 0 }}>{schema.description}</FormHelperText>
+        )}
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ mb: 2 }}>
@@ -164,12 +214,50 @@ const CustomFileUploadControl = (props) => {
 
         {hasFile ? (
           <Box>
-            <IconFile size={32} color="currentColor" />
-            <Typography variant="body2" sx={{ mt: 1, color: 'success.main' }}>
-              File uploaded successfully!
-            </Typography>
+            {isImageDataUrl(data) ? (
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: 2,
+                }}
+              >
+                <Box
+                  component="img"
+                  src={data}
+                  alt="Uploaded image preview"
+                  sx={{
+                    maxWidth: '200px',
+                    maxHeight: '200px',
+                    width: 'auto',
+                    height: 'auto',
+                    borderRadius: 1,
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    objectFit: 'contain',
+                    '&:hover': {
+                      cursor: isReadOnly ? 'default' : 'pointer',
+                    },
+                  }}
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                  }}
+                />
+                <Typography variant="body2" sx={{ color: 'success.main' }}>
+                  Image uploaded successfully!
+                </Typography>
+              </Box>
+            ) : (
+              <Box>
+                <IconFile size={32} color="currentColor" />
+                <Typography variant="body2" sx={{ mt: 1, color: 'success.main' }}>
+                  File uploaded successfully!
+                </Typography>
+              </Box>
+            )}
             {!isReadOnly && (
-              <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+              <Typography variant="caption" sx={{ color: 'text.secondary', mt: 1 }}>
                 Click to change file
               </Typography>
             )}
