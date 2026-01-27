@@ -14,6 +14,7 @@ const CustomFileUploadControl = (props) => {
   const isReadOnly = uischema?.options?.readonly || false;
   const maxFileSize = uischema?.options?.['ui:options']?.maxSize;
   const acceptedFileTypes = uischema?.options?.['ui:options']?.accept;
+  const enablePreview = uischema?.options?.['ui:options']?.enablePreview || false;
 
   // Helper function to check if the data URL represents an image
   const isImageDataUrl = (dataUrl) => {
@@ -120,7 +121,23 @@ const CustomFileUploadControl = (props) => {
 
   const hasFile = typeof data === 'string' && data.startsWith('data:');
   const isImage = hasFile && isImageDataUrl(data);
+  const readOnlyContainer = {
+    border: '1px solid',
+    borderColor: 'divider',
+    borderRadius: 2,
+    p: 2,
+    backgroundColor: 'background.paper',
+    textAlign: 'center',
+  };
 
+  const readOnlyPreview = {
+    maxWidth: '100%',
+    maxHeight: '300px',
+    width: 'auto',
+    height: 'auto',
+    borderRadius: 1,
+    objectFit: 'contain',
+  };
   // In read-only mode with an image, show a cleaner preview layout
   if (isReadOnly && isImage) {
     return (
@@ -130,28 +147,12 @@ const CustomFileUploadControl = (props) => {
             {label}
           </Typography>
         )}
-        <Box
-          sx={{
-            border: '1px solid',
-            borderColor: 'divider',
-            borderRadius: 2,
-            p: 2,
-            backgroundColor: 'background.paper',
-            textAlign: 'center',
-          }}
-        >
+        <Box sx={readOnlyContainer}>
           <Box
             component="img"
             src={data}
             alt="Image preview"
-            sx={{
-              maxWidth: '100%',
-              maxHeight: '300px',
-              width: 'auto',
-              height: 'auto',
-              borderRadius: 1,
-              objectFit: 'contain',
-            }}
+            sx={readOnlyPreview}
             onError={(e) => {
               e.target.style.display = 'none';
             }}
@@ -164,6 +165,50 @@ const CustomFileUploadControl = (props) => {
     );
   }
 
+  const fielUploadContainer = {
+    border: 2,
+    borderRadius: 2,
+    borderStyle: 'dashed',
+    borderColor: hasError
+      ? 'error.main'
+      : hasFile
+        ? 'success.main'
+        : isDragOver
+          ? 'primary.main'
+          : 'grey.300',
+    backgroundColor: isDragOver ? 'action.hover' : hasFile ? 'success.lighter' : 'background.paper',
+    p: 3,
+    textAlign: 'center',
+    cursor: isReadOnly ? 'not-allowed' : 'pointer',
+    opacity: isReadOnly ? 0.6 : 1,
+    transition: 'all 0.2s ease-in-out',
+    '&:hover': !isReadOnly && {
+      borderColor: 'primary.main',
+      backgroundColor: 'action.hover',
+    },
+  };
+
+  const uploadedFileContainer = {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: 2,
+  };
+
+  const previewCointainer = {
+    maxWidth: '200px',
+    maxHeight: '200px',
+    width: 'auto',
+    height: 'auto',
+    borderRadius: 1,
+    border: '1px solid',
+    borderColor: 'divider',
+    objectFit: 'contain',
+    '&:hover': {
+      cursor: isReadOnly ? 'default' : 'pointer',
+    },
+  };
+
   return (
     <Box sx={{ mb: 2 }}>
       {label && (
@@ -172,32 +217,7 @@ const CustomFileUploadControl = (props) => {
         </Typography>
       )}
       <Box
-        sx={{
-          border: 2,
-          borderRadius: 2,
-          borderStyle: 'dashed',
-          borderColor: hasError
-            ? 'error.main'
-            : hasFile
-              ? 'success.main'
-              : isDragOver
-                ? 'primary.main'
-                : 'grey.300',
-          backgroundColor: isDragOver
-            ? 'action.hover'
-            : hasFile
-              ? 'success.lighter'
-              : 'background.paper',
-          p: 3,
-          textAlign: 'center',
-          cursor: isReadOnly ? 'not-allowed' : 'pointer',
-          opacity: isReadOnly ? 0.6 : 1,
-          transition: 'all 0.2s ease-in-out',
-          '&:hover': !isReadOnly && {
-            borderColor: 'primary.main',
-            backgroundColor: 'action.hover',
-          },
-        }}
+        sx={fielUploadContainer}
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -215,35 +235,19 @@ const CustomFileUploadControl = (props) => {
         {hasFile ? (
           <Box>
             {isImageDataUrl(data) ? (
-              <Box
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  gap: 2,
-                }}
-              >
-                <Box
-                  component="img"
-                  src={data}
-                  alt="Uploaded image preview"
-                  sx={{
-                    maxWidth: '200px',
-                    maxHeight: '200px',
-                    width: 'auto',
-                    height: 'auto',
-                    borderRadius: 1,
-                    border: '1px solid',
-                    borderColor: 'divider',
-                    objectFit: 'contain',
-                    '&:hover': {
-                      cursor: isReadOnly ? 'default' : 'pointer',
-                    },
-                  }}
-                  onError={(e) => {
-                    e.target.style.display = 'none';
-                  }}
-                />
+              <Box sx={uploadedFileContainer}>
+                {enablePreview && (
+                  <Box
+                    component="img"
+                    src={data}
+                    alt="Uploaded image preview"
+                    sx={previewCointainer}
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                    }}
+                  />
+                )}
+                {!enablePreview && <IconFile size={32} color="currentColor" />}
                 <Typography variant="body2" sx={{ color: 'success.main' }}>
                   Image uploaded successfully!
                 </Typography>

@@ -1094,55 +1094,77 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
 
               {/* File Upload Options */}
               {localField.type === 'file' && (
-                <FormControl fullWidth margin="normal">
-                  <InputLabel id="allowed-file-types-label" shrink>
-                    Allowed File Types
-                  </InputLabel>
+                <>
+                  <FormControl fullWidth margin="normal">
+                    <InputLabel id="allowed-file-types-label" shrink>
+                      Allowed File Types
+                    </InputLabel>
 
-                  <Select
-                    labelId="allowed-file-types-label"
-                    multiple
-                    displayEmpty
-                    label="Allowed File Types"
-                    value={
-                      localField.uischema?.options?.['ui:options']?.accept
-                        ? localField.uischema.options['ui:options'].accept
-                            .split(',')
-                            .filter(Boolean)
-                        : []
-                    }
-                    onChange={(e) => {
-                      const values = e.target.value;
-                      handleUiOptionsUpdate({
-                        accept: values.length ? values.join(',') : undefined,
-                      });
-                    }}
-                    renderValue={(selected) => {
-                      if (selected.length === 0) {
-                        return (
-                          <Typography sx={{ color: 'text.disabled' }}>Select file types</Typography>
-                        );
+                    <Select
+                      labelId="allowed-file-types-label"
+                      multiple
+                      displayEmpty
+                      label="Allowed File Types"
+                      value={
+                        localField.uischema?.options?.['ui:options']?.accept
+                          ? localField.uischema.options['ui:options'].accept
+                              .split(',')
+                              .filter(Boolean)
+                          : []
                       }
-                      return selected
-                        .map((mime) => FILE_TYPE_OPTIONS.find((o) => o.value === mime)?.label)
-                        .join(', ');
-                    }}
-                    MenuProps={{
-                      PaperProps: {
-                        sx: {
-                          maxHeight: 240,
-                          minWidth: 280,
+                      onChange={(e) => {
+                        const values = e.target.value;
+                        handleUiOptionsUpdate({
+                          accept: values.length ? values.join(',') : undefined,
+                        });
+                      }}
+                      renderValue={(selected) => {
+                        if (selected.length === 0) {
+                          return (
+                            <Typography sx={{ color: 'text.disabled' }}>
+                              Select file types
+                            </Typography>
+                          );
+                        }
+                        return selected
+                          .map((mime) => FILE_TYPE_OPTIONS.find((o) => o.value === mime)?.label)
+                          .join(', ');
+                      }}
+                      MenuProps={{
+                        PaperProps: {
+                          sx: {
+                            maxHeight: 240,
+                            minWidth: 280,
+                          },
                         },
-                      },
-                    }}
-                  >
-                    {FILE_TYPE_OPTIONS.map((option) => (
-                      <MenuItem key={option.value} value={option.value}>
-                        {option.label}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
+                      }}
+                    >
+                      {FILE_TYPE_OPTIONS.map((option) => (
+                        <MenuItem key={option.value} value={option.value}>
+                          {option.label}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={
+                          localField.uischema?.options?.['ui:options']?.enablePreview || false
+                        }
+                        onChange={(e) => {
+                          const value = e.target.checked;
+                          handleUiOptionsUpdate({
+                            enablePreview: value,
+                          });
+                        }}
+                        color="primary"
+                      />
+                    }
+                    label="Enable Preview"
+                    sx={{ mt: 1, mb: 1 }}
+                  />
+                </>
               )}
 
               {/* Enum Values for Select/Radio/Multiselect Fields */}
