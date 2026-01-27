@@ -3,16 +3,18 @@ import { Unwrapped } from '@jsonforms/material-renderers';
 import { and, isControl, optionIs, rankWith } from '@jsonforms/core';
 import { useJsonForms, withJsonFormsControlProps } from '@jsonforms/react';
 import {
+  Box,
   Chip,
   Select,
+  Checkbox,
   MenuItem,
+  TextField,
+  FormLabel,
   InputLabel,
   FormControl,
-  Box,
-  FormLabel,
-  FormControlLabel,
-  Checkbox,
+  Autocomplete,
   FormHelperText,
+  FormControlLabel,
 } from '@mui/material';
 
 import { updateNestedValue } from '../utils';
@@ -73,7 +75,30 @@ const CustomSelectControl = (props) => {
   if (!visible) return null;
 
   return multi ? (
-    displayType === 'checkbox' ? (
+    displayType === 'autocomplete' || uischema.options?.autocomplete ? (
+      <FormControl fullWidth error={hasError}>
+        <Autocomplete
+          multiple
+          disabled={isReadOnly}
+          options={options}
+          getOptionLabel={(opt) => opt.label}
+          value={options.filter((o) => Array.isArray(data) && data.includes(o.value))}
+          onChange={(_e, newValues) => {
+            const selectedVals = newValues.map((v) => v.value);
+            handleOnChange(_e, selectedVals);
+          }}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label={fieldLabel}
+              error={hasError}
+              helperText={validationError}
+            />
+          )}
+          {...(uischema.options?.autocompleteProps || {})}
+        />
+      </FormControl>
+    ) : displayType === 'checkbox' ? (
       <FormControl fullWidth error={hasError}>
         <FormLabel>{fieldLabel}</FormLabel>
         <Box sx={{ display: 'flex', flexDirection: 'row', gap: 2, flexWrap: 'wrap' }}>
