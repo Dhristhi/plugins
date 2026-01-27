@@ -282,9 +282,6 @@ const App = ({ onExport, onSave, schemas = [], theme: customTheme } = {}) => {
     setSelectedField(newField);
     setEditingField(newField);
     setHasUnsavedChanges(false);
-    if (!fieldType.isLayout) {
-      setPropertiesDrawerOpen(true);
-    }
   }, []);
 
   const addFieldToLayout = useCallback(
