@@ -18,6 +18,7 @@ import CustomInfoAlert, { customInfoAlertTester } from './controls/CustomInfoAle
 import ArrayLayoutRenderer, { customArrayLayoutTester } from './controls/CustomArrayLayout';
 
 import mr from './locales/mr.json';
+import es from './locales/es.json';
 
 // Internal registry of custom renderers with IDs for configuration
 export const customRendererEntries = [
@@ -1234,9 +1235,9 @@ export default function App() {
       <FormBuilder
         schemas={schemas}
         defaultLanguage="en"
-        selectedLanguage="en"
+        selectedLanguage="es"
         onSave={handleSchemaSave}
-        translationResources={{ mr: { translation: mr } }}
+        translationResources={{ mr: { translation: mr }, es: { translation: es } }}
       />
     </div>
   );
