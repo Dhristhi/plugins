@@ -383,7 +383,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
     }
 
     // Array fields without enum can switch between array and multiselect types
-    if (currentSchemaType === 'array') {
+    if (currentSchemaType === 'array' && localField.type !== 'file') {
       return availableFieldTypes.filter(
         (ft) => ft.id === 'array' || ft.id === 'multiselect' || ft.id === 'multicheckbox'
       );

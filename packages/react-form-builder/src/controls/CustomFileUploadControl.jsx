@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
-import { IconUpload, IconFile } from '@tabler/icons-react';
+import { IconUpload, IconFile, IconX } from '@tabler/icons-react';
 import { withJsonFormsControlProps } from '@jsonforms/react';
 import { and, isControl, optionIs, rankWith } from '@jsonforms/core';
 import { Box, Typography, Alert, FormHelperText } from '@mui/material';
@@ -15,19 +15,20 @@ const CustomFileUploadControl = (props) => {
   const maxFileSize = uischema?.options?.['ui:options']?.maxSize;
   const acceptedFileTypes = uischema?.options?.['ui:options']?.accept;
   const enablePreview = uischema?.options?.['ui:options']?.enablePreview || false;
+  // For multiple files we expect `data` to be an array of data URLs (or null/undefined)
+  const filesData = Array.isArray(data) ? data : [];
+  const hasFiles = Array.isArray(filesData) && filesData.length > 0;
 
-  // Helper function to check if the data URL represents an image
   const isImageDataUrl = (dataUrl) => {
     if (!dataUrl || typeof dataUrl !== 'string') return false;
     return dataUrl.startsWith('data:image/');
   };
 
-  function getAllowedMimes(acceptedFileTypes) {
-    if (!acceptedFileTypes?.trim()) {
+  function getAllowedMimes(accepted) {
+    if (!accepted?.trim()) {
       return [];
     }
-
-    return acceptedFileTypes
+    return accepted
       .split(',')
       .map((mime) => mime.trim())
       .filter(Boolean);
@@ -37,60 +38,79 @@ const CustomFileUploadControl = (props) => {
     if ((allowedMimes.length && !allowedMimes.includes(file.type)) || !file.type) {
       return `Selected file "${file.name}" is not an allowed file type.`;
     }
-    const MB = 1024 * 1024;
-    if (file.size > maxFileSize * MB) {
-      return `Selected file "${file.name}" exceeds the maximum size of ${maxFileSizeMB}MB.`;
+    if (maxFileSizeMB) {
+      const MB = 1024 * 1024;
+      if (file.size > maxFileSizeMB * MB) {
+        return `Selected file "${file.name}" exceeds the maximum size of ${maxFileSizeMB}MB.`;
+      }
     }
-
     return null;
   }
 
   const inputRef = useRef(null);
 
-  const handleFileSelect = useCallback(
-    async (file) => {
-      if (!file) {
+  const readFilesAsDataUrls = (files) => {
+    return new Promise((resolve, reject) => {
+      const results = [];
+      let remaining = files.length;
+
+      files.forEach((file, index) => {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          results[index] = {
+            dataUrl: event?.target?.result,
+          };
+          remaining -= 1;
+          if (remaining === 0) {
+            resolve(results);
+          }
+        };
+        reader.onerror = () => {
+          reject(new Error('Failed to read one of the files.'));
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+  };
+
+  const handleFilesSelect = useCallback(
+    async (fileList) => {
+      if (!fileList || fileList.length === 0) {
         return;
       }
 
+      const files = Array.from(fileList);
       const allowedMimes = getAllowedMimes(acceptedFileTypes);
-      const error = validateFile(file, allowedMimes, maxFileSize);
 
-      if (error) {
-        setLocalError(error);
-        handleChange(path, null);
-        return;
+      // validate all files first
+      for (const file of files) {
+        const error = validateFile(file, allowedMimes, maxFileSize);
+        if (error) {
+          setLocalError(error);
+          // clear data on validation error
+          handleChange(path, []);
+          return;
+        }
       }
 
       setLocalError(null);
       setIsUploading(true);
 
       try {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          const dataUrl = event?.target?.result;
-          handleChange(path, dataUrl);
-          setIsUploading(false);
-        };
-        reader.onerror = () => {
-          setIsUploading(false);
-          setLocalError('Failed to read the file.');
-        };
-        reader.readAsDataURL(file);
-        // eslint-disable-next-line no-unused-vars
-      } catch (e) {
+        const newItems = await readFilesAsDataUrls(files);
+        const updated = [...filesData, ...newItems];
+        handleChange(path, updated);
         setIsUploading(false);
-        setLocalError('Unexpected error while processing the file.');
+      } catch {
+        setIsUploading(false);
+        setLocalError('Unexpected error while processing the files.');
       }
     },
-    [handleChange, path]
+    [handleChange, path, acceptedFileTypes, maxFileSize, filesData]
   );
 
   const handleFileInputChange = (event) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      handleFileSelect(file);
-    }
+    handleFilesSelect(event.target.files);
   };
 
   const handleDragOver = (event) => {
@@ -109,18 +129,14 @@ const CustomFileUploadControl = (props) => {
     event.preventDefault();
     setIsDragOver(false);
     if (!isReadOnly) {
-      const file = event.dataTransfer.files?.[0];
-      if (file) {
-        handleFileSelect(file);
-      }
+      const fileList = event.dataTransfer.files;
+      handleFilesSelect(fileList);
     }
   };
 
   const jsonFormsError = typeof errors === 'string' ? errors : '';
   const hasError = Boolean(jsonFormsError) || Boolean(localError);
 
-  const hasFile = typeof data === 'string' && data.startsWith('data:');
-  const isImage = hasFile && isImageDataUrl(data);
   const readOnlyContainer = {
     border: '1px solid',
     borderColor: 'divider',
@@ -138,8 +154,9 @@ const CustomFileUploadControl = (props) => {
     borderRadius: 1,
     objectFit: 'contain',
   };
-  // In read-only mode with an image, show a cleaner preview layout
-  if (isReadOnly && isImage) {
+
+  // read-only mode with multiple images/files
+  if (isReadOnly && hasFiles) {
     return (
       <Box sx={{ mb: 2 }}>
         {label && (
@@ -148,15 +165,36 @@ const CustomFileUploadControl = (props) => {
           </Typography>
         )}
         <Box sx={readOnlyContainer}>
-          <Box
-            component="img"
-            src={data}
-            alt="Image preview"
-            sx={readOnlyPreview}
-            onError={(e) => {
-              e.target.style.display = 'none';
-            }}
-          />
+          {filesData.map((item, idx) => {
+            const isImage = isImageDataUrl(item.dataUrl);
+            return (
+              <Box key={idx} sx={{ mb: 1 }}>
+                {isImage ? (
+                  <Box
+                    component="img"
+                    src={item.dataUrl}
+                    alt={`Image preview ${idx + 1}`}
+                    sx={readOnlyPreview}
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                    }}
+                  />
+                ) : (
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 1,
+                    }}
+                  >
+                    <IconFile size={24} />
+                    <Typography variant="body2">{item.name || `File ${idx + 1}`}</Typography>
+                  </Box>
+                )}
+              </Box>
+            );
+          })}
         </Box>
         {schema?.description && (
           <FormHelperText sx={{ mt: 1, mx: 0 }}>{schema.description}</FormHelperText>
@@ -171,12 +209,16 @@ const CustomFileUploadControl = (props) => {
     borderStyle: 'dashed',
     borderColor: hasError
       ? 'error.main'
-      : hasFile
+      : hasFiles
         ? 'success.main'
         : isDragOver
           ? 'primary.main'
           : 'grey.300',
-    backgroundColor: isDragOver ? 'action.hover' : hasFile ? 'success.lighter' : 'background.paper',
+    backgroundColor: isDragOver
+      ? 'action.hover'
+      : hasFiles
+        ? 'success.lighter'
+        : 'background.paper',
     p: 3,
     textAlign: 'center',
     cursor: isReadOnly ? 'not-allowed' : 'pointer',
@@ -190,23 +232,39 @@ const CustomFileUploadControl = (props) => {
 
   const uploadedFileContainer = {
     display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    gap: 2,
+    flexDirection: 'row', // side by side
+    alignItems: 'flex-start', // top‑align cards
+    gap: 2, // or 2 if using theme.spacing
+    flexWrap: 'wrap', // wrap to next line on small screens
+    justifyContent: 'center',
   };
 
-  const previewCointainer = {
-    maxWidth: '200px',
-    maxHeight: '200px',
-    width: 'auto',
-    height: 'auto',
-    borderRadius: 1,
+  const previewContainer = {
+    width: 150,
+    height: 150,
+    borderRadius: '4px',
     border: '1px solid',
     borderColor: 'divider',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
     objectFit: 'contain',
     '&:hover': {
       cursor: isReadOnly ? 'default' : 'pointer',
     },
+  };
+
+  const previewImage = {
+    maxWidth: '100%',
+    maxHeight: '100%',
+    objectFit: 'contain',
+  };
+
+  const removeFile = (index) => {
+    if (isReadOnly) return;
+    const updated = filesData.filter((_, i) => i !== index);
+    handleChange(path, updated);
   };
 
   return (
@@ -230,39 +288,72 @@ const CustomFileUploadControl = (props) => {
           style={{ display: 'none' }}
           onChange={handleFileInputChange}
           disabled={isUploading || isReadOnly}
+          multiple
         />
 
-        {hasFile ? (
+        {hasFiles ? (
           <Box>
-            {isImageDataUrl(data) ? (
-              <Box sx={uploadedFileContainer}>
-                {enablePreview && (
+            <Box sx={uploadedFileContainer}>
+              {filesData.map((item, idx) => {
+                const isImage = isImageDataUrl(item.dataUrl);
+                return (
                   <Box
-                    component="img"
-                    src={data}
-                    alt="Uploaded image preview"
-                    sx={previewCointainer}
-                    onError={(e) => {
-                      e.target.style.display = 'none';
+                    key={idx}
+                    sx={{
+                      position: 'relative',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      mb: 2,
                     }}
-                  />
-                )}
-                {!enablePreview && <IconFile size={32} color="currentColor" />}
-                <Typography variant="body2" sx={{ color: 'success.main' }}>
-                  Image uploaded successfully!
-                </Typography>
-              </Box>
-            ) : (
-              <Box>
-                <IconFile size={32} color="currentColor" />
-                <Typography variant="body2" sx={{ mt: 1, color: 'success.main' }}>
-                  File uploaded successfully!
-                </Typography>
-              </Box>
-            )}
+                  >
+                    {!isReadOnly && (
+                      <Box
+                        sx={{
+                          position: 'absolute',
+                          top: -8,
+                          right: 6,
+                          cursor: 'pointer',
+                          color: 'error.main',
+                          zIndex: 1,
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          removeFile(idx);
+                        }}
+                      >
+                        {/* use any Tabler icon, e.g. IconX */}
+                        <IconX size={18} />
+                      </Box>
+                    )}
+                    {enablePreview && isImage ? (
+                      <Box sx={previewContainer}>
+                        <Box
+                          component="img"
+                          src={item.dataUrl}
+                          alt={`Uploaded image preview ${idx + 1}`}
+                          sx={previewImage}
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                          }}
+                        />
+                      </Box>
+                    ) : (
+                      <Box sx={previewContainer}>
+                        <IconFile size={32} color="currentColor" />
+                      </Box>
+                    )}
+
+                    <Typography variant="body2" sx={{ color: 'success.main', mt: 1 }}>
+                      File {idx + 1} uploaded successfully!
+                    </Typography>
+                  </Box>
+                );
+              })}
+            </Box>
             {!isReadOnly && (
               <Typography variant="caption" sx={{ color: 'text.secondary', mt: 1 }}>
-                Click to change file
+                Click to add more files
               </Typography>
             )}
           </Box>
