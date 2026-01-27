@@ -7,58 +7,64 @@ import { Typography, Button, Box, Tooltip, IconButton } from '@mui/material';
 import CommonHeader from './CommonHeader';
 import { getRenderers, getCells, config } from '../controls/renders';
 import { IconDeviceDesktop, IconDeviceTablet, IconDeviceMobile } from '@tabler/icons-react';
-import { IFrameRenderer } from './IFrameRenderer';
-import { useTheme } from '@mui/material/styles';
 
 const PREVIEW_MODES = {
-  desktop: {
-    label: 'Desktop',
-    width: '100%',
-    icon: 'desktop',
-  },
-  tablet: {
-    label: 'Tablet',
-    width: 768,
-    icon: 'tablet',
-  },
-  mobile: {
-    label: 'Mobile',
-    width: 375,
-    icon: 'mobile',
-  },
+  desktop: { width: 1200, label: 'Desktop', icon: <IconDeviceDesktop /> },
+  tablet: { width: 768, label: 'Tablet', icon: <IconDeviceTablet /> },
+  mobile: { width: 375, label: 'Mobile', icon: <IconDeviceMobile /> },
 };
 
-function FormResponsivePreview({ mode, children }) {
+const FormResponsivePreview = ({ mode, children }) => {
   const { width } = PREVIEW_MODES[mode];
-  const theme = useTheme();
+  const responsiveParentSx = {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    p: 2,
+    height: 650,
+  };
+  const mobileContainerSx = {
+    '& .MuiGrid-container, & .MuiGrid2-container': {
+      flexDirection: 'column',
+    },
+    '& .MuiGrid-item, & .MuiGrid2-root': {
+      maxWidth: '100%',
+      flexBasis: '100%',
+    },
+  };
+  const tabletContainerSX = {
+    '& .MuiGrid-container, & .MuiGrid2-container': {
+      display: 'grid',
+      gap: '16px',
+    },
+    '& .MuiGrid-item, & .MuiGrid2-root': {
+      maxWidth: '100%',
+      flexBasis: 'auto',
+    },
+  };
+  const responsiveContainerSx = {
+    width,
+    height: 600,
+    maxWidth: '100%',
+    border: 2,
+    borderColor: 'grey.300',
+    borderRadius: 2,
+    overflow: 'hidden',
+    contain: 'layout style size',
+    ...(width <= 400 && mobileContainerSx),
+    ...(width === 768 && tabletContainerSX),
+  };
+
+  const responsiveChildSx = { width: '100%', height: '100%', p: 2, overflowY: 'auto' };
+
   return (
-    <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-      <IFrameRenderer width={width} theme={theme}>
-        {children}
-      </IFrameRenderer>
+    <Box sx={responsiveParentSx}>
+      <Box sx={responsiveContainerSx}>
+        <Box sx={responsiveChildSx}>{children}</Box>
+      </Box>
     </Box>
   );
-}
-
-const icons = {
-  desktop: <IconDeviceDesktop />,
-  tablet: <IconDeviceTablet />,
-  mobile: <IconDeviceMobile />,
 };
-
-function PreviewToolbar({ mode, onChange }) {
-  return (
-    <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center', alignItems: 'center' }}>
-      {Object.entries(PREVIEW_MODES).map(([key, cfg]) => (
-        <Tooltip key={key} title={cfg.label}>
-          <IconButton onClick={() => onChange(key)} color={mode === key ? 'primary' : 'default'}>
-            {icons[key]}
-          </IconButton>
-        </Tooltip>
-      ))}
-    </Box>
-  );
-}
 
 const FormPreview = ({
   formState,
@@ -93,7 +99,22 @@ const FormPreview = ({
     justifyContent: 'flex-end',
     px: 3,
   };
+
   const [mode, setMode] = useState('desktop');
+  const toolBarSx = { display: 'flex', gap: 1, justifyContent: 'center', alignItems: 'center' };
+  const PreviewToolbar = ({ mode }) => {
+    return (
+      <Box sx={toolBarSx}>
+        {Object.entries(PREVIEW_MODES).map(([key, cfg]) => (
+          <Tooltip key={key} title={cfg.label}>
+            <IconButton onClick={() => setMode(key)} color={mode === key ? 'primary' : 'default'}>
+              {cfg.icon}
+            </IconButton>
+          </Tooltip>
+        ))}
+      </Box>
+    );
+  };
 
   const hasFieldContent = (value) => {
     if (value === undefined || value === null || value === '') {
@@ -276,42 +297,40 @@ const FormPreview = ({
       <Box sx={{ p: 2 }}>
         {formState.schema.properties && Object.keys(formState.schema.properties).length > 0 ? (
           <div ref={formRef}>
-            <PreviewToolbar mode={mode} onChange={setMode} />
+            <PreviewToolbar mode={mode} />
             <FormResponsivePreview mode={mode}>
-              <Box sx={{ p: 2 }}>
-                <JsonForms
-                  key={key} // Force re-render when validation state changes
-                  ajv={ajv}
-                  config={{
-                    ...config,
-                    showUnfocusedDescription: hasValidated,
-                    trim: false,
-                    hideRequiredAsterisk: false,
-                  }}
-                  cells={getCells()}
-                  data={dataWithDefaults ?? formState.data}
-                  renderers={getRenderers()}
-                  schema={formState.schema}
-                  uischema={formState.uischema}
-                  validationMode="NoValidation"
-                  additionalErrors={hasValidated ? validationErrors : []}
-                  onChange={({ data }) => {
-                    if (isProgrammaticUpdateRef.current) {
-                      isProgrammaticUpdateRef.current = false;
-                      return;
-                    }
+              <JsonForms
+                key={key} // Force re-render when validation state changes
+                ajv={ajv}
+                config={{
+                  ...config,
+                  showUnfocusedDescription: hasValidated,
+                  trim: false,
+                  hideRequiredAsterisk: false,
+                }}
+                cells={getCells()}
+                data={dataWithDefaults ?? formState.data}
+                renderers={getRenderers()}
+                schema={formState.schema}
+                uischema={formState.uischema}
+                validationMode="NoValidation"
+                additionalErrors={hasValidated ? validationErrors : []}
+                onChange={({ data }) => {
+                  if (isProgrammaticUpdateRef.current) {
+                    isProgrammaticUpdateRef.current = false;
+                    return;
+                  }
 
-                    userActions.current = true;
-                    if (data) {
-                      onDataChange(data);
-                    }
-                    // Perform real-time validation if validation mode is active
-                    if (hasValidated) {
-                      performValidation(data);
-                    }
-                  }}
-                />
-              </Box>
+                  userActions.current = true;
+                  if (data) {
+                    onDataChange(data);
+                  }
+                  // Perform real-time validation if validation mode is active
+                  if (hasValidated) {
+                    performValidation(data);
+                  }
+                }}
+              />
             </FormResponsivePreview>
           </div>
         ) : (
