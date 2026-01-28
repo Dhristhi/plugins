@@ -215,11 +215,7 @@ const CustomFileUploadControl = (props) => {
         : isDragOver
           ? 'primary.main'
           : 'grey.300',
-    backgroundColor: isDragOver
-      ? 'action.hover'
-      : hasFiles
-        ? 'success.lighter'
-        : 'background.paper',
+    backgroundColor: isDragOver ? 'action.hover' : hasFiles ? 'success.lighter' : '',
     p: 3,
     textAlign: 'center',
     cursor: isReadOnly ? 'not-allowed' : 'pointer',
