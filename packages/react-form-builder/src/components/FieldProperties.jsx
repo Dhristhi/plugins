@@ -784,8 +784,11 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
             {localField.parentVisibility && (
               <>
                 <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                  <FormControl fullWidth margin="normal">
+                  <FormControl fullWidth margin="normal" size="small">
+                    <InputLabel id="effect">Choose Effect</InputLabel>
                     <Select
+                      labelId="effect"
+                      label="Choose Effect"
                       size="small"
                       value={localField.effect || ''}
                       onChange={(e) => {
@@ -801,7 +804,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                     </Select>
                   </FormControl>
                 </Box>
-                <Box>
+                <Box sx={{ marginTop: '10px' }}>
                   {rows.map((row, index) => {
                     const dependsOnField = fields.find((f) => f.key === row.dependsOn);
                     return (
@@ -824,9 +827,12 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                           }}
                         >
                           {/* Field selector */}
-                          <FormControl>
+                          <FormControl size="small" sx={{ minWidth: 100 }}>
+                            <InputLabel id={`depends-on-label-${index}`}>Field</InputLabel>
                             <Select
+                              labelId={`depends-on-label-${index}`}
                               size="small"
+                              label="Field"
                               value={row.dependsOn || ''}
                               onChange={
                                 (e) => updateCondition(index, 'dependsOn', e.target.value)
@@ -850,8 +856,11 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                           {dependsOnField && (
                             <>
                               {/* operator */}
-                              <FormControl>
+                              <FormControl size="small" sx={{ minWidth: 110 }}>
+                                <InputLabel id={`operator-label-${index}`}>Operator</InputLabel>
                                 <Select
+                                  labelId={`operator-label-${index}`}
+                                  label="Operator"
                                   size="small"
                                   value={row.operator || ''}
                                   onChange={(e) =>
@@ -868,8 +877,9 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                                     ))}
 
                                   {dependsOnField &&
-                                    dependsOnField.schema.type === 'number' &&
-                                    OPERATORS[dependsOnField.schema.type]?.map((op) => (
+                                    (dependsOnField.schema.type === 'number' ||
+                                      dependsOnField.schema.type === 'integer') &&
+                                    OPERATORS['number']?.map((op) => (
                                       <MenuItem key={op.value} value={op.value}>
                                         {op.label}
                                       </MenuItem>
@@ -895,11 +905,14 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
 
                               {/* select or radio  */}
                               {dependsOnField?.schema?.enum && (
-                                <FormControl>
+                                <FormControl size="small" sx={{ minWidth: 100 }}>
+                                  <InputLabel id={`value-label-${index}`}>Value</InputLabel>
                                   <Select
+                                    labelId={`value-label-${index}`}
                                     size="small"
                                     disabled={!dependsOnField}
                                     value={row.value ?? ''}
+                                    label="Value"
                                     onChange={(e) => {
                                       updateCondition(index, 'value', e.target.value);
                                     }}
@@ -916,10 +929,13 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
 
                               {/* checkbox */}
                               {dependsOnField?.schema.type === 'boolean' && (
-                                <FormControl>
+                                <FormControl size="small" sx={{ minWidth: 100 }}>
+                                  <InputLabel id={`value-label-${index}`}>Value</InputLabel>
                                   <Select
+                                    labelId={`value-label-${index}`}
                                     size="small"
                                     disabled={!dependsOnField}
+                                    label="Value"
                                     value={row.value ?? ''}
                                     onChange={(e) => {
                                       updateCondition(index, 'value', e.target.value);
@@ -936,7 +952,8 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                               )}
 
                               {/* number */}
-                              {dependsOnField.schema.type === 'number' && (
+                              {(dependsOnField.schema.type === 'number' ||
+                                dependsOnField.schema.type === 'integer') && (
                                 <TextField
                                   type="number"
                                   size="small"
@@ -1011,8 +1028,11 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                   Add More
                 </Button>
                 {showLogical && (
-                  <FormControl sx={{ marginLeft: '10px' }}>
+                  <FormControl sx={{ marginLeft: '10px', minWidth: 110 }} size="small">
+                    <InputLabel id={`condition-label`}>Condition</InputLabel>
                     <Select
+                      labelId={`condition-label`}
+                      label="Condition"
                       size="small"
                       value={logical || ''}
                       onChange={(e) => addRow(e.target.value)}
