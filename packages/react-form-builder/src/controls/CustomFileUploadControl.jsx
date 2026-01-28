@@ -268,6 +268,20 @@ const CustomFileUploadControl = (props) => {
     handleChange(path, updated);
   };
 
+  const removeFileIconSx = {
+    position: 'absolute',
+    top: -8,
+    right: -9,
+    cursor: 'pointer',
+    color: 'error.main',
+    zIndex: 1,
+  };
+  const filePreviewContainSx = {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    mb: 2,
+  };
   return (
     <Box sx={{ mb: 2 }}>
       {label && (
@@ -298,16 +312,7 @@ const CustomFileUploadControl = (props) => {
               {filesData.map((item, idx) => {
                 const isImage = isImageDataUrl(item.dataUrl);
                 return (
-                  <Box
-                    key={idx}
-                    sx={{
-                      // position: 'relative',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      mb: 2,
-                    }}
-                  >
+                  <Box key={idx} sx={filePreviewContainSx}>
                     <Box
                       sx={{
                         position: 'relative',
@@ -315,14 +320,7 @@ const CustomFileUploadControl = (props) => {
                     >
                       {!isReadOnly && (
                         <Box
-                          sx={{
-                            position: 'absolute',
-                            top: -8,
-                            right: -9,
-                            cursor: 'pointer',
-                            color: 'error.main',
-                            zIndex: 1,
-                          }}
+                          sx={removeFileIconSx}
                           onClick={(e) => {
                             e.stopPropagation();
                             removeFile(idx);
