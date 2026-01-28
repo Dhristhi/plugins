@@ -10,7 +10,12 @@ const CustomHorizontalLayoutRenderer = (props) => {
   const restrictMaxCell = uischema.options?.restrictMaxCell ?? config?.restrictMaxCell;
 
   return (
-    <Grid container columnSpacing={2}>
+    <Grid
+      container
+      className="layout-container horizontal-layout-container"
+      data-layout="horizontal"
+      columnSpacing={2}
+    >
       {layout?.map((element, index) => {
         return (
           <Grid
