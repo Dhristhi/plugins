@@ -1062,7 +1062,11 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                 <TextField
                   label="Default Value"
                   fullWidth
-                  // value={localField.schema?.default || ''}
+                  type={
+                    localField.type === 'number' || localField.type === 'integer'
+                      ? 'number'
+                      : 'text'
+                  }
                   value={defaultInput}
                   onChange={(e) => {
                     setDefaultInput(e.target.value);
