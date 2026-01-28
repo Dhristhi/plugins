@@ -649,14 +649,7 @@ const App = ({ onExport, onSave, schemas = [], theme: customTheme } = {}) => {
   const resetForm = () => {
     let data = {};
     Object.entries(formState?.schema.properties).forEach(([key, prop]) => {
-      data[key] =
-        prop.type === 'boolean'
-          ? false
-          : prop.type === 'number'
-            ? 0
-            : prop.type === 'array'
-              ? []
-              : '';
+      data[key] = prop.type === 'boolean' ? false : prop.type === 'array' ? [] : '';
     });
     setFormData(data);
   };
