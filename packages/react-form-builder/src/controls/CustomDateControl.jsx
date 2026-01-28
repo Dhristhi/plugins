@@ -246,8 +246,6 @@ const CustomDateControl = (props) => {
         fullWidth
         required={required}
         value={getDisplayValue()}
-        min={getMinValue()}
-        max={getMaxValue()}
         placeholder={undefined}
         InputProps={{
           placeholder: undefined,
