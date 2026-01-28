@@ -1,4 +1,4 @@
-import { TextField } from '@mui/material';
+import { TextField, Box } from '@mui/material';
 import { withJsonFormsControlProps } from '@jsonforms/react';
 import { rankWith, isControl, and, schemaMatches } from '@jsonforms/core';
 
@@ -7,8 +7,20 @@ import { formatDate } from '../utils';
 const CustomDateControl = (props) => {
   const { data, handleChange, path, label, required, errors, uischema, schema } = props;
 
+  // Check if this is a date range field
+  const isDateRange =
+    schema?.type === 'object' && schema?.properties?.startDate && schema?.properties?.endDate;
+
+  // For single date fields
   const minDate = schema?.minimum;
   const maxDate = schema?.maximum;
+
+  // For date range fields
+  const startDateMinimum = schema?.properties?.startDate?.minimum;
+  const startDateMaximum = schema?.properties?.startDate?.maximum;
+  const endDateMinimum = schema?.properties?.endDate?.minimum;
+  const endDateMaximum = schema?.properties?.endDate?.maximum;
+
   const isReadOnly = uischema?.options?.readonly;
   const includeTime = uischema?.options?.includeTime || false;
   const dateFormat = uischema?.options?.dateTimeFormat || 'friendly';
@@ -88,6 +100,143 @@ const CustomDateControl = (props) => {
   };
 
   const formattedDisplay = getFormattedDisplayText();
+
+  // Handle Date Range
+  if (isDateRange) {
+    const startDate = data?.startDate || schema?.properties?.startDate?.default || '';
+    const endDate = data?.endDate || schema?.properties?.endDate?.default || '';
+
+    const getFormattedDateText = (dateValue) => {
+      if (!dateValue || isReadOnly) return null;
+      return formatDate(dateValue, dateFormat);
+    };
+
+    return (
+      <Box>
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+          {/* Start Date Picker */}
+          <Box sx={{ flex: '1 1 45%', minWidth: '200px' }}>
+            <TextField
+              label="Start Date"
+              type="date"
+              fullWidth
+              required={required}
+              value={startDate}
+              inputProps={{
+                min: startDateMinimum ? startDateMinimum.split('T')[0] : undefined,
+                max: endDate || (startDateMaximum ? startDateMaximum.split('T')[0] : undefined),
+              }}
+              onChange={(e) => {
+                handleChange(path, {
+                  ...data,
+                  startDate: e.target.value,
+                });
+              }}
+              error={errors && (Array.isArray(errors) ? errors.length > 0 : !!errors)}
+              helperText={(() => {
+                if (!errors) return undefined;
+                if (Array.isArray(errors) && errors.length > 0) {
+                  return errors[0].message || errors[0];
+                }
+                if (typeof errors === 'string') {
+                  return errors;
+                }
+                return undefined;
+              })()}
+              variant="outlined"
+              InputLabelProps={{
+                shrink: true,
+              }}
+              disabled={isReadOnly}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 2,
+                },
+              }}
+            />
+            {getFormattedDateText(startDate) && (
+              <div
+                style={{
+                  fontSize: '0.875rem',
+                  color: '#666',
+                  marginTop: '4px',
+                  marginLeft: '14px',
+                }}
+              >
+                Preview: {getFormattedDateText(startDate)}
+              </div>
+            )}
+          </Box>
+
+          {/* Separator */}
+          <Box
+            sx={{
+              pt: 2,
+              fontSize: '0.875rem',
+              fontWeight: 500,
+              color: '#999',
+            }}
+          >
+            to
+          </Box>
+
+          {/* End Date Picker */}
+          <Box sx={{ flex: '1 1 45%', minWidth: '200px' }}>
+            <TextField
+              label="End Date"
+              type="date"
+              fullWidth
+              required={required}
+              value={endDate}
+              inputProps={{
+                min: startDate || (endDateMinimum ? endDateMinimum.split('T')[0] : undefined),
+                max: endDateMaximum ? endDateMaximum.split('T')[0] : undefined,
+              }}
+              onChange={(e) => {
+                handleChange(path, {
+                  ...data,
+                  endDate: e.target.value,
+                });
+              }}
+              error={errors && (Array.isArray(errors) ? errors.length > 0 : !!errors)}
+              helperText={(() => {
+                if (!errors) return undefined;
+                if (Array.isArray(errors) && errors.length > 0) {
+                  return errors[0].message || errors[0];
+                }
+                if (typeof errors === 'string') {
+                  return errors;
+                }
+                return undefined;
+              })()}
+              variant="outlined"
+              InputLabelProps={{
+                shrink: true,
+              }}
+              disabled={isReadOnly}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 2,
+                },
+              }}
+            />
+            {getFormattedDateText(endDate) && (
+              <div
+                style={{
+                  fontSize: '0.875rem',
+                  color: '#666',
+                  marginTop: '4px',
+                  marginLeft: '14px',
+                }}
+              >
+                Preview: {getFormattedDateText(endDate)}
+              </div>
+            )}
+          </Box>
+        </Box>
+      </Box>
+    );
+  }
 
   return (
     <div>
@@ -170,13 +319,20 @@ export const customDateTester = rankWith(
     isControl,
     schemaMatches(
       (schema) =>
+        // Single date fields
         schema.format === 'date' ||
         schema.format === 'date-time' ||
         schema.format === 'datetime' ||
         (schema.type === 'string' &&
           (schema.format === 'date' ||
             schema.format === 'date-time' ||
-            schema.format === 'datetime'))
+            schema.format === 'datetime')) ||
+        // Date range fields
+        (schema.type === 'object' &&
+          schema.properties?.startDate &&
+          schema.properties?.endDate &&
+          schema.properties?.startDate?.format === 'date' &&
+          schema.properties?.endDate?.format === 'date')
     )
   )
 );
