@@ -79,7 +79,7 @@ const FormPreview = ({
   const userActions = useRef(false);
   const isProgrammaticUpdateRef = useRef(false);
 
-  const ajv = useMemo(() => createAjv({ useDefaults: 'empty', strictSchema: false }), []);
+  const ajv = useMemo(() => createAjv({ useDefaults: false, strictSchema: false }), []);
 
   const [key, setKey] = useState(0); // Force re-render
   const [hasValidated, setHasValidated] = useState(false);
