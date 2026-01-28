@@ -58,6 +58,7 @@ const CustomFileUploadControl = (props) => {
         const reader = new FileReader();
         reader.onload = (event) => {
           results[index] = {
+            name: file.name,
             dataUrl: event?.target?.result,
           };
           remaining -= 1;
@@ -343,14 +344,16 @@ const CustomFileUploadControl = (props) => {
                         <IconFile size={32} color="currentColor" />
                       </Box>
                     )}
-
-                    <Typography variant="body2" sx={{ color: 'success.main', mt: 1 }}>
-                      File {idx + 1} uploaded successfully!
+                    <Typography variant="caption" sx={{ mt: 0.5 }}>
+                      {item.name}
                     </Typography>
                   </Box>
                 );
               })}
             </Box>
+            <Typography variant="body2" sx={{ color: 'success.main', mt: 1 }}>
+              File(s) uploaded successfully!
+            </Typography>
             {!isReadOnly && (
               <Typography variant="caption" sx={{ color: 'text.secondary', mt: 1 }}>
                 Click to add more files
