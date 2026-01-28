@@ -301,49 +301,55 @@ const CustomFileUploadControl = (props) => {
                   <Box
                     key={idx}
                     sx={{
-                      position: 'relative',
+                      // position: 'relative',
                       display: 'flex',
                       flexDirection: 'column',
                       alignItems: 'center',
                       mb: 2,
                     }}
                   >
-                    {!isReadOnly && (
-                      <Box
-                        sx={{
-                          position: 'absolute',
-                          top: -8,
-                          right: 6,
-                          cursor: 'pointer',
-                          color: 'error.main',
-                          zIndex: 1,
-                        }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          removeFile(idx);
-                        }}
-                      >
-                        {/* use any Tabler icon, e.g. IconX */}
-                        <IconX size={18} />
-                      </Box>
-                    )}
-                    {enablePreview && isImage ? (
-                      <Box sx={previewContainer}>
+                    <Box
+                      sx={{
+                        position: 'relative',
+                      }}
+                    >
+                      {!isReadOnly && (
                         <Box
-                          component="img"
-                          src={item.dataUrl}
-                          alt={`Uploaded image preview ${idx + 1}`}
-                          sx={previewImage}
-                          onError={(e) => {
-                            e.target.style.display = 'none';
+                          sx={{
+                            position: 'absolute',
+                            top: -8,
+                            right: -9,
+                            cursor: 'pointer',
+                            color: 'error.main',
+                            zIndex: 1,
                           }}
-                        />
-                      </Box>
-                    ) : (
-                      <Box sx={previewContainer}>
-                        <IconFile size={32} color="currentColor" />
-                      </Box>
-                    )}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            removeFile(idx);
+                          }}
+                        >
+                          {/* use any Tabler icon, e.g. IconX */}
+                          <IconX size={18} />
+                        </Box>
+                      )}
+                      {enablePreview && isImage ? (
+                        <Box sx={previewContainer}>
+                          <Box
+                            component="img"
+                            src={item.dataUrl}
+                            alt={`Uploaded image preview ${idx + 1}`}
+                            sx={previewImage}
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                            }}
+                          />
+                        </Box>
+                      ) : (
+                        <Box sx={previewContainer}>
+                          <IconFile size={32} color="currentColor" />
+                        </Box>
+                      )}
+                    </Box>
                     <Typography variant="caption" sx={{ mt: 0.5 }}>
                       {item.name}
                     </Typography>
