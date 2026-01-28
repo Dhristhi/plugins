@@ -261,7 +261,8 @@ export const defaultFieldTypes = [
       options: {
         multi: true,
         format: 'select',
-        displayType: 'dropdown',
+        autocomplete: true,
+        displayType: 'autocomplete',
         autocompleteProps: {
           limitTags: 5,
         },
