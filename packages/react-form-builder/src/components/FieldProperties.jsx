@@ -910,6 +910,14 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                                     ))}
 
                                   {dependsOnField &&
+                                    dependsOnField.schema?.type === 'array' &&
+                                    OPERATORS['string']?.map((op) => (
+                                      <MenuItem key={op.value} value={op.value}>
+                                        {op.label}
+                                      </MenuItem>
+                                    ))}
+
+                                  {dependsOnField &&
                                     (dependsOnField.schema.type === 'number' ||
                                       dependsOnField.schema.type === 'integer') &&
                                     OPERATORS['number']?.map((op) => (
@@ -958,6 +966,29 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                                     sx={layoutSelectRuleSx}
                                   >
                                     {dependsOnField?.schema?.enum?.map((opt) => (
+                                      <MenuItem key={opt} value={opt}>
+                                        {opt}
+                                      </MenuItem>
+                                    ))}
+                                  </Select>
+                                </FormControl>
+                              )}
+
+                              {dependsOnField.schema?.type === 'array' && (
+                                <FormControl size="small" sx={{ minWidth: 100 }}>
+                                  <InputLabel id={`value-label-${index}`}>Value</InputLabel>
+                                  <Select
+                                    labelId={`value-label-${index}`}
+                                    size="small"
+                                    disabled={!dependsOnField}
+                                    value={row.value ?? ''}
+                                    label="Value"
+                                    onChange={(e) => {
+                                      updateCondition(index, 'value', e.target.value);
+                                    }}
+                                    sx={layoutSelectRuleSx}
+                                  >
+                                    {dependsOnField?.schema?.items?.enum?.map((opt) => (
                                       <MenuItem key={opt} value={opt}>
                                         {opt}
                                       </MenuItem>
