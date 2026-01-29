@@ -95,7 +95,7 @@ export const convertSchemaToFields = (schema, defaultFieldTypes, getNextId) => {
         type: arrayType.id,
         label,
         key,
-        i18nKey: i18nKey || fieldType.translationKey || fieldType.labelKey || label,
+        i18nKey: i18nKey || arrayType.translationKey || arrayType.labelKey || label,
         required: schema.required?.includes(key) || false,
         isLayout: false,
         schema: {},
@@ -139,7 +139,7 @@ export const convertSchemaToFields = (schema, defaultFieldTypes, getNextId) => {
         type: multiselectTypeId,
         label,
         key,
-        i18nKey: i18nKey || fieldType.translationKey || fieldType.labelKey || label,
+        i18nKey: i18nKey || multiselectType?.translationKey || multiselectType?.labelKey || label,
         required: schema.required?.includes(key) || false,
         isLayout: false,
         schema: { ...property },
@@ -163,14 +163,14 @@ export const convertSchemaToFields = (schema, defaultFieldTypes, getNextId) => {
     const fieldType = mapSchemaPropertyToFieldType(property, defaultFieldTypes);
     const newField = {
       id: `field_${uniqueId}`,
-      type: fieldType.id,
+      type: fieldType?.id || 'text',
       label,
       key,
-      i18nKey: i18nKey || fieldType.translationKey || fieldType.labelKey || label,
+      i18nKey: i18nKey || fieldType?.translationKey || fieldType?.labelKey || label,
       required: schema.required?.includes(key) || false,
-      isLayout: fieldType.isLayout || false,
-      schema: { ...fieldType.schema, ...property },
-      uischema: { ...fieldType.uischema, scope: `#/properties/${key}` },
+      isLayout: fieldType?.isLayout || false,
+      schema: { ...(fieldType?.schema || {}), ...property },
+      uischema: { ...(fieldType?.uischema || {}), scope: `#/properties/${key}` },
       parentId: null,
     };
 
