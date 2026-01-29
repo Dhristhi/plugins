@@ -52,14 +52,14 @@ function compileRule(field) {
   let currentGroup = [];
   const conditions = field.visibility;
   conditions.forEach((condition, index) => {
-    console.log('condition', condition);
     const compiled = buildPropertyCondition(condition);
     currentGroup.push(compiled);
 
     const isLast = index === conditions.length - 1;
+    const next = !isLast ? conditions[index + 1] : null;
+    const closesHere = !next || next.logical === 'OR';
 
-    if (condition.logical === 'OR' || isLast) {
-      // close current group
+    if (closesHere) {
       if (currentGroup.length === 1) {
         anyOf.push(currentGroup[0]);
       } else {
@@ -69,11 +69,8 @@ function compileRule(field) {
     }
   });
 
-  const schema =
-    anyOf.length === 1
-      ? anyOf[0] // no ORs → single condition or single allOf
-      : { anyOf };
-  console.log('schema', schema);
+  const schema = anyOf.length === 1 ? anyOf[0] : { anyOf };
+
   return {
     effect: field.effect,
     condition: {
@@ -84,7 +81,6 @@ function compileRule(field) {
 }
 
 function buildPropertyCondition({ dependsOn, operator, value }) {
-  console.log('dependsOn', dependsOn);
   const constValue = normalizeConstValue(value);
 
   let schemaCondition;
