@@ -25,22 +25,49 @@ const FormResponsivePreview = ({ mode, children }) => {
     height: 650,
   };
   const mobileContainerSx = {
-    '& .MuiGrid-container, & .MuiGrid2-container': {
-      flexDirection: 'column',
-    },
     '& .MuiGrid-item, & .MuiGrid2-root': {
       maxWidth: '100%',
       flexBasis: '100%',
     },
+    '& .MuiTable-root td[style*="text-align: center"]': {
+      width: 'auto !important',
+      height: 'auto !important',
+    },
+    '& .MuiTable-root .MuiIconButton-root.MuiIconButton-sizeLarge': {
+      padding: '4px',
+      fontSize: '1.2rem',
+    },
+
+    '& .MuiTable-root .MuiSvgIcon-root': {
+      fontSize: '1.2rem',
+    },
+    '& .MuiTable-root td[style*="text-align: center"] .MuiGrid-root': {
+      display: 'flex',
+      flexDirection: 'row',
+      columnGap: '8px',
+      flexWrap: 'nowrap',
+    },
+    '& .MuiStack-root .MuiGrid-container': {
+      alignItems: 'flex-start',
+    },
   };
   const tabletContainerSX = {
-    '& .MuiGrid-container, & .MuiGrid2-container': {
-      display: 'grid',
-      gap: '16px',
-    },
     '& .MuiGrid-item, & .MuiGrid2-root': {
       maxWidth: '100%',
-      flexBasis: 'auto',
+      flexBasis: '100%',
+    },
+    '& .MuiTable-root .MuiIconButton-root.MuiIconButton-sizeLarge': {
+      padding: '4px',
+      fontSize: '1.2rem',
+    },
+
+    '& .MuiTable-root .MuiSvgIcon-root': {
+      fontSize: '1.2rem',
+    },
+    '& .MuiTable-root td[style*="text-align: center"] .MuiGrid-root': {
+      display: 'flex',
+      flexDirection: 'row',
+      columnGap: '8px',
     },
   };
   const responsiveContainerSx = {
