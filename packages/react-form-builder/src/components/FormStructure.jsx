@@ -201,13 +201,14 @@ const SortableFieldItem = ({
             <Box {...attributes} {...listeners} sx={dragHandleSx}>
               <IconGripVertical size={16} />
             </Box>
-
             <Box sx={fieldIconBoxSx}>{getFieldIcon(useTheme())}</Box>
-
             <Typography variant="subtitle2" sx={fieldLabelSx(isLayout, isArray)}>
-              {field.label}
+              {field.labelKey
+                ? t(field.labelKey)
+                : field.i18nKey
+                  ? t(field.i18nKey)
+                  : field.uischema?.label || field.label}
             </Typography>
-
             {(isLayout || isArray) && (
               <Chip
                 label={
@@ -229,13 +230,11 @@ const SortableFieldItem = ({
                 sx={typeChipSx(level)}
               />
             )}
-
             {field.required && (
               <Typography variant="caption" color="error">
                 *
               </Typography>
             )}
-
             {field.uischema?.options?.hidden && (
               <Chip
                 size="small"
@@ -245,7 +244,6 @@ const SortableFieldItem = ({
                 label={t('hidden')}
               />
             )}
-
             {level > 0 && level <= 3 && (
               <Chip label={`L${level}`} size="small" variant="outlined" sx={levelChipSx} />
             )}

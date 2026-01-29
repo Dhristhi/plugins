@@ -142,6 +142,7 @@
   "applyChanges.label": "बदल लागू करा",
   "preview.label": "पूर्वावलोकन",
   "schema.label": "स्कीमा",
+  "fieldType_group.label": "गट",
   "fieldType_text.label": "मजकूर इनपुट",
   "fieldType_textarea.label": "मजकूर क्षेत्र",
   "fieldType_email.label": "ईमेल",

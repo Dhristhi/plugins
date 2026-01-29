@@ -216,9 +216,6 @@ const FormBuilder = ({ onSave, onExport, schemas = [] } = {}) => {
     setSelectedField(newField);
     setEditingField(newField);
     setHasUnsavedChanges(false);
-    if (!fieldType.isLayout) {
-      setPropertiesDrawerOpen(true);
-    }
   }, []);
 
   const addFieldToLayout = useCallback(
@@ -586,14 +583,7 @@ const FormBuilder = ({ onSave, onExport, schemas = [] } = {}) => {
   const resetForm = () => {
     let data = {};
     Object.entries(formState?.schema.properties).forEach(([key, prop]) => {
-      data[key] =
-        prop.type === 'boolean'
-          ? false
-          : prop.type === 'number'
-            ? 0
-            : prop.type === 'array'
-              ? []
-              : '';
+      data[key] = prop.type === 'boolean' ? false : prop.type === 'array' ? [] : '';
     });
     setFormData(data);
   };
