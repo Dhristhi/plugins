@@ -22,6 +22,8 @@ export const defaultFieldTypes = [
   {
     id: 'group',
     type: 'group',
+    labelKey: 'fieldType_group',
+    translationKey: 'fieldType_group',
     label: 'Group',
     icon: IconBox,
     isLayout: true,
@@ -35,6 +37,8 @@ export const defaultFieldTypes = [
   {
     id: 'vertical-layout',
     type: 'layout',
+    labelKey: 'fieldType_verticalLayout',
+    translationKey: 'fieldType_verticalLayout',
     label: 'Vertical Layout',
     icon: IconLayoutRows,
     isLayout: true,
@@ -47,6 +51,8 @@ export const defaultFieldTypes = [
   {
     id: 'horizontal-layout',
     type: 'layout',
+    labelKey: 'fieldType_horizontalLayout',
+    translationKey: 'fieldType_horizontalLayout',
     label: 'Horizontal Layout',
     icon: IconLayoutColumns,
     isLayout: true,
@@ -56,11 +62,14 @@ export const defaultFieldTypes = [
       elements: [],
     },
   },
+
   // Form Fields
   {
     id: 'number',
     type: 'number',
-    label: 'Number',
+    labelKey: 'fieldType_number',
+    translationKey: 'fieldType_number',
+    label: 'Number Field',
     icon: IconHash,
     schema: {
       type: 'number',
@@ -73,6 +82,8 @@ export const defaultFieldTypes = [
   {
     id: 'integer',
     type: 'integer',
+    labelKey: 'fieldType_integer',
+    translationKey: 'fieldType_integer',
     label: 'Integer',
     icon: IconNumbers,
     schema: {
@@ -86,6 +97,8 @@ export const defaultFieldTypes = [
   {
     id: 'text',
     type: 'string',
+    labelKey: 'fieldType_text',
+    translationKey: 'fieldType_text',
     label: 'Text Input',
     icon: IconEdit,
     schema: {
@@ -99,6 +112,8 @@ export const defaultFieldTypes = [
   {
     id: 'textarea',
     type: 'string',
+    labelKey: 'fieldType_textarea',
+    translationKey: 'fieldType_textarea',
     label: 'Textarea',
     icon: IconFileText,
     schema: {
@@ -115,6 +130,8 @@ export const defaultFieldTypes = [
   {
     id: 'email',
     type: 'string',
+    labelKey: 'fieldType_email',
+    translationKey: 'fieldType_email',
     label: 'Email',
     icon: IconMail,
     schema: {
@@ -129,6 +146,8 @@ export const defaultFieldTypes = [
   {
     id: 'password',
     type: 'string',
+    labelKey: 'fieldType_password',
+    translationKey: 'fieldType_password',
     label: 'Password',
     icon: IconEye,
     schema: {
@@ -143,10 +162,11 @@ export const defaultFieldTypes = [
       },
     },
   },
-
   {
     id: 'url',
     type: 'string',
+    labelKey: 'fieldType_url',
+    translationKey: 'fieldType_url',
     label: 'URL',
     icon: IconLink,
     schema: {
@@ -161,6 +181,8 @@ export const defaultFieldTypes = [
   {
     id: 'date',
     type: 'string',
+    labelKey: 'fieldType_date',
+    translationKey: 'fieldType_date',
     label: 'Date',
     icon: IconCalendar,
     schema: {
@@ -175,6 +197,8 @@ export const defaultFieldTypes = [
   {
     id: 'file',
     type: 'string',
+    labelKey: 'fieldType_file',
+    translationKey: 'fieldType_file',
     label: 'File Upload',
     icon: IconFileText,
     schema: {
@@ -195,6 +219,8 @@ export const defaultFieldTypes = [
   {
     id: 'checkbox',
     type: 'boolean',
+    labelKey: 'fieldType_checkbox',
+    translationKey: 'fieldType_checkbox',
     label: 'Checkbox',
     icon: IconSquareCheck,
     schema: {
@@ -208,6 +234,8 @@ export const defaultFieldTypes = [
   {
     id: 'multicheckbox',
     type: 'array',
+    labelKey: 'fieldType_multicheckbox',
+    translationKey: 'fieldType_multicheckbox',
     label: 'Multi Checkbox',
     icon: IconSquareCheck,
     schema: {
@@ -231,6 +259,8 @@ export const defaultFieldTypes = [
   {
     id: 'select',
     type: 'string',
+    labelKey: 'fieldType_select',
+    translationKey: 'fieldType_select',
     label: 'Select',
     icon: IconChevronDown,
     schema: {
@@ -245,6 +275,8 @@ export const defaultFieldTypes = [
   {
     id: 'multiselect',
     type: 'array',
+    labelKey: 'fieldType_multiselect',
+    translationKey: 'fieldType_multiselect',
     label: 'Multi-Select',
     icon: IconChevronDown,
     schema: {
@@ -272,6 +304,8 @@ export const defaultFieldTypes = [
   {
     id: 'radio',
     type: 'string',
+    labelKey: 'fieldType_radio',
+    translationKey: 'fieldType_radio',
     label: 'Radio Buttons',
     icon: IconCircleDot,
     schema: {
@@ -286,10 +320,11 @@ export const defaultFieldTypes = [
       },
     },
   },
-
   {
     id: 'object',
     type: 'object',
+    labelKey: 'fieldType_object',
+    translationKey: 'fieldType_object',
     label: 'Object',
     icon: IconCube,
     isLayout: true,
@@ -306,6 +341,8 @@ export const defaultFieldTypes = [
   {
     id: 'array',
     type: 'array',
+    labelKey: 'fieldType_array',
+    translationKey: 'fieldType_array',
     label: 'Array',
     icon: IconList,
     schema: {
