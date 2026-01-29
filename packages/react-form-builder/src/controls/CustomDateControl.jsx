@@ -5,7 +5,6 @@ import { rankWith, isControl, and, schemaMatches } from '@jsonforms/core';
 import { formatDate } from '../utils';
 
 const CustomDateControl = (props) => {
-  console.log('props', props);
   const { data, handleChange, path, label, required, errors, uischema, schema, visible } = props;
 
   // Check if this is a date range field
