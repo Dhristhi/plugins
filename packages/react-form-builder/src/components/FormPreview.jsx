@@ -2,10 +2,96 @@ import { createAjv } from '@jsonforms/core';
 import { JsonForms } from '@jsonforms/react';
 import { IconEye } from '@tabler/icons-react';
 import { useState, useMemo, useRef } from 'react';
-import { Typography, Button, Box } from '@mui/material';
+import { Typography, Button, Box, Tooltip, IconButton } from '@mui/material';
 
 import CommonHeader from './CommonHeader';
 import { getRenderers, getCells, config } from '../controls/renders';
+import { IconDeviceDesktop, IconDeviceTablet, IconDeviceMobile } from '@tabler/icons-react';
+
+const PREVIEW_MODES = {
+  desktop: { width: 1200, label: 'Desktop', icon: <IconDeviceDesktop /> },
+  tablet: { width: 768, label: 'Tablet', icon: <IconDeviceTablet /> },
+  mobile: { width: 375, label: 'Mobile', icon: <IconDeviceMobile /> },
+};
+
+const FormResponsivePreview = ({ mode, children }) => {
+  const { width } = PREVIEW_MODES[mode];
+  const responsiveParentSx = {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    p: 2,
+    height: 650,
+  };
+  const mobileContainerSx = {
+    '& .MuiGrid-item, & .MuiGrid2-root': {
+      maxWidth: '100%',
+      flexBasis: '100%',
+    },
+    '& .MuiTable-root td[style*="text-align: center"]': {
+      width: 'auto !important',
+      height: 'auto !important',
+    },
+    '& .MuiTable-root .MuiIconButton-root.MuiIconButton-sizeLarge': {
+      padding: '4px',
+      fontSize: '1.2rem',
+    },
+
+    '& .MuiTable-root .MuiSvgIcon-root': {
+      fontSize: '1.2rem',
+    },
+    '& .MuiTable-root td[style*="text-align: center"] .MuiGrid-root': {
+      display: 'flex',
+      flexDirection: 'row',
+      columnGap: '8px',
+      flexWrap: 'nowrap',
+    },
+    '& .MuiStack-root .MuiGrid-container': {
+      alignItems: 'flex-start',
+    },
+  };
+  const tabletContainerSX = {
+    '& .MuiGrid-item, & .MuiGrid2-root': {
+      maxWidth: '100%',
+      flexBasis: '100%',
+    },
+    '& .MuiTable-root .MuiIconButton-root.MuiIconButton-sizeLarge': {
+      padding: '4px',
+      fontSize: '1.2rem',
+    },
+
+    '& .MuiTable-root .MuiSvgIcon-root': {
+      fontSize: '1.2rem',
+    },
+    '& .MuiTable-root td[style*="text-align: center"] .MuiGrid-root': {
+      display: 'flex',
+      flexDirection: 'row',
+      columnGap: '8px',
+    },
+  };
+  const responsiveContainerSx = {
+    width,
+    height: 600,
+    maxWidth: '100%',
+    border: 2,
+    borderColor: 'grey.300',
+    borderRadius: 2,
+    overflow: 'hidden',
+    contain: 'layout style size',
+    ...(width <= 400 && mobileContainerSx),
+    ...(width === 768 && tabletContainerSX),
+  };
+
+  const responsiveChildSx = { width: '100%', height: '100%', p: 2, overflowY: 'auto' };
+
+  return (
+    <Box sx={responsiveParentSx}>
+      <Box sx={responsiveContainerSx}>
+        <Box sx={responsiveChildSx}>{children}</Box>
+      </Box>
+    </Box>
+  );
+};
 
 const FormPreview = ({
   formState,
@@ -20,7 +106,7 @@ const FormPreview = ({
   const userActions = useRef(false);
   const isProgrammaticUpdateRef = useRef(false);
 
-  const ajv = useMemo(() => createAjv({ useDefaults: 'empty' }), []);
+  const ajv = useMemo(() => createAjv({ useDefaults: false, strictSchema: false }), []);
 
   const [key, setKey] = useState(0); // Force re-render
   const [hasValidated, setHasValidated] = useState(false);
@@ -39,6 +125,22 @@ const FormPreview = ({
     alignItems: 'center',
     justifyContent: 'flex-end',
     px: 3,
+  };
+
+  const [mode, setMode] = useState('desktop');
+  const toolBarSx = { display: 'flex', gap: 1, justifyContent: 'center', alignItems: 'center' };
+  const PreviewToolbar = ({ mode }) => {
+    return (
+      <Box sx={toolBarSx}>
+        {Object.entries(PREVIEW_MODES).map(([key, cfg]) => (
+          <Tooltip key={key} title={cfg.label}>
+            <IconButton onClick={() => setMode(key)} color={mode === key ? 'primary' : 'default'}>
+              {cfg.icon}
+            </IconButton>
+          </Tooltip>
+        ))}
+      </Box>
+    );
   };
 
   const hasFieldContent = (value) => {
@@ -222,38 +324,40 @@ const FormPreview = ({
       <Box sx={{ p: 2 }}>
         {formState.schema.properties && Object.keys(formState.schema.properties).length > 0 ? (
           <div ref={formRef}>
-            <JsonForms
-              key={key} // Force re-render when validation state changes
-              ajv={ajv}
-              config={{
-                ...config,
-                showUnfocusedDescription: hasValidated,
-                trim: false,
-                hideRequiredAsterisk: false,
-              }}
-              cells={getCells()}
-              data={dataWithDefaults ?? formState.data}
-              renderers={getRenderers()}
-              schema={formState.schema}
-              uischema={formState.uischema}
-              validationMode="NoValidation"
-              additionalErrors={hasValidated ? validationErrors : []}
-              onChange={({ data }) => {
-                if (isProgrammaticUpdateRef.current) {
-                  isProgrammaticUpdateRef.current = false;
-                  return;
-                }
+            <PreviewToolbar mode={mode} />
+            <FormResponsivePreview mode={mode}>
+              <JsonForms
+                key={key} // Force re-render when validation state changes
+                ajv={ajv}
+                config={{
+                  ...config,
+                  trim: false,
+                  hideRequiredAsterisk: false,
+                }}
+                cells={getCells()}
+                data={dataWithDefaults ?? formState.data}
+                renderers={getRenderers()}
+                schema={formState.schema}
+                uischema={formState.uischema}
+                validationMode="NoValidation"
+                additionalErrors={hasValidated ? validationErrors : []}
+                onChange={({ data }) => {
+                  if (isProgrammaticUpdateRef.current) {
+                    isProgrammaticUpdateRef.current = false;
+                    return;
+                  }
 
-                userActions.current = true;
-                if (data) {
-                  onDataChange(data);
-                }
-                // Perform real-time validation if validation mode is active
-                if (hasValidated) {
-                  performValidation(data);
-                }
-              }}
-            />
+                  userActions.current = true;
+                  if (data) {
+                    onDataChange(data);
+                  }
+                  // Perform real-time validation if validation mode is active
+                  if (hasValidated) {
+                    performValidation(data);
+                  }
+                }}
+              />
+            </FormResponsivePreview>
           </div>
         ) : (
           <Typography variant="body2" color="textSecondary">

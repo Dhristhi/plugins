@@ -3,16 +3,18 @@ import { Unwrapped } from '@jsonforms/material-renderers';
 import { and, isControl, optionIs, rankWith } from '@jsonforms/core';
 import { useJsonForms, withJsonFormsControlProps } from '@jsonforms/react';
 import {
+  Box,
   Chip,
   Select,
+  Checkbox,
   MenuItem,
+  TextField,
+  FormLabel,
   InputLabel,
   FormControl,
-  Box,
-  FormLabel,
-  FormControlLabel,
-  Checkbox,
+  Autocomplete,
   FormHelperText,
+  FormControlLabel,
 } from '@mui/material';
 
 import { updateNestedValue } from '../utils';
@@ -26,7 +28,7 @@ const CustomSelectControl = (props) => {
   const [options, setOptions] = useState([]);
   const [showAllChips, setShowAllChips] = useState(false);
 
-  const { schema, uischema, path, handleChange, data, errors } = props;
+  const { schema, uischema, path, handleChange, data, errors, visible } = props;
   const {
     key,
     value,
@@ -36,7 +38,6 @@ const CustomSelectControl = (props) => {
   } = uischema.options || {};
 
   const formData = core?.data || {};
-
   useEffect(() => {
     const fetchOptions = async () => {
       const newOptions =
@@ -71,9 +72,34 @@ const CustomSelectControl = (props) => {
   const fieldLabel = useMemo(() => {
     return schema.title || 'Select';
   }, [path, schema.title]);
+  if (!visible) return null;
 
   return multi ? (
-    displayType === 'checkbox' ? (
+    displayType === 'autocomplete' || uischema.options?.autocomplete ? (
+      <FormControl fullWidth error={hasError}>
+        <Autocomplete
+          multiple
+          disabled={isReadOnly}
+          options={options}
+          getOptionLabel={(opt) => opt.label}
+          value={options.filter((o) => Array.isArray(data) && data.includes(o.value))}
+          onChange={(_e, newValues) => {
+            const selectedVals = newValues.map((v) => v.value);
+            handleOnChange(_e, selectedVals);
+          }}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label={fieldLabel}
+              error={hasError}
+              helperText={validationError}
+            />
+          )}
+          {...(uischema.options?.autocompleteProps || {})}
+        />
+        {schema?.description && <FormHelperText>{schema?.description}</FormHelperText>}
+      </FormControl>
+    ) : displayType === 'checkbox' ? (
       <FormControl fullWidth error={hasError}>
         <FormLabel>{fieldLabel}</FormLabel>
         <Box sx={{ display: 'flex', flexDirection: 'row', gap: 2, flexWrap: 'wrap' }}>
@@ -104,6 +130,7 @@ const CustomSelectControl = (props) => {
             );
           })}
         </Box>
+        {schema?.description && <FormHelperText>{schema?.description}</FormHelperText>}
         {hasError && <FormHelperText>{validationError}</FormHelperText>}
       </FormControl>
     ) : (
@@ -177,6 +204,7 @@ const CustomSelectControl = (props) => {
             </MenuItem>
           ))}
         </Select>
+        {schema?.description && <FormHelperText>{schema?.description}</FormHelperText>}
         {hasError && <FormHelperText>{validationError}</FormHelperText>}
       </FormControl>
     )
