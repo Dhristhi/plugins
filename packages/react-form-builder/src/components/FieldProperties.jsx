@@ -796,25 +796,24 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
           </AccordionSummary>
 
           <AccordionDetails>
-            {fields.length > 1 && (
-              <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'nowrap' }}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={localField.parentVisibility || false}
-                      onChange={(e) => {
-                        setDependentState(e.target.checked);
+            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'nowrap' }}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={localField.parentVisibility || false}
+                    onChange={(e) => {
+                      setDependentState(e.target.checked);
 
-                        // handleUpdate({ uischema: updatedUISchema });
-                      }}
-                      color="primary"
-                    />
-                  }
-                  label="Is Dependent"
-                  sx={formControlLabelSx}
-                />
-              </Box>
-            )}
+                      // handleUpdate({ uischema: updatedUISchema });
+                    }}
+                    color="primary"
+                  />
+                }
+                label="Is Dependent"
+                sx={formControlLabelSx}
+              />
+            </Box>
+
             {localField.parentVisibility && (
               <>
                 <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
