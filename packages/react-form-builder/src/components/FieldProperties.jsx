@@ -399,19 +399,20 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
   const handleAddOption = () => {
     if (newOption.trim()) {
       const convertedValue = convertEnumValue(newOption.trim(), enumDataType);
+      if (Number.isNaN(convertedValue)) return;
       const newOptions = [...enumOptions, convertedValue];
       setEnumOptions(newOptions);
       if (localField.schema?.type === 'array' && localField.schema?.items) {
         handleSchemaUpdate({
           items: {
             ...localField.schema.items,
-            type: enumDataType,
+            enumType: enumDataType,
             enum: newOptions,
           },
         });
       } else {
         handleSchemaUpdate({
-          type: enumDataType,
+          enumType: enumDataType,
           enum: newOptions,
         });
       }
@@ -425,11 +426,13 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
     if (localField.schema?.type === 'array' && localField.schema?.items) {
       handleSchemaUpdate({
         items:
-          newOptions.length > 0 ? { type: enumDataType, enum: newOptions } : { type: 'string' },
+          newOptions.length > 0
+            ? { enumType: enumDataType, enum: newOptions }
+            : { enumType: 'string' },
       });
     } else {
       handleSchemaUpdate({
-        type: newOptions.length > 0 ? enumDataType : 'string',
+        enumType: newOptions.length > 0 ? enumDataType : 'string',
         enum: newOptions.length > 0 ? newOptions : undefined,
       });
     }
@@ -1912,18 +1915,17 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                                 ? [1, 2, 3]
                                 : ['Option 1', 'Option 2', 'Option 3'];
                             setEnumOptions(defaultOptions);
-
                             // Update schema with default options
                             if (localField.schema?.type === 'array' && localField.schema?.items) {
                               handleSchemaUpdate({
                                 items: {
-                                  type: newType,
+                                  enumType: newType,
                                   enum: defaultOptions,
                                 },
                               });
                             } else {
                               handleSchemaUpdate({
-                                type: newType,
+                                enumType: newType,
                                 enum: defaultOptions,
                               });
                             }
