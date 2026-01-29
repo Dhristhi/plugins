@@ -198,7 +198,9 @@ const CustomFileUploadControl = (props) => {
           })}
         </Box>
         {schema?.description && (
-          <FormHelperText sx={{ mt: 1, mx: 0 }}>{schema.description}</FormHelperText>
+          <FormHelperText sx={{ mt: 1, mx: 0, marginLeft: '14px' }}>
+            {schema.description}
+          </FormHelperText>
         )}
       </Box>
     );
@@ -384,7 +386,9 @@ const CustomFileUploadControl = (props) => {
         </Alert>
       )}
       {schema?.description && (
-        <FormHelperText sx={{ mt: 1, mx: 0 }}>{schema.description}</FormHelperText>
+        <FormHelperText sx={{ mt: 1, mx: 0, marginLeft: '14px' }}>
+          {schema.description}
+        </FormHelperText>
       )}
     </Box>
   );
