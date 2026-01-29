@@ -202,9 +202,8 @@ export const defaultFieldTypes = [
     label: 'File Upload',
     icon: IconFileText,
     schema: {
-      type: 'string',
-      format: 'data-url',
-      title: 'Upload File',
+      type: 'array',
+      items: { type: 'string', format: 'data-url' },
     },
     uischema: {
       type: 'Control',

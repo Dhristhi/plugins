@@ -1,3 +1,6 @@
+import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { IconPlus, IconTrash, IconSettings, IconChevronDown, IconX } from '@tabler/icons-react';
 import {
   Typography,
   TextField,
@@ -17,9 +20,6 @@ import {
   Checkbox,
   InputAdornment,
 } from '@mui/material';
-import { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
-import { IconPlus, IconTrash, IconSettings, IconChevronDown, IconX } from '@tabler/icons-react';
 
 import { defaultFieldTypes } from '../types';
 import IconSelector from '../utils/IconSelector';
@@ -205,6 +205,26 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
         };
       }
 
+      // Ensure date range fields have default dateTimeFormat
+      if (
+        field.schema?.type === 'object' &&
+        field.schema?.properties?.startDate &&
+        field.schema?.properties?.endDate &&
+        !field.uischema?.options?.dateTimeFormat
+      ) {
+        updatedField = {
+          ...field,
+          uischema: {
+            ...field.uischema,
+            options: {
+              ...field.uischema?.options,
+              dateTimeFormat: 'D MMM YYYY',
+              isDateRange: true,
+            },
+          },
+        };
+      }
+
       setLocalField(updatedField);
 
       if (field.isLayout) {
@@ -377,6 +397,12 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
   const getCompatibleFieldTypes = () => {
     const currentSchemaType = localField.schema?.type;
 
+    // Check if this is a date range field
+    const isDateRange =
+      localField.schema?.type === 'object' &&
+      localField.schema?.properties?.startDate &&
+      localField.schema?.properties?.endDate;
+
     // Array fields with enum items (multiselect) can switch between multiselect types and array
     if (currentSchemaType === 'array' && localField.schema?.items?.enum) {
       return availableFieldTypes.filter(
@@ -385,10 +411,15 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
     }
 
     // Array fields without enum can switch between array and multiselect types
-    if (currentSchemaType === 'array') {
+    if (currentSchemaType === 'array' && localField.type !== 'file') {
       return availableFieldTypes.filter(
         (ft) => ft.id === 'array' || ft.id === 'multiselect' || ft.id === 'multicheckbox'
       );
+    }
+
+    // Date range fields should show date type option
+    if (isDateRange) {
+      return availableFieldTypes.filter((ft) => ft.id === 'date');
     }
 
     return availableFieldTypes.filter((ft) => {
@@ -461,7 +492,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
     borderRadius: 0,
     border: '1px solid',
     borderColor: 'divider',
-    // backgroundColor: 'background.paper',
     boxShadow: 'none',
     mx: -2,
     transition: 'all 0.2s ease-in-out',
@@ -471,7 +501,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
     '&.Mui-expanded': {
       margin: '15px -15px',
       boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
-      // backgroundColor: 'action.hover',
     },
     '&:hover': {
       borderRadius: 0,
@@ -691,84 +720,179 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
               localField.schema?.format === 'date-time' ||
               localField.schema?.format === 'datetime' ||
               localField.schema?.format === 'time' ||
-              localField.type === 'date' ? (
+              localField.type === 'date' ||
+              (localField.schema?.type === 'object' &&
+                localField.schema?.properties?.startDate &&
+                localField.schema?.properties?.endDate) ? (
                 <>
+                  {/* Date Type Selector */}
                   <FormControl fullWidth margin="normal" sx={outlinedTextFieldSx}>
-                    <InputLabel>{t('dateDisplayFormat')}</InputLabel>
+                    <InputLabel>Date Type</InputLabel>
                     <Select
                       value={(() => {
-                        const currentFormat = localField.uischema?.options?.dateTimeFormat;
+                        const isRange =
+                          localField.schema?.type === 'object' &&
+                          localField.schema?.properties?.startDate &&
+                          localField.schema?.properties?.endDate;
                         const includeTime = localField.uischema?.options?.includeTime;
 
-                        if (!includeTime) {
-                          const dateOnlyFormats = [
-                            'D MMM YYYY',
-                            'DD MMMM YYYY',
-                            'MM/DD/YYYY',
-                            'DD/MM/YYYY',
-                            'YYYY-MM-DD',
-                          ];
-                          return dateOnlyFormats.includes(currentFormat)
-                            ? currentFormat
-                            : 'D MMM YYYY';
-                        } else {
-                          const dateTimeFormats = [
-                            'DD MMM YYYY, HH:mm',
-                            'MMMM D, YYYY at h:mm A',
-                            'MMM D, YYYY • HH:mm',
-                            'ddd, D MMM YYYY, HH:mm',
-                          ];
-                          return dateTimeFormats.includes(currentFormat)
-                            ? currentFormat
-                            : 'DD MMM YYYY, HH:mm';
-                        }
+                        if (isRange) return 'range';
+                        if (includeTime) return 'datetime';
+                        return 'date';
                       })()}
-                      label={t('dateDisplayFormat')}
                       onChange={(e) => {
-                        const updatedUISchema = {
+                        const type = e.target.value;
+                        let updatedSchema = { ...localField.schema };
+                        let updatedUISchema = {
                           ...localField.uischema,
-                          options: {
-                            ...localField.uischema?.options,
-                            dateTimeFormat: e.target.value,
-                          },
+                          options: { ...localField.uischema?.options },
                         };
-                        handleUpdate({ uischema: updatedUISchema });
+
+                        // Reset values
+                        updatedSchema.default = undefined;
+                        updatedSchema.minimum = undefined;
+                        updatedSchema.maximum = undefined;
+
+                        if (type === 'date') {
+                          // Simple date
+                          updatedSchema.type = 'string';
+                          updatedSchema.format = 'date';
+                          updatedUISchema.options.includeTime = false;
+                          updatedUISchema.options.isDateRange = false;
+                          updatedUISchema.options.dateTimeFormat = 'D MMM YYYY';
+                          delete updatedSchema.properties;
+                          delete updatedSchema.items;
+                        } else if (type === 'datetime') {
+                          // Date with time
+                          updatedSchema.type = 'string';
+                          updatedSchema.format = 'date-time';
+                          updatedUISchema.options.includeTime = true;
+                          updatedUISchema.options.isDateRange = false;
+                          updatedUISchema.options.dateTimeFormat = 'DD MMM YYYY, HH:mm';
+                          delete updatedSchema.properties;
+                          delete updatedSchema.items;
+                        } else if (type === 'range') {
+                          // Date range
+                          updatedSchema.type = 'object';
+                          updatedSchema.properties = {
+                            startDate: {
+                              type: 'string',
+                              format: 'date',
+                              title: 'Start Date',
+                            },
+                            endDate: {
+                              type: 'string',
+                              format: 'date',
+                              title: 'End Date',
+                            },
+                          };
+                          updatedSchema.required = ['startDate', 'endDate'];
+                          delete updatedSchema.format;
+                          updatedUISchema.options.isDateRange = true;
+                          updatedUISchema.options.includeTime = false;
+                          updatedUISchema.options.dateTimeFormat = 'D MMM YYYY';
+                        }
+
+                        handleUpdate(
+                          {
+                            type: 'date', // Keep field type as 'date' regardless of schema type
+                            schema: updatedSchema,
+                            uischema: updatedUISchema,
+                          },
+                          { resetFormData: true }
+                        );
                       }}
+                      label="Date Type"
                     >
-                      {!localField.uischema?.options?.includeTime
-                        ? [
-                            <MenuItem key="D MMM YYYY" value="D MMM YYYY">
-                              D MMM YYYY (8 Jan 2025)
-                            </MenuItem>,
-                            <MenuItem key="DD MMMM YYYY" value="DD MMMM YYYY">
-                              DD MMMM YYYY (08 January 2025)
-                            </MenuItem>,
-                            <MenuItem key="MM/DD/YYYY" value="MM/DD/YYYY">
-                              MM/DD/YYYY (01/08/2025)
-                            </MenuItem>,
-                            <MenuItem key="DD/MM/YYYY" value="DD/MM/YYYY">
-                              DD/MM/YYYY (08/01/2025)
-                            </MenuItem>,
-                            <MenuItem key="YYYY-MM-DD" value="YYYY-MM-DD">
-                              YYYY-MM-DD (2025-01-08)
-                            </MenuItem>,
-                          ]
-                        : [
-                            <MenuItem key="DD MMM YYYY, HH:mm" value="DD MMM YYYY, HH:mm">
-                              DD MMM YYYY, HH:mm (08 Jan 2025, 14:30)
-                            </MenuItem>,
-                            <MenuItem key="MMMM D, YYYY at h:mm A" value="MMMM D, YYYY at h:mm A">
-                              MMMM D, YYYY at h:mm A (January 8, 2025 at 2:30 PM)
-                            </MenuItem>,
-                            <MenuItem key="MMM D, YYYY • HH:mm" value="MMM D, YYYY • HH:mm">
-                              MMM D, YYYY • HH:mm (Jan 8, 2025 • 14:30)
-                            </MenuItem>,
-                            <MenuItem key="ddd, D MMM YYYY, HH:mm" value="ddd, D MMM YYYY, HH:mm">
-                              ddd, D MMM YYYY, HH:mm (Thu, 8 Jan 2025, 14:30)
-                            </MenuItem>,
-                          ]}
+                      <MenuItem value="date">Date Only</MenuItem>
+                      <MenuItem value="datetime">Date & Time</MenuItem>
+                      <MenuItem value="range">Date Range</MenuItem>
                     </Select>
                   </FormControl>
+
+                  {/* Date Format Selector */}
+                  {!(
+                    localField.schema?.type === 'object' &&
+                    localField.schema?.properties?.startDate &&
+                    localField.schema?.properties?.endDate
+                  ) && (
+                    <FormControl fullWidth margin="normal" sx={outlinedTextFieldSx}>
+                      <InputLabel>{t('dateDisplayFormat')}</InputLabel>
+                      <Select
+                        value={(() => {
+                          const currentFormat = localField.uischema?.options?.dateTimeFormat;
+                          const includeTime = localField.uischema?.options?.includeTime;
+
+                          if (!includeTime) {
+                            const dateOnlyFormats = [
+                              'D MMM YYYY',
+                              'DD MMMM YYYY',
+                              'MM/DD/YYYY',
+                              'DD/MM/YYYY',
+                              'YYYY-MM-DD',
+                            ];
+                            return dateOnlyFormats.includes(currentFormat)
+                              ? currentFormat
+                              : 'D MMM YYYY';
+                          } else {
+                            const dateTimeFormats = [
+                              'DD MMM YYYY, HH:mm',
+                              'MMMM D, YYYY at h:mm A',
+                              'MMM D, YYYY • HH:mm',
+                              'ddd, D MMM YYYY, HH:mm',
+                            ];
+                            return dateTimeFormats.includes(currentFormat)
+                              ? currentFormat
+                              : 'DD MMM YYYY, HH:mm';
+                          }
+                        })()}
+                        label={t('dateDisplayFormat')}
+                        onChange={(e) => {
+                          const updatedUISchema = {
+                            ...localField.uischema,
+                            options: {
+                              ...localField.uischema?.options,
+                              dateTimeFormat: e.target.value,
+                            },
+                          };
+                          handleUpdate({ uischema: updatedUISchema });
+                        }}
+                      >
+                        {!localField.uischema?.options?.includeTime
+                          ? [
+                              <MenuItem key="D MMM YYYY" value="D MMM YYYY">
+                                D MMM YYYY (8 Jan 2025)
+                              </MenuItem>,
+                              <MenuItem key="DD MMMM YYYY" value="DD MMMM YYYY">
+                                DD MMMM YYYY (08 January 2025)
+                              </MenuItem>,
+                              <MenuItem key="MM/DD/YYYY" value="MM/DD/YYYY">
+                                MM/DD/YYYY (01/08/2025)
+                              </MenuItem>,
+                              <MenuItem key="DD/MM/YYYY" value="DD/MM/YYYY">
+                                DD/MM/YYYY (08/01/2025)
+                              </MenuItem>,
+                              <MenuItem key="YYYY-MM-DD" value="YYYY-MM-DD">
+                                YYYY-MM-DD (2025-01-08)
+                              </MenuItem>,
+                            ]
+                          : [
+                              <MenuItem key="DD MMM YYYY, HH:mm" value="DD MMM YYYY, HH:mm">
+                                DD MMM YYYY, HH:mm (08 Jan 2025, 14:30)
+                              </MenuItem>,
+                              <MenuItem key="MMMM D, YYYY at h:mm A" value="MMMM D, YYYY at h:mm A">
+                                MMMM D, YYYY at h:mm A (January 8, 2025 at 2:30 PM)
+                              </MenuItem>,
+                              <MenuItem key="MMM D, YYYY • HH:mm" value="MMM D, YYYY • HH:mm">
+                                MMM D, YYYY • HH:mm (Jan 8, 2025 • 14:30)
+                              </MenuItem>,
+                              <MenuItem key="ddd, D MMM YYYY, HH:mm" value="ddd, D MMM YYYY, HH:mm">
+                                ddd, D MMM YYYY, HH:mm (Thu, 8 Jan 2025, 14:30)
+                              </MenuItem>,
+                            ]}
+                      </Select>
+                    </FormControl>
+                  )}
 
                   {/* Include Time Toggle */}
                   <FormControlLabel
@@ -831,7 +955,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                           return `${year}-${month}-${day}T${hours}:${minutes}`;
                         }
                       }
-
                       return defaultDate ? defaultDate.split('T')[0] : '';
                     })()}
                     onChange={(e) => {
@@ -842,12 +965,50 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                         if (includeTime) {
                           const date = new Date(dateValue);
                           dateValue = date.toISOString();
+                        } else {
+                          dateValue = dateValue.split('T')[0];
                         }
                       } else {
                         dateValue = undefined;
                       }
 
                       handleSchemaUpdate({ default: dateValue });
+                    }}
+                    inputProps={{
+                      min: (() => {
+                        const minDate = localField.schema?.minimum;
+                        if (!minDate) return undefined;
+                        const includeTime = localField.uischema?.options?.includeTime;
+                        if (includeTime) {
+                          const date = new Date(minDate);
+                          if (!isNaN(date.getTime())) {
+                            const year = date.getFullYear();
+                            const month = String(date.getMonth() + 1).padStart(2, '0');
+                            const day = String(date.getDate()).padStart(2, '0');
+                            const hours = String(date.getHours()).padStart(2, '0');
+                            const minutes = String(date.getMinutes()).padStart(2, '0');
+                            return `${year}-${month}-${day}T${hours}:${minutes}`;
+                          }
+                        }
+                        return minDate ? minDate.split('T')[0] : undefined;
+                      })(),
+                      max: (() => {
+                        const maxDate = localField.schema?.maximum;
+                        if (!maxDate) return undefined;
+                        const includeTime = localField.uischema?.options?.includeTime;
+                        if (includeTime) {
+                          const date = new Date(maxDate);
+                          if (!isNaN(date.getTime())) {
+                            const year = date.getFullYear();
+                            const month = String(date.getMonth() + 1).padStart(2, '0');
+                            const day = String(date.getDate()).padStart(2, '0');
+                            const hours = String(date.getHours()).padStart(2, '0');
+                            const minutes = String(date.getMinutes()).padStart(2, '0');
+                            return `${year}-${month}-${day}T${hours}:${minutes}`;
+                          }
+                        }
+                        return maxDate ? maxDate.split('T')[0] : undefined;
+                      })(),
                     }}
                     margin="normal"
                     variant="outlined"
@@ -857,6 +1018,127 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                     }}
                     sx={outlinedTextFieldSx}
                   />
+
+                  {/* Default Date Range Values - only for date range fields */}
+                  {localField.schema?.type === 'object' &&
+                    localField.schema?.properties?.startDate &&
+                    localField.schema?.properties?.endDate && (
+                      <>
+                        <Box sx={{ mt: 2, mb: 1 }}>
+                          <Typography variant="subtitle2" fontWeight={500}>
+                            Default Date Range
+                          </Typography>
+                        </Box>
+                        <Grid container spacing={2}>
+                          {/* Start Date Default */}
+                          <Grid item xs={6}>
+                            <TextField
+                              label="Default Start Date"
+                              type="date"
+                              fullWidth
+                              value={(() => {
+                                const defaultDate =
+                                  localField.schema?.properties?.startDate?.default;
+                                return defaultDate ? defaultDate.split('T')[0] : '';
+                              })()}
+                              inputProps={{
+                                min: (() => {
+                                  const minStartDate =
+                                    localField.schema?.properties?.startDate?.minimum;
+                                  return minStartDate ? minStartDate.split('T')[0] : undefined;
+                                })(),
+                                max: (() => {
+                                  const endDateDefault =
+                                    localField.schema?.properties?.endDate?.default;
+                                  const maxEndDate =
+                                    localField.schema?.properties?.endDate?.maximum;
+                                  if (endDateDefault) return endDateDefault.split('T')[0];
+                                  return maxEndDate ? maxEndDate.split('T')[0] : undefined;
+                                })(),
+                              }}
+                              onChange={(e) => {
+                                let dateValue = e.target.value;
+                                if (dateValue) {
+                                  const date = new Date(dateValue);
+                                  dateValue = date.toISOString().split('T')[0];
+                                } else {
+                                  dateValue = undefined;
+                                }
+                                handleSchemaUpdate({
+                                  properties: {
+                                    ...localField.schema.properties,
+                                    startDate: {
+                                      ...localField.schema.properties.startDate,
+                                      default: dateValue,
+                                    },
+                                  },
+                                });
+                              }}
+                              margin="normal"
+                              variant="outlined"
+                              helperText="Default start date value"
+                              InputLabelProps={{
+                                shrink: true,
+                              }}
+                              sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                            />
+                          </Grid>
+
+                          {/* End Date Default */}
+                          <Grid item xs={6}>
+                            <TextField
+                              label="Default End Date"
+                              type="date"
+                              fullWidth
+                              value={(() => {
+                                const defaultDate = localField.schema?.properties?.endDate?.default;
+                                return defaultDate ? defaultDate.split('T')[0] : '';
+                              })()}
+                              inputProps={{
+                                min: (() => {
+                                  const startDateDefault =
+                                    localField.schema?.properties?.startDate?.default;
+                                  const minStartDate =
+                                    localField.schema?.properties?.startDate?.minimum;
+                                  if (startDateDefault) return startDateDefault.split('T')[0];
+                                  return minStartDate ? minStartDate.split('T')[0] : undefined;
+                                })(),
+                                max: (() => {
+                                  const maxEndDate =
+                                    localField.schema?.properties?.endDate?.maximum;
+                                  return maxEndDate ? maxEndDate.split('T')[0] : undefined;
+                                })(),
+                              }}
+                              onChange={(e) => {
+                                let dateValue = e.target.value;
+                                if (dateValue) {
+                                  const date = new Date(dateValue);
+                                  dateValue = date.toISOString().split('T')[0];
+                                } else {
+                                  dateValue = undefined;
+                                }
+                                handleSchemaUpdate({
+                                  properties: {
+                                    ...localField.schema.properties,
+                                    endDate: {
+                                      ...localField.schema.properties.endDate,
+                                      default: dateValue,
+                                    },
+                                  },
+                                });
+                              }}
+                              margin="normal"
+                              variant="outlined"
+                              helperText="Default end date value"
+                              InputLabelProps={{
+                                shrink: true,
+                              }}
+                              sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                            />
+                          </Grid>
+                        </Grid>
+                      </>
+                    )}
                 </>
               ) : // Default Value field for non-date fields
               localField.type !== 'array' &&
@@ -865,7 +1147,11 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                 <TextField
                   label={t('defaultValue')}
                   fullWidth
-                  // value={localField.schema?.default || ''}
+                  type={
+                    localField.type === 'number' || localField.type === 'integer'
+                      ? 'number'
+                      : 'text'
+                  }
                   value={defaultInput}
                   onChange={(e) => {
                     setDefaultInput(e.target.value);
@@ -1096,57 +1382,77 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
 
               {/* File Upload Options */}
               {localField.type === 'file' && (
-                <FormControl fullWidth margin="normal">
-                  <InputLabel id="allowed-file-types-label" shrink>
-                    {t('allowedFileTypes')}
-                  </InputLabel>
+                <>
+                  <FormControl fullWidth margin="normal">
+                    <InputLabel id="allowed-file-types-label" shrink>
+                      {t('allowedFileTypes')}
+                    </InputLabel>
 
-                  <Select
-                    labelId="allowed-file-types-label"
-                    multiple
-                    displayEmpty
-                    label={t('allowedFileTypes')}
-                    value={
-                      localField.uischema?.options?.['ui:options']?.accept
-                        ? localField.uischema.options['ui:options'].accept
-                            .split(',')
-                            .filter(Boolean)
-                        : []
-                    }
-                    onChange={(e) => {
-                      const values = e.target.value;
-                      handleUiOptionsUpdate({
-                        accept: values.length ? values.join(',') : undefined,
-                      });
-                    }}
-                    renderValue={(selected) => {
-                      if (selected.length === 0) {
-                        return (
-                          <Typography sx={{ color: 'text.disabled' }}>
-                            {t('selectFileTypes')}
-                          </Typography>
-                        );
+                    <Select
+                      labelId="allowed-file-types-label"
+                      multiple
+                      displayEmpty
+                      label={t('allowedFileTypes')}
+                      value={
+                        localField.uischema?.options?.['ui:options']?.accept
+                          ? localField.uischema.options['ui:options'].accept
+                              .split(',')
+                              .filter(Boolean)
+                          : []
                       }
-                      return selected
-                        .map((mime) => FILE_TYPE_OPTIONS.find((o) => o.value === mime)?.label)
-                        .join(', ');
-                    }}
-                    MenuProps={{
-                      PaperProps: {
-                        sx: {
-                          maxHeight: 240,
-                          minWidth: 280,
+                      onChange={(e) => {
+                        const values = e.target.value;
+                        handleUiOptionsUpdate({
+                          accept: values.length ? values.join(',') : undefined,
+                        });
+                      }}
+                      renderValue={(selected) => {
+                        if (selected.length === 0) {
+                          return (
+                            <Typography sx={{ color: 'text.disabled' }}>
+                              {t('selectFileTypes')}
+                            </Typography>
+                          );
+                        }
+                        return selected
+                          .map((mime) => FILE_TYPE_OPTIONS.find((o) => o.value === mime)?.label)
+                          .join(', ');
+                      }}
+                      MenuProps={{
+                        PaperProps: {
+                          sx: {
+                            maxHeight: 240,
+                            minWidth: 280,
+                          },
                         },
-                      },
-                    }}
-                  >
-                    {FILE_TYPE_OPTIONS.map((option) => (
-                      <MenuItem key={option.value} value={option.value}>
-                        {option.label}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
+                      }}
+                    >
+                      {FILE_TYPE_OPTIONS.map((option) => (
+                        <MenuItem key={option.value} value={option.value}>
+                          {option.label}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={
+                          localField.uischema?.options?.['ui:options']?.enablePreview || false
+                        }
+                        onChange={(e) => {
+                          const value = e.target.checked;
+                          handleUiOptionsUpdate({
+                            enablePreview: value,
+                          });
+                        }}
+                        color="primary"
+                      />
+                    }
+                    label="Enable Preview"
+                    sx={{ mt: 1, mb: 1 }}
+                  />
+                </>
               )}
 
               {/* Enum Values for Select/Radio/Multiselect Fields */}
@@ -1457,140 +1763,427 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
               {(localField.schema?.format === 'date' ||
                 localField.schema?.format === 'date-time' ||
                 localField.schema?.format === 'datetime' ||
-                localField.type === 'date') && (
-                <Grid container spacing={2}>
-                  <Grid item xs={6}>
-                    <TextField
-                      label={t('minDate')}
-                      type={localField.uischema?.options?.includeTime ? 'datetime-local' : 'date'}
-                      fullWidth
-                      value={(() => {
-                        const minDate = localField.schema?.minimum;
-                        if (!minDate) return '';
+                localField.type === 'date') &&
+                !(
+                  localField.schema?.type === 'object' &&
+                  localField.schema?.properties?.startDate &&
+                  localField.schema?.properties?.endDate
+                ) && (
+                  <Grid container spacing={2}>
+                    <Grid item xs={6}>
+                      <TextField
+                        label={t('minDate')}
+                        type={localField.uischema?.options?.includeTime ? 'datetime-local' : 'date'}
+                        fullWidth
+                        value={(() => {
+                          const minDate = localField.schema?.minimum;
+                          if (!minDate) return '';
 
-                        const includeTime = localField.uischema?.options?.includeTime;
-                        if (includeTime) {
-                          const date = new Date(minDate);
-                          if (!isNaN(date.getTime())) {
-                            const year = date.getFullYear();
-                            const month = String(date.getMonth() + 1).padStart(2, '0');
-                            const day = String(date.getDate()).padStart(2, '0');
-                            const hours = String(date.getHours()).padStart(2, '0');
-                            const minutes = String(date.getMinutes()).padStart(2, '0');
-                            return `${year}-${month}-${day}T${hours}:${minutes}`;
-                          }
-                        }
-
-                        return minDate ? minDate.split('T')[0] : '';
-                      })()}
-                      onChange={(e) => {
-                        let dateValue = e.target.value;
-
-                        if (dateValue) {
                           const includeTime = localField.uischema?.options?.includeTime;
                           if (includeTime) {
-                            const date = new Date(dateValue);
-                            dateValue = date.toISOString();
+                            const date = new Date(minDate);
+                            if (!isNaN(date.getTime())) {
+                              const year = date.getFullYear();
+                              const month = String(date.getMonth() + 1).padStart(2, '0');
+                              const day = String(date.getDate()).padStart(2, '0');
+                              const hours = String(date.getHours()).padStart(2, '0');
+                              const minutes = String(date.getMinutes()).padStart(2, '0');
+                              return `${year}-${month}-${day}T${hours}:${minutes}`;
+                            }
                           }
-                        } else {
-                          dateValue = undefined;
-                        }
 
-                        handleSchemaUpdate({ minimum: dateValue });
-                      }}
-                      margin="normal"
-                      variant="outlined"
-                      helperText={t('minDateHelp')}
-                      InputLabelProps={{
-                        shrink: true,
-                      }}
-                      InputProps={{
-                        endAdornment: localField.schema?.minimum && (
-                          <InputAdornment position="end">
-                            <IconButton
-                              size="small"
-                              onClick={() => handleSchemaUpdate({ minimum: undefined })}
-                              edge="end"
-                              sx={{
-                                color: 'text.secondary',
-                                '&:hover': { color: 'error.main' },
-                              }}
-                            >
-                              <IconX size={16} />
-                            </IconButton>
-                          </InputAdornment>
-                        ),
-                      }}
-                      sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-                    />
-                  </Grid>
-                  <Grid item xs={6}>
-                    <TextField
-                      label={t('maxDate')}
-                      type={localField.uischema?.options?.includeTime ? 'datetime-local' : 'date'}
-                      fullWidth
-                      value={(() => {
-                        const maxDate = localField.schema?.maximum;
-                        if (!maxDate) return '';
+                          return minDate ? minDate.split('T')[0] : '';
+                        })()}
+                        onChange={(e) => {
+                          let dateValue = e.target.value;
 
-                        const includeTime = localField.uischema?.options?.includeTime;
-                        if (includeTime) {
-                          const date = new Date(maxDate);
-                          if (!isNaN(date.getTime())) {
-                            const year = date.getFullYear();
-                            const month = String(date.getMonth() + 1).padStart(2, '0');
-                            const day = String(date.getDate()).padStart(2, '0');
-                            const hours = String(date.getHours()).padStart(2, '0');
-                            const minutes = String(date.getMinutes()).padStart(2, '0');
-                            return `${year}-${month}-${day}T${hours}:${minutes}`;
+                          if (dateValue) {
+                            const includeTime = localField.uischema?.options?.includeTime;
+                            if (includeTime) {
+                              const date = new Date(dateValue);
+                              dateValue = date.toISOString();
+                            } else {
+                              // Ensure date-only format (YYYY-MM-DD)
+                              dateValue = dateValue.split('T')[0];
+                            }
+                          } else {
+                            dateValue = undefined;
                           }
-                        }
 
-                        return maxDate ? maxDate.split('T')[0] : '';
-                      })()}
-                      onChange={(e) => {
-                        let dateValue = e.target.value;
+                          handleSchemaUpdate({ minimum: dateValue });
 
-                        if (dateValue) {
+                          // Clear default if it's now invalid
+                          const currentDefault = localField.schema?.default;
+                          if (
+                            currentDefault &&
+                            dateValue &&
+                            new Date(currentDefault) < new Date(dateValue)
+                          ) {
+                            handleSchemaUpdate({ minimum: dateValue, default: undefined });
+                          }
+                        }}
+                        inputProps={{
+                          max: (() => {
+                            const maxDate = localField.schema?.maximum;
+                            if (!maxDate) return undefined;
+                            const includeTime = localField.uischema?.options?.includeTime;
+                            if (includeTime) {
+                              const date = new Date(maxDate);
+                              if (!isNaN(date.getTime())) {
+                                const year = date.getFullYear();
+                                const month = String(date.getMonth() + 1).padStart(2, '0');
+                                const day = String(date.getDate()).padStart(2, '0');
+                                const hours = String(date.getHours()).padStart(2, '0');
+                                const minutes = String(date.getMinutes()).padStart(2, '0');
+                                return `${year}-${month}-${day}T${hours}:${minutes}`;
+                              }
+                            }
+                            return maxDate ? maxDate.split('T')[0] : undefined;
+                          })(),
+                        }}
+                        margin="normal"
+                        variant="outlined"
+                        helperText={t('minDateHelp')}
+                        InputLabelProps={{
+                          shrink: true,
+                        }}
+                        InputProps={{
+                          endAdornment: localField.schema?.minimum && (
+                            <InputAdornment position="end">
+                              <IconButton
+                                size="small"
+                                onClick={() => handleSchemaUpdate({ minimum: undefined })}
+                                edge="end"
+                                sx={{
+                                  color: 'text.secondary',
+                                  '&:hover': { color: 'error.main' },
+                                }}
+                              >
+                                <IconX size={16} />
+                              </IconButton>
+                            </InputAdornment>
+                          ),
+                        }}
+                        sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                      />
+                    </Grid>
+                    <Grid item xs={6}>
+                      <TextField
+                        label={t('maxDate')}
+                        type={localField.uischema?.options?.includeTime ? 'datetime-local' : 'date'}
+                        fullWidth
+                        value={(() => {
+                          const maxDate = localField.schema?.maximum;
+                          if (!maxDate) return '';
+
                           const includeTime = localField.uischema?.options?.includeTime;
                           if (includeTime) {
-                            const date = new Date(dateValue);
-                            dateValue = date.toISOString();
+                            const date = new Date(maxDate);
+                            if (!isNaN(date.getTime())) {
+                              const year = date.getFullYear();
+                              const month = String(date.getMonth() + 1).padStart(2, '0');
+                              const day = String(date.getDate()).padStart(2, '0');
+                              const hours = String(date.getHours()).padStart(2, '0');
+                              const minutes = String(date.getMinutes()).padStart(2, '0');
+                              return `${year}-${month}-${day}T${hours}:${minutes}`;
+                            }
                           }
-                        } else {
-                          dateValue = undefined;
-                        }
 
-                        handleSchemaUpdate({ maximum: dateValue });
-                      }}
-                      margin="normal"
-                      variant="outlined"
-                      helperText={t('maxDateHelp')}
-                      InputLabelProps={{
-                        shrink: true,
-                      }}
-                      InputProps={{
-                        endAdornment: localField.schema?.maximum && (
-                          <InputAdornment position="end">
-                            <IconButton
-                              size="small"
-                              onClick={() => handleSchemaUpdate({ maximum: undefined })}
-                              edge="end"
-                              sx={{
-                                color: 'text.secondary',
-                                '&:hover': { color: 'error.main' },
-                              }}
-                            >
-                              <IconX size={16} />
-                            </IconButton>
-                          </InputAdornment>
-                        ),
-                      }}
-                      sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-                    />
+                          return maxDate ? maxDate.split('T')[0] : '';
+                        })()}
+                        onChange={(e) => {
+                          let dateValue = e.target.value;
+
+                          if (dateValue) {
+                            const includeTime = localField.uischema?.options?.includeTime;
+                            if (includeTime) {
+                              const date = new Date(dateValue);
+                              dateValue = date.toISOString();
+                            } else {
+                              // Ensure date-only format (YYYY-MM-DD)
+                              dateValue = dateValue.split('T')[0];
+                            }
+                          } else {
+                            dateValue = undefined;
+                          }
+
+                          handleSchemaUpdate({ maximum: dateValue });
+
+                          // Clear default if it's now invalid
+                          const currentDefault = localField.schema?.default;
+                          if (
+                            currentDefault &&
+                            dateValue &&
+                            new Date(currentDefault) > new Date(dateValue)
+                          ) {
+                            handleSchemaUpdate({ maximum: dateValue, default: undefined });
+                          }
+                        }}
+                        inputProps={{
+                          min: (() => {
+                            const minDate = localField.schema?.minimum;
+                            if (!minDate) return undefined;
+                            const includeTime = localField.uischema?.options?.includeTime;
+                            if (includeTime) {
+                              const date = new Date(minDate);
+                              if (!isNaN(date.getTime())) {
+                                const year = date.getFullYear();
+                                const month = String(date.getMonth() + 1).padStart(2, '0');
+                                const day = String(date.getDate()).padStart(2, '0');
+                                const hours = String(date.getHours()).padStart(2, '0');
+                                const minutes = String(date.getMinutes()).padStart(2, '0');
+                                return `${year}-${month}-${day}T${hours}:${minutes}`;
+                              }
+                            }
+                            return minDate ? minDate.split('T')[0] : undefined;
+                          })(),
+                        }}
+                        margin="normal"
+                        variant="outlined"
+                        helperText={t('maxDateHelp')}
+                        InputLabelProps={{
+                          shrink: true,
+                        }}
+                        InputProps={{
+                          endAdornment: localField.schema?.maximum && (
+                            <InputAdornment position="end">
+                              <IconButton
+                                size="small"
+                                onClick={() => handleSchemaUpdate({ maximum: undefined })}
+                                edge="end"
+                                sx={{
+                                  color: 'text.secondary',
+                                  '&:hover': { color: 'error.main' },
+                                }}
+                              >
+                                <IconX size={16} />
+                              </IconButton>
+                            </InputAdornment>
+                          ),
+                        }}
+                        sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                      />
+                    </Grid>
                   </Grid>
-                </Grid>
-              )}
+                )}
+
+              {/* Date Range Configuration */}
+              {localField.schema?.type === 'object' &&
+                localField.schema?.properties?.startDate &&
+                localField.schema?.properties?.endDate && (
+                  <Box>
+                    <Typography variant="subtitle2" sx={{ mt: 2, mb: 2, fontWeight: 500 }}>
+                      Date Range Validation
+                    </Typography>
+                    <Grid container spacing={2}>
+                      {/* Min Date */}
+                      <Grid item xs={6}>
+                        <TextField
+                          label="Min Date"
+                          type="date"
+                          fullWidth
+                          value={(() => {
+                            const minDate = localField.schema?.properties?.startDate?.minimum;
+                            return minDate ? minDate.split('T')[0] : '';
+                          })()}
+                          onChange={(e) => {
+                            let dateValue = e.target.value;
+                            if (dateValue) {
+                              const date = new Date(dateValue);
+                              dateValue = date.toISOString().split('T')[0];
+                            } else {
+                              dateValue = undefined;
+                            }
+
+                            const updates = {
+                              properties: {
+                                ...localField.schema.properties,
+                                startDate: {
+                                  ...localField.schema.properties.startDate,
+                                  minimum: dateValue,
+                                },
+                                endDate: {
+                                  ...localField.schema.properties.endDate,
+                                  minimum: dateValue,
+                                },
+                              },
+                            };
+
+                            // Clear defaults if they become invalid
+                            const defaultStartDate =
+                              localField.schema?.properties?.startDate?.default;
+                            const defaultEndDate = localField.schema?.properties?.endDate?.default;
+
+                            if (
+                              defaultStartDate &&
+                              dateValue &&
+                              new Date(defaultStartDate) < new Date(dateValue)
+                            ) {
+                              updates.properties.startDate.default = undefined;
+                            }
+                            if (
+                              defaultEndDate &&
+                              dateValue &&
+                              new Date(defaultEndDate) < new Date(dateValue)
+                            ) {
+                              updates.properties.endDate.default = undefined;
+                            }
+
+                            handleSchemaUpdate(updates);
+                          }}
+                          inputProps={{
+                            max: (() => {
+                              const maxEndDate = localField.schema?.properties?.endDate?.maximum;
+                              return maxEndDate ? maxEndDate.split('T')[0] : undefined;
+                            })(),
+                          }}
+                          margin="normal"
+                          variant="outlined"
+                          helperText="Earliest allowed date for both start and end dates"
+                          InputLabelProps={{
+                            shrink: true,
+                          }}
+                          InputProps={{
+                            endAdornment: localField.schema?.properties?.startDate?.minimum && (
+                              <InputAdornment position="end">
+                                <IconButton
+                                  size="small"
+                                  onClick={() =>
+                                    handleSchemaUpdate({
+                                      properties: {
+                                        ...localField.schema.properties,
+                                        startDate: {
+                                          ...localField.schema.properties.startDate,
+                                          minimum: undefined,
+                                        },
+                                        endDate: {
+                                          ...localField.schema.properties.endDate,
+                                          minimum: undefined,
+                                        },
+                                      },
+                                    })
+                                  }
+                                  edge="end"
+                                  sx={{
+                                    color: 'text.secondary',
+                                    '&:hover': { color: 'error.main' },
+                                  }}
+                                >
+                                  <IconX size={16} />
+                                </IconButton>
+                              </InputAdornment>
+                            ),
+                          }}
+                          sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                        />
+                      </Grid>
+
+                      {/* Max Date */}
+                      <Grid item xs={6}>
+                        <TextField
+                          label="Max Date"
+                          type="date"
+                          fullWidth
+                          value={(() => {
+                            const maxDate = localField.schema?.properties?.endDate?.maximum;
+                            return maxDate ? maxDate.split('T')[0] : '';
+                          })()}
+                          onChange={(e) => {
+                            let dateValue = e.target.value;
+                            if (dateValue) {
+                              const date = new Date(dateValue);
+                              dateValue = date.toISOString().split('T')[0];
+                            } else {
+                              dateValue = undefined;
+                            }
+
+                            const updates = {
+                              properties: {
+                                ...localField.schema.properties,
+                                startDate: {
+                                  ...localField.schema.properties.startDate,
+                                  maximum: dateValue,
+                                },
+                                endDate: {
+                                  ...localField.schema.properties.endDate,
+                                  maximum: dateValue,
+                                },
+                              },
+                            };
+
+                            // Clear defaults if they become invalid
+                            const defaultStartDate =
+                              localField.schema?.properties?.startDate?.default;
+                            const defaultEndDate = localField.schema?.properties?.endDate?.default;
+
+                            if (
+                              defaultStartDate &&
+                              dateValue &&
+                              new Date(defaultStartDate) > new Date(dateValue)
+                            ) {
+                              updates.properties.startDate.default = undefined;
+                            }
+                            if (
+                              defaultEndDate &&
+                              dateValue &&
+                              new Date(defaultEndDate) > new Date(dateValue)
+                            ) {
+                              updates.properties.endDate.default = undefined;
+                            }
+
+                            handleSchemaUpdate(updates);
+                          }}
+                          inputProps={{
+                            min: (() => {
+                              const minStartDate =
+                                localField.schema?.properties?.startDate?.minimum;
+                              return minStartDate ? minStartDate.split('T')[0] : undefined;
+                            })(),
+                          }}
+                          margin="normal"
+                          variant="outlined"
+                          helperText="Latest allowed date for both start and end dates"
+                          InputLabelProps={{
+                            shrink: true,
+                          }}
+                          InputProps={{
+                            endAdornment: localField.schema?.properties?.endDate?.maximum && (
+                              <InputAdornment position="end">
+                                <IconButton
+                                  size="small"
+                                  onClick={() =>
+                                    handleSchemaUpdate({
+                                      properties: {
+                                        ...localField.schema.properties,
+                                        startDate: {
+                                          ...localField.schema.properties.startDate,
+                                          maximum: undefined,
+                                        },
+                                        endDate: {
+                                          ...localField.schema.properties.endDate,
+                                          maximum: undefined,
+                                        },
+                                      },
+                                    })
+                                  }
+                                  edge="end"
+                                  sx={{
+                                    color: 'text.secondary',
+                                    '&:hover': { color: 'error.main' },
+                                  }}
+                                >
+                                  <IconX size={16} />
+                                </IconButton>
+                              </InputAdornment>
+                            ),
+                          }}
+                          sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                        />
+                      </Grid>
+                    </Grid>
+                  </Box>
+                )}
+
               {(localField.type === 'array' || localField.type === 'multiselect') && (
                 <Grid container spacing={2}>
                   <Grid item xs={6}>
