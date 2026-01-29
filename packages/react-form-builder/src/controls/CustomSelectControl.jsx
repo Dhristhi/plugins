@@ -97,6 +97,7 @@ const CustomSelectControl = (props) => {
           )}
           {...(uischema.options?.autocompleteProps || {})}
         />
+        {schema?.description && <FormHelperText>{schema?.description}</FormHelperText>}
       </FormControl>
     ) : displayType === 'checkbox' ? (
       <FormControl fullWidth error={hasError}>
@@ -129,6 +130,7 @@ const CustomSelectControl = (props) => {
             );
           })}
         </Box>
+        {schema?.description && <FormHelperText>{schema?.description}</FormHelperText>}
         {hasError && <FormHelperText>{validationError}</FormHelperText>}
       </FormControl>
     ) : (
@@ -202,6 +204,7 @@ const CustomSelectControl = (props) => {
             </MenuItem>
           ))}
         </Select>
+        {schema?.description && <FormHelperText>{schema?.description}</FormHelperText>}
         {hasError && <FormHelperText>{validationError}</FormHelperText>}
       </FormControl>
     )

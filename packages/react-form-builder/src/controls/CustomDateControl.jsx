@@ -1,4 +1,4 @@
-import { TextField, Box } from '@mui/material';
+import { TextField, Box, FormHelperText } from '@mui/material';
 import { withJsonFormsControlProps } from '@jsonforms/react';
 import { rankWith, isControl, and, schemaMatches } from '@jsonforms/core';
 
@@ -235,6 +235,11 @@ const CustomDateControl = (props) => {
             )}
           </Box>
         </Box>
+        {schema?.description && (
+          <FormHelperText sx={{ mt: 1, mx: 0, marginLeft: '14px' }}>
+            {schema.description}
+          </FormHelperText>
+        )}
       </Box>
     );
   }
@@ -307,6 +312,11 @@ const CustomDateControl = (props) => {
         >
           Preview: {formattedDisplay}
         </div>
+      )}
+      {schema?.description && (
+        <FormHelperText sx={{ mt: 1, mx: 0, marginLeft: '14px' }}>
+          {schema.description}
+        </FormHelperText>
       )}
     </div>
   );
