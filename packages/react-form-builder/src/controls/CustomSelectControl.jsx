@@ -28,7 +28,7 @@ const CustomSelectControl = (props) => {
   const [options, setOptions] = useState([]);
   const [showAllChips, setShowAllChips] = useState(false);
 
-  const { schema, uischema, path, handleChange, data, errors } = props;
+  const { schema, uischema, path, handleChange, data, errors, visible } = props;
   const {
     key,
     value,
@@ -38,7 +38,6 @@ const CustomSelectControl = (props) => {
   } = uischema.options || {};
 
   const formData = core?.data || {};
-
   useEffect(() => {
     const fetchOptions = async () => {
       const newOptions =
@@ -73,6 +72,7 @@ const CustomSelectControl = (props) => {
   const fieldLabel = useMemo(() => {
     return schema.title || 'Select';
   }, [path, schema.title]);
+  if (!visible) return null;
 
   return multi ? (
     displayType === 'autocomplete' || uischema.options?.autocomplete ? (

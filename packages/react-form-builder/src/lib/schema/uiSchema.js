@@ -41,6 +41,124 @@ export const buildUISchemaForArrayItems = (fieldsArray) => {
     });
 };
 
+function normalizeConstValue(value) {
+  if (value === 'true') return true;
+  if (value === 'false') return false;
+  return value;
+}
+
+function compileRule(field) {
+  const anyOf = [];
+  let currentGroup = [];
+  const conditions = field.visibility;
+  conditions.forEach((condition, index) => {
+    const compiled = buildPropertyCondition(condition);
+    currentGroup.push(compiled);
+
+    const isLast = index === conditions.length - 1;
+    const next = !isLast ? conditions[index + 1] : null;
+    const closesHere = !next || next.logical === 'OR';
+
+    if (closesHere) {
+      if (currentGroup.length === 1) {
+        anyOf.push(currentGroup[0]);
+      } else {
+        anyOf.push({ allOf: currentGroup });
+      }
+      currentGroup = [];
+    }
+  });
+
+  const schema = anyOf.length === 1 ? anyOf[0] : { anyOf };
+
+  return {
+    effect: field.effect,
+    condition: {
+      scope: '#',
+      schema,
+    },
+  };
+}
+
+function buildPropertyCondition({ dependsOn, operator, value }) {
+  const constValue = normalizeConstValue(value);
+
+  let schemaCondition;
+
+  switch (operator) {
+    case 'equals':
+      schemaCondition = { const: constValue };
+      break;
+
+    case 'not_equals':
+      schemaCondition = { not: { const: constValue } };
+      break;
+
+    case 'eq':
+      schemaCondition = { const: Number(constValue) };
+      break;
+
+    case 'neq':
+      schemaCondition = { not: { const: Number(constValue) } };
+      break;
+    case 'gt':
+      schemaCondition = { exclusiveMinimum: Number(value) };
+      break;
+    case 'gte':
+      schemaCondition = { minimum: Number(value) };
+      break;
+    case 'lt':
+      schemaCondition = { exclusiveMaximum: Number(value) };
+      break;
+    case 'lte':
+      schemaCondition = { maximum: Number(value) };
+      break;
+
+    case 'pattern': {
+      // escape regex
+      const escaped = String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      schemaCondition = { pattern: escaped };
+      break;
+    }
+
+    case 'starts_with': {
+      const escaped = String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      schemaCondition = { pattern: `^${escaped}` };
+      break;
+    }
+
+    case 'ends_with': {
+      const escaped = String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      schemaCondition = { pattern: `${escaped}$` };
+      break;
+    }
+
+    case 'between': {
+      const min = Number(value?.min);
+      const max = Number(value?.max);
+
+      if (!Number.isFinite(min) || !Number.isFinite(max)) return null;
+      if (min > max) return null; // logical safety
+
+      schemaCondition = {
+        minimum: min,
+        maximum: max,
+      };
+      break;
+    }
+
+    default:
+      schemaCondition = { const: constValue };
+  }
+
+  return {
+    properties: {
+      [dependsOn]: schemaCondition,
+    },
+    required: [dependsOn],
+  };
+}
+
 export const buildUISchemaFromFields = (fieldsArray, parentKey = null) => {
   return fieldsArray
     .filter((field) => {
@@ -129,16 +247,25 @@ export const buildUISchemaFromFields = (fieldsArray, parentKey = null) => {
             },
           ];
         } else {
+          let rule = {};
+          if (field.visibility) {
+            rule = compileRule(field);
+          }
           const scope = parentKey
             ? `#/properties/${parentKey}/properties/${field.key}`
             : `#/properties/${field.key}`;
-          return [
-            {
+          if (field.visibility)
+            return {
               ...field.uischema,
               scope: scope,
               label: field.label,
-            },
-          ];
+              rule: rule,
+            };
+          return {
+            ...field.uischema,
+            scope: scope,
+            label: field.label,
+          };
         }
       }
     });
