@@ -931,6 +931,12 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                                         {op.label}
                                       </MenuItem>
                                     ))}
+                                  {dependsOnField.schema.type === 'boolean' &&
+                                    OPERATORS[dependsOnField.schema.type]?.map((op) => (
+                                      <MenuItem key={op.value} value={op.value}>
+                                        {op.label}
+                                      </MenuItem>
+                                    ))}
                                 </Select>
                               </FormControl>
 
