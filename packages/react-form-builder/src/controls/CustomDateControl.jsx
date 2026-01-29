@@ -234,7 +234,9 @@ const CustomDateControl = (props) => {
           </Box>
         </Box>
         {schema?.description && (
-          <FormHelperText sx={{ mt: 1, mx: 0 }}>{schema.description}</FormHelperText>
+          <FormHelperText sx={{ mt: 1, mx: 0, marginLeft: '14px' }}>
+            {schema.description}
+          </FormHelperText>
         )}
       </Box>
     );
@@ -310,7 +312,9 @@ const CustomDateControl = (props) => {
         </div>
       )}
       {schema?.description && (
-        <FormHelperText sx={{ mt: 1, mx: 0 }}>{schema.description}</FormHelperText>
+        <FormHelperText sx={{ mt: 1, mx: 0, marginLeft: '14px' }}>
+          {schema.description}
+        </FormHelperText>
       )}
     </div>
   );
