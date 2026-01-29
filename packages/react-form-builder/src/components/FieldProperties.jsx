@@ -727,7 +727,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                 <>
                   {/* Date Type Selector */}
                   <FormControl fullWidth margin="normal" sx={outlinedTextFieldSx}>
-                    <InputLabel>Date Type</InputLabel>
+                    <InputLabel>{t('dateType')}</InputLabel>
                     <Select
                       value={(() => {
                         const isRange =
@@ -778,12 +778,12 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                             startDate: {
                               type: 'string',
                               format: 'date',
-                              title: 'Start Date',
+                              title: t('startDate'),
                             },
                             endDate: {
                               type: 'string',
                               format: 'date',
-                              title: 'End Date',
+                              title: t('endDate'),
                             },
                           };
                           updatedSchema.required = ['startDate', 'endDate'];
@@ -802,11 +802,11 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                           { resetFormData: true }
                         );
                       }}
-                      label="Date Type"
+                      label={t('dateType')}
                     >
-                      <MenuItem value="date">Date Only</MenuItem>
-                      <MenuItem value="datetime">Date & Time</MenuItem>
-                      <MenuItem value="range">Date Range</MenuItem>
+                      <MenuItem value="date">{t('dateOnly')}</MenuItem>
+                      <MenuItem value="datetime">{t('dateAndTime')}</MenuItem>
+                      <MenuItem value="range">{t('dateRange')}</MenuItem>
                     </Select>
                   </FormControl>
 
@@ -893,46 +893,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                       </Select>
                     </FormControl>
                   )}
-
-                  {/* Include Time Toggle */}
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={localField.uischema?.options?.includeTime || false}
-                        onChange={(e) => {
-                          const includeTime = e.target.checked;
-                          let defaultFormat = includeTime ? 'DD MMM YYYY, HH:mm' : 'D MMM YYYY';
-
-                          const updatedUISchema = {
-                            ...localField.uischema,
-                            options: {
-                              ...localField.uischema?.options,
-                              includeTime,
-                              dateTimeFormat: defaultFormat,
-                            },
-                          };
-
-                          // Update schema format based on includeTime and reset default value
-                          const updatedSchema = {
-                            ...localField.schema,
-                            format: includeTime ? 'date-time' : 'date',
-                            default: undefined, // Reset default value when toggling
-                          };
-
-                          handleUpdate(
-                            {
-                              uischema: updatedUISchema,
-                              schema: updatedSchema,
-                            },
-                            { resetFormData: true }
-                          );
-                        }}
-                        color="primary"
-                      />
-                    }
-                    label={t('includeTime')}
-                    sx={{ mt: 1, mb: 1 }}
-                  />
 
                   {/* Default Date Value Picker */}
                   <TextField
@@ -1026,14 +986,14 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                       <>
                         <Box sx={{ mt: 2, mb: 1 }}>
                           <Typography variant="subtitle2" fontWeight={500}>
-                            Default Date Range
+                            {t('defaultDateRange')}
                           </Typography>
                         </Box>
                         <Grid container spacing={2}>
                           {/* Start Date Default */}
                           <Grid item xs={6}>
                             <TextField
-                              label="Default Start Date"
+                              label={t('defaultStartDate')}
                               type="date"
                               fullWidth
                               value={(() => {
@@ -1076,7 +1036,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                               }}
                               margin="normal"
                               variant="outlined"
-                              helperText="Default start date value"
+                              helperText={t('defaultStartDateHelp')}
                               InputLabelProps={{
                                 shrink: true,
                               }}
@@ -1087,7 +1047,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                           {/* End Date Default */}
                           <Grid item xs={6}>
                             <TextField
-                              label="Default End Date"
+                              label={t('defaultEndDate')}
                               type="date"
                               fullWidth
                               value={(() => {
@@ -1129,7 +1089,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                               }}
                               margin="normal"
                               variant="outlined"
-                              helperText="Default end date value"
+                              helperText={t('defaultEndDateHelp')}
                               InputLabelProps={{
                                 shrink: true,
                               }}
@@ -1200,10 +1160,10 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
               {/* Array Item Type Selector */}
               {localField.type === 'array' && (
                 <FormControl fullWidth margin="normal">
-                  <InputLabel>Array Item Type</InputLabel>
+                  <InputLabel>{t('arrayItemType')}</InputLabel>
                   <Select
                     value={localField.schema?.items?.type || 'string'}
-                    label="Array Item Type"
+                    label={t('arrayItemType')}
                     onChange={(e) => {
                       const itemType = e.target.value;
                       let updatedSchema = { ...localField.schema };
@@ -1251,9 +1211,9 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                     }}
                     sx={layoutSelectSx}
                   >
-                    <MenuItem value="string">String</MenuItem>
-                    <MenuItem value="number">Number</MenuItem>
-                    <MenuItem value="object">Object</MenuItem>
+                    <MenuItem value="string">{t('string')}</MenuItem>
+                    <MenuItem value="number">{t('number')}</MenuItem>
+                    <MenuItem value="object">{t('object')}</MenuItem>
                   </Select>
                 </FormControl>
               )}
@@ -1449,7 +1409,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                         color="primary"
                       />
                     }
-                    label="Enable Preview"
+                    label={t('enablePreview')}
                     sx={{ mt: 1, mb: 1 }}
                   />
                 </>
@@ -1973,13 +1933,13 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                 localField.schema?.properties?.endDate && (
                   <Box>
                     <Typography variant="subtitle2" sx={{ mt: 2, mb: 2, fontWeight: 500 }}>
-                      Date Range Validation
+                      {t('dateRangeValidation')}
                     </Typography>
                     <Grid container spacing={2}>
                       {/* Min Date */}
                       <Grid item xs={6}>
                         <TextField
-                          label="Min Date"
+                          label={t('minDate')}
                           type="date"
                           fullWidth
                           value={(() => {
@@ -2039,7 +1999,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                           }}
                           margin="normal"
                           variant="outlined"
-                          helperText="Earliest allowed date for both start and end dates"
+                          helperText={t('minDateRangeHelp')}
                           InputLabelProps={{
                             shrink: true,
                           }}
@@ -2081,7 +2041,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                       {/* Max Date */}
                       <Grid item xs={6}>
                         <TextField
-                          label="Max Date"
+                          label={t('maxDate')}
                           type="date"
                           fullWidth
                           value={(() => {
@@ -2142,7 +2102,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                           }}
                           margin="normal"
                           variant="outlined"
-                          helperText="Latest allowed date for both start and end dates"
+                          helperText={t('maxDateRangeHelp')}
                           InputLabelProps={{
                             shrink: true,
                           }}
