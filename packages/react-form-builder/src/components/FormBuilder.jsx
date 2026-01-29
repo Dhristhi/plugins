@@ -124,7 +124,6 @@ const FormBuilder = ({ onSave, onExport, schemas = [] } = {}) => {
     };
   }, [fields]);
 
-  // Stable form state object
   const formState = useMemo(() => {
     const schema = {
       type: 'object',
@@ -167,7 +166,10 @@ const FormBuilder = ({ onSave, onExport, schemas = [] } = {}) => {
     const newField = {
       id: `field_${uniqueId}`,
       type: fieldType.id,
-      label: fieldType.isLayout ? fieldType.label : `${fieldType.label} Field`,
+      label: fieldType.isLayout
+        ? fieldType.label
+        : `${t(fieldType.translationKey || fieldType.labelKey || fieldType.label)} ${t('fieldSuffix', 'Field')}`,
+      i18nKey: fieldType.translationKey || fieldType.labelKey || fieldType.label,
       key: fieldKey,
       required: false,
       schema: { ...fieldType.schema },

@@ -132,5 +132,59 @@
   "addFormInput": "Add form input",
   "containerWithBorder": "Container with border",
   "stackVertically": "Stack vertically",
-  "arrangeHorizontally": "Arrange horizontally"
+  "arrangeHorizontally": "Arrange horizontally",
+
+  "formPreview.label": "Form Preview",
+  "validate.label": "Validate",
+  "schemaEditor.label": "Schema Editor",
+  "jsonSchema.label": "JSON Schema",
+  "uiSchema.label": "UI Schema",
+  "applyChanges.label": "Apply Changes",
+  "preview.label": "Preview",
+  "schema.label": "Schema",
+  "fieldType_text.label": "Text Input",
+  "fieldType_textarea.label": "Textarea",
+  "fieldType_email.label": "Email",
+  "fieldType_password.label": "Password",
+  "fieldType_number.label": "Number",
+  "fieldType_integer.label": "Integer",
+  "fieldType_date.label": "Date",
+  "fieldType_checkbox.label": "Checkbox",
+  "fieldType_multicheckbox.label": "Multi Checkbox",
+  "fieldType_select.label": "Select",
+  "fieldType_multiselect.label": "Multi-Select",
+  "fieldType_radio.label": "Radio Buttons",
+  "fieldType_file.label": "File Upload",
+  "fieldType_object.label": "Object",
+  "fieldType_array.label": "Array",
+  "group.label": "Group",
+  "array.label": "Array",
+  "label.label": "Label",
+  "description.label": "Description",
+
+  "upload": "Upload",
+  "uploading": "Uploading...",
+  "dragAndDropOrClick": "Drag and drop or click to select",
+  "fileUploadSuccess": "File uploaded successfully!",
+  "clickToChangeFile": "Click to change file",
+  "showMore": "Show more",
+  "showLess": "Show less",
+
+  "fieldSuffix": "Field",
+
+  "validation": {
+    "passwordMismatch": "Passwords do not match",
+    "required": "This field is required",
+    "generic": "Invalid value",
+    "format": {
+      "email": "Please enter a valid email address",
+      "date": "Please enter a valid date",
+      "generic": "Invalid format"
+    },
+    "pattern": "Invalid format",
+    "minLength": "Please enter at least {{min}} characters",
+    "maxLength": "Please enter no more than {{max}} characters",
+    "minimum": "Value must be at least {{limit}}",
+    "maximum": "Value must be at most {{limit}}"
+  }
 }

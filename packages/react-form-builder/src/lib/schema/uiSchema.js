@@ -58,6 +58,9 @@ export const buildUISchemaFromFields = (fieldsArray, parentKey = null) => {
           field.type === 'object' || field.type === 'group' ? 'GroupWithIcon' : field.uischema.type;
         uischema.label = field.label;
 
+        uischema.label = field.label;
+        uischema.i18n = field.i18nKey || field.label;
+
         const newParentKey =
           field.type === 'object'
             ? parentKey
@@ -89,11 +92,13 @@ export const buildUISchemaFromFields = (fieldsArray, parentKey = null) => {
               ...field.uischema,
               scope: scope,
               label: field.label,
+              i18n: field.i18nKey || field.label,
             },
             {
               type: 'Control',
               scope: confirmScope,
               label: `Confirm ${field.label}`,
+              i18n: field.i18nKey ? `${field.i18nKey}_confirm` : `${field.key}_confirm`,
               options: {
                 format: 'password',
               },
@@ -115,6 +120,8 @@ export const buildUISchemaFromFields = (fieldsArray, parentKey = null) => {
             {
               type: 'Control',
               scope: scope,
+              label: field.label,
+              i18n: field.i18nKey || field.label,
               options: {
                 addable: true,
                 ...field.uischema?.options,
@@ -137,6 +144,7 @@ export const buildUISchemaFromFields = (fieldsArray, parentKey = null) => {
               ...field.uischema,
               scope: scope,
               label: field.label,
+              i18n: field.i18nKey || field.label,
             },
           ];
         }

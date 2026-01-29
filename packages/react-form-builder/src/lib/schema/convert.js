@@ -40,6 +40,7 @@ export const convertSchemaToFields = (schema, defaultFieldTypes, getNextId) => {
     const uniqueId = getNextId();
 
     const label = property.title || key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' ');
+    const i18nKey = property.i18n || null;
 
     if (property.type === 'object' && property.properties) {
       const objectType = defaultFieldTypes.find((ft) => ft.id === 'object') || defaultFieldTypes[0];
@@ -63,6 +64,7 @@ export const convertSchemaToFields = (schema, defaultFieldTypes, getNextId) => {
         type: objectType.id,
         label,
         key,
+        i18nKey: i18nKey || objectType.translationKey || objectType.labelKey || label,
         required: schema.required?.includes(key) || false,
         isLayout: true,
         schema: { ...objectType.schema, ...property },
@@ -93,6 +95,7 @@ export const convertSchemaToFields = (schema, defaultFieldTypes, getNextId) => {
         type: arrayType.id,
         label,
         key,
+        i18nKey: i18nKey || fieldType.translationKey || fieldType.labelKey || label,
         required: schema.required?.includes(key) || false,
         isLayout: false,
         schema: {},
@@ -136,6 +139,7 @@ export const convertSchemaToFields = (schema, defaultFieldTypes, getNextId) => {
         type: multiselectTypeId,
         label,
         key,
+        i18nKey: i18nKey || fieldType.translationKey || fieldType.labelKey || label,
         required: schema.required?.includes(key) || false,
         isLayout: false,
         schema: { ...property },
@@ -162,6 +166,7 @@ export const convertSchemaToFields = (schema, defaultFieldTypes, getNextId) => {
       type: fieldType.id,
       label,
       key,
+      i18nKey: i18nKey || fieldType.translationKey || fieldType.labelKey || label,
       required: schema.required?.includes(key) || false,
       isLayout: fieldType.isLayout || false,
       schema: { ...fieldType.schema, ...property },

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useState, useCallback, useRef } from 'react';
 import { IconUpload, IconFile } from '@tabler/icons-react';
 import { withJsonFormsControlProps } from '@jsonforms/react';
@@ -7,6 +8,7 @@ import { Box, Typography, Alert, FormHelperText } from '@mui/material';
 const CustomFileUploadControl = (props) => {
   const { data, handleChange, path, errors, uischema, schema, label } = props;
 
+  const { t } = useTranslation();
   const [localError, setLocalError] = useState(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -166,11 +168,11 @@ const CustomFileUploadControl = (props) => {
           <Box>
             <IconFile size={32} color="currentColor" />
             <Typography variant="body2" sx={{ mt: 1, color: 'success.main' }}>
-              File uploaded successfully!
+              {t('fileUploadSuccess', 'File uploaded successfully!')}
             </Typography>
             {!isReadOnly && (
               <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                Click to change file
+                {t('clickToChangeFile', 'Click to change file')}
               </Typography>
             )}
           </Box>
@@ -178,10 +180,10 @@ const CustomFileUploadControl = (props) => {
           <Box>
             <IconUpload size={32} color="currentColor" />
             <Typography variant="body2" sx={{ mt: 1, color: 'text.primary' }}>
-              {isUploading ? 'Uploading...' : 'Upload'}
+              {isUploading ? t('uploading', 'Uploading...') : t('upload', 'Upload')}
             </Typography>
             <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-              Drag and drop or click to select
+              {t('dragAndDropOrClick', 'Drag and drop or click to select')}
             </Typography>
             {acceptedFileTypes && (
               <Typography variant="caption" sx={{ display: 'block', color: 'text.secondary' }}>

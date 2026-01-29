@@ -1,18 +1,18 @@
 import { useState } from 'react';
-import { TextField, InputAdornment, IconButton } from '@mui/material';
+import { rankWith, formatIs } from '@jsonforms/core';
 import { IconEye, IconEyeOff } from '@tabler/icons-react';
 import { withJsonFormsControlProps } from '@jsonforms/react';
-import { rankWith, formatIs } from '@jsonforms/core';
+import { TextField, InputAdornment, IconButton } from '@mui/material';
 
 const CustomPasswordControl = ({
   data,
-  handleChange,
   path,
+  label,
   errors,
   schema,
-  uischema,
   visible,
   required,
+  handleChange,
 }) => {
   const [showPassword, setShowPassword] = useState(false);
   const isValid = errors.length === 0;
@@ -25,7 +25,7 @@ const CustomPasswordControl = ({
     <TextField
       type={showPassword ? 'text' : 'password'}
       value={data || ''}
-      label={schema.title || uischema.label}
+      label={label}
       onChange={(event) => handleChange(path, event.target.value)}
       error={!isValid}
       helperText={!isValid ? errors : schema.description}

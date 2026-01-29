@@ -21,13 +21,14 @@ const FormPreview = ({
   const userActions = useRef(false);
   const isProgrammaticUpdateRef = useRef(false);
 
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const ajv = useMemo(() => createAjv({ useDefaults: 'empty' }), []);
 
   const [key, setKey] = useState(0); // Force re-render
   const [hasValidated, setHasValidated] = useState(false);
   const [validationErrors, setValidationErrors] = useState([]);
+
   const validateBox = {
     position: 'fixed',
     bottom: 0,
@@ -42,6 +43,42 @@ const FormPreview = ({
     alignItems: 'center',
     justifyContent: 'flex-end',
     px: 3,
+  };
+
+  const translationFn = useMemo(
+    () => (key, defaultMessage) => {
+      if (!key) {
+        return defaultMessage;
+      }
+      const result = t(key, defaultMessage ?? '');
+      if (result === '' && defaultMessage === undefined) {
+        return undefined;
+      }
+      return result;
+    },
+    [t]
+  );
+
+  const mapAjvErrorToKey = (error) => {
+    switch (error.keyword) {
+      case 'required':
+        return 'validation.required';
+      case 'format':
+        // e.g. date, email, etc. – you can further branch on error.params.format
+        return `validation.format.${error.params?.format || 'generic'}`;
+      case 'pattern':
+        return 'validation.pattern';
+      case 'minLength':
+        return 'validation.minLength';
+      case 'maxLength':
+        return 'validation.maxLength';
+      case 'minimum':
+        return 'validation.minimum';
+      case 'maximum':
+        return 'validation.maximum';
+      default:
+        return 'validation.generic';
+    }
   };
 
   const hasFieldContent = (value) => {
@@ -112,9 +149,9 @@ const FormPreview = ({
           errors.push({
             instancePath: `/${key}`,
             schemaPath: `#/properties/${key}`,
-            keyword: 'const',
-            params: { allowedValue: password },
-            message: 'Passwords do not match',
+            keyword: 'passwordMismatch',
+            params: { passwordKey, confirmKey: key },
+            message: 'validation.passwordMismatch',
             data: confirmPassword,
           });
         }
@@ -148,7 +185,7 @@ const FormPreview = ({
         schemaPath: error.schemaPath,
         keyword: error.keyword,
         params: error.params,
-        message: error.message,
+        message: mapAjvErrorToKey(error),
         data: error.data,
       }));
 
@@ -241,6 +278,10 @@ const FormPreview = ({
               uischema={formState.uischema}
               validationMode="NoValidation"
               additionalErrors={hasValidated ? validationErrors : []}
+              i18n={{
+                locale: i18n.resolvedLanguage || i18n.language,
+                translate: translationFn,
+              }}
               onChange={({ data }) => {
                 if (isProgrammaticUpdateRef.current) {
                   isProgrammaticUpdateRef.current = false;

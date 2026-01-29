@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { Unwrapped } from '@jsonforms/material-renderers';
 import { and, isControl, optionIs, rankWith } from '@jsonforms/core';
 import { useJsonForms, withJsonFormsControlProps } from '@jsonforms/react';
@@ -16,6 +16,7 @@ import {
   FormHelperText,
   FormControlLabel,
 } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 
 import { updateNestedValue } from '../utils';
 
@@ -24,11 +25,12 @@ const { MaterialEnumControl } = Unwrapped;
 
 const CustomSelectControl = (props) => {
   const { core } = useJsonForms();
+  const { t } = useTranslation();
 
   const [options, setOptions] = useState([]);
   const [showAllChips, setShowAllChips] = useState(false);
 
-  const { schema, uischema, path, handleChange, data, errors } = props;
+  const { schema, uischema, path, handleChange, data, errors, label } = props;
   const {
     key,
     value,
@@ -70,9 +72,7 @@ const CustomSelectControl = (props) => {
 
   const isReadOnly = uischema.options?.readonly || false;
 
-  const fieldLabel = useMemo(() => {
-    return schema.title || 'Select';
-  }, [path, schema.title]);
+  const fieldLabel = label || schema.title || 'Select';
 
   return multi ? (
     displayType === 'autocomplete' || uischema.options?.autocomplete ? (
@@ -178,13 +178,13 @@ const CustomSelectControl = (props) => {
                       setShowAllChips(true);
                     }}
                     sx={{ cursor: 'pointer', bgcolor: 'action.hover' }}
-                    label={`+${selected.length - visibleChipsCount} more`}
+                    label={t('showMore', `+${selected.length - visibleChipsCount} more`)}
                   />
                 )}
                 {showAllChips && hasMore && (
                   <Chip
                     size="small"
-                    label="Show less"
+                    label={t('showLess', 'Show less')}
                     onClick={(e) => {
                       e.stopPropagation();
                       setShowAllChips(false);
