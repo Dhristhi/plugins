@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { IconEye, IconCode } from '@tabler/icons-react';
 import { Box, Typography, Button, ButtonGroup } from '@mui/material';
 
@@ -62,6 +63,8 @@ const CommonHeader = ({
   showSchemaEditor,
   setShowSchemaEditor,
 }) => {
+  const { t } = useTranslation();
+
   return (
     <Box sx={headerContainerSx}>
       {/* Header Info */}
@@ -92,7 +95,7 @@ const CommonHeader = ({
               variant={showFormPreview ? 'contained' : 'outlined'}
               startIcon={<IconEye size={16} />}
             >
-              Preview
+              {t('preview')}
             </Button>
 
             <Button
@@ -104,7 +107,7 @@ const CommonHeader = ({
               variant={showSchemaEditor ? 'contained' : 'outlined'}
               startIcon={<IconCode size={16} />}
             >
-              Schema
+              {t('schema')}
             </Button>
           </ButtonGroup>
         </Box>

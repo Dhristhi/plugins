@@ -22,6 +22,7 @@ import {
   IconArrowDown,
 } from '@tabler/icons-react';
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { defaultFieldTypes } from '../types';
 
@@ -35,6 +36,7 @@ const ActionButtons = ({
   moveField,
   deleteField,
 }) => {
+  const { t } = useTranslation();
   const [anchorEl, setAnchorEl] = useState(null);
   const [addMenuAnchor, setAddMenuAnchor] = useState(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -149,7 +151,7 @@ const ActionButtons = ({
   if (level > 2) {
     return (
       <Box sx={styles.mainBox}>
-        <Tooltip title="More options">
+        <Tooltip title={t('moreOptions')}>
           <IconButton size="small" onClick={handleMoreClick} sx={styles.minimalGreyButton}>
             <IconDotsVertical size={16} />
           </IconButton>
@@ -171,7 +173,7 @@ const ActionButtons = ({
             <ListItemIcon>
               <IconEdit size={18} />
             </ListItemIcon>
-            <ListItemText primary="Edit" />
+            <ListItemText primary={t('edit')} />
           </MenuItem>
 
           {isLayout && (
@@ -179,7 +181,7 @@ const ActionButtons = ({
               <ListItemIcon>
                 <IconPlus size={18} />
               </ListItemIcon>
-              <ListItemText primary="Add Field" />
+              <ListItemText primary={t('addField')} />
             </MenuItem>
           )}
 
@@ -193,7 +195,7 @@ const ActionButtons = ({
             <ListItemIcon>
               <IconArrowUp size={18} />
             </ListItemIcon>
-            <ListItemText primary="Move Up" />
+            <ListItemText primary={t('moveUp')} />
           </MenuItem>
 
           <MenuItem
@@ -206,7 +208,7 @@ const ActionButtons = ({
             <ListItemIcon>
               <IconArrowDown size={18} />
             </ListItemIcon>
-            <ListItemText primary="Move Down" />
+            <ListItemText primary={t('moveDown')} />
           </MenuItem>
 
           <Divider />
@@ -215,16 +217,16 @@ const ActionButtons = ({
             <ListItemIcon>
               <IconTrash size={18} color={(theme) => theme.palette.error.main} />
             </ListItemIcon>
-            <ListItemText primary="Delete" />
+            <ListItemText primary={t('delete')} />
           </MenuItem>
         </Menu>
         {/* Delete Confirmation Dialog */}
         <Dialog open={confirmOpen} onClose={closeDeleteConfirm} maxWidth="xs" fullWidth>
-          <DialogTitle>Are you sure you want to delete this item?</DialogTitle>
+          <DialogTitle>{t('deleteConfirm')}</DialogTitle>
           <DialogActions>
-            <Button onClick={closeDeleteConfirm}>Cancel</Button>
+            <Button onClick={closeDeleteConfirm}>{t('cancel')}</Button>
             <Button variant="contained" color="error" onClick={confirmDelete}>
-              Delete
+              {t('delete')}
             </Button>
           </DialogActions>
         </Dialog>
@@ -241,7 +243,7 @@ const ActionButtons = ({
   return (
     <Box sx={styles.actionContainer(level)}>
       {isLayout && (
-        <Tooltip title="Add field or layout">
+        <Tooltip title={t('addFieldOrLayout')}>
           <IconButton size="small" onClick={handleAddClick} sx={styles.successButton(level)}>
             <Box sx={iconContainerSx}>
               <IconPlus size={level > 1 ? 16 : 18} />
@@ -251,7 +253,7 @@ const ActionButtons = ({
         </Tooltip>
       )}
 
-      <Tooltip title="Edit">
+      <Tooltip title={t('edit')}>
         <IconButton
           size="small"
           onClick={(e) => {
@@ -264,13 +266,13 @@ const ActionButtons = ({
         </IconButton>
       </Tooltip>
 
-      <Tooltip title="More options">
+      <Tooltip title={t('moreOptions')}>
         <IconButton size="small" onClick={handleMoreClick} sx={styles.greyButton(level)}>
           <IconDotsVertical size={level > 1 ? 16 : 18} />
         </IconButton>
       </Tooltip>
 
-      <Tooltip title="Delete">
+      <Tooltip title={t('delete')}>
         <IconButton size="small" onClick={openDeleteConfirm} sx={styles.errorButton(level)}>
           <IconTrash size={level > 1 ? 16 : 18} />
         </IconButton>
@@ -289,7 +291,7 @@ const ActionButtons = ({
           <ListItemIcon>
             <IconEdit size={18} color={(theme) => theme.palette.primary.main} />
           </ListItemIcon>
-          <ListItemText primary="Add Field" secondary="Add form input" />
+          <ListItemText primary={t('addField')} secondary={t('addFormInput')} />
         </MenuItem>
 
         <Divider />
@@ -303,13 +305,13 @@ const ActionButtons = ({
               })}
             </ListItemIcon>
             <ListItemText
-              primary={layoutType.label}
+              primary={layoutType.labelKey ? t(layoutType.labelKey) : layoutType.label}
               secondary={
                 layoutType.id === 'group'
-                  ? 'Container with border'
+                  ? t('containerWithBorder')
                   : layoutType.id === 'vertical-layout'
-                    ? 'Stack vertically'
-                    : 'Arrange horizontally'
+                    ? t('stackVertically')
+                    : t('arrangeHorizontally')
               }
             />
           </MenuItem>
@@ -335,7 +337,7 @@ const ActionButtons = ({
           <ListItemIcon>
             <IconArrowUp size={18} />
           </ListItemIcon>
-          <ListItemText primary="Move Up" />
+          <ListItemText primary={t('moveUp')} />
         </MenuItem>
 
         <MenuItem
@@ -348,17 +350,17 @@ const ActionButtons = ({
           <ListItemIcon>
             <IconArrowDown size={18} />
           </ListItemIcon>
-          <ListItemText primary="Move Down" />
+          <ListItemText primary={t('moveDown')} />
         </MenuItem>
       </Menu>
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={confirmOpen} onClose={closeDeleteConfirm} maxWidth="xs" fullWidth>
-        <DialogTitle>Are you sure you want to delete this item?</DialogTitle>
+        <DialogTitle>{t('deleteConfirm')}</DialogTitle>
         <DialogActions>
-          <Button onClick={closeDeleteConfirm}>Cancel</Button>
+          <Button onClick={closeDeleteConfirm}>{t('cancel')}</Button>
           <Button variant="contained" color="error" onClick={confirmDelete}>
-            Delete
+            {t('delete')}
           </Button>
         </DialogActions>
       </Dialog>

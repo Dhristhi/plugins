@@ -8,25 +8,25 @@ export default [
   js.configs.recommended,
   {
     linterOptions: {
-      reportUnusedDisableDirectives: 'off'
-    }
+      reportUnusedDisableDirectives: 'off',
+    },
   },
   {
     files: [
       'src/**/*.{js,jsx,ts,tsx}',
       'packages/**/src/**/*.{js,jsx,ts,tsx}',
-      'examples/**/src/**/*.{js,jsx,ts,tsx}'
+      'examples/**/src/**/*.{js,jsx,ts,tsx}',
     ],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'module',
       parserOptions: { ecmaFeatures: { jsx: true } },
-      globals: { ...globals.browser }
+      globals: { ...globals.browser },
     },
     plugins: {
       react: reactPlugin,
       'react-hooks': reactHooksPlugin,
-      'react-refresh': reactRefreshPlugin
+      'react-refresh': reactRefreshPlugin,
     },
     rules: {
       'no-undef': 'off',
@@ -37,24 +37,23 @@ export default [
       'react/react-in-jsx-scope': 'off',
       'react-hooks/rules-of-hooks': 'warn',
       'react-hooks/exhaustive-deps': 'off',
-      'react-refresh/only-export-components': 'off'
-      
+      'react-refresh/only-export-components': 'off',
     },
     settings: {
-      react: { version: 'detect' }
-    }
+      react: { version: 'detect' },
+    },
   },
   {
     files: [
       'src/__tests__/**/*.{js,jsx,ts,tsx}',
       'packages/**/src/__tests__/**/*.{js,jsx,ts,tsx}',
-      'examples/**/src/__tests__/**/*.{js,jsx,ts,tsx}'
+      'examples/**/src/__tests__/**/*.{js,jsx,ts,tsx}',
     ],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'module',
       parserOptions: { ecmaFeatures: { jsx: true } },
-      globals: { ...globals.browser, ...globals.vitest }
-    }
-  }
+      globals: { ...globals.browser, ...globals.vitest },
+    },
+  },
 ];

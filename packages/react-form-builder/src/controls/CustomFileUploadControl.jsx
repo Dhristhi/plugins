@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useState, useCallback, useRef } from 'react';
 import { IconUpload, IconFile, IconX } from '@tabler/icons-react';
 import { withJsonFormsControlProps } from '@jsonforms/react';
@@ -7,6 +8,7 @@ import { Box, Typography, Alert, FormHelperText } from '@mui/material';
 const CustomFileUploadControl = (props) => {
   const { data, handleChange, path, errors, uischema, schema, label, visible } = props;
 
+  const { t } = useTranslation();
   const [localError, setLocalError] = useState(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -36,12 +38,12 @@ const CustomFileUploadControl = (props) => {
 
   function validateFile(file, allowedMimes, maxFileSizeMB) {
     if ((allowedMimes.length && !allowedMimes.includes(file.type)) || !file.type) {
-      return `Selected file "${file.name}" is not an allowed file type.`;
+      return t('fileTypeNotAllowed', { fileName: file.name });
     }
     if (maxFileSizeMB) {
       const MB = 1024 * 1024;
       if (file.size > maxFileSizeMB * MB) {
-        return `Selected file "${file.name}" exceeds the maximum size of ${maxFileSizeMB}MB.`;
+        return t('fileSizeExceeded', { fileName: file.name, maxSize: maxFileSizeMB });
       }
     }
     return null;
@@ -104,7 +106,7 @@ const CustomFileUploadControl = (props) => {
         setIsUploading(false);
       } catch {
         setIsUploading(false);
-        setLocalError('Unexpected error while processing the files.');
+        setLocalError(t('fileProcessingError'));
       }
     },
     [handleChange, path, acceptedFileTypes, maxFileSize, filesData]
@@ -174,7 +176,7 @@ const CustomFileUploadControl = (props) => {
                   <Box
                     component="img"
                     src={item.dataUrl}
-                    alt={`Image preview ${idx + 1}`}
+                    alt={t('imagePreview', { index: idx + 1 })}
                     sx={readOnlyPreview}
                     onError={(e) => {
                       e.target.style.display = 'none';
@@ -190,7 +192,9 @@ const CustomFileUploadControl = (props) => {
                     }}
                   >
                     <IconFile size={24} />
-                    <Typography variant="body2">{item.name || `File ${idx + 1}`}</Typography>
+                    <Typography variant="body2">
+                      {item.name || t('file', { index: idx + 1 })}
+                    </Typography>
                   </Box>
                 )}
               </Box>
@@ -335,7 +339,7 @@ const CustomFileUploadControl = (props) => {
                           <Box
                             component="img"
                             src={item.dataUrl}
-                            alt={`Uploaded image preview ${idx + 1}`}
+                            alt={t('uploadedImagePreview', { index: idx + 1 })}
                             sx={previewImage}
                             onError={(e) => {
                               e.target.style.display = 'none';
@@ -356,11 +360,11 @@ const CustomFileUploadControl = (props) => {
               })}
             </Box>
             <Typography variant="body2" sx={{ color: 'success.main', mt: 1 }}>
-              File(s) uploaded successfully!
+              {t('fileUploadSuccess', 'File(s) uploaded successfully!')}
             </Typography>
             {!isReadOnly && (
-              <Typography variant="caption" sx={{ color: 'text.secondary', mt: 1 }}>
-                Click to add more files
+              <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                {t('clickToChangeFile', 'Click to change file')}
               </Typography>
             )}
           </Box>
@@ -368,14 +372,14 @@ const CustomFileUploadControl = (props) => {
           <Box>
             <IconUpload size={32} color="currentColor" />
             <Typography variant="body2" sx={{ mt: 1, color: 'text.primary' }}>
-              {isUploading ? 'Uploading...' : 'Upload'}
+              {isUploading ? t('uploading', 'Uploading...') : t('upload', 'Upload')}
             </Typography>
             <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-              Drag and drop or click to select
+              {t('dragAndDropOrClick', 'Drag and drop or click to select')}
             </Typography>
             {acceptedFileTypes && (
               <Typography variant="caption" sx={{ display: 'block', color: 'text.secondary' }}>
-                Accepted Formats: {acceptedFileTypes}
+                {t('acceptedFormats')}: {acceptedFileTypes}
               </Typography>
             )}
           </Box>
@@ -384,7 +388,7 @@ const CustomFileUploadControl = (props) => {
 
       {hasError && (
         <Alert severity="error" sx={{ mt: 1 }}>
-          {localError || jsonFormsError || 'Invalid file'}
+          {localError || jsonFormsError || t('invalidFile')}
         </Alert>
       )}
       {schema?.description && (
