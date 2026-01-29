@@ -175,8 +175,6 @@ export const buildUISchemaFromFields = (fieldsArray, parentKey = null) => {
         uischema.type =
           field.type === 'object' || field.type === 'group' ? 'GroupWithIcon' : field.uischema.type;
         uischema.label = field.label;
-
-        uischema.label = field.label;
         uischema.i18n = field.i18nKey || field.label;
 
         const newParentKey =
@@ -273,6 +271,7 @@ export const buildUISchemaFromFields = (fieldsArray, parentKey = null) => {
             ...field.uischema,
             scope: scope,
             label: field.label,
+            i18n: field.i18nKey || field.label,
           };
         }
       }
