@@ -6,7 +6,7 @@ import { and, isControl, optionIs, rankWith } from '@jsonforms/core';
 import { Box, Typography, Alert, FormHelperText } from '@mui/material';
 
 const CustomFileUploadControl = (props) => {
-  const { data, handleChange, path, errors, uischema, schema, label } = props;
+  const { data, handleChange, path, errors, uischema, schema, label, visible } = props;
 
   const { t } = useTranslation();
   const [localError, setLocalError] = useState(null);
@@ -284,6 +284,8 @@ const CustomFileUploadControl = (props) => {
     alignItems: 'center',
     mb: 2,
   };
+
+  if (!visible) return null;
   return (
     <Box sx={{ mb: 2 }}>
       {label && (

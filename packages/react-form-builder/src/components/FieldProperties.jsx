@@ -19,6 +19,7 @@ import {
   Grid,
   Checkbox,
   InputAdornment,
+  Button,
 } from '@mui/material';
 
 import { defaultFieldTypes } from '../types';
@@ -41,6 +42,8 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
   );
   const [parentArrayField, setParentArrayField] = useState(null);
   const [isInsideArrayOfObjects, setIsInsideArrayOfObjects] = useState(false);
+  const [showLogical, setShowLogical] = useState(false);
+  const [logical, setLogical] = useState('');
 
   useEffect(() => {
     setMaxSizeInput(localField?.uischema?.options?.['ui:options']?.maxSize?.toString() || '');
@@ -74,6 +77,102 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
 
     { label: '.csv', value: 'text/csv' },
   ];
+
+  const OPERATORS = {
+    string: [
+      { label: 'Equals', value: 'equals' },
+      { label: 'Not equals', value: 'not_equals' },
+    ],
+    boolean: [
+      { label: 'Is', value: 'equals' },
+      { label: 'Is not', value: 'not_equals' },
+    ],
+    number: [
+      { label: 'Equals', value: 'eq' },
+      { label: 'Not equals', value: 'neq' },
+      { label: 'Greater than', value: 'gt' },
+      { label: 'Greater than or equals to', value: 'gte' },
+      { label: 'less than', value: 'lt' },
+      { label: 'Less than or equals to', value: 'lte' },
+    ],
+    text: [
+      { label: 'Equals', value: 'equals' },
+      { label: 'Not equals', value: 'not_equals' },
+      { label: 'Contains', value: 'pattern' },
+      { label: 'Starts With', value: 'starts_with' },
+      { label: 'Ends With', value: 'ends_with' },
+    ],
+
+    date: [
+      { label: 'Date equals', value: 'date_equals' },
+      { label: 'Date not equals', value: 'date_not_equals' },
+      { label: 'Date after', value: 'date_after' },
+      { label: 'Date on or after', value: 'date_on_or_after' },
+      { label: 'Date before', value: 'date_before' },
+      { label: 'Date on or before', value: 'date_on_or_before' },
+    ],
+  };
+
+  //let dependsOnField = null;
+  const [rows, setRows] = useState([
+    { dependsOn: '', operator: '', value: '', logical: '', value2: '' },
+  ]);
+  // const dependsOnField = useMemo(
+  //   () => fields.find((f) => f.key === rows.dependsOn),
+  //   [fields, rows.dependsOn]
+  // );
+
+  const updateCondition = (index, key, value) => {
+    const updated = [...rows];
+    updated[index][key] = value;
+    setRows(() => {
+      const next = updated;
+      handleUpdate({ visibility: next });
+      return next;
+    });
+  };
+
+  //const  =
+  const updateEffect = (value) => {
+    handleUpdate({ effect: value });
+  };
+
+  const showOperator = () => {
+    setShowLogical(true);
+    setLogical('');
+  };
+
+  const addRow = (value) => {
+    setRows(() => {
+      const next = [
+        ...rows,
+        { dependsOn: '', operator: '', value: '', logical: value, value2: '' },
+      ];
+      handleUpdate({ visibility: next });
+      setShowLogical(false);
+      setLogical(value);
+      return next;
+    });
+  };
+
+  const removeRow = (index) => {
+    const updated = rows.filter((_, i) => i !== index);
+    // setRows(updated);
+    setRows(() => {
+      const next = updated;
+      handleUpdate({ visibility: next });
+      return next;
+    });
+  };
+
+  const setDependentState = (value) => {
+    if (value) handleUpdate({ parentVisibility: value });
+    else
+      setRows(() => {
+        handleUpdate({ visibility: [], parentVisibility: value });
+        return [];
+      });
+  };
 
   const handleLayoutChange = (event) => {
     const newLayoutType = event.target.value;
@@ -180,6 +279,9 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
 
     if (field) {
       let updatedField = { ...field };
+      if (field.visibility) {
+        setRows(field.visibility);
+      }
 
       // Ensure date fields have default dateTimeFormat in UI schema
       if (
@@ -226,7 +328,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
       }
 
       setLocalField(updatedField);
-
       if (field.isLayout) {
         setLayout(field.type);
       }
@@ -469,8 +570,21 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
     },
   };
 
+  const outlinedTextFieldNumberSx = {
+    '& .MuiOutlinedInput-root': {
+      borderRadius: 2,
+    },
+    width: 75,
+  };
+
   const layoutSelectSx = {
     borderRadius: 2,
+  };
+
+  const layoutSelectRuleSx = {
+    borderRadius: 2,
+    //width: 110,
+    fontSize: 13,
   };
 
   const fieldTypeMenuItemSx = {
@@ -566,6 +680,8 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
       trimmed = tempVal.trim();
     }
   };
+
+  const excludedTypes = ['array', 'array-strings', 'file', 'date'];
   return (
     <Box>
       {/* Basic Properties */}
@@ -677,6 +793,299 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
           </AccordionSummary>
 
           <AccordionDetails>
+            {fields.length > 1 && (
+              <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'nowrap' }}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={localField.parentVisibility || false}
+                      onChange={(e) => {
+                        setDependentState(e.target.checked);
+
+                        // handleUpdate({ uischema: updatedUISchema });
+                      }}
+                      color="primary"
+                    />
+                  }
+                  label="Is Dependent"
+                  sx={formControlLabelSx}
+                />
+              </Box>
+            )}
+            {localField.parentVisibility && (
+              <>
+                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                  <FormControl fullWidth margin="normal" size="small">
+                    <InputLabel id="effect">Choose Effect</InputLabel>
+                    <Select
+                      labelId="effect"
+                      label="Choose Effect"
+                      size="small"
+                      value={localField.effect || ''}
+                      onChange={(e) => {
+                        updateEffect(e.target.value);
+                      }}
+                      sx={layoutSelectSx}
+                    >
+                      {['SHOW', 'HIDE', 'ENABLE', 'DISABLE'].map((v) => (
+                        <MenuItem key={v} value={v}>
+                          <Box sx={fieldTypeMenuItemSx}>{v}</Box>
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Box>
+                <Box sx={{ marginTop: '10px' }}>
+                  {rows.map((row, index) => {
+                    const dependsOnField = fields.find((f) => f.key === row.dependsOn);
+                    return (
+                      <>
+                        <Typography
+                          variant="subtitle1"
+                          fontWeight={600}
+                          sx={{ textAlign: 'center' }}
+                        >
+                          {row.logical}
+                        </Typography>
+                        <Box
+                          key={index}
+                          sx={{
+                            display: 'flex',
+                            gap: 1,
+                            flexWrap: 'wrap',
+                            alignItems: 'center',
+                            marginBottom: '5px',
+                          }}
+                        >
+                          {/* Field selector */}
+                          <FormControl size="small" sx={{ minWidth: 100 }}>
+                            <InputLabel id={`depends-on-label-${index}`}>Field</InputLabel>
+                            <Select
+                              labelId={`depends-on-label-${index}`}
+                              size="small"
+                              label="Field"
+                              value={row.dependsOn || ''}
+                              onChange={
+                                (e) => updateCondition(index, 'dependsOn', e.target.value)
+                                // updateCurrentSelection(e.target.value)
+                              }
+                              sx={layoutSelectRuleSx}
+                            >
+                              {fields
+                                .filter((f) => {
+                                  return f.id !== field.id && !excludedTypes.includes(f.type);
+                                })
+                                .map((f) => (
+                                  <MenuItem key={f.key} value={f.key}>
+                                    <Box sx={fieldTypeMenuItemSx}>{f.label}</Box>
+                                  </MenuItem>
+                                ))}
+                            </Select>
+                          </FormControl>
+                          {/* {<pre>{JSON.stringify(dependsOnField)}</pre>} */}
+                          {/* Operator selector */}
+                          {dependsOnField && (
+                            <>
+                              {/* operator */}
+                              <FormControl size="small" sx={{ minWidth: 110 }}>
+                                <InputLabel id={`operator-label-${index}`}>Operator</InputLabel>
+                                <Select
+                                  labelId={`operator-label-${index}`}
+                                  label="Operator"
+                                  size="small"
+                                  value={row.operator || ''}
+                                  onChange={(e) =>
+                                    updateCondition(index, 'operator', e.target.value)
+                                  }
+                                  sx={layoutSelectRuleSx}
+                                >
+                                  {dependsOnField &&
+                                    dependsOnField?.schema?.enum &&
+                                    OPERATORS[dependsOnField.schema.type]?.map((op) => (
+                                      <MenuItem key={op.value} value={op.value}>
+                                        {op.label}
+                                      </MenuItem>
+                                    ))}
+
+                                  {dependsOnField &&
+                                    (dependsOnField.schema.type === 'number' ||
+                                      dependsOnField.schema.type === 'integer') &&
+                                    OPERATORS['number']?.map((op) => (
+                                      <MenuItem key={op.value} value={op.value}>
+                                        {op.label}
+                                      </MenuItem>
+                                    ))}
+
+                                  {!dependsOnField?.schema?.enum &&
+                                    dependsOnField.schema.type === 'string' &&
+                                    dependsOnField.type !== 'date' &&
+                                    OPERATORS['text']?.map((op) => (
+                                      <MenuItem key={op.value} value={op.value}>
+                                        {op.label}
+                                      </MenuItem>
+                                    ))}
+
+                                  {dependsOnField.type === 'date' &&
+                                    OPERATORS['date']?.map((op) => (
+                                      <MenuItem key={op.value} value={op.value}>
+                                        {op.label}
+                                      </MenuItem>
+                                    ))}
+                                  {dependsOnField.schema.type === 'boolean' &&
+                                    OPERATORS[dependsOnField.schema.type]?.map((op) => (
+                                      <MenuItem key={op.value} value={op.value}>
+                                        {op.label}
+                                      </MenuItem>
+                                    ))}
+                                </Select>
+                              </FormControl>
+
+                              {/* select or radio  */}
+                              {dependsOnField?.schema?.enum && (
+                                <FormControl size="small" sx={{ minWidth: 100 }}>
+                                  <InputLabel id={`value-label-${index}`}>Value</InputLabel>
+                                  <Select
+                                    labelId={`value-label-${index}`}
+                                    size="small"
+                                    disabled={!dependsOnField}
+                                    value={row.value ?? ''}
+                                    label="Value"
+                                    onChange={(e) => {
+                                      updateCondition(index, 'value', e.target.value);
+                                    }}
+                                    sx={layoutSelectRuleSx}
+                                  >
+                                    {dependsOnField?.schema?.enum?.map((opt) => (
+                                      <MenuItem key={opt} value={opt}>
+                                        {opt}
+                                      </MenuItem>
+                                    ))}
+                                  </Select>
+                                </FormControl>
+                              )}
+
+                              {/* checkbox */}
+                              {dependsOnField?.schema.type === 'boolean' && (
+                                <FormControl size="small" sx={{ minWidth: 100 }}>
+                                  <InputLabel id={`value-label-${index}`}>Value</InputLabel>
+                                  <Select
+                                    labelId={`value-label-${index}`}
+                                    size="small"
+                                    disabled={!dependsOnField}
+                                    label="Value"
+                                    value={row.value ?? ''}
+                                    onChange={(e) => {
+                                      updateCondition(index, 'value', e.target.value);
+                                    }}
+                                    sx={layoutSelectRuleSx}
+                                  >
+                                    {['true', 'false'].map((v) => (
+                                      <MenuItem key={v} value={v}>
+                                        {v === 'true' ? 'True' : 'False'}
+                                      </MenuItem>
+                                    ))}
+                                  </Select>
+                                </FormControl>
+                              )}
+
+                              {/* number */}
+                              {(dependsOnField.schema.type === 'number' ||
+                                dependsOnField.schema.type === 'integer') && (
+                                <TextField
+                                  type="number"
+                                  size="small"
+                                  value={row.value ?? ''}
+                                  onChange={(e) => {
+                                    updateCondition(index, 'value', e.target.value);
+                                  }}
+                                  variant="outlined"
+                                  sx={{
+                                    ...outlinedTextFieldNumberSx,
+                                    '& input[type=number]': {
+                                      MozAppearance: 'textfield',
+                                    },
+                                    '& input[type=number]::-webkit-outer-spin-button': {
+                                      WebkitAppearance: 'none',
+                                      margin: 0,
+                                    },
+                                    '& input[type=number]::-webkit-inner-spin-button': {
+                                      WebkitAppearance: 'none',
+                                      margin: 0,
+                                    },
+                                  }}
+                                />
+                              )}
+
+                              {/* string type other than select */}
+                              {!dependsOnField?.schema?.enum &&
+                                dependsOnField.schema.type === 'string' &&
+                                dependsOnField.type !== 'date' && (
+                                  <TextField
+                                    size="small"
+                                    value={row.value ?? ''}
+                                    onChange={(e) => {
+                                      updateCondition(index, 'value', e.target.value);
+                                    }}
+                                    variant="outlined"
+                                    sx={outlinedTextFieldNumberSx}
+                                  />
+                                )}
+
+                              {dependsOnField.type === 'date' && (
+                                <TextField
+                                  size="small"
+                                  type="date"
+                                  value={row.value ?? ''}
+                                  onChange={(e) => {
+                                    updateCondition(index, 'value', e.target.value);
+                                  }}
+                                  variant="outlined"
+                                  sx={outlinedTextFieldSx}
+                                />
+                              )}
+                              {/* Delete row */}
+                              {rows.length > 1 && (
+                                <IconButton
+                                  size="small"
+                                  color="error"
+                                  onClick={() => removeRow(index)}
+                                >
+                                  <IconTrash size={19} />
+                                </IconButton>
+                              )}
+                            </>
+                          )}
+                        </Box>
+                      </>
+                    ); //return
+                  })}
+                </Box>
+                {/* Add More button */}
+                <Button variant="contained" onClick={showOperator} sx={{ width: 150 }}>
+                  Add More
+                </Button>
+                {showLogical && (
+                  <FormControl sx={{ marginLeft: '10px', minWidth: 110 }} size="small">
+                    <InputLabel id={`condition-label`}>Condition</InputLabel>
+                    <Select
+                      labelId={`condition-label`}
+                      label="Condition"
+                      size="small"
+                      value={logical || ''}
+                      onChange={(e) => addRow(e.target.value)}
+                      sx={layoutSelectSx}
+                    >
+                      {['AND', 'OR'].map((v) => (
+                        <MenuItem key={v} value={v}>
+                          {v}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                )}
+              </>
+            )}
+
             <Box>
               <FormControlLabel
                 control={

@@ -8,7 +8,8 @@ import { formatDate } from '../utils';
 const CustomDateControl = (props) => {
   const { t } = useTranslation();
 
-  const { data, handleChange, path, label, required, errors, uischema, schema } = props;
+  const { data, handleChange, path, label, required, errors, uischema, schema, visible } = props;
+
   // Check if this is a date range field
   const isDateRange =
     schema?.type === 'object' && schema?.properties?.startDate && schema?.properties?.endDate;
@@ -26,7 +27,6 @@ const CustomDateControl = (props) => {
   const isReadOnly = uischema?.options?.readonly;
   const includeTime = uischema?.options?.includeTime || false;
   const dateFormat = uischema?.options?.dateTimeFormat || 'friendly';
-
   const getDisplayValue = () => {
     if (!data) return '';
 
@@ -102,6 +102,7 @@ const CustomDateControl = (props) => {
   };
 
   const formattedDisplay = getFormattedDisplayText();
+  if (!visible) return null;
 
   // Handle Date Range
   if (isDateRange) {
