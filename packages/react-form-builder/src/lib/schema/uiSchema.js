@@ -231,6 +231,30 @@ export const buildUISchemaFromFields = (fieldsArray, parentKey = null) => {
           if (field.children && field.children.length > 0) {
             detailElements = buildUISchemaForArrayItems(field.children);
           }
+          if (field.visibility) {
+            let rule = {};
+            rule = compileRule(field);
+            return [
+              {
+                type: 'Control',
+                scope: scope,
+                label: field.label,
+                i18n: field.i18nKey || field.label,
+                options: {
+                  addable: true,
+                  ...field.uischema?.options,
+                  showSortButtons: true,
+                  ...(detailElements.length > 0 && {
+                    detail: {
+                      type: 'VerticalLayout',
+                      elements: detailElements,
+                    },
+                  }),
+                },
+                rule: rule,
+              },
+            ];
+          }
 
           return [
             {
