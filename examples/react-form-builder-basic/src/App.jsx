@@ -17,7 +17,6 @@ import CustomAccordionGroupLayoutRenderer, {
 import CustomInfoAlert, { customInfoAlertTester } from './controls/CustomInfoAlert';
 import ArrayLayoutRenderer, { customArrayLayoutTester } from './controls/CustomArrayLayout';
 
-import mr from './locales/mr.json';
 import es from './locales/es.json';
 
 // Internal registry of custom renderers with IDs for configuration
@@ -1235,9 +1234,9 @@ export default function App() {
       <FormBuilder
         schemas={schemas}
         defaultLanguage="en"
-        selectedLanguage="es"
+        selectedLanguage="en"
         onSave={handleSchemaSave}
-        translationResources={{ mr: { translation: mr }, es: { translation: es } }}
+        translationResources={{ es: { translation: es } }}
       />
     </div>
   );

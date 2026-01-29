@@ -199,6 +199,10 @@
   "fileSizeExceeded": "Selected file \"{{fileName}}\" exceeds the maximum size of {{maxSize}}MB.",
   "fileProcessingError": "Unexpected error while processing the files.",
 
+  "desktop": "Desktop",
+  "tablet": "Tablet",
+  "mobile": "Mobile",
+
   "validation": {
     "passwordMismatch": "Passwords do not match",
     "required": "This field is required",

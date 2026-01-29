@@ -9,14 +9,14 @@ import CommonHeader from './CommonHeader';
 import { getRenderers, getCells, config } from '../controls/renders';
 import { IconDeviceDesktop, IconDeviceTablet, IconDeviceMobile } from '@tabler/icons-react';
 
-const PREVIEW_MODES = {
-  desktop: { width: 1200, label: 'Desktop', icon: <IconDeviceDesktop /> },
-  tablet: { width: 768, label: 'Tablet', icon: <IconDeviceTablet /> },
-  mobile: { width: 375, label: 'Mobile', icon: <IconDeviceMobile /> },
-};
+const getPreviewModes = (t) => ({
+  desktop: { width: 1200, label: t('desktop'), icon: <IconDeviceDesktop /> },
+  tablet: { width: 768, label: t('tablet'), icon: <IconDeviceTablet /> },
+  mobile: { width: 375, label: t('mobile'), icon: <IconDeviceMobile /> },
+});
 
-const FormResponsivePreview = ({ mode, children }) => {
-  const { width } = PREVIEW_MODES[mode];
+const FormResponsivePreview = ({ mode, children, previewModes }) => {
+  const { width } = previewModes[mode];
   const responsiveParentSx = {
     display: 'flex',
     flexDirection: 'column',
@@ -167,12 +167,13 @@ const FormPreview = ({
     }
   };
 
+  const previewModes = useMemo(() => getPreviewModes(t), [t]);
   const [mode, setMode] = useState('desktop');
   const toolBarSx = { display: 'flex', gap: 1, justifyContent: 'center', alignItems: 'center' };
   const PreviewToolbar = ({ mode }) => {
     return (
       <Box sx={toolBarSx}>
-        {Object.entries(PREVIEW_MODES).map(([key, cfg]) => (
+        {Object.entries(previewModes).map(([key, cfg]) => (
           <Tooltip key={key} title={cfg.label}>
             <IconButton onClick={() => setMode(key)} color={mode === key ? 'primary' : 'default'}>
               {cfg.icon}
@@ -365,7 +366,7 @@ const FormPreview = ({
         {formState.schema.properties && Object.keys(formState.schema.properties).length > 0 ? (
           <div ref={formRef}>
             <PreviewToolbar mode={mode} />
-            <FormResponsivePreview mode={mode}>
+            <FormResponsivePreview mode={mode} previewModes={previewModes}>
               <JsonForms
                 key={key} // Force re-render when validation state changes
                 ajv={ajv}
