@@ -1576,7 +1576,25 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                       } else {
                         defaultArray = valu1;
                       }
-                      handleSchemaUpdate({ default: defaultArray });
+                      // Filter and convert to match enum type
+                      const matchedValues = defaultArray
+                        .map((val) => {
+                          const matched = enumOptions.find(
+                            (opt) => String(opt).toLowerCase() === String(val).toLowerCase()
+                          );
+                          return matched !== undefined ? matched : null;
+                        })
+                        .filter((val) => val !== null);
+                      handleSchemaUpdate({
+                        default: matchedValues.length > 0 ? matchedValues : undefined,
+                      });
+                    } else if (localField.type === 'select' || localField.type === 'radio') {
+                      const matchedValue = enumOptions.find(
+                        (opt) => String(opt).toLowerCase() === String(defaultValue).toLowerCase()
+                      );
+                      handleSchemaUpdate({
+                        default: matchedValue !== undefined ? matchedValue : defaultValue,
+                      });
                     } else {
                       handleSchemaUpdate({ default: defaultValue });
                     }
@@ -1940,9 +1958,11 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                                 ? [1, 2, 3]
                                 : ['Option 1', 'Option 2', 'Option 3'];
                             setEnumOptions(defaultOptions);
+                            setDefaultInput('');
                             // Update schema with default options
                             if (localField.schema?.type === 'array' && localField.schema?.items) {
                               handleSchemaUpdate({
+                                default: undefined,
                                 items: {
                                   enumType: newType,
                                   enum: defaultOptions,
@@ -1950,6 +1970,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                               });
                             } else {
                               handleSchemaUpdate({
+                                default: undefined,
                                 enumType: newType,
                                 enum: defaultOptions,
                               });
