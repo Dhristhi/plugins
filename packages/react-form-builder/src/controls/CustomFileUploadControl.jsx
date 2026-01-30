@@ -204,7 +204,20 @@ const CustomFileUploadControl = (props) => {
   );
 };
 
-// Use when ui:widget is 'file'
-export const customFileUploadTester = rankWith(10, and(isControl, optionIs('ui:widget', 'file')));
+// Use when ui:widget is 'file' or format is 'data-url'
+export const customFileUploadTester = rankWith(
+  Number.MAX_VALUE, // Highest priority to ensure it takes precedence over default text controls
+  and(isControl, (uischema, schema) => {
+    let fieldSchema = schema;
+    if (uischema?.scope && schema?.properties) {
+      const fieldName = uischema.scope.replace('#/properties/', '');
+      fieldSchema = schema.properties[fieldName];
+    }
+
+    const hasFileWidget = optionIs('ui:widget', 'file')(uischema, schema);
+    const hasDataUrlFormat = fieldSchema?.format === 'data-url';
+    return hasFileWidget || hasDataUrlFormat;
+  })
+);
 
 export default withJsonFormsControlProps(CustomFileUploadControl);
