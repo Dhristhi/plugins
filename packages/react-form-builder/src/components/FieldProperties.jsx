@@ -1482,6 +1482,33 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                               InputLabelProps={{
                                 shrink: true,
                               }}
+                              InputProps={{
+                                endAdornment: localField.schema?.properties?.startDate?.default && (
+                                  <InputAdornment position="end">
+                                    <IconButton
+                                      size="small"
+                                      onClick={() =>
+                                        handleSchemaUpdate({
+                                          properties: {
+                                            ...localField.schema.properties,
+                                            startDate: {
+                                              ...localField.schema.properties.startDate,
+                                              default: undefined,
+                                            },
+                                          },
+                                        })
+                                      }
+                                      edge="end"
+                                      sx={{
+                                        color: 'text.secondary',
+                                        '&:hover': { color: 'error.main' },
+                                      }}
+                                    >
+                                      <IconX size={16} />
+                                    </IconButton>
+                                  </InputAdornment>
+                                ),
+                              }}
                               sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                             />
                           </Grid>
@@ -1534,6 +1561,33 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                               helperText={t('defaultEndDateHelp')}
                               InputLabelProps={{
                                 shrink: true,
+                              }}
+                              InputProps={{
+                                endAdornment: localField.schema?.properties?.endDate?.default && (
+                                  <InputAdornment position="end">
+                                    <IconButton
+                                      size="small"
+                                      onClick={() =>
+                                        handleSchemaUpdate({
+                                          properties: {
+                                            ...localField.schema.properties,
+                                            endDate: {
+                                              ...localField.schema.properties.endDate,
+                                              default: undefined,
+                                            },
+                                          },
+                                        })
+                                      }
+                                      edge="end"
+                                      sx={{
+                                        color: 'text.secondary',
+                                        '&:hover': { color: 'error.main' },
+                                      }}
+                                    >
+                                      <IconX size={16} />
+                                    </IconButton>
+                                  </InputAdornment>
+                                ),
                               }}
                               sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                             />
