@@ -134,6 +134,7 @@
   "stackVertically": "Apilar verticalmente",
   "arrangeHorizontally": "Organizar horizontalmente",
 
+  "fieldType_group.label": "Grupo",
   "formPreview.label": "Vista previa del formulario",
   "validate.label": "Validar",
   "schemaEditor.label": "Editor de esquema",
