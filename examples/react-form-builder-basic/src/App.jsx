@@ -397,10 +397,8 @@ const schemas = [
         },
         file_upload: {
           type: 'string',
-          title: 'File Upload (base64)',
-          contentEncoding: 'base64',
-          contentMediaType: 'application/pdf',
-          pattern: '^[A-Za-z0-9+/=]+$',
+          title: 'File Upload',
+          format: 'data-url',
         },
         number_basic: {
           type: 'number',
@@ -504,6 +502,11 @@ const schemas = [
             enum: ['Option A', 'Option B', 'Option C', 'Option D'],
           },
           uniqueItems: true,
+        },
+        select_dropdown: {
+          type: 'string',
+          title: 'Select Dropdown',
+          enum: ['Option 1', 'Option 2', 'Option 3', 'Option 4'],
         },
       },
       required: [
