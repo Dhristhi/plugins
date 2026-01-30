@@ -1,11 +1,14 @@
-import { TextField, Box } from '@mui/material';
+import { TextField, Box, FormHelperText } from '@mui/material';
 import { withJsonFormsControlProps } from '@jsonforms/react';
 import { rankWith, isControl, and, schemaMatches } from '@jsonforms/core';
+import { useTranslation } from 'react-i18next';
 
 import { formatDate } from '../utils';
 
 const CustomDateControl = (props) => {
-  const { data, handleChange, path, label, required, errors, uischema, schema } = props;
+  const { t } = useTranslation();
+
+  const { data, handleChange, path, label, required, errors, uischema, schema, visible } = props;
 
   // Check if this is a date range field
   const isDateRange =
@@ -24,7 +27,6 @@ const CustomDateControl = (props) => {
   const isReadOnly = uischema?.options?.readonly;
   const includeTime = uischema?.options?.includeTime || false;
   const dateFormat = uischema?.options?.dateTimeFormat || 'friendly';
-
   const getDisplayValue = () => {
     if (!data) return '';
 
@@ -100,6 +102,7 @@ const CustomDateControl = (props) => {
   };
 
   const formattedDisplay = getFormattedDisplayText();
+  if (!visible) return null;
 
   // Handle Date Range
   if (isDateRange) {
@@ -117,7 +120,7 @@ const CustomDateControl = (props) => {
           {/* Start Date Picker */}
           <Box sx={{ flex: '1 1 45%', minWidth: '200px' }}>
             <TextField
-              label="Start Date"
+              label={t('startDate')}
               type="date"
               fullWidth
               required={required}
@@ -163,7 +166,7 @@ const CustomDateControl = (props) => {
                   marginLeft: '14px',
                 }}
               >
-                Preview: {getFormattedDateText(startDate)}
+                {t('preview')}: {getFormattedDateText(startDate)}
               </div>
             )}
           </Box>
@@ -177,13 +180,13 @@ const CustomDateControl = (props) => {
               color: '#999',
             }}
           >
-            to
+            {t('to')}
           </Box>
 
           {/* End Date Picker */}
           <Box sx={{ flex: '1 1 45%', minWidth: '200px' }}>
             <TextField
-              label="End Date"
+              label={t('endDate')}
               type="date"
               fullWidth
               required={required}
@@ -229,11 +232,16 @@ const CustomDateControl = (props) => {
                   marginLeft: '14px',
                 }}
               >
-                Preview: {getFormattedDateText(endDate)}
+                {t('preview')}: {getFormattedDateText(endDate)}
               </div>
             )}
           </Box>
         </Box>
+        {schema?.description && (
+          <FormHelperText sx={{ mt: 1, mx: 0, marginLeft: '14px' }}>
+            {schema.description}
+          </FormHelperText>
+        )}
       </Box>
     );
   }
@@ -246,8 +254,6 @@ const CustomDateControl = (props) => {
         fullWidth
         required={required}
         value={getDisplayValue()}
-        min={getMinValue()}
-        max={getMaxValue()}
         placeholder={undefined}
         InputProps={{
           placeholder: undefined,
@@ -306,8 +312,13 @@ const CustomDateControl = (props) => {
             marginLeft: '14px',
           }}
         >
-          Preview: {formattedDisplay}
+          {t('preview')}: {formattedDisplay}
         </div>
+      )}
+      {schema?.description && (
+        <FormHelperText sx={{ mt: 1, mx: 0, marginLeft: '14px' }}>
+          {schema.description}
+        </FormHelperText>
       )}
     </div>
   );

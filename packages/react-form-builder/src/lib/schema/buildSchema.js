@@ -8,6 +8,7 @@ export const buildSchemaFromFields = (fieldsArray, parentKey = null) => {
       properties[field.key] = {
         type: 'array',
         title: field.label,
+        i18n: field.i18nKey || field.label,
         uniqueItems: true,
         ...Object.fromEntries(Object.entries(field.schema || {}).filter(([key]) => key !== 'type')),
       };
@@ -37,6 +38,7 @@ export const buildSchemaFromFields = (fieldsArray, parentKey = null) => {
         properties[field.key] = {
           ...field.schema,
           title: field.label,
+          i18n: field.i18nKey || field.label,
         };
 
         // Add confirm password field
@@ -44,6 +46,7 @@ export const buildSchemaFromFields = (fieldsArray, parentKey = null) => {
           type: 'string',
           format: 'password',
           title: `Confirm ${field.label}`,
+          i18n: field.i18nKey ? `${field.i18nKey}_confirm` : `${field.key}_confirm`,
         };
 
         if (field.required) {
@@ -53,6 +56,7 @@ export const buildSchemaFromFields = (fieldsArray, parentKey = null) => {
         properties[field.key] = {
           ...field.schema,
           title: field.label,
+          i18n: field.i18nKey || field.label,
         };
         if (field.required) {
           required.push(field.key);
@@ -65,6 +69,7 @@ export const buildSchemaFromFields = (fieldsArray, parentKey = null) => {
       const objectSchema = {
         type: 'object',
         title: field.label,
+        i18n: field.i18nKey || field.label,
         properties: childSchema.properties,
       };
 

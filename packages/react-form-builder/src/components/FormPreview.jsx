@@ -1,6 +1,7 @@
 import { createAjv } from '@jsonforms/core';
 import { JsonForms } from '@jsonforms/react';
 import { IconEye } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 import { useState, useMemo, useRef } from 'react';
 import { Typography, Button, Box, Tooltip, IconButton } from '@mui/material';
 
@@ -8,14 +9,14 @@ import CommonHeader from './CommonHeader';
 import { getRenderers, getCells, config } from '../controls/renders';
 import { IconDeviceDesktop, IconDeviceTablet, IconDeviceMobile } from '@tabler/icons-react';
 
-const PREVIEW_MODES = {
-  desktop: { width: 1200, label: 'Desktop', icon: <IconDeviceDesktop /> },
-  tablet: { width: 768, label: 'Tablet', icon: <IconDeviceTablet /> },
-  mobile: { width: 375, label: 'Mobile', icon: <IconDeviceMobile /> },
-};
+const getPreviewModes = (t) => ({
+  desktop: { width: 1200, label: t('desktop'), icon: <IconDeviceDesktop /> },
+  tablet: { width: 768, label: t('tablet'), icon: <IconDeviceTablet /> },
+  mobile: { width: 375, label: t('mobile'), icon: <IconDeviceMobile /> },
+});
 
-const FormResponsivePreview = ({ mode, children }) => {
-  const { width } = PREVIEW_MODES[mode];
+const FormResponsivePreview = ({ mode, children, previewModes }) => {
+  const { width } = previewModes[mode];
   const responsiveParentSx = {
     display: 'flex',
     flexDirection: 'column',
@@ -24,22 +25,49 @@ const FormResponsivePreview = ({ mode, children }) => {
     height: 650,
   };
   const mobileContainerSx = {
-    '& .MuiGrid-container, & .MuiGrid2-container': {
-      flexDirection: 'column',
-    },
     '& .MuiGrid-item, & .MuiGrid2-root': {
       maxWidth: '100%',
       flexBasis: '100%',
     },
+    '& .MuiTable-root td[style*="text-align: center"]': {
+      width: 'auto !important',
+      height: 'auto !important',
+    },
+    '& .MuiTable-root .MuiIconButton-root.MuiIconButton-sizeLarge': {
+      padding: '4px',
+      fontSize: '1.2rem',
+    },
+
+    '& .MuiTable-root .MuiSvgIcon-root': {
+      fontSize: '1.2rem',
+    },
+    '& .MuiTable-root td[style*="text-align: center"] .MuiGrid-root': {
+      display: 'flex',
+      flexDirection: 'row',
+      columnGap: '8px',
+      flexWrap: 'nowrap',
+    },
+    '& .MuiStack-root .MuiGrid-container': {
+      alignItems: 'flex-start',
+    },
   };
   const tabletContainerSX = {
-    '& .MuiGrid-container, & .MuiGrid2-container': {
-      display: 'grid',
-      gap: '16px',
-    },
     '& .MuiGrid-item, & .MuiGrid2-root': {
       maxWidth: '100%',
-      flexBasis: 'auto',
+      flexBasis: '100%',
+    },
+    '& .MuiTable-root .MuiIconButton-root.MuiIconButton-sizeLarge': {
+      padding: '4px',
+      fontSize: '1.2rem',
+    },
+
+    '& .MuiTable-root .MuiSvgIcon-root': {
+      fontSize: '1.2rem',
+    },
+    '& .MuiTable-root td[style*="text-align: center"] .MuiGrid-root': {
+      display: 'flex',
+      flexDirection: 'row',
+      columnGap: '8px',
     },
   };
   const responsiveContainerSx = {
@@ -79,11 +107,14 @@ const FormPreview = ({
   const userActions = useRef(false);
   const isProgrammaticUpdateRef = useRef(false);
 
-  const ajv = useMemo(() => createAjv({ useDefaults: 'empty', strictSchema: false }), []);
+  const { t, i18n } = useTranslation();
+
+  const ajv = useMemo(() => createAjv({ useDefaults: 'empty' }), []);
 
   const [key, setKey] = useState(0); // Force re-render
   const [hasValidated, setHasValidated] = useState(false);
   const [validationErrors, setValidationErrors] = useState([]);
+
   const validateBox = {
     position: 'fixed',
     bottom: 0,
@@ -100,12 +131,49 @@ const FormPreview = ({
     px: 3,
   };
 
+  const translationFn = useMemo(
+    () => (key, defaultMessage) => {
+      if (!key) {
+        return defaultMessage;
+      }
+      const result = t(key, defaultMessage ?? '');
+      if (result === '' && defaultMessage === undefined) {
+        return undefined;
+      }
+      return result;
+    },
+    [t]
+  );
+
+  const mapAjvErrorToKey = (error) => {
+    switch (error.keyword) {
+      case 'required':
+        return 'validation.required';
+      case 'format':
+        // e.g. date, email, etc. – you can further branch on error.params.format
+        return `validation.format.${error.params?.format || 'generic'}`;
+      case 'pattern':
+        return 'validation.pattern';
+      case 'minLength':
+        return 'validation.minLength';
+      case 'maxLength':
+        return 'validation.maxLength';
+      case 'minimum':
+        return 'validation.minimum';
+      case 'maximum':
+        return 'validation.maximum';
+      default:
+        return 'validation.generic';
+    }
+  };
+
+  const previewModes = useMemo(() => getPreviewModes(t), [t]);
   const [mode, setMode] = useState('desktop');
   const toolBarSx = { display: 'flex', gap: 1, justifyContent: 'center', alignItems: 'center' };
   const PreviewToolbar = ({ mode }) => {
     return (
       <Box sx={toolBarSx}>
-        {Object.entries(PREVIEW_MODES).map(([key, cfg]) => (
+        {Object.entries(previewModes).map(([key, cfg]) => (
           <Tooltip key={key} title={cfg.label}>
             <IconButton onClick={() => setMode(key)} color={mode === key ? 'primary' : 'default'}>
               {cfg.icon}
@@ -184,9 +252,9 @@ const FormPreview = ({
           errors.push({
             instancePath: `/${key}`,
             schemaPath: `#/properties/${key}`,
-            keyword: 'const',
-            params: { allowedValue: password },
-            message: 'Passwords do not match',
+            keyword: 'passwordMismatch',
+            params: { passwordKey, confirmKey: key },
+            message: 'validation.passwordMismatch',
             data: confirmPassword,
           });
         }
@@ -220,7 +288,7 @@ const FormPreview = ({
         schemaPath: error.schemaPath,
         keyword: error.keyword,
         params: error.params,
-        message: error.message,
+        message: mapAjvErrorToKey(error),
         data: error.data,
       }));
 
@@ -285,8 +353,8 @@ const FormPreview = ({
   return (
     <Box sx={{ paddingBottom: '64px' }}>
       <CommonHeader
-        title="Form Preview"
-        description="Test your form and see how it will look to users"
+        title={t('formPreview')}
+        description={t('testYourForm')}
         icon={IconEye}
         showFormPreview={showFormPreview}
         setShowFormPreview={setShowFormPreview}
@@ -298,7 +366,7 @@ const FormPreview = ({
         {formState.schema.properties && Object.keys(formState.schema.properties).length > 0 ? (
           <div ref={formRef}>
             <PreviewToolbar mode={mode} />
-            <FormResponsivePreview mode={mode}>
+            <FormResponsivePreview mode={mode} previewModes={previewModes}>
               <JsonForms
                 key={key} // Force re-render when validation state changes
                 ajv={ajv}
@@ -314,6 +382,10 @@ const FormPreview = ({
                 uischema={formState.uischema}
                 validationMode="NoValidation"
                 additionalErrors={hasValidated ? validationErrors : []}
+                i18n={{
+                  locale: i18n.resolvedLanguage || i18n.language,
+                  translate: translationFn,
+                }}
                 onChange={({ data }) => {
                   if (isProgrammaticUpdateRef.current) {
                     isProgrammaticUpdateRef.current = false;
@@ -334,14 +406,14 @@ const FormPreview = ({
           </div>
         ) : (
           <Typography variant="body2" color="textSecondary">
-            No fields added yet. Start by adding fields from the palette.
+            {t('noFieldsAdded')}
           </Typography>
         )}
       </Box>
       {formState.schema.properties && Object.keys(formState.schema.properties).length > 0 && (
         <Box sx={validateBox}>
           <Button onClick={toggleValidateButton} variant="contained">
-            Validate
+            {t('validate')}
           </Button>
         </Box>
       )}

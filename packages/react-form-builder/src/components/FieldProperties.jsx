@@ -1,3 +1,6 @@
+import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { IconPlus, IconTrash, IconSettings, IconChevronDown, IconX } from '@tabler/icons-react';
 import {
   Typography,
   TextField,
@@ -16,15 +19,15 @@ import {
   Grid,
   Checkbox,
   InputAdornment,
+  Button,
 } from '@mui/material';
-import { useState, useEffect } from 'react';
-import { IconPlus, IconTrash, IconSettings, IconChevronDown, IconX } from '@tabler/icons-react';
 
 import { defaultFieldTypes } from '../types';
 import IconSelector from '../utils/IconSelector';
 import { updateFieldById } from '../lib/structure/treeOps';
 
 const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
+  const { t } = useTranslation();
   const [layout, setLayout] = useState('');
   const [newOption, setNewOption] = useState('');
   const [localField, setLocalField] = useState(null);
@@ -39,6 +42,8 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
   );
   const [parentArrayField, setParentArrayField] = useState(null);
   const [isInsideArrayOfObjects, setIsInsideArrayOfObjects] = useState(false);
+  const [showLogical, setShowLogical] = useState(false);
+  const [logical, setLogical] = useState('');
 
   useEffect(() => {
     setMaxSizeInput(localField?.uischema?.options?.['ui:options']?.maxSize?.toString() || '');
@@ -72,6 +77,102 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
 
     { label: '.csv', value: 'text/csv' },
   ];
+
+  const OPERATORS = {
+    string: [
+      { label: 'Equals', value: 'equals' },
+      { label: 'Not equals', value: 'not_equals' },
+    ],
+    boolean: [
+      { label: 'Is', value: 'equals' },
+      { label: 'Is not', value: 'not_equals' },
+    ],
+    number: [
+      { label: 'Equals', value: 'eq' },
+      { label: 'Not equals', value: 'neq' },
+      { label: 'Greater than', value: 'gt' },
+      { label: 'Greater than or equals to', value: 'gte' },
+      { label: 'less than', value: 'lt' },
+      { label: 'Less than or equals to', value: 'lte' },
+    ],
+    text: [
+      { label: 'Equals', value: 'equals' },
+      { label: 'Not equals', value: 'not_equals' },
+      { label: 'Contains', value: 'pattern' },
+      { label: 'Starts With', value: 'starts_with' },
+      { label: 'Ends With', value: 'ends_with' },
+    ],
+
+    date: [
+      { label: 'Date equals', value: 'date_equals' },
+      { label: 'Date not equals', value: 'date_not_equals' },
+      { label: 'Date after', value: 'date_after' },
+      { label: 'Date on or after', value: 'date_on_or_after' },
+      { label: 'Date before', value: 'date_before' },
+      { label: 'Date on or before', value: 'date_on_or_before' },
+    ],
+  };
+
+  //let dependsOnField = null;
+  const [rows, setRows] = useState([
+    { dependsOn: '', operator: '', value: '', logical: '', value2: '' },
+  ]);
+  // const dependsOnField = useMemo(
+  //   () => fields.find((f) => f.key === rows.dependsOn),
+  //   [fields, rows.dependsOn]
+  // );
+
+  const updateCondition = (index, key, value) => {
+    const updated = [...rows];
+    updated[index][key] = value;
+    setRows(() => {
+      const next = updated;
+      handleUpdate({ visibility: next });
+      return next;
+    });
+  };
+
+  //const  =
+  const updateEffect = (value) => {
+    handleUpdate({ effect: value });
+  };
+
+  const showOperator = () => {
+    setShowLogical(true);
+    setLogical('');
+  };
+
+  const addRow = (value) => {
+    setRows(() => {
+      const next = [
+        ...rows,
+        { dependsOn: '', operator: '', value: '', logical: value, value2: '' },
+      ];
+      handleUpdate({ visibility: next });
+      setShowLogical(false);
+      setLogical(value);
+      return next;
+    });
+  };
+
+  const removeRow = (index) => {
+    const updated = rows.filter((_, i) => i !== index);
+    // setRows(updated);
+    setRows(() => {
+      const next = updated;
+      handleUpdate({ visibility: next });
+      return next;
+    });
+  };
+
+  const setDependentState = (value) => {
+    if (value) handleUpdate({ parentVisibility: value });
+    else
+      setRows(() => {
+        handleUpdate({ visibility: [], parentVisibility: value });
+        return [];
+      });
+  };
 
   const handleLayoutChange = (event) => {
     const newLayoutType = event.target.value;
@@ -178,6 +279,9 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
 
     if (field) {
       let updatedField = { ...field };
+      if (field.visibility) {
+        setRows(field.visibility);
+      }
 
       // Ensure date fields have default dateTimeFormat in UI schema
       if (
@@ -224,7 +328,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
       }
 
       setLocalField(updatedField);
-
       if (field.isLayout) {
         setLayout(field.type);
       }
@@ -274,11 +377,11 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
         <IconSettings size={48} sx={mb16} color="currentColor" />
 
         <Typography variant="h6" color="textSecondary" sx={emptyStateTitleSx}>
-          Select a field to edit
+          {t('selectFieldToEdit')}
         </Typography>
 
         <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>
-          Click on any field in the form structure to configure its properties
+          {t('clickToConfig')}
         </Typography>
       </Box>
     );
@@ -409,7 +512,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
     }
 
     // Array fields without enum can switch between array and multiselect types
-    if (currentSchemaType === 'array') {
+    if (currentSchemaType === 'array' && localField.type !== 'file') {
       return availableFieldTypes.filter(
         (ft) => ft.id === 'array' || ft.id === 'multiselect' || ft.id === 'multicheckbox'
       );
@@ -467,8 +570,21 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
     },
   };
 
+  const outlinedTextFieldNumberSx = {
+    '& .MuiOutlinedInput-root': {
+      borderRadius: 2,
+    },
+    width: 75,
+  };
+
   const layoutSelectSx = {
     borderRadius: 2,
+  };
+
+  const layoutSelectRuleSx = {
+    borderRadius: 2,
+    //width: 110,
+    fontSize: 13,
   };
 
   const fieldTypeMenuItemSx = {
@@ -490,7 +606,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
     borderRadius: 0,
     border: '1px solid',
     borderColor: 'divider',
-    // backgroundColor: 'background.paper',
     boxShadow: 'none',
     mx: -2,
     transition: 'all 0.2s ease-in-out',
@@ -500,7 +615,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
     '&.Mui-expanded': {
       margin: '15px -15px',
       boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
-      // backgroundColor: 'action.hover',
     },
     '&:hover': {
       borderRadius: 0,
@@ -566,13 +680,15 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
       trimmed = tempVal.trim();
     }
   };
+
+  const excludedTypes = ['array', 'array-strings', 'file', 'date'];
   return (
     <Box>
       {/* Basic Properties */}
       <Accordion defaultExpanded sx={accordionSx}>
         <AccordionSummary expandIcon={<IconChevronDown />} sx={accordionSummarySx}>
           <Typography variant="subtitle1" fontWeight={600}>
-            Basic Properties
+            {t('basicProperties')}
           </Typography>
         </AccordionSummary>
         <AccordionDetails>
@@ -580,16 +696,16 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
             {/* Layout selector for vertical/horizontal layouts */}
             {isLayout && (
               <FormControl fullWidth margin="normal">
-                <InputLabel id="layout-select-label">Layout Type</InputLabel>
+                <InputLabel id="layout-select-label">{t('layoutType')}</InputLabel>
                 <Select
                   labelId="layout-select-label"
                   value={layout}
-                  label="Layout Type"
+                  label={t('layoutType')}
                   onChange={handleLayoutChange}
                   sx={layoutSelectSx}
                 >
-                  <MenuItem value="vertical-layout">Vertical Layout</MenuItem>
-                  <MenuItem value="horizontal-layout">Horizontal Layout</MenuItem>
+                  <MenuItem value="vertical-layout">{t('verticalLayout')}</MenuItem>
+                  <MenuItem value="horizontal-layout">{t('horizontalLayout')}</MenuItem>
                 </Select>
               </FormControl>
             )}
@@ -597,21 +713,21 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
             {!isLayout && !isGroup && (
               <>
                 <TextField
-                  label="Field Key"
+                  label={t('fieldKey')}
                   fullWidth
                   value={localField.key}
                   onChange={(e) => handleUpdate({ key: e.target.value })}
                   margin="normal"
                   variant="outlined"
-                  helperText="Unique identifier for this field"
+                  helperText={t('uniqueIdentifier')}
                   sx={outlinedTextFieldSx}
                 />
 
                 <FormControl fullWidth margin="normal">
-                  <InputLabel>Field Type</InputLabel>
+                  <InputLabel>{t('fieldType')}</InputLabel>
                   <Select
                     value={localField.type}
-                    label="Field Type"
+                    label={t('fieldType')}
                     onChange={(e) => handleFieldTypeChange(e.target.value)}
                     sx={layoutSelectSx}
                   >
@@ -634,7 +750,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
             {isGroup && (
               <>
                 <TextField
-                  label="Group Name"
+                  label={t('groupName')}
                   fullWidth
                   value={localField.label}
                   onChange={(e) => {
@@ -650,7 +766,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                   }}
                   margin="normal"
                   variant="outlined"
-                  helperText="Displayed as the group header"
+                  helperText={t('displayedAsHeader')}
                   sx={outlinedTextFieldSx}
                 />
                 <Box sx={iconSelectorContainerSx}>
@@ -672,11 +788,304 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
         <Accordion sx={accordionSx}>
           <AccordionSummary expandIcon={<IconChevronDown />} sx={accordionSummarySx}>
             <Typography variant="subtitle1" fontWeight={600}>
-              Display Options
+              {t('displayOptions')}
             </Typography>
           </AccordionSummary>
 
           <AccordionDetails>
+            {fields.length > 1 && (
+              <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'nowrap' }}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={localField.parentVisibility || false}
+                      onChange={(e) => {
+                        setDependentState(e.target.checked);
+
+                        // handleUpdate({ uischema: updatedUISchema });
+                      }}
+                      color="primary"
+                    />
+                  }
+                  label="Is Dependent"
+                  sx={formControlLabelSx}
+                />
+              </Box>
+            )}
+            {localField.parentVisibility && (
+              <>
+                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                  <FormControl fullWidth margin="normal" size="small">
+                    <InputLabel id="effect">Choose Effect</InputLabel>
+                    <Select
+                      labelId="effect"
+                      label="Choose Effect"
+                      size="small"
+                      value={localField.effect || ''}
+                      onChange={(e) => {
+                        updateEffect(e.target.value);
+                      }}
+                      sx={layoutSelectSx}
+                    >
+                      {['SHOW', 'HIDE', 'ENABLE', 'DISABLE'].map((v) => (
+                        <MenuItem key={v} value={v}>
+                          <Box sx={fieldTypeMenuItemSx}>{v}</Box>
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Box>
+                <Box sx={{ marginTop: '10px' }}>
+                  {rows.map((row, index) => {
+                    const dependsOnField = fields.find((f) => f.key === row.dependsOn);
+                    return (
+                      <>
+                        <Typography
+                          variant="subtitle1"
+                          fontWeight={600}
+                          sx={{ textAlign: 'center' }}
+                        >
+                          {row.logical}
+                        </Typography>
+                        <Box
+                          key={index}
+                          sx={{
+                            display: 'flex',
+                            gap: 1,
+                            flexWrap: 'wrap',
+                            alignItems: 'center',
+                            marginBottom: '5px',
+                          }}
+                        >
+                          {/* Field selector */}
+                          <FormControl size="small" sx={{ minWidth: 100 }}>
+                            <InputLabel id={`depends-on-label-${index}`}>Field</InputLabel>
+                            <Select
+                              labelId={`depends-on-label-${index}`}
+                              size="small"
+                              label="Field"
+                              value={row.dependsOn || ''}
+                              onChange={
+                                (e) => updateCondition(index, 'dependsOn', e.target.value)
+                                // updateCurrentSelection(e.target.value)
+                              }
+                              sx={layoutSelectRuleSx}
+                            >
+                              {fields
+                                .filter((f) => {
+                                  return f.id !== field.id && !excludedTypes.includes(f.type);
+                                })
+                                .map((f) => (
+                                  <MenuItem key={f.key} value={f.key}>
+                                    <Box sx={fieldTypeMenuItemSx}>{f.label}</Box>
+                                  </MenuItem>
+                                ))}
+                            </Select>
+                          </FormControl>
+                          {/* {<pre>{JSON.stringify(dependsOnField)}</pre>} */}
+                          {/* Operator selector */}
+                          {dependsOnField && (
+                            <>
+                              {/* operator */}
+                              <FormControl size="small" sx={{ minWidth: 110 }}>
+                                <InputLabel id={`operator-label-${index}`}>Operator</InputLabel>
+                                <Select
+                                  labelId={`operator-label-${index}`}
+                                  label="Operator"
+                                  size="small"
+                                  value={row.operator || ''}
+                                  onChange={(e) =>
+                                    updateCondition(index, 'operator', e.target.value)
+                                  }
+                                  sx={layoutSelectRuleSx}
+                                >
+                                  {dependsOnField &&
+                                    dependsOnField?.schema?.enum &&
+                                    OPERATORS[dependsOnField.schema.type]?.map((op) => (
+                                      <MenuItem key={op.value} value={op.value}>
+                                        {op.label}
+                                      </MenuItem>
+                                    ))}
+
+                                  {dependsOnField &&
+                                    (dependsOnField.schema.type === 'number' ||
+                                      dependsOnField.schema.type === 'integer') &&
+                                    OPERATORS['number']?.map((op) => (
+                                      <MenuItem key={op.value} value={op.value}>
+                                        {op.label}
+                                      </MenuItem>
+                                    ))}
+
+                                  {!dependsOnField?.schema?.enum &&
+                                    dependsOnField.schema.type === 'string' &&
+                                    dependsOnField.type !== 'date' &&
+                                    OPERATORS['text']?.map((op) => (
+                                      <MenuItem key={op.value} value={op.value}>
+                                        {op.label}
+                                      </MenuItem>
+                                    ))}
+
+                                  {dependsOnField.type === 'date' &&
+                                    OPERATORS['date']?.map((op) => (
+                                      <MenuItem key={op.value} value={op.value}>
+                                        {op.label}
+                                      </MenuItem>
+                                    ))}
+                                  {dependsOnField.schema.type === 'boolean' &&
+                                    OPERATORS[dependsOnField.schema.type]?.map((op) => (
+                                      <MenuItem key={op.value} value={op.value}>
+                                        {op.label}
+                                      </MenuItem>
+                                    ))}
+                                </Select>
+                              </FormControl>
+
+                              {/* select or radio  */}
+                              {dependsOnField?.schema?.enum && (
+                                <FormControl size="small" sx={{ minWidth: 100 }}>
+                                  <InputLabel id={`value-label-${index}`}>Value</InputLabel>
+                                  <Select
+                                    labelId={`value-label-${index}`}
+                                    size="small"
+                                    disabled={!dependsOnField}
+                                    value={row.value ?? ''}
+                                    label="Value"
+                                    onChange={(e) => {
+                                      updateCondition(index, 'value', e.target.value);
+                                    }}
+                                    sx={layoutSelectRuleSx}
+                                  >
+                                    {dependsOnField?.schema?.enum?.map((opt) => (
+                                      <MenuItem key={opt} value={opt}>
+                                        {opt}
+                                      </MenuItem>
+                                    ))}
+                                  </Select>
+                                </FormControl>
+                              )}
+
+                              {/* checkbox */}
+                              {dependsOnField?.schema.type === 'boolean' && (
+                                <FormControl size="small" sx={{ minWidth: 100 }}>
+                                  <InputLabel id={`value-label-${index}`}>Value</InputLabel>
+                                  <Select
+                                    labelId={`value-label-${index}`}
+                                    size="small"
+                                    disabled={!dependsOnField}
+                                    label="Value"
+                                    value={row.value ?? ''}
+                                    onChange={(e) => {
+                                      updateCondition(index, 'value', e.target.value);
+                                    }}
+                                    sx={layoutSelectRuleSx}
+                                  >
+                                    {['true', 'false'].map((v) => (
+                                      <MenuItem key={v} value={v}>
+                                        {v === 'true' ? 'True' : 'False'}
+                                      </MenuItem>
+                                    ))}
+                                  </Select>
+                                </FormControl>
+                              )}
+
+                              {/* number */}
+                              {(dependsOnField.schema.type === 'number' ||
+                                dependsOnField.schema.type === 'integer') && (
+                                <TextField
+                                  type="number"
+                                  size="small"
+                                  value={row.value ?? ''}
+                                  onChange={(e) => {
+                                    updateCondition(index, 'value', e.target.value);
+                                  }}
+                                  variant="outlined"
+                                  sx={{
+                                    ...outlinedTextFieldNumberSx,
+                                    '& input[type=number]': {
+                                      MozAppearance: 'textfield',
+                                    },
+                                    '& input[type=number]::-webkit-outer-spin-button': {
+                                      WebkitAppearance: 'none',
+                                      margin: 0,
+                                    },
+                                    '& input[type=number]::-webkit-inner-spin-button': {
+                                      WebkitAppearance: 'none',
+                                      margin: 0,
+                                    },
+                                  }}
+                                />
+                              )}
+
+                              {/* string type other than select */}
+                              {!dependsOnField?.schema?.enum &&
+                                dependsOnField.schema.type === 'string' &&
+                                dependsOnField.type !== 'date' && (
+                                  <TextField
+                                    size="small"
+                                    value={row.value ?? ''}
+                                    onChange={(e) => {
+                                      updateCondition(index, 'value', e.target.value);
+                                    }}
+                                    variant="outlined"
+                                    sx={outlinedTextFieldNumberSx}
+                                  />
+                                )}
+
+                              {dependsOnField.type === 'date' && (
+                                <TextField
+                                  size="small"
+                                  type="date"
+                                  value={row.value ?? ''}
+                                  onChange={(e) => {
+                                    updateCondition(index, 'value', e.target.value);
+                                  }}
+                                  variant="outlined"
+                                  sx={outlinedTextFieldSx}
+                                />
+                              )}
+                              {/* Delete row */}
+                              {rows.length > 1 && (
+                                <IconButton
+                                  size="small"
+                                  color="error"
+                                  onClick={() => removeRow(index)}
+                                >
+                                  <IconTrash size={19} />
+                                </IconButton>
+                              )}
+                            </>
+                          )}
+                        </Box>
+                      </>
+                    ); //return
+                  })}
+                </Box>
+                {/* Add More button */}
+                <Button variant="contained" onClick={showOperator} sx={{ width: 150 }}>
+                  Add More
+                </Button>
+                {showLogical && (
+                  <FormControl sx={{ marginLeft: '10px', minWidth: 110 }} size="small">
+                    <InputLabel id={`condition-label`}>Condition</InputLabel>
+                    <Select
+                      labelId={`condition-label`}
+                      label="Condition"
+                      size="small"
+                      value={logical || ''}
+                      onChange={(e) => addRow(e.target.value)}
+                      sx={layoutSelectSx}
+                    >
+                      {['AND', 'OR'].map((v) => (
+                        <MenuItem key={v} value={v}>
+                          {v}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                )}
+              </>
+            )}
+
             <Box>
               <FormControlLabel
                 control={
@@ -695,14 +1104,14 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                     color="primary"
                   />
                 }
-                label="Read Only"
+                label={t('readOnly')}
                 sx={formControlLabelSx}
               />
 
               {/* Show label field only for non-layout and non-group fields */}
               {localField.type !== 'layout' && localField.type !== 'group' && (
                 <TextField
-                  label="Label"
+                  label={t('label')}
                   fullWidth
                   value={localField.label}
                   onChange={(e) => {
@@ -710,7 +1119,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                   }}
                   margin="normal"
                   variant="outlined"
-                  helperText="The display label for this field"
+                  helperText={t('displayLabel')}
                   sx={outlinedTextFieldSx}
                 />
               )}
@@ -727,7 +1136,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                 <>
                   {/* Date Type Selector */}
                   <FormControl fullWidth margin="normal" sx={outlinedTextFieldSx}>
-                    <InputLabel>Date Type</InputLabel>
+                    <InputLabel>{t('dateType')}</InputLabel>
                     <Select
                       value={(() => {
                         const isRange =
@@ -778,12 +1187,12 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                             startDate: {
                               type: 'string',
                               format: 'date',
-                              title: 'Start Date',
+                              title: t('startDate'),
                             },
                             endDate: {
                               type: 'string',
                               format: 'date',
-                              title: 'End Date',
+                              title: t('endDate'),
                             },
                           };
                           updatedSchema.required = ['startDate', 'endDate'];
@@ -802,11 +1211,11 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                           { resetFormData: true }
                         );
                       }}
-                      label="Date Type"
+                      label={t('dateType')}
                     >
-                      <MenuItem value="date">Date Only</MenuItem>
-                      <MenuItem value="datetime">Date & Time</MenuItem>
-                      <MenuItem value="range">Date Range</MenuItem>
+                      <MenuItem value="date">{t('dateOnly')}</MenuItem>
+                      <MenuItem value="datetime">{t('dateAndTime')}</MenuItem>
+                      <MenuItem value="range">{t('dateRange')}</MenuItem>
                     </Select>
                   </FormControl>
 
@@ -817,7 +1226,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                     localField.schema?.properties?.endDate
                   ) && (
                     <FormControl fullWidth margin="normal" sx={outlinedTextFieldSx}>
-                      <InputLabel>Date Display Format</InputLabel>
+                      <InputLabel>{t('dateDisplayFormat')}</InputLabel>
                       <Select
                         value={(() => {
                           const currentFormat = localField.uischema?.options?.dateTimeFormat;
@@ -846,7 +1255,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                               : 'DD MMM YYYY, HH:mm';
                           }
                         })()}
-                        label="Date Display Format"
+                        label={t('dateDisplayFormat')}
                         onChange={(e) => {
                           const updatedUISchema = {
                             ...localField.uischema,
@@ -894,23 +1303,53 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                     </FormControl>
                   )}
 
-                  {/* Default Date Value Picker - only for non-range date fields */}
-                  {!(
-                    localField.schema?.type === 'object' &&
-                    localField.schema?.properties?.startDate &&
-                    localField.schema?.properties?.endDate
-                  ) && (
-                    <TextField
-                      label="Default Date Value"
-                      type={localField.uischema?.options?.includeTime ? 'datetime-local' : 'date'}
-                      fullWidth
-                      value={(() => {
-                        const defaultDate = localField.schema?.default;
-                        if (!defaultDate) return '';
+                  {/* Default Date Value Picker */}
+                  <TextField
+                    label={t('defaultDateValue')}
+                    type={localField.uischema?.options?.includeTime ? 'datetime-local' : 'date'}
+                    fullWidth
+                    value={(() => {
+                      const defaultDate = localField.schema?.default;
+                      if (!defaultDate) return '';
 
+                      const includeTime = localField.uischema?.options?.includeTime;
+                      if (includeTime) {
+                        const date = new Date(defaultDate);
+                        if (!isNaN(date.getTime())) {
+                          const year = date.getFullYear();
+                          const month = String(date.getMonth() + 1).padStart(2, '0');
+                          const day = String(date.getDate()).padStart(2, '0');
+                          const hours = String(date.getHours()).padStart(2, '0');
+                          const minutes = String(date.getMinutes()).padStart(2, '0');
+                          return `${year}-${month}-${day}T${hours}:${minutes}`;
+                        }
+                      }
+                      return defaultDate ? defaultDate.split('T')[0] : '';
+                    })()}
+                    onChange={(e) => {
+                      let dateValue = e.target.value;
+
+                      if (dateValue) {
                         const includeTime = localField.uischema?.options?.includeTime;
                         if (includeTime) {
-                          const date = new Date(defaultDate);
+                          const date = new Date(dateValue);
+                          dateValue = date.toISOString();
+                        } else {
+                          dateValue = dateValue.split('T')[0];
+                        }
+                      } else {
+                        dateValue = undefined;
+                      }
+
+                      handleSchemaUpdate({ default: dateValue });
+                    }}
+                    inputProps={{
+                      min: (() => {
+                        const minDate = localField.schema?.minimum;
+                        if (!minDate) return undefined;
+                        const includeTime = localField.uischema?.options?.includeTime;
+                        if (includeTime) {
+                          const date = new Date(minDate);
                           if (!isNaN(date.getTime())) {
                             const year = date.getFullYear();
                             const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -920,33 +1359,34 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                             return `${year}-${month}-${day}T${hours}:${minutes}`;
                           }
                         }
-
-                        return defaultDate ? defaultDate.split('T')[0] : '';
-                      })()}
-                      onChange={(e) => {
-                        let dateValue = e.target.value;
-
-                        if (dateValue) {
-                          const includeTime = localField.uischema?.options?.includeTime;
-                          if (includeTime) {
-                            const date = new Date(dateValue);
-                            dateValue = date.toISOString();
+                        return minDate ? minDate.split('T')[0] : undefined;
+                      })(),
+                      max: (() => {
+                        const maxDate = localField.schema?.maximum;
+                        if (!maxDate) return undefined;
+                        const includeTime = localField.uischema?.options?.includeTime;
+                        if (includeTime) {
+                          const date = new Date(maxDate);
+                          if (!isNaN(date.getTime())) {
+                            const year = date.getFullYear();
+                            const month = String(date.getMonth() + 1).padStart(2, '0');
+                            const day = String(date.getDate()).padStart(2, '0');
+                            const hours = String(date.getHours()).padStart(2, '0');
+                            const minutes = String(date.getMinutes()).padStart(2, '0');
+                            return `${year}-${month}-${day}T${hours}:${minutes}`;
                           }
-                        } else {
-                          dateValue = undefined;
                         }
-
-                        handleSchemaUpdate({ default: dateValue });
-                      }}
-                      margin="normal"
-                      variant="outlined"
-                      helperText="Default date value that will be pre-filled in the form"
-                      InputLabelProps={{
-                        shrink: true,
-                      }}
-                      sx={outlinedTextFieldSx}
-                    />
-                  )}
+                        return maxDate ? maxDate.split('T')[0] : undefined;
+                      })(),
+                    }}
+                    margin="normal"
+                    variant="outlined"
+                    helperText={t('defaultDateHelp')}
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                    sx={outlinedTextFieldSx}
+                  />
 
                   {/* Default Date Range Values - only for date range fields */}
                   {localField.schema?.type === 'object' &&
@@ -955,14 +1395,14 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                       <>
                         <Box sx={{ mt: 2, mb: 1 }}>
                           <Typography variant="subtitle2" fontWeight={500}>
-                            Default Date Range
+                            {t('defaultDateRange')}
                           </Typography>
                         </Box>
                         <Grid container spacing={2}>
                           {/* Start Date Default */}
                           <Grid item xs={6}>
                             <TextField
-                              label="Default Start Date"
+                              label={t('defaultStartDate')}
                               type="date"
                               fullWidth
                               value={(() => {
@@ -971,10 +1411,18 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                                 return defaultDate ? defaultDate.split('T')[0] : '';
                               })()}
                               inputProps={{
+                                min: (() => {
+                                  const minStartDate =
+                                    localField.schema?.properties?.startDate?.minimum;
+                                  return minStartDate ? minStartDate.split('T')[0] : undefined;
+                                })(),
                                 max: (() => {
                                   const endDateDefault =
                                     localField.schema?.properties?.endDate?.default;
-                                  return endDateDefault ? endDateDefault.split('T')[0] : undefined;
+                                  const maxEndDate =
+                                    localField.schema?.properties?.endDate?.maximum;
+                                  if (endDateDefault) return endDateDefault.split('T')[0];
+                                  return maxEndDate ? maxEndDate.split('T')[0] : undefined;
                                 })(),
                               }}
                               onChange={(e) => {
@@ -997,7 +1445,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                               }}
                               margin="normal"
                               variant="outlined"
-                              helperText="Default start date value"
+                              helperText={t('defaultStartDateHelp')}
                               InputLabelProps={{
                                 shrink: true,
                               }}
@@ -1008,7 +1456,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                           {/* End Date Default */}
                           <Grid item xs={6}>
                             <TextField
-                              label="Default End Date"
+                              label={t('defaultEndDate')}
                               type="date"
                               fullWidth
                               value={(() => {
@@ -1019,9 +1467,15 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                                 min: (() => {
                                   const startDateDefault =
                                     localField.schema?.properties?.startDate?.default;
-                                  return startDateDefault
-                                    ? startDateDefault.split('T')[0]
-                                    : undefined;
+                                  const minStartDate =
+                                    localField.schema?.properties?.startDate?.minimum;
+                                  if (startDateDefault) return startDateDefault.split('T')[0];
+                                  return minStartDate ? minStartDate.split('T')[0] : undefined;
+                                })(),
+                                max: (() => {
+                                  const maxEndDate =
+                                    localField.schema?.properties?.endDate?.maximum;
+                                  return maxEndDate ? maxEndDate.split('T')[0] : undefined;
                                 })(),
                               }}
                               onChange={(e) => {
@@ -1044,7 +1498,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                               }}
                               margin="normal"
                               variant="outlined"
-                              helperText="Default end date value"
+                              helperText={t('defaultEndDateHelp')}
                               InputLabelProps={{
                                 shrink: true,
                               }}
@@ -1060,9 +1514,13 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                 localField.type !== 'checkbox' &&
                 localField.type !== 'file' ? (
                 <TextField
-                  label="Default Value"
+                  label={t('defaultValue')}
                   fullWidth
-                  // value={localField.schema?.default || ''}
+                  type={
+                    localField.type === 'number' || localField.type === 'integer'
+                      ? 'number'
+                      : 'text'
+                  }
                   value={defaultInput}
                   onChange={(e) => {
                     setDefaultInput(e.target.value);
@@ -1092,7 +1550,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                   }}
                   margin="normal"
                   variant="outlined"
-                  helperText="Initial value for this field"
+                  helperText={t('initialValue')}
                   sx={outlinedTextFieldSx}
                 />
               ) : localField.type === 'checkbox' ? (
@@ -1105,16 +1563,16 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                       }}
                     />
                   }
-                  label="Checked by default"
+                  label={t('checkedByDefault')}
                 />
               ) : null}
               {/* Array Item Type Selector */}
               {localField.type === 'array' && (
                 <FormControl fullWidth margin="normal">
-                  <InputLabel>Array Item Type</InputLabel>
+                  <InputLabel>{t('arrayItemType')}</InputLabel>
                   <Select
                     value={localField.schema?.items?.type || 'string'}
-                    label="Array Item Type"
+                    label={t('arrayItemType')}
                     onChange={(e) => {
                       const itemType = e.target.value;
                       let updatedSchema = { ...localField.schema };
@@ -1162,9 +1620,9 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                     }}
                     sx={layoutSelectSx}
                   >
-                    <MenuItem value="string">String</MenuItem>
-                    <MenuItem value="number">Number</MenuItem>
-                    <MenuItem value="object">Object</MenuItem>
+                    <MenuItem value="string">{t('string')}</MenuItem>
+                    <MenuItem value="number">{t('number')}</MenuItem>
+                    <MenuItem value="object">{t('object')}</MenuItem>
                   </Select>
                 </FormControl>
               )}
@@ -1172,7 +1630,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
               {/* Element Label field for array of objects */}
               {localField.type === 'array' && localField.schema?.items?.type === 'object' && (
                 <TextField
-                  label="Element Label"
+                  label={t('elementLabel')}
                   fullWidth
                   value={localField.uischema?.options?.elementLabelProp || ''}
                   onChange={(e) => {
@@ -1187,13 +1645,13 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                   }}
                   margin="normal"
                   variant="outlined"
-                  helperText="Property name to use as accordion label for array items (e.g., 'name', 'title'). It should be 'Field Key'."
+                  helperText={t('elementLabelHelp')}
                   sx={outlinedTextFieldSx}
                 />
               )}
 
               <TextField
-                label="Description"
+                label={t('description')}
                 fullWidth
                 multiline
                 rows={2}
@@ -1201,7 +1659,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                 onChange={(e) => handleSchemaUpdate({ description: e.target.value || undefined })}
                 margin="normal"
                 variant="outlined"
-                helperText="Help text displayed below the field"
+                helperText={t('helpText')}
                 sx={outlinedTextFieldSx}
               />
               {/* Multiselect Display Type */}
@@ -1209,7 +1667,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                 <>
                   {localField.uischema?.options?.displayType !== 'checkbox' && (
                     <TextField
-                      label="Visible Chips Count"
+                      label={t('visibleChipsCount')}
                       type="number"
                       fullWidth
                       value={localField.uischema?.options?.autocompleteProps?.limitTags || ''}
@@ -1229,7 +1687,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                       }}
                       margin="normal"
                       variant="outlined"
-                      helperText="Number of chips to show before 'show more'"
+                      helperText={t('chipsCountHelp')}
                       inputProps={{ min: 1, max: 20 }}
                       sx={outlinedTextFieldSx}
                     />
@@ -1248,7 +1706,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                       color="primary"
                     />
                   }
-                  label="Require Password Confirmation"
+                  label={t('requirePasswordConfirmation')}
                   sx={formControlLabelSx}
                 />
               )}
@@ -1286,74 +1744,96 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                       color="primary"
                     />
                   }
-                  label="Make Field as Element Label"
+                  label={t('makeFieldElementLabel')}
                   sx={formControlLabelSx}
                 />
               )}
 
               {/* File Upload Options */}
               {localField.type === 'file' && (
-                <FormControl fullWidth margin="normal">
-                  <InputLabel id="allowed-file-types-label" shrink>
-                    Allowed File Types
-                  </InputLabel>
+                <>
+                  <FormControl fullWidth margin="normal">
+                    <InputLabel id="allowed-file-types-label" shrink>
+                      {t('allowedFileTypes')}
+                    </InputLabel>
 
-                  <Select
-                    labelId="allowed-file-types-label"
-                    multiple
-                    displayEmpty
-                    label="Allowed File Types"
-                    value={
-                      localField.uischema?.options?.['ui:options']?.accept
-                        ? localField.uischema.options['ui:options'].accept
-                            .split(',')
-                            .filter(Boolean)
-                        : []
-                    }
-                    onChange={(e) => {
-                      const values = e.target.value;
-                      handleUiOptionsUpdate({
-                        accept: values.length ? values.join(',') : undefined,
-                      });
-                    }}
-                    renderValue={(selected) => {
-                      if (selected.length === 0) {
-                        return (
-                          <Typography sx={{ color: 'text.disabled' }}>Select file types</Typography>
-                        );
+                    <Select
+                      labelId="allowed-file-types-label"
+                      multiple
+                      displayEmpty
+                      label={t('allowedFileTypes')}
+                      value={
+                        localField.uischema?.options?.['ui:options']?.accept
+                          ? localField.uischema.options['ui:options'].accept
+                              .split(',')
+                              .filter(Boolean)
+                          : []
                       }
-                      return selected
-                        .map((mime) => FILE_TYPE_OPTIONS.find((o) => o.value === mime)?.label)
-                        .join(', ');
-                    }}
-                    MenuProps={{
-                      PaperProps: {
-                        sx: {
-                          maxHeight: 240,
-                          minWidth: 280,
+                      onChange={(e) => {
+                        const values = e.target.value;
+                        handleUiOptionsUpdate({
+                          accept: values.length ? values.join(',') : undefined,
+                        });
+                      }}
+                      renderValue={(selected) => {
+                        if (selected.length === 0) {
+                          return (
+                            <Typography sx={{ color: 'text.disabled' }}>
+                              {t('selectFileTypes')}
+                            </Typography>
+                          );
+                        }
+                        return selected
+                          .map((mime) => FILE_TYPE_OPTIONS.find((o) => o.value === mime)?.label)
+                          .join(', ');
+                      }}
+                      MenuProps={{
+                        PaperProps: {
+                          sx: {
+                            maxHeight: 240,
+                            minWidth: 280,
+                          },
                         },
-                      },
-                    }}
-                  >
-                    {FILE_TYPE_OPTIONS.map((option) => (
-                      <MenuItem key={option.value} value={option.value}>
-                        {option.label}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
+                      }}
+                    >
+                      {FILE_TYPE_OPTIONS.map((option) => (
+                        <MenuItem key={option.value} value={option.value}>
+                          {option.label}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={
+                          localField.uischema?.options?.['ui:options']?.enablePreview || false
+                        }
+                        onChange={(e) => {
+                          const value = e.target.checked;
+                          handleUiOptionsUpdate({
+                            enablePreview: value,
+                          });
+                        }}
+                        color="primary"
+                      />
+                    }
+                    label={t('enablePreview')}
+                    sx={{ mt: 1, mb: 1 }}
+                  />
+                </>
               )}
 
               {/* Enum Values for Select/Radio/Multiselect Fields */}
               {hasEnumOptions && (
                 <Box sx={{ mt: 2 }}>
                   <Typography variant="body2" sx={{ mb: 2, fontWeight: 600 }}>
-                    Enum Values
+                    {t('enumValues')}
                   </Typography>
                   {localField.uischema?.options?.entity !== undefined ? (
                     <Box>
                       <TextField
-                        label="API Entity"
+                        label={t('apiEntity')}
                         fullWidth
                         value={localField.uischema?.options?.entity || ''}
                         onChange={(e) => {
@@ -1368,11 +1848,11 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                         }}
                         margin="normal"
                         variant="outlined"
-                        helperText="API endpoint name (e.g., countries, cities)"
+                        helperText={t('apiEntityHelp')}
                         sx={outlinedTextFieldSx}
                       />
                       <TextField
-                        label="Value Field Name"
+                        label={t('valueFieldName')}
                         fullWidth
                         value={localField.uischema?.options?.key || ''}
                         onChange={(e) => {
@@ -1387,11 +1867,11 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                         }}
                         margin="normal"
                         variant="outlined"
-                        helperText="Field name for stored value (e.g., code, id). Leave empty for primitive arrays."
+                        helperText={t('valueFieldHelp')}
                         sx={outlinedTextFieldSx}
                       />
                       <TextField
-                        label="Label Field Name"
+                        label={t('labelFieldName')}
                         fullWidth
                         value={localField.uischema?.options?.value || ''}
                         onChange={(e) => {
@@ -1406,17 +1886,17 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                         }}
                         margin="normal"
                         variant="outlined"
-                        helperText="Field name for display label (e.g., name, label). Leave empty for primitive arrays."
+                        helperText={t('labelFieldHelp')}
                         sx={outlinedTextFieldSx}
                       />
                     </Box>
                   ) : (
                     <>
                       <FormControl fullWidth margin="normal">
-                        <InputLabel>Enum Data Type</InputLabel>
+                        <InputLabel>{t('enumDataType')}</InputLabel>
                         <Select
                           value={enumDataType}
-                          label="Enum Data Type"
+                          label={t('enumDataType')}
                           onChange={(e) => {
                             const newType = e.target.value;
                             setEnumDataType(newType);
@@ -1445,18 +1925,18 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                           }}
                           sx={layoutSelectSx}
                         >
-                          <MenuItem value="string">String</MenuItem>
-                          <MenuItem value="number">Number</MenuItem>
+                          <MenuItem value="string">{t('string')}</MenuItem>
+                          <MenuItem value="number">{t('number')}</MenuItem>
                         </Select>
                       </FormControl>
 
                       <Typography variant="body2" sx={{ mt: 2, mb: 1, fontWeight: 500 }}>
-                        Add Enum
+                        {t('addEnum')}
                       </Typography>
 
                       <Box sx={optionInputRowSx}>
                         <TextField
-                          label="New Option"
+                          label={t('newOption')}
                           size="small"
                           value={newOption}
                           onChange={(e) => setNewOption(e.target.value)}
@@ -1499,7 +1979,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
         <Accordion sx={accordionSx}>
           <AccordionSummary expandIcon={<IconChevronDown />} sx={accordionSummarySx}>
             <Typography variant="subtitle1" fontWeight={600}>
-              Validation Rules
+              {t('validationRules')}
             </Typography>
           </AccordionSummary>
 
@@ -1512,7 +1992,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                   color="primary"
                 />
               }
-              label="Required Field"
+              label={t('requiredField')}
               sx={requiredSwitchSx}
             />
 
@@ -1525,7 +2005,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                   <Grid container spacing={2}>
                     <Grid item xs={6}>
                       <TextField
-                        label="Min Length"
+                        label={t('minLength')}
                         type="number"
                         fullWidth
                         value={localField.schema?.minLength || ''}
@@ -1550,7 +2030,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                     </Grid>
                     <Grid item xs={6}>
                       <TextField
-                        label="Max Length"
+                        label={t('maxLength')}
                         type="number"
                         fullWidth
                         value={localField.schema?.maxLength || ''}
@@ -1576,7 +2056,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                   </Grid>
 
                   <TextField
-                    label="Pattern (RegEx)"
+                    label={t('pattern')}
                     fullWidth
                     value={localField.schema?.pattern || ''}
                     onChange={(e) =>
@@ -1586,7 +2066,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                     }
                     margin="normal"
                     variant="outlined"
-                    helperText="Regular expression for validation (e.g., ^[A-Za-z]+$ for letters only)"
+                    helperText={t('patternHelp')}
                     sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                   />
                 </>
@@ -1594,7 +2074,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
 
               {localField.type === 'email' && (
                 <TextField
-                  label="Pattern (RegEx)"
+                  label={t('pattern')}
                   fullWidth
                   value={localField.schema?.pattern || ''}
                   onChange={(e) =>
@@ -1604,7 +2084,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                   }
                   margin="normal"
                   variant="outlined"
-                  helperText="Regular expression for validation (e.g., ^[A-Za-z]+$ for letters only)"
+                  helperText={t('patternHelp')}
                   sx={outlinedTextFieldSx}
                 />
               )}
@@ -1612,7 +2092,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                 <Grid container spacing={2}>
                   <Grid item xs={6}>
                     <TextField
-                      label="Minimum Value"
+                      label={t('minimumValue')}
                       type="number"
                       fullWidth
                       value={localField.schema?.minimum || ''}
@@ -1630,7 +2110,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
 
                   <Grid item xs={6}>
                     <TextField
-                      label="Maximum Value"
+                      label={t('maximumValue')}
                       type="number"
                       fullWidth
                       value={localField.schema?.maximum || ''}
@@ -1661,7 +2141,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                   <Grid container spacing={2}>
                     <Grid item xs={6}>
                       <TextField
-                        label="Min Date"
+                        label={t('minDate')}
                         type={localField.uischema?.options?.includeTime ? 'datetime-local' : 'date'}
                         fullWidth
                         value={(() => {
@@ -1700,10 +2180,39 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                           }
 
                           handleSchemaUpdate({ minimum: dateValue });
+
+                          // Clear default if it's now invalid
+                          const currentDefault = localField.schema?.default;
+                          if (
+                            currentDefault &&
+                            dateValue &&
+                            new Date(currentDefault) < new Date(dateValue)
+                          ) {
+                            handleSchemaUpdate({ minimum: dateValue, default: undefined });
+                          }
+                        }}
+                        inputProps={{
+                          max: (() => {
+                            const maxDate = localField.schema?.maximum;
+                            if (!maxDate) return undefined;
+                            const includeTime = localField.uischema?.options?.includeTime;
+                            if (includeTime) {
+                              const date = new Date(maxDate);
+                              if (!isNaN(date.getTime())) {
+                                const year = date.getFullYear();
+                                const month = String(date.getMonth() + 1).padStart(2, '0');
+                                const day = String(date.getDate()).padStart(2, '0');
+                                const hours = String(date.getHours()).padStart(2, '0');
+                                const minutes = String(date.getMinutes()).padStart(2, '0');
+                                return `${year}-${month}-${day}T${hours}:${minutes}`;
+                              }
+                            }
+                            return maxDate ? maxDate.split('T')[0] : undefined;
+                          })(),
                         }}
                         margin="normal"
                         variant="outlined"
-                        helperText="Minimum allowed date"
+                        helperText={t('minDateHelp')}
                         InputLabelProps={{
                           shrink: true,
                         }}
@@ -1729,11 +2238,11 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                     </Grid>
                     <Grid item xs={6}>
                       <TextField
-                        label="Max Date"
+                        label={t('maxDate')}
                         type={localField.uischema?.options?.includeTime ? 'datetime-local' : 'date'}
                         fullWidth
                         value={(() => {
-                          const maxDate = localField.uischema?.options?.maxDate;
+                          const maxDate = localField.schema?.maximum;
                           if (!maxDate) return '';
 
                           const includeTime = localField.uischema?.options?.includeTime;
@@ -1768,10 +2277,39 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                           }
 
                           handleSchemaUpdate({ maximum: dateValue });
+
+                          // Clear default if it's now invalid
+                          const currentDefault = localField.schema?.default;
+                          if (
+                            currentDefault &&
+                            dateValue &&
+                            new Date(currentDefault) > new Date(dateValue)
+                          ) {
+                            handleSchemaUpdate({ maximum: dateValue, default: undefined });
+                          }
+                        }}
+                        inputProps={{
+                          min: (() => {
+                            const minDate = localField.schema?.minimum;
+                            if (!minDate) return undefined;
+                            const includeTime = localField.uischema?.options?.includeTime;
+                            if (includeTime) {
+                              const date = new Date(minDate);
+                              if (!isNaN(date.getTime())) {
+                                const year = date.getFullYear();
+                                const month = String(date.getMonth() + 1).padStart(2, '0');
+                                const day = String(date.getDate()).padStart(2, '0');
+                                const hours = String(date.getHours()).padStart(2, '0');
+                                const minutes = String(date.getMinutes()).padStart(2, '0');
+                                return `${year}-${month}-${day}T${hours}:${minutes}`;
+                              }
+                            }
+                            return minDate ? minDate.split('T')[0] : undefined;
+                          })(),
                         }}
                         margin="normal"
                         variant="outlined"
-                        helperText="Maximum allowed date"
+                        helperText={t('maxDateHelp')}
                         InputLabelProps={{
                           shrink: true,
                         }}
@@ -1804,13 +2342,13 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                 localField.schema?.properties?.endDate && (
                   <Box>
                     <Typography variant="subtitle2" sx={{ mt: 2, mb: 2, fontWeight: 500 }}>
-                      Date Range Validation
+                      {t('dateRangeValidation')}
                     </Typography>
                     <Grid container spacing={2}>
-                      {/* Start Date Min */}
+                      {/* Min Date */}
                       <Grid item xs={6}>
                         <TextField
-                          label="Min Start Date"
+                          label={t('minDate')}
                           type="date"
                           fullWidth
                           value={(() => {
@@ -1825,19 +2363,52 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                             } else {
                               dateValue = undefined;
                             }
-                            handleSchemaUpdate({
+
+                            const updates = {
                               properties: {
                                 ...localField.schema.properties,
                                 startDate: {
                                   ...localField.schema.properties.startDate,
                                   minimum: dateValue,
                                 },
+                                endDate: {
+                                  ...localField.schema.properties.endDate,
+                                  minimum: dateValue,
+                                },
                               },
-                            });
+                            };
+
+                            // Clear defaults if they become invalid
+                            const defaultStartDate =
+                              localField.schema?.properties?.startDate?.default;
+                            const defaultEndDate = localField.schema?.properties?.endDate?.default;
+
+                            if (
+                              defaultStartDate &&
+                              dateValue &&
+                              new Date(defaultStartDate) < new Date(dateValue)
+                            ) {
+                              updates.properties.startDate.default = undefined;
+                            }
+                            if (
+                              defaultEndDate &&
+                              dateValue &&
+                              new Date(defaultEndDate) < new Date(dateValue)
+                            ) {
+                              updates.properties.endDate.default = undefined;
+                            }
+
+                            handleSchemaUpdate(updates);
+                          }}
+                          inputProps={{
+                            max: (() => {
+                              const maxEndDate = localField.schema?.properties?.endDate?.maximum;
+                              return maxEndDate ? maxEndDate.split('T')[0] : undefined;
+                            })(),
                           }}
                           margin="normal"
                           variant="outlined"
-                          helperText="Earliest allowed start date"
+                          helperText={t('minDateRangeHelp')}
                           InputLabelProps={{
                             shrink: true,
                           }}
@@ -1852,6 +2423,10 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                                         ...localField.schema.properties,
                                         startDate: {
                                           ...localField.schema.properties.startDate,
+                                          minimum: undefined,
+                                        },
+                                        endDate: {
+                                          ...localField.schema.properties.endDate,
                                           minimum: undefined,
                                         },
                                       },
@@ -1872,10 +2447,10 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                         />
                       </Grid>
 
-                      {/* End Date Max */}
+                      {/* Max Date */}
                       <Grid item xs={6}>
                         <TextField
-                          label="Max End Date"
+                          label={t('maxDate')}
                           type="date"
                           fullWidth
                           value={(() => {
@@ -1890,19 +2465,53 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                             } else {
                               dateValue = undefined;
                             }
-                            handleSchemaUpdate({
+
+                            const updates = {
                               properties: {
                                 ...localField.schema.properties,
+                                startDate: {
+                                  ...localField.schema.properties.startDate,
+                                  maximum: dateValue,
+                                },
                                 endDate: {
                                   ...localField.schema.properties.endDate,
                                   maximum: dateValue,
                                 },
                               },
-                            });
+                            };
+
+                            // Clear defaults if they become invalid
+                            const defaultStartDate =
+                              localField.schema?.properties?.startDate?.default;
+                            const defaultEndDate = localField.schema?.properties?.endDate?.default;
+
+                            if (
+                              defaultStartDate &&
+                              dateValue &&
+                              new Date(defaultStartDate) > new Date(dateValue)
+                            ) {
+                              updates.properties.startDate.default = undefined;
+                            }
+                            if (
+                              defaultEndDate &&
+                              dateValue &&
+                              new Date(defaultEndDate) > new Date(dateValue)
+                            ) {
+                              updates.properties.endDate.default = undefined;
+                            }
+
+                            handleSchemaUpdate(updates);
+                          }}
+                          inputProps={{
+                            min: (() => {
+                              const minStartDate =
+                                localField.schema?.properties?.startDate?.minimum;
+                              return minStartDate ? minStartDate.split('T')[0] : undefined;
+                            })(),
                           }}
                           margin="normal"
                           variant="outlined"
-                          helperText="Latest allowed end date"
+                          helperText={t('maxDateRangeHelp')}
                           InputLabelProps={{
                             shrink: true,
                           }}
@@ -1915,6 +2524,10 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                                     handleSchemaUpdate({
                                       properties: {
                                         ...localField.schema.properties,
+                                        startDate: {
+                                          ...localField.schema.properties.startDate,
+                                          maximum: undefined,
+                                        },
                                         endDate: {
                                           ...localField.schema.properties.endDate,
                                           maximum: undefined,
@@ -1944,7 +2557,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                 <Grid container spacing={2}>
                   <Grid item xs={6}>
                     <TextField
-                      label="Min Items"
+                      label={t('minItems')}
                       type="number"
                       fullWidth
                       value={localField.schema?.minItems || ''}
@@ -1955,7 +2568,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                       }
                       margin="normal"
                       variant="outlined"
-                      helperText="Minimum number of items required in array"
+                      helperText={t('minItemsHelp')}
                       inputProps={{ min: 0 }}
                       sx={outlinedTextFieldSx}
                     />
@@ -1963,7 +2576,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
 
                   <Grid item xs={6}>
                     <TextField
-                      label="Max Items"
+                      label={t('maxItems')}
                       type="number"
                       fullWidth
                       value={localField.schema?.maxItems || ''}
@@ -1974,7 +2587,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                       }
                       margin="normal"
                       variant="outlined"
-                      helperText="Maximum number of items allowed in array"
+                      helperText={t('maxItemsHelp')}
                       inputProps={{ min: 0 }}
                       sx={outlinedTextFieldSx}
                     />
@@ -1988,7 +2601,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                   <Grid container spacing={1}>
                     <Grid item xs={12}>
                       <TextField
-                        label="Maximum File Size (MB)"
+                        label={t('maxFileSize')}
                         type="number"
                         fullWidth
                         value={maxSizeInput}
@@ -2012,7 +2625,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                         }}
                         margin="normal"
                         variant="outlined"
-                        helperText="Maximum allowed file size in megabytes"
+                        helperText={t('maxFileSizeHelp')}
                         inputProps={{
                           step: 0.1,
                           min: 0,
