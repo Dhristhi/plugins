@@ -76,6 +76,7 @@ function compileRule(field) {
     condition: {
       scope: '#',
       schema,
+      failWhenUndefined: true,
     },
   };
 }
@@ -102,16 +103,16 @@ function buildPropertyCondition({ dependsOn, operator, value }) {
       schemaCondition = { not: { const: Number(constValue) } };
       break;
     case 'gt':
-      schemaCondition = { exclusiveMinimum: Number(value) };
+      schemaCondition = { type: 'number', exclusiveMinimum: Number(value) };
       break;
     case 'gte':
-      schemaCondition = { minimum: Number(value) };
+      schemaCondition = { type: 'number', minimum: Number(value) };
       break;
     case 'lt':
-      schemaCondition = { exclusiveMaximum: Number(value) };
+      schemaCondition = { type: 'number', exclusiveMaximum: Number(value) };
       break;
     case 'lte':
-      schemaCondition = { maximum: Number(value) };
+      schemaCondition = { type: 'number', maximum: Number(value) };
       break;
 
     case 'pattern': {
