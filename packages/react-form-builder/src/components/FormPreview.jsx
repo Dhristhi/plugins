@@ -109,7 +109,7 @@ const FormPreview = ({
 
   const { t, i18n } = useTranslation();
 
-  const ajv = useMemo(() => createAjv({ useDefaults: 'empty' }), []);
+  const ajv = useMemo(() => createAjv({ useDefaults: false }), []);
 
   const [key, setKey] = useState(0); // Force re-render
   const [hasValidated, setHasValidated] = useState(false);

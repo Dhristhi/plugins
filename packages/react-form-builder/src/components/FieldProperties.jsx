@@ -1337,89 +1337,95 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                   )}
 
                   {/* Default Date Value Picker */}
-                  <TextField
-                    label={t('defaultDateValue')}
-                    type={localField.uischema?.options?.includeTime ? 'datetime-local' : 'date'}
-                    fullWidth
-                    value={(() => {
-                      const defaultDate = localField.schema?.default;
-                      if (!defaultDate) return '';
+                  {!(
+                    localField.schema?.type === 'object' &&
+                    localField.schema?.properties?.startDate &&
+                    localField.schema?.properties?.endDate
+                  ) && (
+                    <TextField
+                      label={t('defaultDateValue')}
+                      type={localField.uischema?.options?.includeTime ? 'datetime-local' : 'date'}
+                      fullWidth
+                      value={(() => {
+                        const defaultDate = localField.schema?.default;
+                        if (!defaultDate) return '';
 
-                      const includeTime = localField.uischema?.options?.includeTime;
-                      if (includeTime) {
-                        const date = new Date(defaultDate);
-                        if (!isNaN(date.getTime())) {
-                          const year = date.getFullYear();
-                          const month = String(date.getMonth() + 1).padStart(2, '0');
-                          const day = String(date.getDate()).padStart(2, '0');
-                          const hours = String(date.getHours()).padStart(2, '0');
-                          const minutes = String(date.getMinutes()).padStart(2, '0');
-                          return `${year}-${month}-${day}T${hours}:${minutes}`;
-                        }
-                      }
-                      return defaultDate ? defaultDate.split('T')[0] : '';
-                    })()}
-                    onChange={(e) => {
-                      let dateValue = e.target.value;
-
-                      if (dateValue) {
                         const includeTime = localField.uischema?.options?.includeTime;
                         if (includeTime) {
-                          const date = new Date(dateValue);
-                          dateValue = date.toISOString();
+                          const date = new Date(defaultDate);
+                          if (!isNaN(date.getTime())) {
+                            const year = date.getFullYear();
+                            const month = String(date.getMonth() + 1).padStart(2, '0');
+                            const day = String(date.getDate()).padStart(2, '0');
+                            const hours = String(date.getHours()).padStart(2, '0');
+                            const minutes = String(date.getMinutes()).padStart(2, '0');
+                            return `${year}-${month}-${day}T${hours}:${minutes}`;
+                          }
+                        }
+                        return defaultDate ? defaultDate.split('T')[0] : '';
+                      })()}
+                      onChange={(e) => {
+                        let dateValue = e.target.value;
+
+                        if (dateValue) {
+                          const includeTime = localField.uischema?.options?.includeTime;
+                          if (includeTime) {
+                            const date = new Date(dateValue);
+                            dateValue = date.toISOString();
+                          } else {
+                            dateValue = dateValue.split('T')[0];
+                          }
                         } else {
-                          dateValue = dateValue.split('T')[0];
+                          dateValue = undefined;
                         }
-                      } else {
-                        dateValue = undefined;
-                      }
 
-                      handleSchemaUpdate({ default: dateValue });
-                    }}
-                    inputProps={{
-                      min: (() => {
-                        const minDate = localField.schema?.minimum;
-                        if (!minDate) return undefined;
-                        const includeTime = localField.uischema?.options?.includeTime;
-                        if (includeTime) {
-                          const date = new Date(minDate);
-                          if (!isNaN(date.getTime())) {
-                            const year = date.getFullYear();
-                            const month = String(date.getMonth() + 1).padStart(2, '0');
-                            const day = String(date.getDate()).padStart(2, '0');
-                            const hours = String(date.getHours()).padStart(2, '0');
-                            const minutes = String(date.getMinutes()).padStart(2, '0');
-                            return `${year}-${month}-${day}T${hours}:${minutes}`;
+                        handleSchemaUpdate({ default: dateValue });
+                      }}
+                      inputProps={{
+                        min: (() => {
+                          const minDate = localField.schema?.minimum;
+                          if (!minDate) return undefined;
+                          const includeTime = localField.uischema?.options?.includeTime;
+                          if (includeTime) {
+                            const date = new Date(minDate);
+                            if (!isNaN(date.getTime())) {
+                              const year = date.getFullYear();
+                              const month = String(date.getMonth() + 1).padStart(2, '0');
+                              const day = String(date.getDate()).padStart(2, '0');
+                              const hours = String(date.getHours()).padStart(2, '0');
+                              const minutes = String(date.getMinutes()).padStart(2, '0');
+                              return `${year}-${month}-${day}T${hours}:${minutes}`;
+                            }
                           }
-                        }
-                        return minDate ? minDate.split('T')[0] : undefined;
-                      })(),
-                      max: (() => {
-                        const maxDate = localField.schema?.maximum;
-                        if (!maxDate) return undefined;
-                        const includeTime = localField.uischema?.options?.includeTime;
-                        if (includeTime) {
-                          const date = new Date(maxDate);
-                          if (!isNaN(date.getTime())) {
-                            const year = date.getFullYear();
-                            const month = String(date.getMonth() + 1).padStart(2, '0');
-                            const day = String(date.getDate()).padStart(2, '0');
-                            const hours = String(date.getHours()).padStart(2, '0');
-                            const minutes = String(date.getMinutes()).padStart(2, '0');
-                            return `${year}-${month}-${day}T${hours}:${minutes}`;
+                          return minDate ? minDate.split('T')[0] : undefined;
+                        })(),
+                        max: (() => {
+                          const maxDate = localField.schema?.maximum;
+                          if (!maxDate) return undefined;
+                          const includeTime = localField.uischema?.options?.includeTime;
+                          if (includeTime) {
+                            const date = new Date(maxDate);
+                            if (!isNaN(date.getTime())) {
+                              const year = date.getFullYear();
+                              const month = String(date.getMonth() + 1).padStart(2, '0');
+                              const day = String(date.getDate()).padStart(2, '0');
+                              const hours = String(date.getHours()).padStart(2, '0');
+                              const minutes = String(date.getMinutes()).padStart(2, '0');
+                              return `${year}-${month}-${day}T${hours}:${minutes}`;
+                            }
                           }
-                        }
-                        return maxDate ? maxDate.split('T')[0] : undefined;
-                      })(),
-                    }}
-                    margin="normal"
-                    variant="outlined"
-                    helperText={t('defaultDateHelp')}
-                    InputLabelProps={{
-                      shrink: true,
-                    }}
-                    sx={outlinedTextFieldSx}
-                  />
+                          return maxDate ? maxDate.split('T')[0] : undefined;
+                        })(),
+                      }}
+                      margin="normal"
+                      variant="outlined"
+                      helperText={t('defaultDateHelp')}
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                      sx={outlinedTextFieldSx}
+                    />
+                  )}
 
                   {/* Default Date Range Values - only for date range fields */}
                   {localField.schema?.type === 'object' &&
