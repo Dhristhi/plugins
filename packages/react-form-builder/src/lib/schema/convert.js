@@ -17,6 +17,9 @@ export const mapSchemaPropertyToFieldType = (property, defaultFieldTypes) => {
       if (format === 'date' || format === 'date-time') {
         return defaultFieldTypes.find((ft) => ft.id === 'date') || defaultFieldTypes[0];
       }
+      if (format === 'data-url') {
+        return defaultFieldTypes.find((ft) => ft.id === 'file') || defaultFieldTypes[0];
+      }
       if (maxLength && maxLength > 100) {
         return defaultFieldTypes.find((ft) => ft.id === 'textarea') || defaultFieldTypes[0];
       }
