@@ -348,13 +348,20 @@ export const defaultFieldTypes = [
     schema: {
       type: 'array',
       items: {
-        type: 'string',
+        type: 'object',
+        properties: {},
       },
       uniqueItems: true,
     },
     uischema: {
       type: 'Control',
       scope: '#/properties/field',
+      options: {
+        detail: {
+          type: 'VerticalLayout',
+          elements: [],
+        },
+      },
     },
   },
 ];

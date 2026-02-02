@@ -1682,7 +1682,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                 <FormControl fullWidth margin="normal">
                   <InputLabel>{t('arrayItemType')}</InputLabel>
                   <Select
-                    value={localField.schema?.items?.type || 'string'}
+                    value={localField.schema?.items?.type || 'object'}
                     label={t('arrayItemType')}
                     onChange={(e) => {
                       const itemType = e.target.value;

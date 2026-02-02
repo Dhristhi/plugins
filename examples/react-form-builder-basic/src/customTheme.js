@@ -194,9 +194,7 @@ const getCustomTheme = (mode = 'light') =>
           },
           colorPrimary: {
             background:
-              mode === 'dark'
-                ? 'linear-gradient(45deg, #7b1fa2 30%, #9c27b0 90%)'
-                : 'linear-gradient(45deg, #ba68c8 30%, #e1bee7 90%)',
+              mode === 'dark' ? 'linear-gradient(45deg, #7b1fa2 30%, #9c27b0 90%)' : 'undefined',
             color: mode === 'dark' ? '#e1bee7' : '#7b1fa2',
           },
         },
