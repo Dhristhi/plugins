@@ -166,10 +166,7 @@ const FormBuilder = ({ onSave, onExport, schemas = [] } = {}) => {
     const newField = {
       id: `field_${uniqueId}`,
       type: fieldType.id,
-      label: fieldType.isLayout
-        ? fieldType.label
-        : `${t(fieldType.translationKey || fieldType.labelKey || fieldType.label)} ${t('fieldSuffix', 'Field')}`,
-      i18nKey: fieldType.translationKey || fieldType.labelKey || fieldType.label,
+      label: fieldType.isLayout ? fieldType.label : `${fieldType.label}`,
       key: fieldKey,
       required: false,
       schema: { ...fieldType.schema },
