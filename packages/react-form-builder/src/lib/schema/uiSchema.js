@@ -76,6 +76,7 @@ function compileRule(field) {
     condition: {
       scope: '#',
       schema,
+      failWhenUndefined: true,
     },
   };
 }
@@ -102,16 +103,16 @@ function buildPropertyCondition({ dependsOn, operator, value }) {
       schemaCondition = { not: { const: Number(constValue) } };
       break;
     case 'gt':
-      schemaCondition = { exclusiveMinimum: Number(value) };
+      schemaCondition = { type: 'number', exclusiveMinimum: Number(value) };
       break;
     case 'gte':
-      schemaCondition = { minimum: Number(value) };
+      schemaCondition = { type: 'number', minimum: Number(value) };
       break;
     case 'lt':
-      schemaCondition = { exclusiveMaximum: Number(value) };
+      schemaCondition = { type: 'number', exclusiveMaximum: Number(value) };
       break;
     case 'lte':
-      schemaCondition = { maximum: Number(value) };
+      schemaCondition = { type: 'number', maximum: Number(value) };
       break;
 
     case 'pattern': {
@@ -230,6 +231,30 @@ export const buildUISchemaFromFields = (fieldsArray, parentKey = null) => {
           let detailElements = [];
           if (field.children && field.children.length > 0) {
             detailElements = buildUISchemaForArrayItems(field.children);
+          }
+          if (field.visibility) {
+            let rule = {};
+            rule = compileRule(field);
+            return [
+              {
+                type: 'Control',
+                scope: scope,
+                label: field.label,
+                i18n: field.i18nKey || field.label,
+                options: {
+                  addable: true,
+                  ...field.uischema?.options,
+                  showSortButtons: true,
+                  ...(detailElements.length > 0 && {
+                    detail: {
+                      type: 'VerticalLayout',
+                      elements: detailElements,
+                    },
+                  }),
+                },
+                rule: rule,
+              },
+            ];
           }
 
           return [
