@@ -118,8 +118,8 @@ const FormPreview = ({
   const validateBox = {
     position: 'fixed',
     bottom: 0,
-    left: { xs: 0, md: 320 },
-    width: { xs: '100%', md: `calc(100% - 320px)` },
+    left: 0,
+    right: 0,
     height: 64,
     backgroundColor: 'background.paper',
     borderTop: '1px solid',

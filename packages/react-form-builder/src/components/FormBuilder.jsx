@@ -457,7 +457,7 @@ const FormBuilder = ({ onSave, onExport, schemas = [] } = {}) => {
     borderRight: { md: 1 },
     borderColor: { md: 'grey.200' },
     borderBottom: { xs: 1, md: 'none' },
-    display: 'flex',
+    display: showFormPreview ? 'none' : 'flex',
     flexDirection: 'column',
     overflow: 'auto',
     boxShadow: { md: 1 },
@@ -469,6 +469,7 @@ const FormBuilder = ({ onSave, onExport, schemas = [] } = {}) => {
     flexDirection: 'column',
     overflow: 'auto',
     minHeight: { xs: '60vh', md: 'auto' },
+    marginLeft: showFormPreview ? 0 : { xs: 0, md: 0 },
   };
 
   const dragOverlay = {
