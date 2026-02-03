@@ -326,6 +326,17 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
         };
       }
 
+      // Detect file upload fields and correct their type for display
+      if (
+        updatedField.schema?.format === 'data-url' ||
+        (updatedField.uischema?.options && updatedField.uischema.options['ui:widget'] === 'file')
+      ) {
+        updatedField = {
+          ...updatedField,
+          type: 'file',
+        };
+      }
+
       setLocalField(updatedField);
       if (field.isLayout) {
         setLayout(field.type);
@@ -505,6 +516,11 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
       localField.schema?.type === 'object' &&
       localField.schema?.properties?.startDate &&
       localField.schema?.properties?.endDate;
+
+    // File upload fields should show file type option
+    if (localField.type === 'file') {
+      return availableFieldTypes.filter((ft) => ft.id === 'file');
+    }
 
     // Array fields with enum items (multiselect) can switch between multiselect types and array
     if (currentSchemaType === 'array' && localField.schema?.items?.enum) {
@@ -1683,7 +1699,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                 <FormControl fullWidth margin="normal">
                   <InputLabel>{t('arrayItemType')}</InputLabel>
                   <Select
-                    value={localField.schema?.items?.type || 'string'}
+                    value={localField.schema?.items?.type || 'object'}
                     label={t('arrayItemType')}
                     onChange={(e) => {
                       const itemType = e.target.value;
