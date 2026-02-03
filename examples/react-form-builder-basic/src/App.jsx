@@ -406,6 +406,12 @@ const schemas = [
           minimum: 0,
           maximum: 1000,
         },
+        integer_basic: {
+          type: 'integer',
+          title: 'Integer',
+          minimum: 1,
+          maximum: 100,
+        },
         boolean_basic: {
           type: 'boolean',
           title: 'Boolean Flag',
@@ -513,6 +519,7 @@ const schemas = [
         'string_basic',
         'string_email',
         'number_basic',
+        'integer_basic',
         'boolean_basic',
         'array_strings',
         'array_objects',
