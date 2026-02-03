@@ -108,6 +108,9 @@
   "fieldType_number": "Number",
   "fieldType_integer": "Integer",
   "fieldType_text": "Text Input",
+  "textType": "Text Type",
+  "singleLineText": "Single Line Text",
+  "multiLineText": "Multi-line Text",
   "fieldType_textarea": "Textarea",
   "fieldType_email": "Email",
   "fieldType_password": "Password",
@@ -202,6 +205,8 @@
   "desktop": "Desktop",
   "tablet": "Tablet",
   "mobile": "Mobile",
+  "fullscreen": "Fullscreen",
+  "exitFullscreen": "Exit Fullscreen",
 
   "validation": {
     "passwordMismatch": "Passwords do not match",
