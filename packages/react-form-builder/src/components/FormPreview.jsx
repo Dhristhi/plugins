@@ -9,9 +9,9 @@ import { DeviceToolbar, DEVICE_PRESETS } from './DeviceToolbar';
 import CommonHeader from './CommonHeader';
 import { getRenderers, getCells, config } from '../controls/renders';
 
-const MAX_WIDTH_BEFORE_SCALE = 1200;
+const MAX_WIDTH_BEFORE_SCALE = 1400;
 
-const FormResponsivePreview = ({ children }) => {
+const FormResponsivePreview = ({ isFullscreen, setIsFullscreen, children }) => {
   const [deviceId, setDeviceId] = useState('responsive');
   // const [orientation, setOrientation] = useState('portrait');
   const preset = useMemo(
@@ -147,6 +147,8 @@ const FormResponsivePreview = ({ children }) => {
         height={deviceHeight}
         onChangeSize={setSize}
         onToggleOrientation={toggleOrientation}
+        isFullscreen={isFullscreen}
+        setIsFullscreen={setIsFullscreen}
       />
       <Box sx={viewportSx} ref={viewportRef}>
         <Box sx={deviceFrameSx}>
@@ -171,7 +173,7 @@ const FormPreview = ({
   const isProgrammaticUpdateRef = useRef(false);
 
   const { t, i18n } = useTranslation();
-
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const ajv = useMemo(() => createAjv({ useDefaults: false }), []);
 
   const [key, setKey] = useState(0); // Force re-render
@@ -181,8 +183,8 @@ const FormPreview = ({
   const validateBox = {
     position: 'fixed',
     bottom: 0,
-    left: { xs: 0, md: 320 },
-    width: { xs: '100%', md: `calc(100% - 320px)` },
+    left: 0,
+    right: 0,
     height: 64,
     backgroundColor: 'background.paper',
     borderTop: '1px solid',
@@ -398,20 +400,28 @@ const FormPreview = ({
 
   return (
     <Box sx={{ paddingBottom: '64px' }}>
-      <CommonHeader
-        title={t('formPreview')}
-        description={t('testYourForm')}
-        icon={IconEye}
-        showFormPreview={showFormPreview}
-        setShowFormPreview={setShowFormPreview}
-        showSchemaEditor={showSchemaEditor}
-        setShowSchemaEditor={setShowSchemaEditor}
-        exportForm={exportForm}
-      />
+      <Box
+        sx={{
+          height: isFullscreen ? 0 : '120px',
+          overflow: 'hidden',
+          transition: 'height 0.3s ease-in-out',
+        }}
+      >
+        <CommonHeader
+          title={t('formPreview')}
+          description={t('testYourForm')}
+          icon={IconEye}
+          showFormPreview={showFormPreview}
+          setShowFormPreview={setShowFormPreview}
+          showSchemaEditor={showSchemaEditor}
+          setShowSchemaEditor={setShowSchemaEditor}
+          exportForm={exportForm}
+        />
+      </Box>
       <Box sx={{ p: 2 }}>
         {formState.schema.properties && Object.keys(formState.schema.properties).length > 0 ? (
           <div ref={formRef}>
-            <FormResponsivePreview>
+            <FormResponsivePreview isFullscreen={isFullscreen} setIsFullscreen={setIsFullscreen}>
               <JsonForms
                 key={key} // Force re-render when validation state changes
                 ajv={ajv}

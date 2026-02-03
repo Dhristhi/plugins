@@ -1,8 +1,9 @@
-import { IconRefresh } from '@tabler/icons-react';
+import { IconRefresh, IconMaximize, IconMinimize } from '@tabler/icons-react';
 import { Box, Select, MenuItem, TextField, IconButton, Tooltip } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 
 export const DEVICE_PRESETS = [
-  { id: 'responsive', label: 'Responsive', width: 1100, height: 800 },
+  { id: 'responsive', label: 'Responsive', width: 1400, height: 800 },
   { id: 'iphone-se', label: 'iPhone SE', width: 375, height: 667 },
   { id: 'iphone-xr', label: 'iPhone XR', width: 414, height: 896 },
   { id: 'iphone-12-pro', label: 'iPhone 12 Pro', width: 390, height: 844 },
@@ -30,8 +31,11 @@ export const DeviceToolbar = ({
   height,
   onChangeSize,
   onToggleOrientation,
+  isFullscreen,
+  setIsFullscreen,
 }) => {
   const isResponsive = selectedId !== 'responsive';
+  const { t } = useTranslation();
   return (
     <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 1 }}>
       Screen:{' '}
@@ -64,9 +68,14 @@ export const DeviceToolbar = ({
         onChange={(e) => onChangeSize({ width, height: Number(e.target.value) })}
         sx={{ width: 80 }}
       />
-      <Tooltip title="Rotate">
+      <Tooltip title={t('rotate')}>
         <IconButton onClick={onToggleOrientation} size="small">
           <IconRefresh size={24} />
+        </IconButton>
+      </Tooltip>
+      <Tooltip title={isFullscreen ? t('exitFullscreen') : t('fullscreen')}>
+        <IconButton onClick={() => setIsFullscreen(!isFullscreen)}>
+          {isFullscreen ? <IconMinimize /> : <IconMaximize />}
         </IconButton>
       </Tooltip>
     </Box>
