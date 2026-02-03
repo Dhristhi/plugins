@@ -20,13 +20,20 @@ export const mapSchemaPropertyToFieldType = (property, defaultFieldTypes) => {
       if (format === 'data-url') {
         return defaultFieldTypes.find((ft) => ft.id === 'file') || defaultFieldTypes[0];
       }
+      if (format === 'password') {
+        return defaultFieldTypes.find((ft) => ft.id === 'password') || defaultFieldTypes[0];
+      }
+      if (format === 'url' || format === 'uri') {
+        return defaultFieldTypes.find((ft) => ft.id === 'url') || defaultFieldTypes[0];
+      }
       if (maxLength && maxLength > 100) {
         return defaultFieldTypes.find((ft) => ft.id === 'textarea') || defaultFieldTypes[0];
       }
       return defaultFieldTypes.find((ft) => ft.id === 'text') || defaultFieldTypes[0];
     case 'number':
-    case 'integer':
       return defaultFieldTypes.find((ft) => ft.id === 'number') || defaultFieldTypes[0];
+    case 'integer':
+      return defaultFieldTypes.find((ft) => ft.id === 'integer') || defaultFieldTypes[0];
     case 'boolean':
       return defaultFieldTypes.find((ft) => ft.id === 'checkbox') || defaultFieldTypes[0];
     default:
