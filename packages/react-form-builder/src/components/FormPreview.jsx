@@ -2,28 +2,74 @@ import { createAjv } from '@jsonforms/core';
 import { JsonForms } from '@jsonforms/react';
 import { IconEye } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
-import { useState, useMemo, useRef } from 'react';
-import { Typography, Button, Box, Tooltip, IconButton } from '@mui/material';
+import { useState, useMemo, useRef, useEffect, useLayoutEffect } from 'react';
+import { Typography, Button, Box } from '@mui/material';
+import { DeviceToolbar, DEVICE_PRESETS } from './DeviceToolbar';
 
 import CommonHeader from './CommonHeader';
 import { getRenderers, getCells, config } from '../controls/renders';
-import { IconDeviceDesktop, IconDeviceTablet, IconDeviceMobile } from '@tabler/icons-react';
 
-const getPreviewModes = (t) => ({
-  desktop: { width: 1200, label: t('desktop'), icon: <IconDeviceDesktop /> },
-  tablet: { width: 768, label: t('tablet'), icon: <IconDeviceTablet /> },
-  mobile: { width: 375, label: t('mobile'), icon: <IconDeviceMobile /> },
-});
+const MAX_WIDTH_BEFORE_SCALE = 1200;
 
-const FormResponsivePreview = ({ mode, children, previewModes }) => {
-  const { width } = previewModes[mode];
-  const responsiveParentSx = {
+const FormResponsivePreview = ({ children }) => {
+  const [deviceId, setDeviceId] = useState('responsive');
+  // const [orientation, setOrientation] = useState('portrait');
+  const preset = useMemo(
+    () => DEVICE_PRESETS.find((d) => d.id === deviceId) ?? DEVICE_PRESETS[0],
+    [deviceId]
+  );
+
+  const [size, setSize] = useState({ width: preset.width, height: preset.height });
+
+  // keep size in sync when device changes
+  useEffect(() => {
+    setSize({ width: preset.width, height: preset.height });
+  }, [preset]);
+
+  const toggleOrientation = () => {
+    setSize((s) => ({ width: s.height, height: s.width }));
+  };
+
+  const deviceWidth = size.width;
+  const deviceHeight = size.height;
+
+  const viewportRef = useRef(null);
+  const [scale, setScale] = useState(1);
+
+  useLayoutEffect(() => {
+    if (!viewportRef.current) return;
+
+    const { clientWidth, clientHeight } = viewportRef.current;
+
+    if (deviceWidth <= MAX_WIDTH_BEFORE_SCALE) {
+      setScale(1);
+      return;
+    }
+
+    const scaleToFit = Math.min(clientWidth / deviceWidth, clientHeight / deviceHeight);
+
+    setScale(Math.min(1, scaleToFit));
+  }, [deviceWidth, deviceHeight]);
+
+  const outerSx = {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     p: 2,
     height: 650,
   };
+
+  const viewportSx = {
+    width: '100%',
+    height: '100%',
+    borderColor: 'transparent',
+    borderRadius: 2,
+    overflow: 'hidden',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+  };
+
   const mobileContainerSx = {
     '& .MuiGrid-item, & .MuiGrid2-root': {
       maxWidth: '100%',
@@ -70,25 +116,42 @@ const FormResponsivePreview = ({ mode, children, previewModes }) => {
       columnGap: '8px',
     },
   };
-  const responsiveContainerSx = {
-    width,
-    height: 600,
+
+  const deviceFrameSx = {
+    width: deviceWidth,
+    height: deviceHeight,
     maxWidth: '100%',
-    border: 2,
-    borderColor: 'grey.300',
+    maxHeight: '100%',
+    border: '1px solid #999',
     borderRadius: 2,
     overflow: 'hidden',
-    contain: 'layout style size',
-    ...(width <= 400 && mobileContainerSx),
-    ...(width === 768 && tabletContainerSX),
+    ...(deviceWidth <= 400 && mobileContainerSx),
+    ...(deviceWidth <= 768 && deviceWidth > 400 && tabletContainerSX),
   };
 
-  const responsiveChildSx = { width: '100%', height: '100%', p: 2, overflowY: 'auto' };
+  const innerSx = {
+    width: '100%',
+    height: '100%',
+    padding: '20px',
+    overflowY: 'auto',
+    transform: `scale(${scale})`,
+    transformOrigin: 'top',
+  };
 
   return (
-    <Box sx={responsiveParentSx}>
-      <Box sx={responsiveContainerSx}>
-        <Box sx={responsiveChildSx}>{children}</Box>
+    <Box sx={outerSx}>
+      <DeviceToolbar
+        selectedId={deviceId}
+        onChangeDevice={setDeviceId}
+        width={deviceWidth}
+        height={deviceHeight}
+        onChangeSize={setSize}
+        onToggleOrientation={toggleOrientation}
+      />
+      <Box sx={viewportSx} ref={viewportRef}>
+        <Box sx={deviceFrameSx}>
+          <Box sx={innerSx}>{children}</Box>
+        </Box>
       </Box>
     </Box>
   );
@@ -165,23 +228,6 @@ const FormPreview = ({
       default:
         return 'validation.generic';
     }
-  };
-
-  const previewModes = useMemo(() => getPreviewModes(t), [t]);
-  const [mode, setMode] = useState('desktop');
-  const toolBarSx = { display: 'flex', gap: 1, justifyContent: 'center', alignItems: 'center' };
-  const PreviewToolbar = ({ mode }) => {
-    return (
-      <Box sx={toolBarSx}>
-        {Object.entries(previewModes).map(([key, cfg]) => (
-          <Tooltip key={key} title={cfg.label}>
-            <IconButton onClick={() => setMode(key)} color={mode === key ? 'primary' : 'default'}>
-              {cfg.icon}
-            </IconButton>
-          </Tooltip>
-        ))}
-      </Box>
-    );
   };
 
   const hasFieldContent = (value) => {
@@ -365,8 +411,7 @@ const FormPreview = ({
       <Box sx={{ p: 2 }}>
         {formState.schema.properties && Object.keys(formState.schema.properties).length > 0 ? (
           <div ref={formRef}>
-            <PreviewToolbar mode={mode} />
-            <FormResponsivePreview mode={mode} previewModes={previewModes}>
+            <FormResponsivePreview>
               <JsonForms
                 key={key} // Force re-render when validation state changes
                 ajv={ajv}
