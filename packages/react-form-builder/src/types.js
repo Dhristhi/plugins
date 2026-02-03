@@ -69,7 +69,7 @@ export const defaultFieldTypes = [
     type: 'number',
     labelKey: 'fieldType_number',
     translationKey: 'fieldType_number',
-    label: 'Number Field',
+    label: 'Number',
     icon: IconHash,
     schema: {
       type: 'number',

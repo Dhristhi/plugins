@@ -80,36 +80,35 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
 
   const OPERATORS = {
     string: [
-      { label: 'Equals', value: 'equals' },
-      { label: 'Not equals', value: 'not_equals' },
+      { label: t('op_equals'), value: 'equals' },
+      { label: t('op_not_equals'), value: 'not_equals' },
     ],
     boolean: [
-      { label: 'Is', value: 'equals' },
-      { label: 'Is not', value: 'not_equals' },
+      { label: t('op_is'), value: 'equals' },
+      { label: t('op_is_not'), value: 'not_equals' },
     ],
     number: [
-      { label: 'Equals', value: 'eq' },
-      { label: 'Not equals', value: 'neq' },
-      { label: 'Greater than', value: 'gt' },
-      { label: 'Greater than or equals to', value: 'gte' },
-      { label: 'less than', value: 'lt' },
-      { label: 'Less than or equals to', value: 'lte' },
+      { label: t('op_equals'), value: 'eq' },
+      { label: t('op_not_equals'), value: 'neq' },
+      { label: t('op_greater_than'), value: 'gt' },
+      { label: t('op_greater_than_or_equals'), value: 'gte' },
+      { label: t('op_less_than'), value: 'lt' },
+      { label: t('op_less_than_or_equals'), value: 'lte' },
     ],
     text: [
-      { label: 'Equals', value: 'equals' },
-      { label: 'Not equals', value: 'not_equals' },
-      { label: 'Contains', value: 'pattern' },
-      { label: 'Starts With', value: 'starts_with' },
-      { label: 'Ends With', value: 'ends_with' },
+      { label: t('op_equals'), value: 'equals' },
+      { label: t('op_not_equals'), value: 'not_equals' },
+      { label: t('op_contains'), value: 'pattern' },
+      { label: t('op_starts_with'), value: 'starts_with' },
+      { label: t('op_ends_with'), value: 'ends_with' },
     ],
-
     date: [
-      { label: 'Date equals', value: 'date_equals' },
-      { label: 'Date not equals', value: 'date_not_equals' },
-      { label: 'Date after', value: 'date_after' },
-      { label: 'Date on or after', value: 'date_on_or_after' },
-      { label: 'Date before', value: 'date_before' },
-      { label: 'Date on or before', value: 'date_on_or_before' },
+      { label: t('op_date_equals'), value: 'date_equals' },
+      { label: t('op_date_not_equals'), value: 'date_not_equals' },
+      { label: t('op_date_after'), value: 'date_after' },
+      { label: t('op_date_on_or_after'), value: 'date_on_or_after' },
+      { label: t('op_date_before'), value: 'date_before' },
+      { label: t('op_date_on_or_before'), value: 'date_on_or_before' },
     ],
   };
 
@@ -809,7 +808,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                     color="primary"
                   />
                 }
-                label="Is Dependent"
+                label={t('isDependent')}
                 sx={formControlLabelSx}
               />
             </Box>
@@ -818,10 +817,10 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
               <>
                 <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
                   <FormControl fullWidth margin="normal" size="small">
-                    <InputLabel id="effect">Choose Effect</InputLabel>
+                    <InputLabel id="effect">{t('chooseEffect')}</InputLabel>
                     <Select
                       labelId="effect"
-                      label="Choose Effect"
+                      label={t('chooseEffect')}
                       size="small"
                       value={localField.effect || ''}
                       onChange={(e) => {
@@ -831,7 +830,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                     >
                       {['SHOW', 'HIDE', 'ENABLE', 'DISABLE'].map((v) => (
                         <MenuItem key={v} value={v}>
-                          <Box sx={fieldTypeMenuItemSx}>{v}</Box>
+                          <Box sx={fieldTypeMenuItemSx}>{t(`effect_${v.toLowerCase()}`)}</Box>
                         </MenuItem>
                       ))}
                     </Select>
@@ -861,11 +860,11 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                         >
                           {/* Field selector */}
                           <FormControl size="small" sx={{ minWidth: 100 }}>
-                            <InputLabel id={`depends-on-label-${index}`}>Field</InputLabel>
+                            <InputLabel id={`depends-on-label-${index}`}>{t('field')}</InputLabel>
                             <Select
                               labelId={`depends-on-label-${index}`}
                               size="small"
-                              label="Field"
+                              label={t('field')}
                               value={row.dependsOn || ''}
                               onChange={
                                 (e) => updateCondition(index, 'dependsOn', e.target.value)
@@ -890,10 +889,12 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                             <>
                               {/* operator */}
                               <FormControl size="small" sx={{ minWidth: 110 }}>
-                                <InputLabel id={`operator-label-${index}`}>Operator</InputLabel>
+                                <InputLabel id={`operator-label-${index}`}>
+                                  {t('operator')}
+                                </InputLabel>
                                 <Select
                                   labelId={`operator-label-${index}`}
-                                  label="Operator"
+                                  label={t('operator')}
                                   size="small"
                                   value={row.operator || ''}
                                   onChange={(e) =>
@@ -1095,14 +1096,14 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                 </Box>
                 {/* Add More button */}
                 <Button variant="contained" onClick={showOperator} sx={{ width: 150 }}>
-                  Add More
+                  {t('addMore')}
                 </Button>
                 {showLogical && (
                   <FormControl sx={{ marginLeft: '10px', minWidth: 110 }} size="small">
-                    <InputLabel id={`condition-label`}>Condition</InputLabel>
+                    <InputLabel id={`condition-label`}>{t('condition')}</InputLabel>
                     <Select
                       labelId={`condition-label`}
-                      label="Condition"
+                      label={t('condition')}
                       size="small"
                       value={logical || ''}
                       onChange={(e) => addRow(e.target.value)}
