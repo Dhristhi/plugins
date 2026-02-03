@@ -10,7 +10,7 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      '@dhristhi/react-form-builder': resolve(__dirname, '../../packages/react-form-builder/src'),
+      '@dhristhi/react-form-builder': resolve(__dirname, '../../packages/react-form-builder/dist'),
     },
   },
   optimizeDeps: {
