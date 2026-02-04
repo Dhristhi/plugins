@@ -38,7 +38,7 @@ export const DeviceToolbar = ({
   const { t } = useTranslation();
   return (
     <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 1 }}>
-      Screen:{' '}
+      {t('screen')}:{' '}
       <Select
         size="small"
         value={selectedId}
