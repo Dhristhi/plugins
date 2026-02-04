@@ -79,6 +79,7 @@ const CustomSelectControl = (props) => {
       <FormControl fullWidth error={hasError}>
         <Autocomplete
           multiple
+          disableCloseOnSelect
           disabled={isReadOnly}
           options={options}
           getOptionLabel={(opt) => opt.label}

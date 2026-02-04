@@ -465,22 +465,44 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
       };
 
       // Preserve enum options and uischema options
-      if (
-        hasEnumOptions &&
-        ['select', 'radio', 'multiselect', 'multicheckbox'].includes(newTypeId)
-      ) {
-        if (newTypeId === 'multiselect' || newTypeId === 'multicheckbox') {
+      if (hasEnumOptions && ['select', 'radio', 'multicheckbox'].includes(newTypeId)) {
+        if (newTypeId === 'multicheckbox') {
           updatedField.schema.items = {
             type: 'string',
             enum: enumOptions,
           };
           delete updatedField.schema.enum;
-          // Preserve existing uischema options for multiselect
+          // Preserve existing uischema options for multicheckbox
           if (localField.uischema?.options) {
             updatedField.uischema.options = {
               ...updatedField.uischema.options,
               ...localField.uischema.options,
-              displayType: newTypeId === 'multiselect' ? 'dropdown' : 'checkbox',
+              displayType: 'checkbox',
+            };
+          }
+        } else if (newTypeId === 'select') {
+          // Preserve multi-select state when switching to select
+          const isCurrentlyMulti =
+            localField.schema?.type === 'array' || localField.uischema?.options?.multi;
+          if (isCurrentlyMulti) {
+            updatedField.schema.type = 'array';
+            updatedField.schema.items = {
+              type: 'string',
+              enum: enumOptions,
+            };
+            updatedField.schema.uniqueItems = true;
+            delete updatedField.schema.enum;
+            updatedField.uischema.options = {
+              ...updatedField.uischema.options,
+              multi: true,
+              format: 'select',
+              displayType: 'autocomplete',
+            };
+          } else {
+            updatedField.schema.enum = enumOptions;
+            updatedField.uischema.options = {
+              ...updatedField.uischema.options,
+              multi: false,
             };
           }
         } else {
@@ -503,7 +525,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
         setEnumOptions([...newFieldType.schema.enum]);
       } else if (newFieldType.schema.items?.enum) {
         setEnumOptions([...newFieldType.schema.items.enum]);
-      } else if (!['select', 'radio', 'multiselect', 'multicheckbox'].includes(newTypeId)) {
+      } else if (!['select', 'radio', 'multicheckbox'].includes(newTypeId)) {
         setEnumOptions([]);
       }
     }
@@ -526,14 +548,14 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
     // Array fields with enum items (multiselect) can switch between multiselect types and array
     if (currentSchemaType === 'array' && localField.schema?.items?.enum) {
       return availableFieldTypes.filter(
-        (ft) => ft.id === 'multiselect' || ft.id === 'multicheckbox' || ft.id === 'array'
+        (ft) => ft.id === 'select' || ft.id === 'multicheckbox' || ft.id === 'array'
       );
     }
 
     // Array fields without enum can switch between array and multiselect types
     if (currentSchemaType === 'array' && localField.type !== 'file') {
       return availableFieldTypes.filter(
-        (ft) => ft.id === 'array' || ft.id === 'multiselect' || ft.id === 'multicheckbox'
+        (ft) => ft.id === 'array' || ft.id === 'select' || ft.id === 'multicheckbox'
       );
     }
 
@@ -544,7 +566,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
 
     return availableFieldTypes.filter((ft) => {
       // Don't allow converting to array types from other types
-      if (ft.id === 'array' || ft.id === 'multiselect' || ft.id === 'multicheckbox') return false;
+      if (ft.id === 'array' || ft.id === 'multicheckbox') return false;
 
       const targetSchemaType = ft.schema?.type;
 
@@ -559,7 +581,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
 
   const availableFieldTypes = defaultFieldTypes.filter((ft) => !ft.isLayout);
   const hasEnumOptions =
-    ['select', 'radio', 'multiselect', 'multicheckbox'].includes(localField.type) ||
+    ['select', 'radio', 'multicheckbox'].includes(localField.type) ||
     (localField.schema?.type === 'array' &&
       !!localField.schema?.items &&
       localField.uischema?.options?.multi) ||
@@ -567,6 +589,10 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
 
   const isGroup = localField.uischema?.type === 'Group';
   const isLayout = localField.isLayout && localField.uischema?.type !== 'Group';
+
+  const isMultiSelect =
+    localField.type === 'select' &&
+    (localField.schema?.type === 'array' || localField.uischema?.options?.multi === true);
 
   const handleUiOptionsUpdate = (updates) => {
     const existingUiOptions = localField.uischema?.options?.['ui:options'] || {};
@@ -764,6 +790,62 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                   </Select>
                 </FormControl>
               </>
+            )}
+
+            {/* Multi-select toggle for select fields */}
+            {localField.type === 'select' && (
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={isMultiSelect}
+                    onChange={(e) => {
+                      const isMulti = e.target.checked;
+                      let updatedSchema = { ...localField.schema };
+                      let updatedUISchema = { ...localField.uischema };
+
+                      if (isMulti) {
+                        // Convert to multi-select
+                        updatedSchema.type = 'array';
+                        updatedSchema.items = {
+                          type: 'string',
+                          enum: enumOptions,
+                        };
+                        updatedSchema.uniqueItems = true;
+                        delete updatedSchema.enum;
+                        updatedUISchema.options = {
+                          ...updatedUISchema.options,
+                          multi: true,
+                          format: 'select',
+                          displayType: 'autocomplete',
+                          autocompleteProps: {
+                            limitTags: 5,
+                          },
+                        };
+                      } else {
+                        // Convert to single select
+                        updatedSchema.type = 'string';
+                        updatedSchema.enum = enumOptions;
+                        delete updatedSchema.items;
+                        delete updatedSchema.uniqueItems;
+                        updatedUISchema.options = {
+                          ...updatedUISchema.options,
+                          multi: false,
+                        };
+                        delete updatedUISchema.options.displayType;
+                        delete updatedUISchema.options.autocompleteProps;
+                      }
+
+                      handleUpdate({
+                        schema: updatedSchema,
+                        uischema: updatedUISchema,
+                      });
+                    }}
+                    color="primary"
+                  />
+                }
+                label={t('enableMultiSelect')}
+                sx={{ mb: 2, display: 'block' }}
+              />
             )}
 
             {isGroup && (
@@ -1790,7 +1872,8 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                 sx={outlinedTextFieldSx}
               />
               {/* Multiselect Display Type */}
-              {(localField.type === 'multiselect' || localField.type === 'multicheckbox') && (
+              {((localField.type === 'select' && isMultiSelect) ||
+                localField.type === 'multicheckbox') && (
                 <>
                   {localField.uischema?.options?.displayType !== 'checkbox' && (
                     <TextField
