@@ -139,34 +139,63 @@ export const convertSchemaToFields = (schema, defaultFieldTypes, getNextId) => {
     if (property.type === 'array' && property.items && property.items.enum) {
       // Check if field name suggests checkbox display (heuristic approach)
       const useCheckboxDisplay = key.includes('checkbox');
-      const multiselectTypeId = useCheckboxDisplay ? 'multicheckbox' : 'multiselect';
-      const displayType = useCheckboxDisplay ? 'checkbox' : 'dropdown';
 
-      const multiselectType =
-        defaultFieldTypes.find((ft) => ft.id === multiselectTypeId) || defaultFieldTypes[0];
-      const newField = {
-        id: `field_${uniqueId}`,
-        type: multiselectTypeId,
-        label,
-        key,
-        i18nKey: i18nKey || multiselectType?.translationKey || multiselectType?.labelKey || label,
-        required: schema.required?.includes(key) || false,
-        isLayout: false,
-        schema: { ...property },
-        uischema: {
-          ...multiselectType.uischema,
-          scope: `#/properties/${key}`,
-          options: {
-            ...multiselectType.uischema.options,
-            multi: true,
-            format: 'select',
-            displayType: displayType,
+      if (useCheckboxDisplay) {
+        const multicheckboxType =
+          defaultFieldTypes.find((ft) => ft.id === 'multicheckbox') || defaultFieldTypes[0];
+        const newField = {
+          id: `field_${uniqueId}`,
+          type: 'multicheckbox',
+          label,
+          key,
+          i18nKey:
+            i18nKey || multicheckboxType?.translationKey || multicheckboxType?.labelKey || label,
+          required: schema.required?.includes(key) || false,
+          isLayout: false,
+          schema: { ...property },
+          uischema: {
+            ...multicheckboxType.uischema,
+            scope: `#/properties/${key}`,
+            options: {
+              ...multicheckboxType.uischema.options,
+              multi: true,
+              format: 'select',
+              displayType: 'checkbox',
+            },
           },
-        },
-        parentId: null,
-      };
-
-      fields.push(newField);
+          parentId: null,
+        };
+        fields.push(newField);
+      } else {
+        // Use select field with multi enabled
+        const selectType =
+          defaultFieldTypes.find((ft) => ft.id === 'select') || defaultFieldTypes[0];
+        const newField = {
+          id: `field_${uniqueId}`,
+          type: 'select',
+          label,
+          key,
+          i18nKey: i18nKey || selectType?.translationKey || selectType?.labelKey || label,
+          required: schema.required?.includes(key) || false,
+          isLayout: false,
+          schema: { ...property },
+          uischema: {
+            ...selectType.uischema,
+            scope: `#/properties/${key}`,
+            options: {
+              ...selectType.uischema.options,
+              multi: true,
+              format: 'select',
+              displayType: 'autocomplete',
+              autocompleteProps: {
+                limitTags: 5,
+              },
+            },
+          },
+          parentId: null,
+        };
+        fields.push(newField);
+      }
       return;
     }
 
