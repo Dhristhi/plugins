@@ -3,7 +3,7 @@ import { Box, Select, MenuItem, TextField, IconButton, Tooltip } from '@mui/mate
 import { useTranslation } from 'react-i18next';
 
 export const DEVICE_PRESETS = [
-  { id: 'responsive', label: 'Responsive', width: 1400, height: 800 },
+  { id: 'responsive', label: 'Responsive', width: 1376, height: 570 },
   { id: 'iphone-se', label: 'iPhone SE', width: 375, height: 667 },
   { id: 'iphone-xr', label: 'iPhone XR', width: 414, height: 896 },
   { id: 'iphone-12-pro', label: 'iPhone 12 Pro', width: 390, height: 844 },

@@ -9,7 +9,7 @@ import { DeviceToolbar, DEVICE_PRESETS } from './DeviceToolbar';
 import CommonHeader from './CommonHeader';
 import { getRenderers, getCells, config } from '../controls/renders';
 
-const MAX_WIDTH_BEFORE_SCALE = 1400;
+let MAX_WIDTH_BEFORE_SCALE = 1376;
 
 const FormResponsivePreview = ({ isFullscreen, setIsFullscreen, children }) => {
   const [deviceId, setDeviceId] = useState('responsive');
@@ -40,12 +40,12 @@ const FormResponsivePreview = ({ isFullscreen, setIsFullscreen, children }) => {
     if (!viewportRef.current) return;
 
     const { clientWidth, clientHeight } = viewportRef.current;
+    MAX_WIDTH_BEFORE_SCALE = clientWidth;
 
     if (deviceWidth <= MAX_WIDTH_BEFORE_SCALE) {
       setScale(1);
       return;
     }
-
     const scaleToFit = Math.min(clientWidth / deviceWidth, clientHeight / deviceHeight);
 
     setScale(Math.min(1, scaleToFit));
