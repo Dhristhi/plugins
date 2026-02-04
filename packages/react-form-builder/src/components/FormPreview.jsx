@@ -1,8 +1,8 @@
 import { createAjv } from '@jsonforms/core';
 import { JsonForms } from '@jsonforms/react';
-import { IconEye, IconMaximize, IconMinimize } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { useState, useMemo, useRef } from 'react';
+import { IconEye, IconMaximize, IconMinimize } from '@tabler/icons-react';
 import { Typography, Button, Box, Tooltip, IconButton } from '@mui/material';
 
 import CommonHeader from './CommonHeader';
@@ -96,39 +96,54 @@ const FormResponsivePreview = ({ mode, children, previewModes }) => {
 
 const FormPreview = ({
   formState,
+  exportForm,
   onDataChange,
   showFormPreview,
   setShowFormPreview,
   showSchemaEditor,
   setShowSchemaEditor,
-  exportForm,
 }) => {
   const formRef = useRef();
   const userActions = useRef(false);
   const isProgrammaticUpdateRef = useRef(false);
 
-  const { t, i18n } = useTranslation();
-
-  const ajv = useMemo(() => createAjv({ useDefaults: false }), []);
-
-  const [key, setKey] = useState(0); // Force re-render
+  const [key, setKey] = useState(0);
+  const [mode, setMode] = useState('desktop');
   const [hasValidated, setHasValidated] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const [validationErrors, setValidationErrors] = useState([]);
 
+  const { t, i18n } = useTranslation();
+
+  const previewModes = useMemo(() => getPreviewModes(t), [t]);
+  const ajv = useMemo(() => createAjv({ useDefaults: false }), []);
+
+  const toolBarSx = { display: 'flex', gap: 1, justifyContent: 'center', alignItems: 'center' };
+
   const validateBox = {
-    position: 'fixed',
-    bottom: 0,
+    px: 3,
     left: 0,
     right: 0,
+    bottom: 0,
     height: 64,
-    backgroundColor: 'background.paper',
+    display: 'flex',
+    position: 'fixed',
+    alignItems: 'center',
     borderTop: '1px solid',
     borderColor: 'grey.200',
-    zIndex: (theme) => theme.zIndex.drawer + 1,
-    display: 'flex',
-    alignItems: 'center',
     justifyContent: 'flex-end',
-    px: 3,
+    backgroundColor: 'background.paper',
+    zIndex: (theme) => theme.zIndex.drawer + 1,
+  };
+
+  const headerSx = {
+    top: 0,
+    position: 'sticky',
+    overflow: 'hidden',
+    height: isFullscreen ? 0 : 'auto',
+    backgroundColor: 'background.paper',
+    transition: 'height 0.3s ease-in-out',
+    zIndex: (theme) => theme.zIndex.appBar - 1,
   };
 
   const translationFn = useMemo(
@@ -167,10 +182,6 @@ const FormPreview = ({
     }
   };
 
-  const previewModes = useMemo(() => getPreviewModes(t), [t]);
-  const [mode, setMode] = useState('desktop');
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const toolBarSx = { display: 'flex', gap: 1, justifyContent: 'center', alignItems: 'center' };
   const PreviewToolbar = ({ mode }) => {
     return (
       <Box sx={toolBarSx}>
@@ -357,14 +368,8 @@ const FormPreview = ({
   }, [formState.schema, formState.data]);
 
   return (
-    <Box sx={{ paddingBottom: '64px' }}>
-      <Box
-        sx={{
-          height: isFullscreen ? 0 : '120px',
-          overflow: 'hidden',
-          transition: 'height 0.3s ease-in-out',
-        }}
-      >
+    <Box>
+      <Box sx={headerSx}>
         <CommonHeader
           title={t('formPreview')}
           description={t('testYourForm')}
@@ -376,7 +381,7 @@ const FormPreview = ({
           exportForm={exportForm}
         />
       </Box>
-      <Box sx={{ p: 2 }}>
+      <Box sx={{ p: 2, paddingBottom: '80px' }}>
         {formState.schema.properties && Object.keys(formState.schema.properties).length > 0 ? (
           <div ref={formRef}>
             <PreviewToolbar mode={mode} />
