@@ -203,11 +203,7 @@ const SortableFieldItem = ({
             </Box>
             <Box sx={fieldIconBoxSx}>{getFieldIcon(useTheme())}</Box>
             <Typography variant="subtitle2" sx={fieldLabelSx(isLayout, isArray)}>
-              {field.labelKey
-                ? t(field.labelKey)
-                : field.i18nKey
-                  ? t(field.i18nKey)
-                  : field.uischema?.label || field.label}
+              {field.uischema?.label || field.label}
             </Typography>
             {(isLayout || isArray) && (
               <Chip
@@ -216,7 +212,11 @@ const SortableFieldItem = ({
                     ? t('group')
                     : field.type === 'array'
                       ? t('array')
-                      : field.uischema?.type || 'Layout'
+                      : field.type === 'vertical-layout'
+                        ? t('verticalLayout')
+                        : field.type === 'horizontal-layout'
+                          ? t('horizontalLayout')
+                          : 'Layout'
                 }
                 size="small"
                 color={

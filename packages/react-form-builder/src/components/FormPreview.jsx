@@ -1,6 +1,6 @@
 import { createAjv } from '@jsonforms/core';
 import { JsonForms } from '@jsonforms/react';
-import { IconEye } from '@tabler/icons-react';
+import { IconEye, IconMaximize, IconMinimize } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { useState, useMemo, useRef } from 'react';
 import { Typography, Button, Box, Tooltip, IconButton } from '@mui/material';
@@ -118,8 +118,8 @@ const FormPreview = ({
   const validateBox = {
     position: 'fixed',
     bottom: 0,
-    left: { xs: 0, md: 320 },
-    width: { xs: '100%', md: `calc(100% - 320px)` },
+    left: 0,
+    right: 0,
     height: 64,
     backgroundColor: 'background.paper',
     borderTop: '1px solid',
@@ -169,6 +169,7 @@ const FormPreview = ({
 
   const previewModes = useMemo(() => getPreviewModes(t), [t]);
   const [mode, setMode] = useState('desktop');
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const toolBarSx = { display: 'flex', gap: 1, justifyContent: 'center', alignItems: 'center' };
   const PreviewToolbar = ({ mode }) => {
     return (
@@ -180,6 +181,11 @@ const FormPreview = ({
             </IconButton>
           </Tooltip>
         ))}
+        <Tooltip title={isFullscreen ? t('exitFullscreen') : t('fullscreen')}>
+          <IconButton onClick={() => setIsFullscreen(!isFullscreen)}>
+            {isFullscreen ? <IconMinimize /> : <IconMaximize />}
+          </IconButton>
+        </Tooltip>
       </Box>
     );
   };
@@ -352,16 +358,24 @@ const FormPreview = ({
 
   return (
     <Box sx={{ paddingBottom: '64px' }}>
-      <CommonHeader
-        title={t('formPreview')}
-        description={t('testYourForm')}
-        icon={IconEye}
-        showFormPreview={showFormPreview}
-        setShowFormPreview={setShowFormPreview}
-        showSchemaEditor={showSchemaEditor}
-        setShowSchemaEditor={setShowSchemaEditor}
-        exportForm={exportForm}
-      />
+      <Box
+        sx={{
+          height: isFullscreen ? 0 : '120px',
+          overflow: 'hidden',
+          transition: 'height 0.3s ease-in-out',
+        }}
+      >
+        <CommonHeader
+          title={t('formPreview')}
+          description={t('testYourForm')}
+          icon={IconEye}
+          showFormPreview={showFormPreview}
+          setShowFormPreview={setShowFormPreview}
+          showSchemaEditor={showSchemaEditor}
+          setShowSchemaEditor={setShowSchemaEditor}
+          exportForm={exportForm}
+        />
+      </Box>
       <Box sx={{ p: 2 }}>
         {formState.schema.properties && Object.keys(formState.schema.properties).length > 0 ? (
           <div ref={formRef}>
