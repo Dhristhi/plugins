@@ -112,10 +112,9 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
     ],
   };
 
+  const defaultRows = [{ dependsOn: '', operator: '', value: '', logical: '', value2: '' }];
   //let dependsOnField = null;
-  const [rows, setRows] = useState([
-    { dependsOn: '', operator: '', value: '', logical: '', value2: '' },
-  ]);
+  const [rows, setRows] = useState(defaultRows);
   // const dependsOnField = useMemo(
   //   () => fields.find((f) => f.key === rows.dependsOn),
   //   [fields, rows.dependsOn]
@@ -165,10 +164,15 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
   };
 
   const setDependentState = (value) => {
-    if (value) handleUpdate({ parentVisibility: value });
-    else
+    if (value) {
       setRows(() => {
-        handleUpdate({ visibility: [], parentVisibility: value });
+        const next = defaultRows;
+        handleUpdate({ parentVisibility: value });
+        return next;
+      });
+    } else
+      setRows(() => {
+        handleUpdate({ visibility: [], parentVisibility: value, effect: '' });
         return [];
       });
   };
@@ -278,7 +282,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
 
     if (field) {
       let updatedField = { ...field };
-      if (field.visibility) {
+      if (field.visibility && field.visibility.length > 0) {
         setRows(field.visibility);
       }
 
@@ -725,6 +729,27 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
     }
   };
 
+  const flattenFields = (fields) => {
+    const result = [];
+
+    function traverse(items) {
+      for (const item of items) {
+        // Add current item's id and label
+        if (!item.isLayout) {
+          result.push(item);
+        }
+
+        // If it has children, recursively traverse them
+        if (item.children && Array.isArray(item.children)) {
+          traverse(item.children);
+        }
+      }
+    }
+
+    traverse(fields);
+    return result;
+  };
+  const filteredFields = flattenFields(fields);
   const excludedTypes = ['array', 'array-strings', 'file', 'date'];
   return (
     <Box>
@@ -936,7 +961,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                 </Box>
                 <Box sx={{ marginTop: '10px' }}>
                   {rows.map((row, index) => {
-                    const dependsOnField = fields.find((f) => f.key === row.dependsOn);
+                    const dependsOnField = filteredFields.find((f) => f.fieldKey === row.dependsOn);
                     return (
                       <>
                         <Typography
@@ -970,12 +995,12 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                               }
                               sx={layoutSelectRuleSx}
                             >
-                              {fields
+                              {filteredFields
                                 .filter((f) => {
                                   return f.id !== field.id && !excludedTypes.includes(f.type);
                                 })
                                 .map((f) => (
-                                  <MenuItem key={f.key} value={f.key}>
+                                  <MenuItem key={f.fieldKey} value={f.fieldKey}>
                                     <Box sx={fieldTypeMenuItemSx}>{f.label}</Box>
                                   </MenuItem>
                                 ))}
