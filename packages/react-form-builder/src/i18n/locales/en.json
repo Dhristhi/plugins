@@ -220,5 +220,11 @@
     "maxLength": "Please enter no more than {{max}} characters",
     "minimum": "Value must be at least {{limit}}",
     "maximum": "Value must be at most {{limit}}"
-  }
+  },
+
+  "rotate": "Rotate",
+  "exitFullscreen": "Exit full screen",
+  "fullscreen": "Full screen",
+  "screen": "Screen",
+  "responsive": "Responsive"
 }
