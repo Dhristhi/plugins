@@ -118,8 +118,8 @@ const FormResponsivePreview = ({ isFullscreen, setIsFullscreen, children }) => {
   };
 
   const deviceFrameSx = {
-    width: deviceWidth,
-    height: deviceHeight,
+    width: `${deviceWidth}px`,
+    height: `${deviceHeight}px`,
     maxWidth: '100%',
     maxHeight: '100%',
     border: '1px solid #999',

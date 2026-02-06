@@ -787,6 +787,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                   value={localField.key}
                   onChange={(e) => handleUpdate({ key: e.target.value })}
                   margin="normal"
+                  disabled="true"
                   variant="outlined"
                   helperText={t('uniqueIdentifier')}
                   sx={outlinedTextFieldSx}
@@ -1546,6 +1547,27 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                       helperText={t('defaultDateHelp')}
                       InputLabelProps={{
                         shrink: true,
+                      }}
+                      InputProps={{
+                        endAdornment: localField.schema?.default && (
+                          <InputAdornment position="end">
+                            <IconButton
+                              size="small"
+                              onClick={() =>
+                                handleSchemaUpdate({
+                                  default: undefined,
+                                })
+                              }
+                              edge="end"
+                              sx={{
+                                color: 'text.secondary',
+                                '&:hover': { color: 'error.main' },
+                              }}
+                            >
+                              <IconX size={16} />
+                            </IconButton>
+                          </InputAdornment>
+                        ),
                       }}
                       sx={outlinedTextFieldSx}
                     />
