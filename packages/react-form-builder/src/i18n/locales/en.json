@@ -62,6 +62,7 @@
   "selectFileTypes": "Select file types",
   "enumValues": "Enum Values",
   "enableMultiSelect": "Enable Multi-Select",
+  "enableTextarea": "Enable Textarea",
   "apiEntity": "API Entity",
   "apiEntityHelp": "API endpoint name (e.g., countries, cities)",
   "valueFieldName": "Value Field Name",

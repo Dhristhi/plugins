@@ -99,7 +99,7 @@ export const defaultFieldTypes = [
     type: 'string',
     labelKey: 'fieldType_text',
     translationKey: 'fieldType_text',
-    label: 'Text Input',
+    label: 'Text',
     icon: IconEdit,
     schema: {
       type: 'string',
@@ -107,8 +107,10 @@ export const defaultFieldTypes = [
     uischema: {
       type: 'Control',
       scope: '#/properties/field',
+      options: {
+        multi: false,
+      },
     },
-    textType: 'text', // Default to single line text
   },
   {
     id: 'email',

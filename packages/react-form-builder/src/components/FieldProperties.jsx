@@ -847,6 +847,33 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
               />
             )}
 
+            {/* Textarea toggle for text fields */}
+            {localField.type === 'text' && (
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={localField.uischema?.options?.multi === true}
+                    onChange={(e) => {
+                      const isMulti = e.target.checked;
+                      let updatedUISchema = { ...localField.uischema };
+
+                      updatedUISchema.options = {
+                        ...updatedUISchema.options,
+                        multi: isMulti,
+                      };
+
+                      handleUpdate({
+                        uischema: updatedUISchema,
+                      });
+                    }}
+                    color="primary"
+                  />
+                }
+                label={t('enableTextarea')}
+                sx={{ mb: 2, display: 'block' }}
+              />
+            )}
+
             {isGroup && (
               <>
                 <TextField
@@ -2237,7 +2264,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
 
             <Box>
               {(localField.type === 'text' ||
-                localField.type === 'textarea' ||
                 localField.type === 'password' ||
                 localField.type === 'url') && (
                 <>
