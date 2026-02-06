@@ -61,6 +61,7 @@
   "allowedFileTypes": "Allowed File Types",
   "selectFileTypes": "Select file types",
   "enumValues": "Enum Values",
+  "enableMultiSelect": "Enable Multi-Select",
   "apiEntity": "API Entity",
   "apiEntityHelp": "API endpoint name (e.g., countries, cities)",
   "valueFieldName": "Value Field Name",
@@ -224,5 +225,11 @@
     "maxLength": "Please enter no more than {{max}} characters",
     "minimum": "Value must be at least {{limit}}",
     "maximum": "Value must be at most {{limit}}"
-  }
+  },
+
+  "rotate": "Rotate",
+  "exitFullscreen": "Exit full screen",
+  "fullscreen": "Full screen",
+  "screen": "Screen",
+  "responsive": "Responsive"
 }

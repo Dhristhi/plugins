@@ -61,6 +61,7 @@
   "allowedFileTypes": "Tipos de archivo permitidos",
   "selectFileTypes": "Selecciona tipos de archivo",
   "enumValues": "Valores enumerados",
+  "enableMultiSelect": "Habilitar selección múltiple",
   "apiEntity": "Entidad de API",
   "apiEntityHelp": "Nombre del endpoint de la API (p. ej., countries, cities)",
   "valueFieldName": "Nombre del campo de valor",
@@ -219,5 +220,10 @@
     "maxLength": "Por favor, no introduzcas más de {{max}} caracteres",
     "minimum": "El valor debe ser al menos {{limit}}",
     "maximum": "El valor debe ser como máximo {{limit}}"
-  }
+  },
+  "rotate": "Girar",
+  "exitFullscreen": "Salir de pantalla completa",
+  "fullscreen": "Pantalla completa",
+  "screen": "Pantalla",
+  "responsive": "Responsivo"
 }

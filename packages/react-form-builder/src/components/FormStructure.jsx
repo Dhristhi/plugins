@@ -2,16 +2,16 @@ import { CSS } from '@dnd-kit/utilities';
 import { useDroppable } from '@dnd-kit/core';
 import { useTranslation } from 'react-i18next';
 import {
-  IconGripVertical,
   IconBox,
   IconCube,
-  IconLayoutRows,
-  IconLayoutColumns,
   IconList,
   IconEdit,
   IconTarget,
   IconPlus,
   IconForms,
+  IconLayoutRows,
+  IconGripVertical,
+  IconLayoutColumns,
 } from '@tabler/icons-react';
 import { Fragment, useState } from 'react';
 import * as TablerIcons from '@tabler/icons-react';
@@ -519,7 +519,7 @@ const FormStructure = ({
 
   const nestedBox = {
     p: { xs: 1, sm: 2 },
-    paddingBottom: hasOriginalSchema || fields.length > 0 ? '100px' : '0',
+    marginBottom: hasOriginalSchema || fields.length > 0 ? '80px' : '0',
   };
 
   const actionBox = {
