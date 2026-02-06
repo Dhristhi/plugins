@@ -36,8 +36,12 @@ const CustomSelectControl = (props) => {
     value,
     multi,
     displayType,
+    maxSelections: rawMaxSelections,
     autocompleteProps: { limitTags: visibleChipsCount } = {},
   } = uischema.options || {};
+
+  // Ensure maxSelections is at least 2 for multi-select fields
+  const maxSelections = rawMaxSelections && rawMaxSelections > 1 ? rawMaxSelections : undefined;
 
   const formData = core?.data || {};
   useEffect(() => {
@@ -79,12 +83,15 @@ const CustomSelectControl = (props) => {
       <FormControl fullWidth error={hasError}>
         <Autocomplete
           multiple
-          disableCloseOnSelect
           disabled={isReadOnly}
           options={options}
           getOptionLabel={(opt) => opt.label}
           value={options.filter((o) => Array.isArray(data) && data.includes(o.value))}
           onChange={(_e, newValues) => {
+            // Check maxSelections limit
+            if (maxSelections && newValues.length > maxSelections) {
+              return; // Don't allow more than max selections
+            }
             const selectedVals = newValues.map((v) => v.value);
             handleOnChange(_e, selectedVals);
           }}
@@ -98,6 +105,15 @@ const CustomSelectControl = (props) => {
           )}
           {...(uischema.options?.autocompleteProps || {})}
         />
+        {maxSelections && (
+          <FormHelperText>
+            {t('maxSelectionsHint', {
+              current: Array.isArray(data) ? data.length : 0,
+              max: maxSelections,
+              defaultValue: `Selected {{current}} of {{max}} maximum`,
+            })}
+          </FormHelperText>
+        )}
         {schema?.description && <FormHelperText>{schema?.description}</FormHelperText>}
       </FormControl>
     ) : displayType === 'checkbox' ? (
@@ -106,22 +122,34 @@ const CustomSelectControl = (props) => {
         <Box sx={{ display: 'flex', flexDirection: 'row', gap: 2, flexWrap: 'wrap' }}>
           {options.map((opt) => {
             const isChecked = Array.isArray(data) && data.includes(opt.value);
+            const currentValues = Array.isArray(data) ? data : [];
+            const isMaxReached = maxSelections && currentValues.length >= maxSelections;
+            const shouldDisable = isReadOnly || (isMaxReached && !isChecked);
+
             return (
               <FormControlLabel
                 key={opt.value}
                 control={
                   <Checkbox
                     checked={isChecked}
-                    disabled={isReadOnly}
+                    disabled={shouldDisable}
                     onChange={(e) => {
                       if (isReadOnly) {
                         return;
                       }
                       const currentValues = Array.isArray(data) ? data : [];
-                      const newValues = e.target.checked
-                        ? [...currentValues, opt.value]
-                        : currentValues.filter((v) => v !== opt.value);
-                      handleOnChange(e, newValues);
+
+                      if (e.target.checked) {
+                        // Check if maxSelections limit would be exceeded
+                        if (maxSelections && currentValues.length >= maxSelections) {
+                          return; // Don't allow more selections
+                        }
+                        const newValues = [...currentValues, opt.value];
+                        handleOnChange(e, newValues);
+                      } else {
+                        const newValues = currentValues.filter((v) => v !== opt.value);
+                        handleOnChange(e, newValues);
+                      }
                     }}
                   />
                 }
@@ -131,6 +159,15 @@ const CustomSelectControl = (props) => {
             );
           })}
         </Box>
+        {maxSelections && (
+          <FormHelperText>
+            {t('maxSelectionsHint', {
+              current: Array.isArray(data) ? data.length : 0,
+              max: maxSelections,
+              defaultValue: `Selected {{current}} of {{max}} maximum`,
+            })}
+          </FormHelperText>
+        )}
         {schema?.description && <FormHelperText>{schema?.description}</FormHelperText>}
         {hasError && <FormHelperText>{validationError}</FormHelperText>}
       </FormControl>
@@ -145,6 +182,10 @@ const CustomSelectControl = (props) => {
           onChange={(e) => {
             if (isReadOnly) {
               return;
+            }
+            // Check maxSelections limit
+            if (maxSelections && e.target.value.length > maxSelections) {
+              return; // Don't allow more than max selections
             }
             handleOnChange(e, e.target.value);
           }}
@@ -205,6 +246,15 @@ const CustomSelectControl = (props) => {
             </MenuItem>
           ))}
         </Select>
+        {maxSelections && (
+          <FormHelperText>
+            {t('maxSelectionsHint', {
+              current: Array.isArray(data) ? data.length : 0,
+              max: maxSelections,
+              defaultValue: `Selected {{current}} of {{max}} maximum`,
+            })}
+          </FormHelperText>
+        )}
         {schema?.description && <FormHelperText>{schema?.description}</FormHelperText>}
         {hasError && <FormHelperText>{validationError}</FormHelperText>}
       </FormControl>
