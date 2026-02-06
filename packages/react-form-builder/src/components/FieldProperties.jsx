@@ -2041,6 +2041,42 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                   <Typography variant="body2" sx={{ mb: 2, fontWeight: 600 }}>
                     {t('enumValues')}
                   </Typography>
+
+                  {/* Dynamic Data Toggle for select fields */}
+                  {(localField.type === 'select' ||
+                    (localField.schema?.type === 'array' &&
+                      localField.uischema?.options?.multi)) && (
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          checked={localField.uischema?.options?.entity !== undefined}
+                          onChange={(e) => {
+                            const isDynamic = e.target.checked;
+                            const isMultiSelectField =
+                              localField.type === 'select' &&
+                              (localField.schema?.type === 'array' ||
+                                localField.uischema?.options?.multi);
+                            const updatedUISchema = {
+                              ...localField.uischema,
+                              options: {
+                                ...localField.uischema?.options,
+                                format: isDynamic ? 'dynamicselect' : 'select',
+                                multi: isMultiSelectField ? true : undefined,
+                                entity: isDynamic ? '' : undefined,
+                                key: isDynamic ? '' : undefined,
+                                value: isDynamic ? '' : undefined,
+                              },
+                            };
+                            handleUpdate({ uischema: updatedUISchema });
+                          }}
+                          color="primary"
+                        />
+                      }
+                      label={t('useDynamicData')}
+                      sx={{ mb: 2 }}
+                    />
+                  )}
+
                   {localField.uischema?.options?.entity !== undefined ? (
                     <Box>
                       <TextField
