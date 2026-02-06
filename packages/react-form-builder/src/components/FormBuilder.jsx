@@ -168,6 +168,7 @@ const FormBuilder = ({ onSave, onExport, schemas = [] } = {}) => {
       type: fieldType.id,
       label: fieldType.isLayout ? fieldType.label : `${fieldType.label}`,
       key: fieldKey,
+      fieldKey: fieldKey,
       required: false,
       schema: { ...fieldType.schema },
       uischema: { ...fieldType.uischema },
