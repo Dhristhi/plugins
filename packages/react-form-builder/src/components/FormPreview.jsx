@@ -2,11 +2,11 @@ import { createAjv } from '@jsonforms/core';
 import { JsonForms } from '@jsonforms/react';
 import { IconEye } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
-import { useState, useMemo, useRef, useEffect, useLayoutEffect } from 'react';
 import { Typography, Button, Box } from '@mui/material';
-import { DeviceToolbar, DEVICE_PRESETS } from './DeviceToolbar';
+import { useState, useMemo, useRef, useEffect, useLayoutEffect } from 'react';
 
 import CommonHeader from './CommonHeader';
+import { DeviceToolbar, DEVICE_PRESETS } from './DeviceToolbar';
 import { getRenderers, getCells, config } from '../controls/renders';
 
 let MAX_WIDTH_BEFORE_SCALE = 1376;
@@ -62,12 +62,12 @@ const FormResponsivePreview = ({ isFullscreen, setIsFullscreen, children }) => {
   const viewportSx = {
     width: '100%',
     height: '100%',
-    borderColor: 'transparent',
+    display: 'flex',
     borderRadius: 2,
     overflow: 'hidden',
-    display: 'flex',
-    justifyContent: 'center',
     alignItems: 'center',
+    justifyContent: 'center',
+    borderColor: 'transparent',
   };
 
   const mobileContainerSx = {
@@ -173,27 +173,37 @@ const FormPreview = ({
   const isProgrammaticUpdateRef = useRef(false);
 
   const { t, i18n } = useTranslation();
-  const [isFullscreen, setIsFullscreen] = useState(false);
   const ajv = useMemo(() => createAjv({ useDefaults: false }), []);
 
-  const [key, setKey] = useState(0); // Force re-render
+  const [key, setKey] = useState(0);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const [hasValidated, setHasValidated] = useState(false);
   const [validationErrors, setValidationErrors] = useState([]);
 
   const validateBox = {
-    position: 'fixed',
+    px: 3,
     bottom: 0,
     left: 0,
     right: 0,
     height: 64,
-    backgroundColor: 'background.paper',
+    display: 'flex',
+    position: 'fixed',
+    alignItems: 'center',
     borderTop: '1px solid',
     borderColor: 'grey.200',
-    zIndex: (theme) => theme.zIndex.drawer + 1,
-    display: 'flex',
-    alignItems: 'center',
     justifyContent: 'flex-end',
-    px: 3,
+    backgroundColor: 'background.paper',
+    zIndex: (theme) => theme.zIndex.drawer + 1,
+  };
+
+  const headerSx = {
+    top: 0,
+    position: 'sticky',
+    overflow: 'hidden',
+    height: isFullscreen ? 0 : 'auto',
+    backgroundColor: 'background.paper',
+    transition: 'height 0.3s ease-in-out',
+    zIndex: (theme) => theme.zIndex.appBar - 1,
   };
 
   const translationFn = useMemo(
@@ -399,14 +409,8 @@ const FormPreview = ({
   }, [formState.schema, formState.data]);
 
   return (
-    <Box sx={{ paddingBottom: '64px' }}>
-      <Box
-        sx={{
-          height: isFullscreen ? 0 : '120px',
-          overflow: 'hidden',
-          transition: 'height 0.3s ease-in-out',
-        }}
-      >
+    <Box>
+      <Box sx={headerSx}>
         <CommonHeader
           title={t('formPreview')}
           description={t('testYourForm')}
@@ -418,7 +422,7 @@ const FormPreview = ({
           exportForm={exportForm}
         />
       </Box>
-      <Box sx={{ p: 2 }}>
+      <Box sx={{ p: 2, paddingBottom: '80px' }}>
         {formState.schema.properties && Object.keys(formState.schema.properties).length > 0 ? (
           <div ref={formRef}>
             <FormResponsivePreview isFullscreen={isFullscreen} setIsFullscreen={setIsFullscreen}>
