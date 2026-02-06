@@ -50,8 +50,18 @@ function normalizeConstValue(value) {
 function compileRule(field) {
   const anyOf = [];
   let currentGroup = [];
+  field.visibility = field.visibility.filter(
+    (item) => item.dependsOn !== '' && item.dependsOn != null
+  );
   const conditions = field.visibility;
   conditions.forEach((condition, index) => {
+    if (index === 0) {
+      if (condition.logical !== '') {
+        condition.logical === '';
+        field.visibility[index].logical = '';
+      }
+    }
+    // const conditionParentField = fieldsArray.find((obj) => obj.fieldKey === condition.dependsOn);
     const compiled = buildPropertyCondition(condition);
     currentGroup.push(compiled);
 
@@ -70,7 +80,6 @@ function compileRule(field) {
   });
 
   const schema = anyOf.length === 1 ? anyOf[0] : { anyOf };
-
   return {
     effect: field.effect,
     condition: {
@@ -203,7 +212,29 @@ export const buildUISchemaFromFields = (fieldsArray, parentKey = null) => {
           const confirmScope = parentKey
             ? `#/properties/${parentKey}/properties/${field.key}_confirm`
             : `#/properties/${field.key}_confirm`;
-
+          if (field.visibility && field.visibility.length > 0 && field.parentVisibility) {
+            let rule = {};
+            rule = compileRule(field);
+            return [
+              {
+                ...field.uischema,
+                scope: scope,
+                label: field.label,
+                i18n: field.i18nKey || field.label,
+                rule: rule,
+              },
+              {
+                type: 'Control',
+                scope: confirmScope,
+                label: `Confirm ${field.label}`,
+                i18n: field.i18nKey ? `${field.i18nKey}_confirm` : `${field.key}_confirm`,
+                options: {
+                  format: 'password',
+                },
+                rule: rule,
+              },
+            ];
+          }
           return [
             {
               ...field.uischema,
@@ -232,7 +263,7 @@ export const buildUISchemaFromFields = (fieldsArray, parentKey = null) => {
           if (field.children && field.children.length > 0) {
             detailElements = buildUISchemaForArrayItems(field.children);
           }
-          if (field.visibility) {
+          if (field.visibility && field.visibility.length > 0 && field.parentVisibility) {
             let rule = {};
             rule = compileRule(field);
             return [
@@ -278,13 +309,13 @@ export const buildUISchemaFromFields = (fieldsArray, parentKey = null) => {
           ];
         } else {
           let rule = {};
-          if (field.visibility) {
+          if (field.visibility && field.visibility.length > 0 && field.parentVisibility) {
             rule = compileRule(field);
           }
           const scope = parentKey
             ? `#/properties/${parentKey}/properties/${field.key}`
             : `#/properties/${field.key}`;
-          if (field.visibility)
+          if (field.visibility && field.visibility.length > 0 && field.parentVisibility)
             return {
               ...field.uischema,
               scope: scope,
