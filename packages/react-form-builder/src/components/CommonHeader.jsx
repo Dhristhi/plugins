@@ -3,33 +3,36 @@ import { IconEye, IconCode } from '@tabler/icons-react';
 import { Box, Typography, Button, ButtonGroup } from '@mui/material';
 
 const headerContainerSx = {
-  p: { xs: 2, sm: 3 },
+  top: 0,
+  zIndex: 10,
   borderBottom: 1,
+  position: 'sticky',
+  p: { xs: 2, sm: 3 },
   borderColor: 'grey.200',
   backgroundColor: 'background.paper',
 };
 
 const headerRowSx = {
+  mb: 2,
+  gap: 2,
   display: 'flex',
   alignItems: 'center',
-  gap: 2,
-  mb: 2,
 };
 
 const iconWrapperSx = {
-  color: 'primary.contrastText',
   p: 1,
-  borderRadius: 2,
-  backgroundColor: 'primary.main',
   display: 'flex',
+  borderRadius: 2,
   alignItems: 'center',
   justifyContent: 'center',
+  color: 'primary.contrastText',
+  backgroundColor: 'primary.main',
 };
 
 const titleSx = {
+  mb: 0.5,
   fontWeight: 600,
   color: 'text.primary',
-  mb: 0.5,
 };
 
 const descriptionSx = {
