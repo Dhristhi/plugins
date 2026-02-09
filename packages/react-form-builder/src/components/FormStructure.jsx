@@ -587,7 +587,7 @@ const FormStructure = ({
         )}
       </Box>
 
-      {(hasOriginalSchema || fields.length > 0) && (
+      {!propertiesDrawerOpen && (hasOriginalSchema || fields.length > 0) && (
         <Box sx={actionBox}>
           {hasOriginalSchema ? (
             <Button onClick={onReset} variant="contained">

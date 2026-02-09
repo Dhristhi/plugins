@@ -173,7 +173,32 @@ const FormPreview = ({
   const isProgrammaticUpdateRef = useRef(false);
 
   const { t, i18n } = useTranslation();
-  const ajv = useMemo(() => createAjv({ useDefaults: false }), []);
+  const ajv = useMemo(() => {
+    const ajvInstance = createAjv({ useDefaults: false });
+    if (!ajvInstance.getKeyword('formatMinimum')) {
+      ajvInstance.addKeyword({
+        keyword: 'formatMinimum',
+        type: 'string',
+        schemaType: 'string',
+        validate: function validate(schema, data) {
+          if (!data) return true;
+          return new Date(data) >= new Date(schema);
+        },
+      });
+    }
+    if (!ajvInstance.getKeyword('formatMaximum')) {
+      ajvInstance.addKeyword({
+        keyword: 'formatMaximum',
+        type: 'string',
+        schemaType: 'string',
+        validate: function validate(schema, data) {
+          if (!data) return true;
+          return new Date(data) <= new Date(schema);
+        },
+      });
+    }
+    return ajvInstance;
+  }, []);
 
   const [key, setKey] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -236,6 +261,10 @@ const FormPreview = ({
       case 'minimum':
         return 'validation.minimum';
       case 'maximum':
+        return 'validation.maximum';
+      case 'formatMinimum':
+        return 'validation.minimum';
+      case 'formatMaximum':
         return 'validation.maximum';
       default:
         return 'validation.generic';
