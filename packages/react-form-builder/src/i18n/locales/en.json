@@ -230,5 +230,7 @@
 
   "rotate": "Rotate",
   "screen": "Screen",
-  "responsive": "Responsive"
+  "responsive": "Responsive",
+  "op_arr_equals": "Includes",
+  "op_arr_not_equals": "Does not Includes"
 }

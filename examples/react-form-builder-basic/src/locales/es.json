@@ -226,5 +226,7 @@
   "exitFullscreen": "Salir de pantalla completa",
   "fullscreen": "Pantalla completa",
   "screen": "Pantalla",
-  "responsive": "Responsivo"
+  "responsive": "Responsivo",
+  "op_arr_equals": "Incluye",
+  "op_arr_not_equals": "No incluye"
 }
