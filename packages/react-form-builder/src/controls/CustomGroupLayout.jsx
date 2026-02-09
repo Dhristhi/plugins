@@ -16,7 +16,7 @@ const CustomGroupLayoutRenderer = (props) => {
   const gridElement = { mx: 6, mb: 0 };
   const groupContainer = { marginBottom: '10px' };
   return (
-    <Grid container sx={groupContainer} className="test">
+    <Grid container sx={groupContainer}>
       <Grid item xs={12}>
         <Box bgcolor="background.paper" borderRadius={1}>
           <Stack
