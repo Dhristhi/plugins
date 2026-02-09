@@ -13,11 +13,12 @@ const CustomGroupLayoutRenderer = (props) => {
   const removeExtraMargin = uischema?.elements[0]?.elements?.[0]?.options?.removeExtraMargin;
 
   const mainBoxTypo = { marginLeft: 1, fontWeight: 500 };
-  const gridElement = { mx: 6, mb: 0 };
+  const gridElement = { mx: 6, mb: '10px' };
+  const gridBox = { paddingBottom: '15px' };
   return (
     <Grid container>
       <Grid item xs={12}>
-        <Box bgcolor="background.paper" borderRadius={1}>
+        <Box bgcolor="background.paper" borderRadius={1} sx={gridBox}>
           <Stack
             alignItems="flex-end"
             direction="row"
