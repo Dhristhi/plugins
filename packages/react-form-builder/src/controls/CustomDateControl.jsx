@@ -8,21 +8,26 @@ import { formatDate } from '../utils';
 const CustomDateControl = (props) => {
   const { t } = useTranslation();
 
-  const { data, handleChange, path, label, required, errors, uischema, schema, visible } = props;
+  const { data, handleChange, path, label, required, errors, uischema, schema, visible, enabled } =
+    props;
 
   // Check if this is a date range field
   const isDateRange =
     schema?.type === 'object' && schema?.properties?.startDate && schema?.properties?.endDate;
 
   // For single date fields
-  const minDate = schema?.minimum;
-  const maxDate = schema?.maximum;
+  const minDate = schema?.formatMinimum || schema?.minimum;
+  const maxDate = schema?.formatMaximum || schema?.maximum;
 
   // For date range fields
-  const startDateMinimum = schema?.properties?.startDate?.minimum;
-  const startDateMaximum = schema?.properties?.startDate?.maximum;
-  const endDateMinimum = schema?.properties?.endDate?.minimum;
-  const endDateMaximum = schema?.properties?.endDate?.maximum;
+  const startDateMinimum =
+    schema?.properties?.startDate?.formatMinimum || schema?.properties?.startDate?.minimum;
+  const startDateMaximum =
+    schema?.properties?.startDate?.formatMaximum || schema?.properties?.startDate?.maximum;
+  const endDateMinimum =
+    schema?.properties?.endDate?.formatMinimum || schema?.properties?.endDate?.minimum;
+  const endDateMaximum =
+    schema?.properties?.endDate?.formatMaximum || schema?.properties?.endDate?.maximum;
 
   const isReadOnly = uischema?.options?.readonly;
   const includeTime = uischema?.options?.includeTime || false;
@@ -150,7 +155,7 @@ const CustomDateControl = (props) => {
               InputLabelProps={{
                 shrink: true,
               }}
-              disabled={isReadOnly}
+              disabled={isReadOnly || !enabled}
               sx={{
                 '& .MuiOutlinedInput-root': {
                   borderRadius: 2,
@@ -216,7 +221,7 @@ const CustomDateControl = (props) => {
               InputLabelProps={{
                 shrink: true,
               }}
-              disabled={isReadOnly}
+              disabled={isReadOnly || !enabled}
               sx={{
                 '& .MuiOutlinedInput-root': {
                   borderRadius: 2,
@@ -289,7 +294,7 @@ const CustomDateControl = (props) => {
         InputLabelProps={{
           shrink: true,
         }}
-        disabled={isReadOnly}
+        disabled={isReadOnly || !enabled}
         sx={{
           '& .MuiOutlinedInput-root': {
             borderRadius: 2,

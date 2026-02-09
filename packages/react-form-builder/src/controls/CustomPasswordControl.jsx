@@ -13,6 +13,7 @@ const CustomPasswordControl = ({
   visible,
   required,
   handleChange,
+  enabled,
 }) => {
   const [showPassword, setShowPassword] = useState(false);
   const isValid = errors.length === 0;
@@ -31,22 +32,25 @@ const CustomPasswordControl = ({
       helperText={!isValid ? errors : schema.description}
       required={required}
       variant="outlined"
+      disabled={!enabled}
       fullWidth
       style={{ display: visible ? 'block' : 'none' }}
       InputProps={{
         endAdornment: (
           <InputAdornment position="end">
-            <IconButton
-              onClick={handleTogglePasswordVisibility}
-              edge="end"
-              size="small"
-              sx={{
-                color: 'text.secondary',
-                '&:hover': { color: 'primary.main' },
-              }}
-            >
-              {showPassword ? <IconEyeOff size={20} /> : <IconEye size={20} />}
-            </IconButton>
+            {enabled && (
+              <IconButton
+                onClick={handleTogglePasswordVisibility}
+                edge="end"
+                size="small"
+                sx={{
+                  color: 'text.secondary',
+                  '&:hover': { color: 'primary.main' },
+                }}
+              >
+                {showPassword ? <IconEyeOff size={20} /> : <IconEye size={20} />}
+              </IconButton>
+            )}
           </InputAdornment>
         ),
       }}

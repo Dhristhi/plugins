@@ -31,7 +31,8 @@ const CustomSelectControl = (props) => {
   const [isLoading, setIsLoading] = useState(false);
   const [showAllChips, setShowAllChips] = useState(false);
 
-  const { schema, uischema, path, handleChange, data, errors, label, visible } = props;
+  const { schema, uischema, path, handleChange, data, errors, label, visible, enabled, required } =
+    props;
   const {
     entity,
     key,
@@ -113,7 +114,8 @@ const CustomSelectControl = (props) => {
         <Autocomplete
           multiple
           disableCloseOnSelect
-          disabled={isReadOnly}
+          disabled={isReadOnly || !enabled}
+          required={required}
           options={options}
           getOptionLabel={(opt) => opt.label}
           value={options.filter((o) => Array.isArray(data) && data.includes(o.value))}
@@ -125,6 +127,7 @@ const CustomSelectControl = (props) => {
             <TextField
               {...params}
               label={fieldLabel}
+              required={required}
               error={hasError}
               helperText={validationError}
             />
@@ -135,7 +138,9 @@ const CustomSelectControl = (props) => {
       </FormControl>
     ) : displayType === 'checkbox' ? (
       <FormControl fullWidth error={hasError}>
-        <FormLabel>{fieldLabel}</FormLabel>
+        <FormLabel>
+          {fieldLabel} {required && <span> *</span>}
+        </FormLabel>
         <Box sx={{ display: 'flex', flexDirection: 'row', gap: 2, flexWrap: 'wrap' }}>
           {options.map((opt) => {
             const isChecked = Array.isArray(data) && data.includes(opt.value);
@@ -145,7 +150,7 @@ const CustomSelectControl = (props) => {
                 control={
                   <Checkbox
                     checked={isChecked}
-                    disabled={isReadOnly}
+                    disabled={isReadOnly || !enabled}
                     onChange={(e) => {
                       if (isReadOnly) {
                         return;
@@ -173,7 +178,7 @@ const CustomSelectControl = (props) => {
         <Select
           label={fieldLabel}
           multiple
-          disabled={isReadOnly}
+          disabled={isReadOnly || !enabled}
           value={Array.isArray(data) ? data : []}
           onChange={(e) => {
             if (isReadOnly) {

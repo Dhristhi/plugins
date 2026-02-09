@@ -62,6 +62,7 @@
   "selectFileTypes": "Select file types",
   "enumValues": "Enum Values",
   "enableMultiSelect": "Enable Multi-Select",
+  "enableTextarea": "Enable Textarea",
   "apiEntity": "API Entity",
   "apiEntityHelp": "API endpoint name (e.g., countries, cities)",
   "valueFieldName": "Value Field Name",
@@ -109,6 +110,9 @@
   "fieldType_number": "Number",
   "fieldType_integer": "Integer",
   "fieldType_text": "Text Input",
+  "textType": "Text Type",
+  "singleLineText": "Single Line Text",
+  "multiLineText": "Multi-line Text",
   "fieldType_textarea": "Textarea",
   "fieldType_email": "Email",
   "fieldType_password": "Password",
@@ -174,6 +178,8 @@
   "desktop": "Desktop",
   "tablet": "Tablet",
   "mobile": "Mobile",
+  "fullscreen": "Fullscreen",
+  "exitFullscreen": "Exit Fullscreen",
 
   "isDependent": "Is Dependent",
   "chooseEffect": "Choose Effect",
@@ -223,8 +229,6 @@
   },
 
   "rotate": "Rotate",
-  "exitFullscreen": "Exit full screen",
-  "fullscreen": "Full screen",
   "screen": "Screen",
   "responsive": "Responsive"
 }

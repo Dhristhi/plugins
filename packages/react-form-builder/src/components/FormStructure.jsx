@@ -92,12 +92,12 @@ const SortableFieldItem = ({
     ml: level * 2,
     cursor: 'pointer',
     border: isSelected
-      ? `2px solid ${theme.palette.primary.main}`
-      : isGroup
-        ? `2px solid ${theme.palette.warning.main}`
+      ? isGroup
+        ? `2px solid ${theme.palette.primary.main}`
         : isArray
           ? `2px solid ${theme.palette.info.main}`
-          : `1px solid ${theme.palette.grey[200]}`,
+          : `2px solid ${theme.palette.primary.main}`
+      : `1px solid ${theme.palette.grey[200]}`,
     borderRadius: 2,
     transition: 'all 0.2s ease',
     '&:hover': {
@@ -193,7 +193,10 @@ const SortableFieldItem = ({
       <Paper
         elevation={isSelected ? 2 : 0}
         sx={(theme) => fieldPaperSx(theme, { isSelected, isGroup, isArray, level })}
-        onClick={() => onFieldSelect(field)}
+        onClick={(e) => {
+          e.stopPropagation();
+          onFieldSelect(field);
+        }}
         onContextMenu={handleContextMenu}
       >
         <Box sx={rowBetweenSx}>
@@ -343,7 +346,6 @@ const DropZone = ({ parentId, index, accepts, isEmpty = false, onAddField }) => 
     alignItems: 'center',
     justifyContent: 'center',
     '&:hover': {
-      borderColor: 'primary.main',
       transform: 'translateY(-1px)',
     },
   });
@@ -396,7 +398,6 @@ const DropZone = ({ parentId, index, accepts, isEmpty = false, onAddField }) => 
     '&:hover': {
       opacity: 1,
       minHeight: 36,
-      borderColor: 'primary.main',
     },
   });
 
@@ -589,7 +590,7 @@ const FormStructure = ({
         )}
       </Box>
 
-      {(hasOriginalSchema || fields.length > 0) && (
+      {!propertiesDrawerOpen && (hasOriginalSchema || fields.length > 0) && (
         <Box sx={actionBox}>
           {hasOriginalSchema ? (
             <Button onClick={onReset} variant="contained">
