@@ -343,7 +343,6 @@ const DropZone = ({ parentId, index, accepts, isEmpty = false, onAddField }) => 
     alignItems: 'center',
     justifyContent: 'center',
     '&:hover': {
-      borderColor: 'primary.main',
       transform: 'translateY(-1px)',
     },
   });
@@ -396,7 +395,6 @@ const DropZone = ({ parentId, index, accepts, isEmpty = false, onAddField }) => 
     '&:hover': {
       opacity: 1,
       minHeight: 36,
-      borderColor: 'primary.main',
     },
   });
 

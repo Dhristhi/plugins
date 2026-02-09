@@ -229,8 +229,6 @@
   },
 
   "rotate": "Rotate",
-  "exitFullscreen": "Exit full screen",
-  "fullscreen": "Full screen",
   "screen": "Screen",
   "responsive": "Responsive"
 }
