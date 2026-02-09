@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { restrictToWindowEdges } from '@dnd-kit/modifiers';
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import Backdrop from '@mui/material/Backdrop';
 import {
   Box,
   Button,
@@ -704,10 +705,16 @@ const FormBuilder = ({ onSave, onExport, schemas = [] } = {}) => {
             ) : null}
           </DragOverlay>
         </Box>
-
+        <Backdrop
+          open={propertiesDrawerOpen}
+          sx={{
+            zIndex: 1, // below the panel
+            backgroundColor: 'rgba(0,0,0,0.4)', // dim amount
+          }}
+        />
         {/* Properties Panel */}
         {propertiesDrawerOpen && selectedField && (
-          <Box sx={(theme) => propertiesPanel(theme)}>
+          <Box sx={(theme) => ({ zIndex: 2, ...propertiesPanel(theme) })}>
             <Box sx={propertiesPanelBox}>
               <Typography variant="h6" sx={propertiesPanelTypo}>
                 {formTitle}

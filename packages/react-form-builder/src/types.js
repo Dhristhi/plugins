@@ -99,7 +99,7 @@ export const defaultFieldTypes = [
     type: 'string',
     labelKey: 'fieldType_text',
     translationKey: 'fieldType_text',
-    label: 'Text Input',
+    label: 'Text',
     icon: IconEdit,
     schema: {
       type: 'string',
@@ -107,23 +107,8 @@ export const defaultFieldTypes = [
     uischema: {
       type: 'Control',
       scope: '#/properties/field',
-    },
-  },
-  {
-    id: 'textarea',
-    type: 'string',
-    labelKey: 'fieldType_textarea',
-    translationKey: 'fieldType_textarea',
-    label: 'Textarea',
-    icon: IconFileText,
-    schema: {
-      type: 'string',
-    },
-    uischema: {
-      type: 'Control',
-      scope: '#/properties/field',
       options: {
-        multi: true,
+        multi: false,
       },
     },
   },

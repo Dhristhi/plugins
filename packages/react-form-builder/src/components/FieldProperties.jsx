@@ -873,6 +873,33 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
               />
             )}
 
+            {/* Textarea toggle for text fields */}
+            {localField.type === 'text' && (
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={localField.uischema?.options?.multi === true}
+                    onChange={(e) => {
+                      const isMulti = e.target.checked;
+                      let updatedUISchema = { ...localField.uischema };
+
+                      updatedUISchema.options = {
+                        ...updatedUISchema.options,
+                        multi: isMulti,
+                      };
+
+                      handleUpdate({
+                        uischema: updatedUISchema,
+                      });
+                    }}
+                    color="primary"
+                  />
+                }
+                label={t('enableTextarea')}
+                sx={{ mb: 2, display: 'block' }}
+              />
+            )}
+
             {isGroup && (
               <>
                 <TextField
@@ -1266,6 +1293,32 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                 sx={formControlLabelSx}
               />
 
+              {/* Text Type Selector for text fields */}
+              {localField.type === 'text' && (
+                <FormControl fullWidth margin="normal">
+                  <InputLabel>{t('textType')}</InputLabel>
+                  <Select
+                    value={localField.uischema?.options?.multi ? 'textarea' : 'text'}
+                    label={t('textType')}
+                    onChange={(e) => {
+                      const isTextarea = e.target.value === 'textarea';
+                      const updatedUISchema = {
+                        ...localField.uischema,
+                        options: {
+                          ...localField.uischema?.options,
+                          multi: isTextarea || undefined,
+                        },
+                      };
+                      handleUpdate({ uischema: updatedUISchema });
+                    }}
+                    sx={layoutSelectSx}
+                  >
+                    <MenuItem value="text">{t('singleLineText')}</MenuItem>
+                    <MenuItem value="textarea">{t('multiLineText')}</MenuItem>
+                  </Select>
+                </FormControl>
+              )}
+
               {/* Show label field only for non-layout and non-group fields */}
               {localField.type !== 'layout' && localField.type !== 'group' && (
                 <TextField
@@ -1317,8 +1370,10 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
 
                         // Reset values
                         updatedSchema.default = undefined;
-                        updatedSchema.minimum = undefined;
-                        updatedSchema.maximum = undefined;
+                        updatedSchema.formatMinimum = undefined;
+                        updatedSchema.formatMaximum = undefined;
+                        delete updatedSchema.minimum;
+                        delete updatedSchema.maximum;
 
                         if (type === 'date') {
                           // Simple date
@@ -1508,7 +1563,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                       }}
                       inputProps={{
                         min: (() => {
-                          const minDate = localField.schema?.minimum;
+                          const minDate = localField.schema?.formatMinimum;
                           if (!minDate) return undefined;
                           const includeTime = localField.uischema?.options?.includeTime;
                           if (includeTime) {
@@ -1525,7 +1580,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                           return minDate ? minDate.split('T')[0] : undefined;
                         })(),
                         max: (() => {
-                          const maxDate = localField.schema?.maximum;
+                          const maxDate = localField.schema?.formatMaximum;
                           if (!maxDate) return undefined;
                           const includeTime = localField.uischema?.options?.includeTime;
                           if (includeTime) {
@@ -1577,14 +1632,14 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                               inputProps={{
                                 min: (() => {
                                   const minStartDate =
-                                    localField.schema?.properties?.startDate?.minimum;
+                                    localField.schema?.properties?.startDate?.formatMinimum;
                                   return minStartDate ? minStartDate.split('T')[0] : undefined;
                                 })(),
                                 max: (() => {
                                   const endDateDefault =
                                     localField.schema?.properties?.endDate?.default;
                                   const maxEndDate =
-                                    localField.schema?.properties?.endDate?.maximum;
+                                    localField.schema?.properties?.endDate?.formatMaximum;
                                   if (endDateDefault) return endDateDefault.split('T')[0];
                                   return maxEndDate ? maxEndDate.split('T')[0] : undefined;
                                 })(),
@@ -1659,13 +1714,13 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                                   const startDateDefault =
                                     localField.schema?.properties?.startDate?.default;
                                   const minStartDate =
-                                    localField.schema?.properties?.startDate?.minimum;
+                                    localField.schema?.properties?.startDate?.formatMinimum;
                                   if (startDateDefault) return startDateDefault.split('T')[0];
                                   return minStartDate ? minStartDate.split('T')[0] : undefined;
                                 })(),
                                 max: (() => {
                                   const maxEndDate =
-                                    localField.schema?.properties?.endDate?.maximum;
+                                    localField.schema?.properties?.endDate?.formatMaximum;
                                   return maxEndDate ? maxEndDate.split('T')[0] : undefined;
                                 })(),
                               }}
@@ -2237,7 +2292,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
 
             <Box>
               {(localField.type === 'text' ||
-                localField.type === 'textarea' ||
                 localField.type === 'password' ||
                 localField.type === 'url') && (
                 <>
@@ -2384,7 +2438,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                         type={localField.uischema?.options?.includeTime ? 'datetime-local' : 'date'}
                         fullWidth
                         value={(() => {
-                          const minDate = localField.schema?.minimum;
+                          const minDate = localField.schema?.formatMinimum;
                           if (!minDate) return '';
 
                           const includeTime = localField.uischema?.options?.includeTime;
@@ -2418,7 +2472,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                             dateValue = undefined;
                           }
 
-                          handleSchemaUpdate({ minimum: dateValue });
+                          handleSchemaUpdate({ formatMinimum: dateValue });
 
                           // Clear default if it's now invalid
                           const currentDefault = localField.schema?.default;
@@ -2427,12 +2481,12 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                             dateValue &&
                             new Date(currentDefault) < new Date(dateValue)
                           ) {
-                            handleSchemaUpdate({ minimum: dateValue, default: undefined });
+                            handleSchemaUpdate({ formatMinimum: dateValue, default: undefined });
                           }
                         }}
                         inputProps={{
                           max: (() => {
-                            const maxDate = localField.schema?.maximum;
+                            const maxDate = localField.schema?.formatMaximum;
                             if (!maxDate) return undefined;
                             const includeTime = localField.uischema?.options?.includeTime;
                             if (includeTime) {
@@ -2456,11 +2510,11 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                           shrink: true,
                         }}
                         InputProps={{
-                          endAdornment: localField.schema?.minimum && (
+                          endAdornment: localField.schema?.formatMinimum && (
                             <InputAdornment position="end">
                               <IconButton
                                 size="small"
-                                onClick={() => handleSchemaUpdate({ minimum: undefined })}
+                                onClick={() => handleSchemaUpdate({ formatMinimum: undefined })}
                                 edge="end"
                                 sx={{
                                   color: 'text.secondary',
@@ -2481,7 +2535,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                         type={localField.uischema?.options?.includeTime ? 'datetime-local' : 'date'}
                         fullWidth
                         value={(() => {
-                          const maxDate = localField.schema?.maximum;
+                          const maxDate = localField.schema?.formatMaximum;
                           if (!maxDate) return '';
 
                           const includeTime = localField.uischema?.options?.includeTime;
@@ -2515,7 +2569,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                             dateValue = undefined;
                           }
 
-                          handleSchemaUpdate({ maximum: dateValue });
+                          handleSchemaUpdate({ formatMaximum: dateValue });
 
                           // Clear default if it's now invalid
                           const currentDefault = localField.schema?.default;
@@ -2524,12 +2578,12 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                             dateValue &&
                             new Date(currentDefault) > new Date(dateValue)
                           ) {
-                            handleSchemaUpdate({ maximum: dateValue, default: undefined });
+                            handleSchemaUpdate({ formatMaximum: dateValue, default: undefined });
                           }
                         }}
                         inputProps={{
                           min: (() => {
-                            const minDate = localField.schema?.minimum;
+                            const minDate = localField.schema?.formatMinimum;
                             if (!minDate) return undefined;
                             const includeTime = localField.uischema?.options?.includeTime;
                             if (includeTime) {
@@ -2553,11 +2607,11 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                           shrink: true,
                         }}
                         InputProps={{
-                          endAdornment: localField.schema?.maximum && (
+                          endAdornment: localField.schema?.formatMaximum && (
                             <InputAdornment position="end">
                               <IconButton
                                 size="small"
-                                onClick={() => handleSchemaUpdate({ maximum: undefined })}
+                                onClick={() => handleSchemaUpdate({ formatMaximum: undefined })}
                                 edge="end"
                                 sx={{
                                   color: 'text.secondary',
@@ -2591,7 +2645,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                           type="date"
                           fullWidth
                           value={(() => {
-                            const minDate = localField.schema?.properties?.startDate?.minimum;
+                            const minDate = localField.schema?.properties?.startDate?.formatMinimum;
                             return minDate ? minDate.split('T')[0] : '';
                           })()}
                           onChange={(e) => {
@@ -2608,11 +2662,11 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                                 ...localField.schema.properties,
                                 startDate: {
                                   ...localField.schema.properties.startDate,
-                                  minimum: dateValue,
+                                  formatMinimum: dateValue,
                                 },
                                 endDate: {
                                   ...localField.schema.properties.endDate,
-                                  minimum: dateValue,
+                                  formatMinimum: dateValue,
                                 },
                               },
                             };
@@ -2641,7 +2695,8 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                           }}
                           inputProps={{
                             max: (() => {
-                              const maxEndDate = localField.schema?.properties?.endDate?.maximum;
+                              const maxEndDate =
+                                localField.schema?.properties?.endDate?.formatMaximum;
                               return maxEndDate ? maxEndDate.split('T')[0] : undefined;
                             })(),
                           }}
@@ -2652,7 +2707,8 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                             shrink: true,
                           }}
                           InputProps={{
-                            endAdornment: localField.schema?.properties?.startDate?.minimum && (
+                            endAdornment: localField.schema?.properties?.startDate
+                              ?.formatMinimum && (
                               <InputAdornment position="end">
                                 <IconButton
                                   size="small"
@@ -2662,11 +2718,11 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                                         ...localField.schema.properties,
                                         startDate: {
                                           ...localField.schema.properties.startDate,
-                                          minimum: undefined,
+                                          formatMinimum: undefined,
                                         },
                                         endDate: {
                                           ...localField.schema.properties.endDate,
-                                          minimum: undefined,
+                                          formatMinimum: undefined,
                                         },
                                       },
                                     })
@@ -2693,7 +2749,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                           type="date"
                           fullWidth
                           value={(() => {
-                            const maxDate = localField.schema?.properties?.endDate?.maximum;
+                            const maxDate = localField.schema?.properties?.endDate?.formatMaximum;
                             return maxDate ? maxDate.split('T')[0] : '';
                           })()}
                           onChange={(e) => {
@@ -2710,11 +2766,11 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                                 ...localField.schema.properties,
                                 startDate: {
                                   ...localField.schema.properties.startDate,
-                                  maximum: dateValue,
+                                  formatMaximum: dateValue,
                                 },
                                 endDate: {
                                   ...localField.schema.properties.endDate,
-                                  maximum: dateValue,
+                                  formatMaximum: dateValue,
                                 },
                               },
                             };
@@ -2744,7 +2800,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                           inputProps={{
                             min: (() => {
                               const minStartDate =
-                                localField.schema?.properties?.startDate?.minimum;
+                                localField.schema?.properties?.startDate?.formatMinimum;
                               return minStartDate ? minStartDate.split('T')[0] : undefined;
                             })(),
                           }}
@@ -2755,7 +2811,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                             shrink: true,
                           }}
                           InputProps={{
-                            endAdornment: localField.schema?.properties?.endDate?.maximum && (
+                            endAdornment: localField.schema?.properties?.endDate?.formatMaximum && (
                               <InputAdornment position="end">
                                 <IconButton
                                   size="small"
@@ -2765,11 +2821,11 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                                         ...localField.schema.properties,
                                         startDate: {
                                           ...localField.schema.properties.startDate,
-                                          maximum: undefined,
+                                          formatMaximum: undefined,
                                         },
                                         endDate: {
                                           ...localField.schema.properties.endDate,
-                                          maximum: undefined,
+                                          formatMaximum: undefined,
                                         },
                                       },
                                     })
