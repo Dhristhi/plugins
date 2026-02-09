@@ -1963,9 +1963,14 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                     value={localField.uischema?.options?.maxSelections || ''}
                     onChange={(e) => {
                       const maxSelections = e.target.value;
-                      // Ensure minimum value of 2 for multi-select fields
+                      const enumOptions =
+                        localField.schema?.enum || localField.schema?.items?.enum || [];
+                      const maxPossible = Math.max(2, enumOptions.length);
+
                       const validMaxSelections =
-                        maxSelections && Number(maxSelections) >= 2
+                        maxSelections &&
+                        Number(maxSelections) >= 2 &&
+                        Number(maxSelections) <= maxPossible
                           ? Number(maxSelections)
                           : undefined;
                       const updatedUISchema = {
@@ -1979,8 +1984,19 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                     }}
                     margin="normal"
                     variant="outlined"
-                    helperText={t('maxSelectionsHelp')}
-                    inputProps={{ min: 2, max: 50 }}
+                    helperText={(() => {
+                      const enumOptions =
+                        localField.schema?.enum || localField.schema?.items?.enum || [];
+                      const maxPossible = Math.max(2, enumOptions.length);
+                      return `${t('maxSelectionsHelp')} (max ${maxPossible} available)`;
+                    })()}
+                    inputProps={{
+                      min: 2,
+                      max: Math.max(
+                        2,
+                        (localField.schema?.enum || localField.schema?.items?.enum || []).length
+                      ),
+                    }}
                     sx={outlinedTextFieldSx}
                   />
                 </>
