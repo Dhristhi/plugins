@@ -8,7 +8,8 @@ import { formatDate } from '../utils';
 const CustomDateControl = (props) => {
   const { t } = useTranslation();
 
-  const { data, handleChange, path, label, required, errors, uischema, schema, visible } = props;
+  const { data, handleChange, path, label, required, errors, uischema, schema, visible, enabled } =
+    props;
 
   // Check if this is a date range field
   const isDateRange =
@@ -154,7 +155,7 @@ const CustomDateControl = (props) => {
               InputLabelProps={{
                 shrink: true,
               }}
-              disabled={isReadOnly}
+              disabled={isReadOnly || !enabled}
               sx={{
                 '& .MuiOutlinedInput-root': {
                   borderRadius: 2,
@@ -220,7 +221,7 @@ const CustomDateControl = (props) => {
               InputLabelProps={{
                 shrink: true,
               }}
-              disabled={isReadOnly}
+              disabled={isReadOnly || !enabled}
               sx={{
                 '& .MuiOutlinedInput-root': {
                   borderRadius: 2,
@@ -293,7 +294,7 @@ const CustomDateControl = (props) => {
         InputLabelProps={{
           shrink: true,
         }}
-        disabled={isReadOnly}
+        disabled={isReadOnly || !enabled}
         sx={{
           '& .MuiOutlinedInput-root': {
             borderRadius: 2,
