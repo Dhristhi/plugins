@@ -989,11 +989,13 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                         >
                           {/* Field selector */}
                           <FormControl size="small" sx={{ minWidth: 100 }}>
-                            <InputLabel id={`depends-on-label-${index}`}>Field</InputLabel>
+                            <InputLabel id={`depends-on-label-${index}`}>
+                              {t('conditionalLogic.field')}
+                            </InputLabel>
                             <Select
                               labelId={`depends-on-label-${index}`}
                               size="small"
-                              label="Field"
+                              label={t('conditionalLogic.field')}
                               value={row.dependsOn || ''}
                               onChange={
                                 (e) => updateCondition(index, 'dependsOn', e.target.value)
@@ -1018,10 +1020,12 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                             <>
                               {/* operator */}
                               <FormControl size="small" sx={{ minWidth: 110 }}>
-                                <InputLabel id={`operator-label-${index}`}>Operator</InputLabel>
+                                <InputLabel id={`operator-label-${index}`}>
+                                  {t('conditionalLogic.operator')}
+                                </InputLabel>
                                 <Select
                                   labelId={`operator-label-${index}`}
-                                  label="Operator"
+                                  label={t('conditionalLogic.operator')}
                                   size="small"
                                   value={row.operator || ''}
                                   onChange={(e) =>
@@ -1081,13 +1085,15 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                               {/* select or radio  */}
                               {dependsOnField?.schema?.enum && (
                                 <FormControl size="small" sx={{ minWidth: 100 }}>
-                                  <InputLabel id={`value-label-${index}`}>Value</InputLabel>
+                                  <InputLabel id={`value-label-${index}`}>
+                                    {t('conditionalLogic.value')}
+                                  </InputLabel>
                                   <Select
                                     labelId={`value-label-${index}`}
                                     size="small"
                                     disabled={!dependsOnField}
                                     value={row.value ?? ''}
-                                    label="Value"
+                                    label={t('conditionalLogic.value')}
                                     onChange={(e) => {
                                       updateCondition(index, 'value', e.target.value);
                                     }}
@@ -1104,13 +1110,15 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
 
                               {dependsOnField.schema?.type === 'array' && (
                                 <FormControl size="small" sx={{ minWidth: 100 }}>
-                                  <InputLabel id={`value-label-${index}`}>Value</InputLabel>
+                                  <InputLabel id={`value-label-${index}`}>
+                                    {t('conditionalLogic.value')}
+                                  </InputLabel>
                                   <Select
                                     labelId={`value-label-${index}`}
                                     size="small"
                                     disabled={!dependsOnField}
                                     value={row.value ?? ''}
-                                    label="Value"
+                                    label={t('conditionalLogic.value')}
                                     onChange={(e) => {
                                       updateCondition(index, 'value', e.target.value);
                                     }}
@@ -1128,12 +1136,14 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                               {/* checkbox */}
                               {dependsOnField?.schema.type === 'boolean' && (
                                 <FormControl size="small" sx={{ minWidth: 100 }}>
-                                  <InputLabel id={`value-label-${index}`}>Value</InputLabel>
+                                  <InputLabel id={`value-label-${index}`}>
+                                    {t('conditionalLogic.value')}
+                                  </InputLabel>
                                   <Select
                                     labelId={`value-label-${index}`}
                                     size="small"
                                     disabled={!dependsOnField}
-                                    label="Value"
+                                    label={t('conditionalLogic.value')}
                                     value={row.value ?? ''}
                                     onChange={(e) => {
                                       updateCondition(index, 'value', e.target.value);

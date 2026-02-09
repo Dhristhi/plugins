@@ -230,5 +230,11 @@
 
   "rotate": "Rotate",
   "screen": "Screen",
-  "responsive": "Responsive"
+  "responsive": "Responsive",
+
+  "conditionalLogic": {
+    "field": "Field",
+    "operator": "Operator",
+    "value": "Value"
+  }
 }
