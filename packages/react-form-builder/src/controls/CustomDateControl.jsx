@@ -271,8 +271,8 @@ const CustomDateControl = (props) => {
             let value = e.target.value;
 
             if (includeTime && value) {
-              const date = new Date(value);
-              value = date.toISOString();
+              // Keep in local timezone format (YYYY-MM-DDTHH:mm:ss)
+              value = value + ':00';
             }
 
             handleChange(path, value);

@@ -2436,8 +2436,8 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                           if (dateValue) {
                             const includeTime = localField.uischema?.options?.includeTime;
                             if (includeTime) {
-                              const date = new Date(dateValue);
-                              dateValue = date.toISOString();
+                              // Keep datetime in local timezone format (YYYY-MM-DDTHH:mm:ss)
+                              dateValue = dateValue + ':00';
                             } else {
                               // Ensure date-only format (YYYY-MM-DD)
                               dateValue = dateValue.split('T')[0];
@@ -2533,8 +2533,8 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                           if (dateValue) {
                             const includeTime = localField.uischema?.options?.includeTime;
                             if (includeTime) {
-                              const date = new Date(dateValue);
-                              dateValue = date.toISOString();
+                              // Keep datetime in local timezone format (YYYY-MM-DDTHH:mm:ss)
+                              dateValue = dateValue + ':00';
                             } else {
                               // Ensure date-only format (YYYY-MM-DD)
                               dateValue = dateValue.split('T')[0];
