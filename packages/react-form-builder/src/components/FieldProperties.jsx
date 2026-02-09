@@ -731,6 +731,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
 
   const flattenFields = (fields) => {
     const result = [];
+
     function traverse(items) {
       for (const item of items) {
         // Add current item's id and label
@@ -1292,32 +1293,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                 sx={formControlLabelSx}
               />
 
-              {/* Text Type Selector for text fields */}
-              {localField.type === 'text' && (
-                <FormControl fullWidth margin="normal">
-                  <InputLabel>{t('textType')}</InputLabel>
-                  <Select
-                    value={localField.uischema?.options?.multi ? 'textarea' : 'text'}
-                    label={t('textType')}
-                    onChange={(e) => {
-                      const isTextarea = e.target.value === 'textarea';
-                      const updatedUISchema = {
-                        ...localField.uischema,
-                        options: {
-                          ...localField.uischema?.options,
-                          multi: isTextarea || undefined,
-                        },
-                      };
-                      handleUpdate({ uischema: updatedUISchema });
-                    }}
-                    sx={layoutSelectSx}
-                  >
-                    <MenuItem value="text">{t('singleLineText')}</MenuItem>
-                    <MenuItem value="textarea">{t('multiLineText')}</MenuItem>
-                  </Select>
-                </FormControl>
-              )}
-
               {/* Show label field only for non-layout and non-group fields */}
               {localField.type !== 'layout' && localField.type !== 'group' && (
                 <TextField
@@ -1601,6 +1576,27 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                       helperText={t('defaultDateHelp')}
                       InputLabelProps={{
                         shrink: true,
+                      }}
+                      InputProps={{
+                        endAdornment: localField.schema?.default && (
+                          <InputAdornment position="end">
+                            <IconButton
+                              size="small"
+                              onClick={() =>
+                                handleSchemaUpdate({
+                                  default: undefined,
+                                })
+                              }
+                              edge="end"
+                              sx={{
+                                color: 'text.secondary',
+                                '&:hover': { color: 'error.main' },
+                              }}
+                            >
+                              <IconX size={16} />
+                            </IconButton>
+                          </InputAdornment>
+                        ),
                       }}
                       sx={outlinedTextFieldSx}
                     />

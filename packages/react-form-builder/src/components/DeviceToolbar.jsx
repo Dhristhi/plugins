@@ -36,6 +36,11 @@ export const DeviceToolbar = ({
 }) => {
   const isResponsive = selectedId !== 'responsive';
   const { t } = useTranslation();
+  const checkLength = (value) => {
+    if (value !== '') {
+      return Number(value) < 0 ? 1 : Number(value);
+    }
+  };
   return (
     <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 1 }}>
       {t('screen')}:{' '}
@@ -56,7 +61,11 @@ export const DeviceToolbar = ({
         size="small"
         disabled={isResponsive}
         value={width}
-        onChange={(e) => onChangeSize({ width: Number(e.target.value), height })}
+        inputProps={{ min: 1 }}
+        onChange={(e) => {
+          let width = checkLength(e.target.value);
+          onChangeSize({ width, height });
+        }}
         sx={{ width: 80 }}
       />
       <Box component="span">×</Box>
@@ -65,7 +74,11 @@ export const DeviceToolbar = ({
         size="small"
         disabled={isResponsive}
         value={height}
-        onChange={(e) => onChangeSize({ width, height: Number(e.target.value) })}
+        inputProps={{ min: 1 }}
+        onChange={(e) => {
+          let height = checkLength(e.target.value);
+          onChangeSize({ width, height });
+        }}
         sx={{ width: 80 }}
       />
       <Tooltip title={t('rotate')}>

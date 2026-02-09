@@ -53,14 +53,10 @@ function compileRule(field) {
   field.visibility = field.visibility.filter(
     (item) => item.dependsOn !== '' && item.dependsOn != null
   );
+  field.visibility[0].logical = '';
+
   const conditions = field.visibility;
   conditions.forEach((condition, index) => {
-    if (index === 0) {
-      if (condition.logical !== '') {
-        condition.logical === '';
-        field.visibility[index].logical = '';
-      }
-    }
     // const conditionParentField = fieldsArray.find((obj) => obj.fieldKey === condition.dependsOn);
     const compiled = buildPropertyCondition(condition);
     currentGroup.push(compiled);
