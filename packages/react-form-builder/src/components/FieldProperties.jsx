@@ -989,7 +989,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                 </Box>
                 <Box sx={{ marginTop: '10px' }}>
                   {rows.map((row, index) => {
-                    const dependsOnField = filteredFields.find((f) => f.fieldKey === row.dependsOn);
+                    const dependsOnField = filteredFields.find((f) => f.key === row.dependsOn);
                     return (
                       <>
                         <Typography
@@ -1028,7 +1028,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                                   return f.id !== field.id && !excludedTypes.includes(f.type);
                                 })
                                 .map((f) => (
-                                  <MenuItem key={f.fieldKey} value={f.fieldKey}>
+                                  <MenuItem key={f.key} value={f.key}>
                                     <Box sx={fieldTypeMenuItemSx}>{f.label}</Box>
                                   </MenuItem>
                                 ))}
