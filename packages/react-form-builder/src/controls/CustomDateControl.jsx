@@ -15,14 +15,18 @@ const CustomDateControl = (props) => {
     schema?.type === 'object' && schema?.properties?.startDate && schema?.properties?.endDate;
 
   // For single date fields
-  const minDate = schema?.minimum;
-  const maxDate = schema?.maximum;
+  const minDate = schema?.formatMinimum || schema?.minimum;
+  const maxDate = schema?.formatMaximum || schema?.maximum;
 
   // For date range fields
-  const startDateMinimum = schema?.properties?.startDate?.minimum;
-  const startDateMaximum = schema?.properties?.startDate?.maximum;
-  const endDateMinimum = schema?.properties?.endDate?.minimum;
-  const endDateMaximum = schema?.properties?.endDate?.maximum;
+  const startDateMinimum =
+    schema?.properties?.startDate?.formatMinimum || schema?.properties?.startDate?.minimum;
+  const startDateMaximum =
+    schema?.properties?.startDate?.formatMaximum || schema?.properties?.startDate?.maximum;
+  const endDateMinimum =
+    schema?.properties?.endDate?.formatMinimum || schema?.properties?.endDate?.minimum;
+  const endDateMaximum =
+    schema?.properties?.endDate?.formatMaximum || schema?.properties?.endDate?.maximum;
 
   const isReadOnly = uischema?.options?.readonly;
   const includeTime = uischema?.options?.includeTime || false;

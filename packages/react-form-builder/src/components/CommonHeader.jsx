@@ -4,7 +4,7 @@ import { Box, Typography, Button, ButtonGroup } from '@mui/material';
 
 const headerContainerSx = {
   top: 0,
-  zIndex: 10,
+  zIndex: 1,
   borderBottom: 1,
   position: 'sticky',
   p: { xs: 2, sm: 3 },
