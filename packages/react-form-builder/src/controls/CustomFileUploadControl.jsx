@@ -6,7 +6,7 @@ import { and, isControl, optionIs, rankWith } from '@jsonforms/core';
 import { Box, Typography, Alert, FormHelperText } from '@mui/material';
 
 const CustomFileUploadControl = (props) => {
-  const { data, handleChange, path, errors, uischema, schema, label, visible } = props;
+  const { data, handleChange, path, errors, uischema, schema, label, visible, enabled } = props;
 
   const { t } = useTranslation();
   const [localError, setLocalError] = useState(null);
@@ -224,13 +224,14 @@ const CustomFileUploadControl = (props) => {
     backgroundColor: isDragOver ? 'action.hover' : hasFiles ? 'success.lighter' : '',
     p: 3,
     textAlign: 'center',
-    cursor: isReadOnly ? 'not-allowed' : 'pointer',
-    opacity: isReadOnly ? 0.6 : 1,
+    cursor: isReadOnly || !enabled ? 'not-allowed' : 'pointer',
+    opacity: isReadOnly || !enabled ? 0.6 : 1,
     transition: 'all 0.2s ease-in-out',
-    '&:hover': !isReadOnly && {
-      borderColor: 'primary.main',
-      backgroundColor: 'action.hover',
-    },
+    '&:hover': !isReadOnly &&
+      enabled && {
+        borderColor: 'primary.main',
+        backgroundColor: 'action.hover',
+      },
   };
 
   const uploadedFileContainer = {
@@ -306,7 +307,7 @@ const CustomFileUploadControl = (props) => {
           accept={acceptedFileTypes}
           style={{ display: 'none' }}
           onChange={handleFileInputChange}
-          disabled={isUploading || isReadOnly}
+          disabled={isUploading || isReadOnly || !enabled}
           multiple
         />
 
