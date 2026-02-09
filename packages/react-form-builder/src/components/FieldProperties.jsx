@@ -731,7 +731,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
 
   const flattenFields = (fields) => {
     const result = [];
-    console.log('fields', fields);
     function traverse(items) {
       for (const item of items) {
         // Add current item's id and label

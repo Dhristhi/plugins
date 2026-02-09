@@ -133,6 +133,9 @@ const FormResponsivePreview = ({ isFullscreen, setIsFullscreen, children }) => {
     '& .MuiToolbar-regular .MuiGrid-spacing-xs-2': {
       marginLeft: '0px',
     },
+    '& .MuiFormHelperText-root': {
+      textAlign: 'left',
+    },
   };
 
   const innerSx = {
