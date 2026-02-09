@@ -1293,32 +1293,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                 sx={formControlLabelSx}
               />
 
-              {/* Text Type Selector for text fields */}
-              {localField.type === 'text' && (
-                <FormControl fullWidth margin="normal">
-                  <InputLabel>{t('textType')}</InputLabel>
-                  <Select
-                    value={localField.uischema?.options?.multi ? 'textarea' : 'text'}
-                    label={t('textType')}
-                    onChange={(e) => {
-                      const isTextarea = e.target.value === 'textarea';
-                      const updatedUISchema = {
-                        ...localField.uischema,
-                        options: {
-                          ...localField.uischema?.options,
-                          multi: isTextarea || undefined,
-                        },
-                      };
-                      handleUpdate({ uischema: updatedUISchema });
-                    }}
-                    sx={layoutSelectSx}
-                  >
-                    <MenuItem value="text">{t('singleLineText')}</MenuItem>
-                    <MenuItem value="textarea">{t('multiLineText')}</MenuItem>
-                  </Select>
-                </FormControl>
-              )}
-
               {/* Show label field only for non-layout and non-group fields */}
               {localField.type !== 'layout' && localField.type !== 'group' && (
                 <TextField
