@@ -120,6 +120,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
   const [rows, setRows] = useState(defaultRows);
   const [isInteger, setIsInteger] = useState(false);
   const [isMultiSelect, setIsMultiSelect] = useState(false);
+  const [isMultiCheckbox, setIsMultiCheckbox] = useState(false);
 
   const updateCondition = (index, key, value) => {
     const updated = [...rows];
@@ -586,10 +587,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
   const isGroup = localField.uischema?.type === 'Group';
   const isLayout = localField.isLayout && localField.uischema?.type !== 'Group';
 
-  const isMultiCheckbox =
-    localField.type === 'checkbox' &&
-    (localField.schema?.type === 'array' || localField.uischema?.options?.multi === true);
-
   const handleUiOptionsUpdate = (updates) => {
     const existingUiOptions = localField.uischema?.options?.['ui:options'] || {};
     const updatedUiSchema = {
@@ -919,17 +916,20 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
             )}
 
             {/* Multi-select toggle for checkbox fields */}
-            {localField.type === 'checkbox' && (
+            {(localField.type === 'checkbox' || localField.type === 'multicheckbox') && (
               <FormControlLabel
                 control={
                   <Switch
                     checked={isMultiCheckbox}
                     onChange={(e) => {
                       const isMulti = e.target.checked;
+                      setIsMultiCheckbox(isMulti);
                       let updatedSchema = { ...localField.schema };
                       let updatedUISchema = { ...localField.uischema };
-
+                      delete updatedSchema.default;
+                      let type = '';
                       if (isMulti) {
+                        type = 'multicheckbox';
                         const defaultEnumOptions =
                           enumOptions.length > 0
                             ? enumOptions
@@ -940,7 +940,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                           enum: defaultEnumOptions,
                         };
                         updatedSchema.uniqueItems = true;
-                        delete updatedSchema.default;
                         updatedUISchema.options = {
                           ...updatedUISchema.options,
                           multi: true,
@@ -952,6 +951,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                           setEnumOptions(defaultEnumOptions);
                         }
                       } else {
+                        type = 'checkbox';
                         // Convert to single checkbox (boolean)
                         updatedSchema.type = 'boolean';
                         delete updatedSchema.items;
@@ -967,6 +967,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
 
                       handleUpdate(
                         {
+                          type,
                           schema: updatedSchema,
                           uischema: updatedUISchema,
                         },
