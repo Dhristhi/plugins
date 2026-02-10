@@ -259,7 +259,6 @@ const FormPreview = ({
       case 'required':
         return 'validation.required';
       case 'format':
-        // e.g. date, email, etc. – you can further branch on error.params.format
         return `validation.format.${error.params?.format || 'generic'}`;
       case 'pattern':
         return 'validation.pattern';
@@ -272,9 +271,46 @@ const FormPreview = ({
       case 'maximum':
         return 'validation.maximum';
       case 'formatMinimum':
-        return 'validation.minimum';
       case 'formatMaximum':
-        return 'validation.maximum';
+        // For datetime fields, show time range in error message
+        if (error.schemaPath) {
+          const fieldKey = error.instancePath.replace(/^\//, '');
+          const fieldSchema = formState.schema?.properties?.[fieldKey];
+
+          if (fieldSchema?.format === 'date-time' || fieldSchema?.format === 'datetime') {
+            const minDate = fieldSchema.formatMinimum || fieldSchema.minimum;
+            const maxDate = fieldSchema.formatMaximum || fieldSchema.maximum;
+
+            if (minDate && maxDate) {
+              const minTime = new Date(minDate).toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true,
+              });
+              const maxTime = new Date(maxDate).toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true,
+              });
+              return `Time must be between ${minTime} and ${maxTime}`;
+            } else if (minDate) {
+              const minTime = new Date(minDate).toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true,
+              });
+              return `Time must be after ${minTime}`;
+            } else if (maxDate) {
+              const maxTime = new Date(maxDate).toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true,
+              });
+              return `Time must be before ${maxTime}`;
+            }
+          }
+        }
+        return 'validation.minimum';
       default:
         return 'validation.generic';
     }
@@ -389,7 +425,24 @@ const FormPreview = ({
       }));
 
       const filteredErrors = filterErrors(transformedErrors, data);
-      allErrors = [...filteredErrors];
+
+      // Deduplicate datetime errors - keep only one error per field for formatMinimum/formatMaximum
+      const deduplicatedErrors = [];
+      const datetimeErrorFields = new Set();
+
+      filteredErrors.forEach((error) => {
+        if (error.keyword === 'formatMinimum' || error.keyword === 'formatMaximum') {
+          const fieldKey = error.instancePath;
+          if (!datetimeErrorFields.has(fieldKey)) {
+            datetimeErrorFields.add(fieldKey);
+            deduplicatedErrors.push(error);
+          }
+        } else {
+          deduplicatedErrors.push(error);
+        }
+      });
+
+      allErrors = [...deduplicatedErrors];
     }
 
     // Add password confirmation validation
