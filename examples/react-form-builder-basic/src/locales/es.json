@@ -227,5 +227,12 @@
   "fullscreen": "Pantalla completa",
   "screen": "Pantalla",
   "responsive": "Responsivo",
-  "enableInteger": "Habilitar entero"
+  "enableInteger": "Habilitar entero",
+  "op_arr_equals": "Incluye",
+  "op_arr_not_equals": "No incluye",
+  "conditionalLogic": {
+    "field": "Campo",
+    "operator": "Operador",
+    "value": "Valor"
+  }
 }
