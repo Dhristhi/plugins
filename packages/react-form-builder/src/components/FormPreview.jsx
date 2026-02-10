@@ -2,7 +2,7 @@ import { createAjv } from '@jsonforms/core';
 import { JsonForms } from '@jsonforms/react';
 import { IconEye } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
-import { Typography, Button, Box } from '@mui/material';
+import { Typography, Box } from '@mui/material';
 import { useState, useMemo, useRef, useEffect, useLayoutEffect } from 'react';
 
 import CommonHeader from './CommonHeader';
@@ -214,22 +214,6 @@ const FormPreview = ({
   const [hasValidated, setHasValidated] = useState(false);
   const [validationErrors, setValidationErrors] = useState([]);
 
-  const validateBox = {
-    px: 3,
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 64,
-    display: 'flex',
-    position: 'fixed',
-    alignItems: 'center',
-    borderTop: '1px solid',
-    borderColor: 'grey.200',
-    justifyContent: 'flex-end',
-    backgroundColor: 'background.paper',
-    zIndex: (theme) => theme.zIndex.drawer + 1,
-  };
-
   const headerSx = {
     top: 0,
     position: 'sticky',
@@ -259,6 +243,7 @@ const FormPreview = ({
       case 'required':
         return 'validation.required';
       case 'format':
+        // e.g. date, email, etc. – you can further branch on error.params.format
         return `validation.format.${error.params?.format || 'generic'}`;
       case 'pattern':
         return 'validation.pattern';
@@ -271,55 +256,9 @@ const FormPreview = ({
       case 'maximum':
         return 'validation.maximum';
       case 'formatMinimum':
-      case 'formatMaximum':
-        // For datetime fields, show time range in error message
-        if (error.schemaPath) {
-          const fieldKey = error.instancePath.replace(/^\//, '');
-          const fieldSchema = formState.schema?.properties?.[fieldKey];
-
-          if (fieldSchema?.format === 'date-time' || fieldSchema?.format === 'datetime') {
-            const minDate = fieldSchema.formatMinimum || fieldSchema.minimum;
-            const maxDate = fieldSchema.formatMaximum || fieldSchema.maximum;
-
-            const minDateStr = minDate
-              ? new Date(minDate).toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'short',
-                  day: 'numeric',
-                })
-              : undefined;
-
-            const maxDateStr = maxDate
-              ? new Date(maxDate).toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'short',
-                  day: 'numeric',
-                })
-              : undefined;
-            const minTime = minDate
-              ? new Date(minDate).toLocaleTimeString('en-US', {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                  hour12: true,
-                })
-              : undefined;
-            const maxTime = maxDate
-              ? new Date(maxDate).toLocaleTimeString('en-US', {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                  hour12: true,
-                })
-              : undefined;
-            if (minDate && maxDate) {
-              return `Date must be between ${minDateStr} ${minTime} and ${maxDateStr} ${maxTime}`;
-            } else if (minDate) {
-              return `Date must be after ${minDateStr} ${minTime}`;
-            } else if (maxDate) {
-              return `Date must be before ${maxDateStr} ${maxTime}`;
-            }
-          }
-        }
         return 'validation.minimum';
+      case 'formatMaximum':
+        return 'validation.maximum';
       default:
         return 'validation.generic';
     }
@@ -434,24 +373,7 @@ const FormPreview = ({
       }));
 
       const filteredErrors = filterErrors(transformedErrors, data);
-
-      // Deduplicate datetime errors - keep only one error per field for formatMinimum/formatMaximum
-      const deduplicatedErrors = [];
-      const datetimeErrorFields = new Set();
-
-      filteredErrors.forEach((error) => {
-        if (error.keyword === 'formatMinimum' || error.keyword === 'formatMaximum') {
-          const fieldKey = error.instancePath;
-          if (!datetimeErrorFields.has(fieldKey)) {
-            datetimeErrorFields.add(fieldKey);
-            deduplicatedErrors.push(error);
-          }
-        } else {
-          deduplicatedErrors.push(error);
-        }
-      });
-
-      allErrors = [...deduplicatedErrors];
+      allErrors = [...filteredErrors];
     }
 
     // Add password confirmation validation
@@ -520,9 +442,14 @@ const FormPreview = ({
           showSchemaEditor={showSchemaEditor}
           setShowSchemaEditor={setShowSchemaEditor}
           exportForm={exportForm}
+          onValidate={toggleValidateButton}
+          hasValidated={hasValidated}
+          showValidateButton={
+            formState.schema.properties && Object.keys(formState.schema.properties).length > 0
+          }
         />
       </Box>
-      <Box sx={{ p: 2, paddingBottom: '80px' }}>
+      <Box sx={{ p: 2 }}>
         {formState.schema.properties && Object.keys(formState.schema.properties).length > 0 ? (
           <div ref={formRef}>
             <FormResponsivePreview isFullscreen={isFullscreen} setIsFullscreen={setIsFullscreen}>
@@ -569,13 +496,6 @@ const FormPreview = ({
           </Typography>
         )}
       </Box>
-      {formState.schema.properties && Object.keys(formState.schema.properties).length > 0 && (
-        <Box sx={validateBox}>
-          <Button onClick={toggleValidateButton} variant="contained">
-            {t('validate')}
-          </Button>
-        </Box>
-      )}
     </Box>
   );
 };
