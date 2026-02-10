@@ -83,6 +83,10 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
       { label: t('op_equals'), value: 'equals' },
       { label: t('op_not_equals'), value: 'not_equals' },
     ],
+    array: [
+      { label: t('op_arr_equals'), value: 'equals' },
+      { label: t('op_arr_not_equals'), value: 'not_equals' },
+    ],
     boolean: [
       { label: t('op_is'), value: 'equals' },
       { label: t('op_is_not'), value: 'not_equals' },
@@ -1043,7 +1047,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
 
                                   {dependsOnField &&
                                     dependsOnField.schema?.type === 'array' &&
-                                    OPERATORS['string']?.map((op) => (
+                                    OPERATORS['array']?.map((op) => (
                                       <MenuItem key={op.value} value={op.value}>
                                         {op.label}
                                       </MenuItem>
@@ -2523,8 +2527,8 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                           if (dateValue) {
                             const includeTime = localField.uischema?.options?.includeTime;
                             if (includeTime) {
-                              const date = new Date(dateValue);
-                              dateValue = date.toISOString();
+                              // Keep datetime in local timezone format (YYYY-MM-DDTHH:mm:ss)
+                              dateValue = dateValue + ':00';
                             } else {
                               // Ensure date-only format (YYYY-MM-DD)
                               dateValue = dateValue.split('T')[0];
@@ -2620,8 +2624,8 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                           if (dateValue) {
                             const includeTime = localField.uischema?.options?.includeTime;
                             if (includeTime) {
-                              const date = new Date(dateValue);
-                              dateValue = date.toISOString();
+                              // Keep datetime in local timezone format (YYYY-MM-DDTHH:mm:ss)
+                              dateValue = dateValue + ':00';
                             } else {
                               // Ensure date-only format (YYYY-MM-DD)
                               dateValue = dateValue.split('T')[0];
