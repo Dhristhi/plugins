@@ -83,6 +83,10 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
       { label: t('op_equals'), value: 'equals' },
       { label: t('op_not_equals'), value: 'not_equals' },
     ],
+    array: [
+      { label: t('op_arr_equals'), value: 'equals' },
+      { label: t('op_arr_not_equals'), value: 'not_equals' },
+    ],
     boolean: [
       { label: t('op_is'), value: 'equals' },
       { label: t('op_is_not'), value: 'not_equals' },
@@ -468,44 +472,22 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
       };
 
       // Preserve enum options and uischema options
-      if (hasEnumOptions && ['select', 'radio', 'multicheckbox'].includes(newTypeId)) {
-        if (newTypeId === 'multicheckbox') {
+      if (
+        hasEnumOptions &&
+        ['select', 'radio', 'multiselect', 'multicheckbox'].includes(newTypeId)
+      ) {
+        if (newTypeId === 'multiselect' || newTypeId === 'multicheckbox') {
           updatedField.schema.items = {
             type: 'string',
             enum: enumOptions,
           };
           delete updatedField.schema.enum;
-          // Preserve existing uischema options for multicheckbox
+          // Preserve existing uischema options for multiselect
           if (localField.uischema?.options) {
             updatedField.uischema.options = {
               ...updatedField.uischema.options,
               ...localField.uischema.options,
-              displayType: 'checkbox',
-            };
-          }
-        } else if (newTypeId === 'select') {
-          // Preserve multi-select state when switching to select
-          const isCurrentlyMulti =
-            localField.schema?.type === 'array' || localField.uischema?.options?.multi;
-          if (isCurrentlyMulti) {
-            updatedField.schema.type = 'array';
-            updatedField.schema.items = {
-              type: 'string',
-              enum: enumOptions,
-            };
-            updatedField.schema.uniqueItems = true;
-            delete updatedField.schema.enum;
-            updatedField.uischema.options = {
-              ...updatedField.uischema.options,
-              multi: true,
-              format: 'select',
-              displayType: 'autocomplete',
-            };
-          } else {
-            updatedField.schema.enum = enumOptions;
-            updatedField.uischema.options = {
-              ...updatedField.uischema.options,
-              multi: false,
+              displayType: newTypeId === 'multiselect' ? 'dropdown' : 'checkbox',
             };
           }
         } else {
@@ -528,7 +510,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
         setEnumOptions([...newFieldType.schema.enum]);
       } else if (newFieldType.schema.items?.enum) {
         setEnumOptions([...newFieldType.schema.items.enum]);
-      } else if (!['select', 'radio', 'multicheckbox'].includes(newTypeId)) {
+      } else if (!['select', 'radio', 'multiselect', 'multicheckbox'].includes(newTypeId)) {
         setEnumOptions([]);
       }
     }
@@ -551,14 +533,14 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
     // Array fields with enum items (multiselect) can switch between multiselect types and array
     if (currentSchemaType === 'array' && localField.schema?.items?.enum) {
       return availableFieldTypes.filter(
-        (ft) => ft.id === 'select' || ft.id === 'multicheckbox' || ft.id === 'array'
+        (ft) => ft.id === 'multiselect' || ft.id === 'multicheckbox' || ft.id === 'array'
       );
     }
 
     // Array fields without enum can switch between array and multiselect types
     if (currentSchemaType === 'array' && localField.type !== 'file') {
       return availableFieldTypes.filter(
-        (ft) => ft.id === 'array' || ft.id === 'select' || ft.id === 'multicheckbox'
+        (ft) => ft.id === 'array' || ft.id === 'multiselect' || ft.id === 'multicheckbox'
       );
     }
 
@@ -569,7 +551,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
 
     return availableFieldTypes.filter((ft) => {
       // Don't allow converting to array types from other types
-      if (ft.id === 'array' || ft.id === 'multicheckbox') return false;
+      if (ft.id === 'array' || ft.id === 'multiselect' || ft.id === 'multicheckbox') return false;
 
       const targetSchemaType = ft.schema?.type;
 
@@ -584,7 +566,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
 
   const availableFieldTypes = defaultFieldTypes.filter((ft) => !ft.isLayout);
   const hasEnumOptions =
-    ['select', 'radio', 'multicheckbox'].includes(localField.type) ||
+    ['select', 'radio', 'multiselect', 'multicheckbox'].includes(localField.type) ||
     (localField.schema?.type === 'array' &&
       !!localField.schema?.items &&
       localField.uischema?.options?.multi) ||
@@ -1011,11 +993,13 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                         >
                           {/* Field selector */}
                           <FormControl size="small" sx={{ minWidth: 100 }}>
-                            <InputLabel id={`depends-on-label-${index}`}>{t('field')}</InputLabel>
+                            <InputLabel id={`depends-on-label-${index}`}>
+                              {t('conditionalLogic.field')}
+                            </InputLabel>
                             <Select
                               labelId={`depends-on-label-${index}`}
                               size="small"
-                              label={t('field')}
+                              label={t('conditionalLogic.field')}
                               value={row.dependsOn || ''}
                               onChange={
                                 (e) => updateCondition(index, 'dependsOn', e.target.value)
@@ -1041,11 +1025,11 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                               {/* operator */}
                               <FormControl size="small" sx={{ minWidth: 110 }}>
                                 <InputLabel id={`operator-label-${index}`}>
-                                  {t('operator')}
+                                  {t('conditionalLogic.operator')}
                                 </InputLabel>
                                 <Select
                                   labelId={`operator-label-${index}`}
-                                  label={t('operator')}
+                                  label={t('conditionalLogic.operator')}
                                   size="small"
                                   value={row.operator || ''}
                                   onChange={(e) =>
@@ -1063,7 +1047,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
 
                                   {dependsOnField &&
                                     dependsOnField.schema?.type === 'array' &&
-                                    OPERATORS['string']?.map((op) => (
+                                    OPERATORS['array']?.map((op) => (
                                       <MenuItem key={op.value} value={op.value}>
                                         {op.label}
                                       </MenuItem>
@@ -1105,13 +1089,15 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                               {/* select or radio  */}
                               {dependsOnField?.schema?.enum && (
                                 <FormControl size="small" sx={{ minWidth: 100 }}>
-                                  <InputLabel id={`value-label-${index}`}>Value</InputLabel>
+                                  <InputLabel id={`value-label-${index}`}>
+                                    {t('conditionalLogic.value')}
+                                  </InputLabel>
                                   <Select
                                     labelId={`value-label-${index}`}
                                     size="small"
                                     disabled={!dependsOnField}
                                     value={row.value ?? ''}
-                                    label="Value"
+                                    label={t('conditionalLogic.value')}
                                     onChange={(e) => {
                                       updateCondition(index, 'value', e.target.value);
                                     }}
@@ -1128,13 +1114,15 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
 
                               {dependsOnField.schema?.type === 'array' && (
                                 <FormControl size="small" sx={{ minWidth: 100 }}>
-                                  <InputLabel id={`value-label-${index}`}>Value</InputLabel>
+                                  <InputLabel id={`value-label-${index}`}>
+                                    {t('conditionalLogic.value')}
+                                  </InputLabel>
                                   <Select
                                     labelId={`value-label-${index}`}
                                     size="small"
                                     disabled={!dependsOnField}
                                     value={row.value ?? ''}
-                                    label="Value"
+                                    label={t('conditionalLogic.value')}
                                     onChange={(e) => {
                                       updateCondition(index, 'value', e.target.value);
                                     }}
@@ -1152,12 +1140,14 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                               {/* checkbox */}
                               {dependsOnField?.schema.type === 'boolean' && (
                                 <FormControl size="small" sx={{ minWidth: 100 }}>
-                                  <InputLabel id={`value-label-${index}`}>Value</InputLabel>
+                                  <InputLabel id={`value-label-${index}`}>
+                                    {t('conditionalLogic.value')}
+                                  </InputLabel>
                                   <Select
                                     labelId={`value-label-${index}`}
                                     size="small"
                                     disabled={!dependsOnField}
-                                    label="Value"
+                                    label={t('conditionalLogic.value')}
                                     value={row.value ?? ''}
                                     onChange={(e) => {
                                       updateCondition(index, 'value', e.target.value);
@@ -1949,8 +1939,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                 sx={outlinedTextFieldSx}
               />
               {/* Multiselect Display Type */}
-              {((localField.type === 'select' && isMultiSelect) ||
-                localField.type === 'multicheckbox') && (
+              {(localField.type === 'multiselect' || localField.type === 'multicheckbox') && (
                 <>
                   {localField.uischema?.options?.displayType !== 'checkbox' && (
                     <TextField
@@ -1979,6 +1968,51 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                       sx={outlinedTextFieldSx}
                     />
                   )}
+
+                  {/* Maximum Selections Limit */}
+                  <TextField
+                    label={t('maxSelections')}
+                    type="number"
+                    fullWidth
+                    value={localField.uischema?.options?.maxSelections || ''}
+                    onChange={(e) => {
+                      const maxSelections = e.target.value;
+                      const enumOptions =
+                        localField.schema?.enum || localField.schema?.items?.enum || [];
+                      const maxPossible = Math.max(2, enumOptions.length);
+
+                      const validMaxSelections =
+                        maxSelections &&
+                        Number(maxSelections) >= 2 &&
+                        Number(maxSelections) <= maxPossible
+                          ? Number(maxSelections)
+                          : undefined;
+                      const updatedUISchema = {
+                        ...localField.uischema,
+                        options: {
+                          ...localField.uischema?.options,
+                          maxSelections: validMaxSelections,
+                        },
+                      };
+                      handleUpdate({ uischema: updatedUISchema });
+                    }}
+                    margin="normal"
+                    variant="outlined"
+                    helperText={(() => {
+                      const enumOptions =
+                        localField.schema?.enum || localField.schema?.items?.enum || [];
+                      const maxPossible = Math.max(2, enumOptions.length);
+                      return `${t('maxSelectionsHelp')} (max ${maxPossible} available)`;
+                    })()}
+                    inputProps={{
+                      min: 2,
+                      max: Math.max(
+                        2,
+                        (localField.schema?.enum || localField.schema?.items?.enum || []).length
+                      ),
+                    }}
+                    sx={outlinedTextFieldSx}
+                  />
                 </>
               )}
               {/* Password Confirmation Toggle */}

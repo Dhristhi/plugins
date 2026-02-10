@@ -47,7 +47,7 @@ function normalizeConstValue(value) {
   return value;
 }
 
-function compileRule(field) {
+function compileRule(field, fieldsArray = null) {
   const anyOf = [];
   let currentGroup = [];
   field.visibility = field.visibility.filter(
@@ -57,8 +57,11 @@ function compileRule(field) {
 
   const conditions = field.visibility;
   conditions.forEach((condition, index) => {
-    // const conditionParentField = fieldsArray.find((obj) => obj.fieldKey === condition.dependsOn);
-    const compiled = buildPropertyCondition(condition);
+    const isArray =
+      fieldsArray.find((field) => field.key === condition.dependsOn)?.schema?.type === 'array'
+        ? true
+        : false;
+    const compiled = buildPropertyCondition(condition, isArray);
     currentGroup.push(compiled);
 
     const isLast = index === conditions.length - 1;
@@ -86,18 +89,30 @@ function compileRule(field) {
   };
 }
 
-function buildPropertyCondition({ dependsOn, operator, value }) {
+function buildPropertyCondition({ dependsOn, operator, value }, isArray = false) {
   const constValue = normalizeConstValue(value);
 
   let schemaCondition;
 
   switch (operator) {
     case 'equals':
-      schemaCondition = { const: constValue };
+      {
+        schemaCondition = isArray
+          ? {
+              type: 'array',
+              contains: { const: constValue },
+            }
+          : { const: constValue };
+      }
       break;
 
     case 'not_equals':
-      schemaCondition = { not: { const: constValue } };
+      schemaCondition = isArray
+        ? {
+            type: 'array',
+            not: { contains: { const: constValue } },
+          }
+        : { not: { const: constValue } };
       break;
 
     case 'eq':
@@ -210,7 +225,7 @@ export const buildUISchemaFromFields = (fieldsArray, parentKey = null) => {
             : `#/properties/${field.key}_confirm`;
           if (field.visibility && field.visibility.length > 0 && field.parentVisibility) {
             let rule = {};
-            rule = compileRule(field);
+            rule = compileRule(field, fieldsArray);
             return [
               {
                 ...field.uischema,
@@ -261,7 +276,7 @@ export const buildUISchemaFromFields = (fieldsArray, parentKey = null) => {
           }
           if (field.visibility && field.visibility.length > 0 && field.parentVisibility) {
             let rule = {};
-            rule = compileRule(field);
+            rule = compileRule(field, fieldsArray);
             return [
               {
                 type: 'Control',
@@ -306,7 +321,7 @@ export const buildUISchemaFromFields = (fieldsArray, parentKey = null) => {
         } else {
           let rule = {};
           if (field.visibility && field.visibility.length > 0 && field.parentVisibility) {
-            rule = compileRule(field);
+            rule = compileRule(field, fieldsArray);
           }
           const scope = parentKey
             ? `#/properties/${parentKey}/properties/${field.key}`
