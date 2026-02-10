@@ -231,5 +231,10 @@
   "rotate": "Rotate",
   "screen": "Screen",
   "responsive": "Responsive",
+  "conditionalLogic": {
+    "field": "Field",
+    "operator": "Operator",
+    "value": "Value"
+  },
   "enableInteger": "Enable Integer"
 }
