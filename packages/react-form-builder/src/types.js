@@ -214,30 +214,8 @@ export const defaultFieldTypes = [
     uischema: {
       type: 'Control',
       scope: '#/properties/field',
-    },
-  },
-  {
-    id: 'multicheckbox',
-    type: 'array',
-    labelKey: 'fieldType_multicheckbox',
-    translationKey: 'fieldType_multicheckbox',
-    label: 'Multi Checkbox',
-    icon: IconSquareCheck,
-    schema: {
-      type: 'array',
-      items: {
-        type: 'string',
-        enum: ['Option 1', 'Option 2', 'Option 3'],
-      },
-      uniqueItems: true,
-    },
-    uischema: {
-      type: 'Control',
-      scope: '#/properties/field',
       options: {
-        multi: true,
-        format: 'select',
-        displayType: 'checkbox',
+        multi: false,
       },
     },
   },
