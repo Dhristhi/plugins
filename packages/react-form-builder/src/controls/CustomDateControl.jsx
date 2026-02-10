@@ -74,14 +74,13 @@ const CustomDateControl = (props) => {
     if (!minDate) return undefined;
 
     if (includeTime) {
+      // For datetime, only enforce date constraint (set time to 00:00)
       const date = new Date(minDate);
       if (!isNaN(date.getTime())) {
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const day = String(date.getDate()).padStart(2, '0');
-        const hours = String(date.getHours()).padStart(2, '0');
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-        return `${year}-${month}-${day}T${hours}:${minutes}`;
+        return `${year}-${month}-${day}T00:00`;
       }
     }
 
@@ -92,14 +91,13 @@ const CustomDateControl = (props) => {
     if (!maxDate) return undefined;
 
     if (includeTime) {
+      // For datetime, only enforce date constraint (set time to 23:59)
       const date = new Date(maxDate);
       if (!isNaN(date.getTime())) {
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const day = String(date.getDate()).padStart(2, '0');
-        const hours = String(date.getHours()).padStart(2, '0');
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-        return `${year}-${month}-${day}T${hours}:${minutes}`;
+        return `${year}-${month}-${day}T23:59`;
       }
     }
 
@@ -272,8 +270,8 @@ const CustomDateControl = (props) => {
             let value = e.target.value;
 
             if (includeTime && value) {
-              const date = new Date(value);
-              value = date.toISOString();
+              // Keep in local timezone format (YYYY-MM-DDTHH:mm:ss)
+              value = value + ':00';
             }
 
             handleChange(path, value);
