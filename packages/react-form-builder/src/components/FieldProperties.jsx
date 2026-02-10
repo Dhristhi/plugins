@@ -113,13 +113,9 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
   };
 
   const defaultRows = [{ dependsOn: '', operator: '', value: '', logical: '', value2: '' }];
-  //let dependsOnField = null;
   const [rows, setRows] = useState(defaultRows);
   const [isInteger, setIsInteger] = useState(false);
-  // const dependsOnField = useMemo(
-  //   () => fields.find((f) => f.key === rows.dependsOn),
-  //   [fields, rows.dependsOn]
-  // );
+  const [isMultiSelect, setIsMultiSelect] = useState(false);
 
   const updateCondition = (index, key, value) => {
     const updated = [...rows];
@@ -289,6 +285,13 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
 
       if (field.type === 'integer') {
         setIsInteger(true);
+      }
+
+      if (
+        field.type === 'multiselect' &&
+        (field.schema?.type === 'array' || field.uischema?.options?.multi === true)
+      ) {
+        setIsMultiSelect(true);
       }
 
       // Ensure date fields have default dateTimeFormat in UI schema
@@ -579,10 +582,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
   const isGroup = localField.uischema?.type === 'Group';
   const isLayout = localField.isLayout && localField.uischema?.type !== 'Group';
 
-  const isMultiSelect =
-    localField.type === 'select' &&
-    (localField.schema?.type === 'array' || localField.uischema?.options?.multi === true);
-
   const handleUiOptionsUpdate = (updates) => {
     const existingUiOptions = localField.uischema?.options?.['ui:options'] || {};
     const updatedUiSchema = {
@@ -814,18 +813,21 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
             )}
 
             {/* Multi-select toggle for select fields */}
-            {localField.type === 'select' && (
+            {(localField.type === 'select' || localField.type === 'multiselect') && (
               <FormControlLabel
                 control={
                   <Switch
                     checked={isMultiSelect}
                     onChange={(e) => {
                       const isMulti = e.target.checked;
+                      setIsMultiSelect(isMulti);
                       let updatedSchema = { ...localField.schema };
                       let updatedUISchema = { ...localField.uischema };
-
+                      let type = '';
+                      delete updatedSchema.default;
                       if (isMulti) {
                         // Convert to multi-select
+                        type = 'multiselect';
                         updatedSchema.type = 'array';
                         updatedSchema.items = {
                           type: 'string',
@@ -844,6 +846,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                         };
                       } else {
                         // Convert to single select
+                        type = 'select';
                         updatedSchema.type = 'string';
                         updatedSchema.enum = enumOptions;
                         delete updatedSchema.items;
@@ -857,6 +860,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                       }
 
                       handleUpdate({
+                        type,
                         schema: updatedSchema,
                         uischema: updatedUISchema,
                       });

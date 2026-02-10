@@ -179,7 +179,7 @@ const FieldPalette = ({ onLoadSchema, schemas = [], loadedSchemaId = '' }) => {
   const handleFormFieldsToggle = () => {
     const allTypes = getFieldTypes();
     const formFieldIds = allTypes
-      .filter((ft) => !ft.isLayout && ft.type !== 'integer')
+      .filter((ft) => !ft.isLayout && ft.type !== 'integer' && ft.id !== 'multiselect')
       .map((ft) => ft.id);
     const allFormFieldsCurrentlyVisible = formFieldIds.every((id) => visibleFields[id]);
 
@@ -217,7 +217,7 @@ const FieldPalette = ({ onLoadSchema, schemas = [], loadedSchemaId = '' }) => {
     (ft) => ft.isLayout && ft.id !== 'object' && visibleFields[ft.id]
   );
   const fieldTypes = allTypes.filter(
-    (ft) => !ft.isLayout && ft.type !== 'integer' && visibleFields[ft.id]
+    (ft) => !ft.isLayout && ft.type !== 'integer' && ft.id !== 'multiselect' && visibleFields[ft.id]
   );
 
   const sidebarContainerSx = {
@@ -382,7 +382,7 @@ const FieldPalette = ({ onLoadSchema, schemas = [], loadedSchemaId = '' }) => {
 
             <List dense sx={{ pl: 2 }}>
               {allTypes
-                .filter((ft) => !ft.isLayout && ft.type !== 'integer')
+                .filter((ft) => !ft.isLayout && ft.type !== 'integer' && ft.id !== 'multiselect')
                 .map((fieldType) => (
                   <ListItem key={fieldType.id} sx={{ py: 0.5 }}>
                     <FormControlLabel
