@@ -115,6 +115,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
   const defaultRows = [{ dependsOn: '', operator: '', value: '', logical: '', value2: '' }];
   //let dependsOnField = null;
   const [rows, setRows] = useState(defaultRows);
+  const [isInteger, setIsInteger] = useState(false);
   // const dependsOnField = useMemo(
   //   () => fields.find((f) => f.key === rows.dependsOn),
   //   [fields, rows.dependsOn]
@@ -284,6 +285,10 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
       let updatedField = { ...field };
       if (field.visibility && field.visibility.length > 0) {
         setRows(field.visibility);
+      }
+
+      if (field.type === 'integer') {
+        setIsInteger(true);
       }
 
       // Ensure date fields have default dateTimeFormat in UI schema
@@ -572,6 +577,9 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
       if (ft.id === 'array' || ft.id === 'multicheckbox') return false;
 
       const targetSchemaType = ft.schema?.type;
+      if (currentSchemaType === 'number' || currentSchemaType === 'integer') {
+        if (targetSchemaType === 'number' || targetSchemaType === 'integer') return true;
+      }
 
       // Allow switching within same schema type
       if (currentSchemaType === targetSchemaType) {
@@ -751,6 +759,16 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
   };
   const filteredFields = flattenFields(fields);
   const excludedTypes = ['array', 'array-strings', 'file', 'date'];
+
+  const convertFieldKey = (isInt, key) => {
+    const splitedKey = key.split('_');
+    if (splitedKey.length === 2) {
+      const newKey = isInt ? `integer_${splitedKey[1]}` : `number_${splitedKey[1]}`;
+      return newKey;
+    }
+    return key;
+  };
+
   return (
     <Box>
       {/* Basic Properties */}
@@ -869,6 +887,38 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                   />
                 }
                 label={t('enableMultiSelect')}
+                sx={{ mb: 2, display: 'block' }}
+              />
+            )}
+
+            {(localField.type === 'number' || localField.type === 'integer') && (
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={isInteger}
+                    onChange={(e) => {
+                      const isInt = e.target.checked;
+                      setIsInteger(isInt);
+                      let key = convertFieldKey(isInt, localField.key);
+
+                      const type = isInt ? 'integer' : 'number';
+                      const label = isInt ? 'Integer' : 'Number';
+                      const updatedSchema = {
+                        ...localField.schema,
+                        type,
+                        title: label,
+                      };
+                      handleUpdate({
+                        type,
+                        label,
+                        key,
+                        schema: updatedSchema,
+                      });
+                    }}
+                    color="primary"
+                  />
+                }
+                label={t('enableInteger')}
                 sx={{ mb: 2, display: 'block' }}
               />
             )}

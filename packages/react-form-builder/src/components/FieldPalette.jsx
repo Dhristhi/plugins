@@ -124,7 +124,7 @@ const FieldPalette = ({ onLoadSchema, schemas = [], loadedSchemaId = '' }) => {
     const allTypes = getFieldTypes();
     const initialVisibility = {};
     allTypes.forEach((fieldType) => {
-      initialVisibility[fieldType.id] = true;
+      if (fieldType.type !== 'integer') initialVisibility[fieldType.id] = true;
     });
     setVisibleFields(initialVisibility);
   }, []);
@@ -178,7 +178,9 @@ const FieldPalette = ({ onLoadSchema, schemas = [], loadedSchemaId = '' }) => {
 
   const handleFormFieldsToggle = () => {
     const allTypes = getFieldTypes();
-    const formFieldIds = allTypes.filter((ft) => !ft.isLayout).map((ft) => ft.id);
+    const formFieldIds = allTypes
+      .filter((ft) => !ft.isLayout && ft.type !== 'integer')
+      .map((ft) => ft.id);
     const allFormFieldsCurrentlyVisible = formFieldIds.every((id) => visibleFields[id]);
 
     // If all are visible, hide all. If some or none are visible, show all.
@@ -214,7 +216,9 @@ const FieldPalette = ({ onLoadSchema, schemas = [], loadedSchemaId = '' }) => {
   const layoutTypes = allTypes.filter(
     (ft) => ft.isLayout && ft.id !== 'object' && visibleFields[ft.id]
   );
-  const fieldTypes = allTypes.filter((ft) => !ft.isLayout && visibleFields[ft.id]);
+  const fieldTypes = allTypes.filter(
+    (ft) => !ft.isLayout && ft.type !== 'integer' && visibleFields[ft.id]
+  );
 
   const sidebarContainerSx = {
     p: { xs: 2, sm: 3 },
@@ -378,7 +382,7 @@ const FieldPalette = ({ onLoadSchema, schemas = [], loadedSchemaId = '' }) => {
 
             <List dense sx={{ pl: 2 }}>
               {allTypes
-                .filter((ft) => !ft.isLayout)
+                .filter((ft) => !ft.isLayout && ft.type !== 'integer')
                 .map((fieldType) => (
                   <ListItem key={fieldType.id} sx={{ py: 0.5 }}>
                     <FormControlLabel

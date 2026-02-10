@@ -230,5 +230,6 @@
 
   "rotate": "Rotate",
   "screen": "Screen",
-  "responsive": "Responsive"
+  "responsive": "Responsive",
+  "enableInteger": "Enable Integer"
 }
