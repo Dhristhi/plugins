@@ -242,5 +242,6 @@
     "field": "Field",
     "operator": "Operator",
     "value": "Value"
-  }
+  },
+  "enableInteger": "Enable Integer"
 }

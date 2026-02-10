@@ -118,6 +118,9 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
 
   const defaultRows = [{ dependsOn: '', operator: '', value: '', logical: '', value2: '' }];
   const [rows, setRows] = useState(defaultRows);
+  const [isInteger, setIsInteger] = useState(false);
+  const [isMultiSelect, setIsMultiSelect] = useState(false);
+  const [isMultiCheckbox, setIsMultiCheckbox] = useState(false);
 
   const updateCondition = (index, key, value) => {
     const updated = [...rows];
@@ -282,6 +285,17 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
       let updatedField = { ...field };
       if (field.visibility && field.visibility.length > 0) {
         setRows(field.visibility);
+      }
+
+      if (field.type === 'integer') {
+        setIsInteger(true);
+      }
+
+      if (
+        field.type === 'multiselect' &&
+        (field.schema?.type === 'array' || field.uischema?.options?.multi === true)
+      ) {
+        setIsMultiSelect(true);
       }
 
       // Ensure date fields have default dateTimeFormat in UI schema
@@ -548,6 +562,9 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
       if (ft.id === 'array' || ft.id === 'multiselect' || ft.id === 'multicheckbox') return false;
 
       const targetSchemaType = ft.schema?.type;
+      if (currentSchemaType === 'number' || currentSchemaType === 'integer') {
+        if (targetSchemaType === 'number' || targetSchemaType === 'integer') return true;
+      }
 
       // Allow switching within same schema type
       if (currentSchemaType === targetSchemaType) {
@@ -569,14 +586,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
 
   const isGroup = localField.uischema?.type === 'Group';
   const isLayout = localField.isLayout && localField.uischema?.type !== 'Group';
-
-  const isMultiSelect =
-    localField.type === 'select' &&
-    (localField.schema?.type === 'array' || localField.uischema?.options?.multi === true);
-
-  const isMultiCheckbox =
-    localField.type === 'checkbox' &&
-    (localField.schema?.type === 'array' || localField.uischema?.options?.multi === true);
 
   const handleUiOptionsUpdate = (updates) => {
     const existingUiOptions = localField.uischema?.options?.['ui:options'] || {};
@@ -732,6 +741,16 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
   };
   const filteredFields = flattenFields(fields);
   const excludedTypes = ['array', 'array-strings', 'file', 'date'];
+
+  const convertFieldKey = (isInt, key) => {
+    const splitedKey = key.split('_');
+    if (splitedKey.length === 2) {
+      const newKey = isInt ? `integer_${splitedKey[1]}` : `number_${splitedKey[1]}`;
+      return newKey;
+    }
+    return key;
+  };
+
   return (
     <Box>
       {/* Basic Properties */}
@@ -799,18 +818,21 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
             )}
 
             {/* Multi-select toggle for select fields */}
-            {localField.type === 'select' && (
+            {(localField.type === 'select' || localField.type === 'multiselect') && (
               <FormControlLabel
                 control={
                   <Switch
                     checked={isMultiSelect}
                     onChange={(e) => {
                       const isMulti = e.target.checked;
+                      setIsMultiSelect(isMulti);
                       let updatedSchema = { ...localField.schema };
                       let updatedUISchema = { ...localField.uischema };
-
+                      let type = '';
+                      delete updatedSchema.default;
                       if (isMulti) {
                         // Convert to multi-select
+                        type = 'multiselect';
                         updatedSchema.type = 'array';
                         updatedSchema.items = {
                           type: 'string',
@@ -829,6 +851,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                         };
                       } else {
                         // Convert to single select
+                        type = 'select';
                         updatedSchema.type = 'string';
                         updatedSchema.enum = enumOptions;
                         delete updatedSchema.items;
@@ -843,6 +866,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
 
                       handleUpdate(
                         {
+                          type,
                           schema: updatedSchema,
                           uischema: updatedUISchema,
                         },
@@ -859,18 +883,53 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
               />
             )}
 
+            {(localField.type === 'number' || localField.type === 'integer') && (
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={isInteger}
+                    onChange={(e) => {
+                      const isInt = e.target.checked;
+                      setIsInteger(isInt);
+                      let key = convertFieldKey(isInt, localField.key);
+
+                      const type = isInt ? 'integer' : 'number';
+                      const label = isInt ? 'Integer' : 'Number';
+                      const updatedSchema = {
+                        ...localField.schema,
+                        type,
+                        title: label,
+                      };
+                      handleUpdate({
+                        type,
+                        label,
+                        key,
+                        schema: updatedSchema,
+                      });
+                    }}
+                    color="primary"
+                  />
+                }
+                label={t('enableInteger')}
+                sx={{ mb: 2, display: 'block' }}
+              />
+            )}
+
             {/* Multi-select toggle for checkbox fields */}
-            {localField.type === 'checkbox' && (
+            {(localField.type === 'checkbox' || localField.type === 'multicheckbox') && (
               <FormControlLabel
                 control={
                   <Switch
                     checked={isMultiCheckbox}
                     onChange={(e) => {
                       const isMulti = e.target.checked;
+                      setIsMultiCheckbox(isMulti);
                       let updatedSchema = { ...localField.schema };
                       let updatedUISchema = { ...localField.uischema };
-
+                      delete updatedSchema.default;
+                      let type = '';
                       if (isMulti) {
+                        type = 'multicheckbox';
                         const defaultEnumOptions =
                           enumOptions.length > 0
                             ? enumOptions
@@ -881,7 +940,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                           enum: defaultEnumOptions,
                         };
                         updatedSchema.uniqueItems = true;
-                        delete updatedSchema.default;
                         updatedUISchema.options = {
                           ...updatedUISchema.options,
                           multi: true,
@@ -893,6 +951,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                           setEnumOptions(defaultEnumOptions);
                         }
                       } else {
+                        type = 'checkbox';
                         // Convert to single checkbox (boolean)
                         updatedSchema.type = 'boolean';
                         delete updatedSchema.items;
@@ -908,6 +967,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
 
                       handleUpdate(
                         {
+                          type,
                           schema: updatedSchema,
                           uischema: updatedUISchema,
                         },
