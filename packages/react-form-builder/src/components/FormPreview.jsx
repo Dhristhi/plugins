@@ -281,32 +281,41 @@ const FormPreview = ({
             const minDate = fieldSchema.formatMinimum || fieldSchema.minimum;
             const maxDate = fieldSchema.formatMaximum || fieldSchema.maximum;
 
+            const minDateStr = minDate
+              ? new Date(minDate).toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric',
+                })
+              : undefined;
+
+            const maxDateStr = maxDate
+              ? new Date(maxDate).toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric',
+                })
+              : undefined;
+            const minTime = minDate
+              ? new Date(minDate).toLocaleTimeString('en-US', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  hour12: true,
+                })
+              : undefined;
+            const maxTime = maxDate
+              ? new Date(maxDate).toLocaleTimeString('en-US', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  hour12: true,
+                })
+              : undefined;
             if (minDate && maxDate) {
-              const minTime = new Date(minDate).toLocaleTimeString('en-US', {
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: true,
-              });
-              const maxTime = new Date(maxDate).toLocaleTimeString('en-US', {
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: true,
-              });
-              return `Time must be between ${minTime} and ${maxTime}`;
+              return `Date must be between ${minDateStr} ${minTime} and ${maxDateStr} ${maxTime}`;
             } else if (minDate) {
-              const minTime = new Date(minDate).toLocaleTimeString('en-US', {
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: true,
-              });
-              return `Time must be after ${minTime}`;
+              return `Date must be after ${minDateStr} ${minTime}`;
             } else if (maxDate) {
-              const maxTime = new Date(maxDate).toLocaleTimeString('en-US', {
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: true,
-              });
-              return `Time must be before ${maxTime}`;
+              return `Date must be before ${maxDateStr} ${maxTime}`;
             }
           }
         }

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Unwrapped } from '@jsonforms/material-renderers';
-import { and, isControl, optionIs, rankWith, or } from '@jsonforms/core';
+import { and, isControl, rankWith } from '@jsonforms/core';
 import { useJsonForms, withJsonFormsControlProps } from '@jsonforms/react';
 import {
   Box,
@@ -124,12 +124,16 @@ const CustomSelectControl = (props) => {
           getOptionLabel={(opt) => opt.label}
           value={options.filter((o) => Array.isArray(data) && data.includes(o.value))}
           onChange={(_e, newValues) => {
-            // Check maxSelections limit
             if (maxSelections && newValues.length > maxSelections) {
-              return; // Don't allow more than max selections
+              return;
             }
             const selectedVals = newValues.map((v) => v.value);
             handleOnChange(_e, selectedVals);
+          }}
+          getOptionDisabled={(option) => {
+            const currentCount = Array.isArray(data) ? data.length : 0;
+            const isSelected = Array.isArray(data) && data.includes(option.value);
+            return maxSelections && currentCount >= maxSelections && !isSelected;
           }}
           renderInput={(params) => (
             <TextField
@@ -313,14 +317,20 @@ const CustomSelectControl = (props) => {
 // eslint-disable-next-line react-refresh/only-export-components
 export const customSelectTester = rankWith(
   Number.MAX_VALUE,
-  and(
-    isControl,
-    or(
-      optionIs('format', 'select'),
-      optionIs('format', 'dynamicselect'),
-      optionIs('displayType', 'checkbox')
-    )
-  )
+  and(isControl, (uischema, schema) => {
+    const format = uischema?.options?.format;
+    const isMulti = uischema?.options?.multi;
+
+    if (format === 'select' || format === 'checkbox') {
+      return true;
+    }
+
+    if (isMulti && schema?.type === 'array' && schema?.items?.enum) {
+      return true;
+    }
+
+    return false;
+  })
 );
 
 const CustomSelectControlWrapper = withJsonFormsControlProps(CustomSelectControl);
