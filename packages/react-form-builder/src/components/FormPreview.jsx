@@ -127,6 +127,15 @@ const FormResponsivePreview = ({ isFullscreen, setIsFullscreen, children }) => {
     overflow: 'hidden',
     ...(deviceWidth <= 400 && mobileContainerSx),
     ...(deviceWidth <= 768 && deviceWidth > 400 && tabletContainerSX),
+    '& div p': {
+      textAlign: 'center',
+    },
+    '& .MuiToolbar-regular .MuiGrid-spacing-xs-2': {
+      marginLeft: '0px',
+    },
+    '& .MuiFormHelperText-root': {
+      textAlign: 'left',
+    },
   };
 
   const innerSx = {
