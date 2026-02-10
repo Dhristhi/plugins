@@ -117,12 +117,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
   };
 
   const defaultRows = [{ dependsOn: '', operator: '', value: '', logical: '', value2: '' }];
-  //let dependsOnField = null;
   const [rows, setRows] = useState(defaultRows);
-  // const dependsOnField = useMemo(
-  //   () => fields.find((f) => f.key === rows.dependsOn),
-  //   [fields, rows.dependsOn]
-  // );
 
   const updateCondition = (index, key, value) => {
     const updated = [...rows];
@@ -134,7 +129,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
     });
   };
 
-  //const  =
   const updateEffect = (value) => {
     handleUpdate({ effect: value });
   };
@@ -570,13 +564,18 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
     (localField.schema?.type === 'array' &&
       !!localField.schema?.items &&
       localField.uischema?.options?.multi) ||
-    localField.uischema?.options?.format === 'select';
+    localField.uischema?.options?.format === 'select' ||
+    (localField.type === 'checkbox' && localField.uischema?.options?.multi === true);
 
   const isGroup = localField.uischema?.type === 'Group';
   const isLayout = localField.isLayout && localField.uischema?.type !== 'Group';
 
   const isMultiSelect =
     localField.type === 'select' &&
+    (localField.schema?.type === 'array' || localField.uischema?.options?.multi === true);
+
+  const isMultiCheckbox =
+    localField.type === 'checkbox' &&
     (localField.schema?.type === 'array' || localField.uischema?.options?.multi === true);
 
   const handleUiOptionsUpdate = (updates) => {
@@ -842,15 +841,85 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                         delete updatedUISchema.options.autocompleteProps;
                       }
 
-                      handleUpdate({
-                        schema: updatedSchema,
-                        uischema: updatedUISchema,
-                      });
+                      handleUpdate(
+                        {
+                          schema: updatedSchema,
+                          uischema: updatedUISchema,
+                        },
+                        {
+                          resetFormData: true, // Clear the form data for this field
+                        }
+                      );
                     }}
                     color="primary"
                   />
                 }
                 label={t('enableMultiSelect')}
+                sx={{ mb: 2, display: 'block' }}
+              />
+            )}
+
+            {/* Multi-select toggle for checkbox fields */}
+            {localField.type === 'checkbox' && (
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={isMultiCheckbox}
+                    onChange={(e) => {
+                      const isMulti = e.target.checked;
+                      let updatedSchema = { ...localField.schema };
+                      let updatedUISchema = { ...localField.uischema };
+
+                      if (isMulti) {
+                        const defaultEnumOptions =
+                          enumOptions.length > 0
+                            ? enumOptions
+                            : ['Option 1', 'Option 2', 'Option 3'];
+                        updatedSchema.type = 'array';
+                        updatedSchema.items = {
+                          type: 'string',
+                          enum: defaultEnumOptions,
+                        };
+                        updatedSchema.uniqueItems = true;
+                        delete updatedSchema.default;
+                        updatedUISchema.options = {
+                          ...updatedUISchema.options,
+                          multi: true,
+                          format: 'checkbox',
+                          displayType: 'checkbox',
+                        };
+                        // Initialize enum options if not already set
+                        if (enumOptions.length === 0) {
+                          setEnumOptions(defaultEnumOptions);
+                        }
+                      } else {
+                        // Convert to single checkbox (boolean)
+                        updatedSchema.type = 'boolean';
+                        delete updatedSchema.items;
+                        delete updatedSchema.uniqueItems;
+                        delete updatedSchema.enum;
+                        updatedUISchema.options = {
+                          ...updatedUISchema.options,
+                          multi: false,
+                        };
+                        delete updatedUISchema.options.format;
+                        delete updatedUISchema.options.displayType;
+                      }
+
+                      handleUpdate(
+                        {
+                          schema: updatedSchema,
+                          uischema: updatedUISchema,
+                        },
+                        {
+                          resetFormData: true, // Clear the form data for this field
+                        }
+                      );
+                    }}
+                    color="primary"
+                  />
+                }
+                label={t('enableMultiCheckbox')}
                 sx={{ mb: 2, display: 'block' }}
               />
             )}
@@ -1939,9 +2008,12 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                 sx={outlinedTextFieldSx}
               />
               {/* Multiselect Display Type */}
-              {(localField.type === 'multiselect' || localField.type === 'multicheckbox') && (
+              {(localField.type === 'multiselect' ||
+                localField.type === 'multicheckbox' ||
+                isMultiCheckbox ||
+                isMultiSelect) && (
                 <>
-                  {localField.uischema?.options?.displayType !== 'checkbox' && (
+                  {localField.uischema?.options?.displayType !== 'checkbox' && !isMultiCheckbox && (
                     <TextField
                       label={t('visibleChipsCount')}
                       type="number"
@@ -2001,8 +2073,8 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                     helperText={(() => {
                       const enumOptions =
                         localField.schema?.enum || localField.schema?.items?.enum || [];
-                      const maxPossible = Math.max(2, enumOptions.length);
-                      return `${t('maxSelectionsHelp')} (max ${maxPossible} available)`;
+                      const maxPossible = enumOptions.length;
+                      return `${t('maxSelectionsHelp')} (min 2, max ${maxPossible} available)`;
                     })()}
                     inputProps={{
                       min: 2,
