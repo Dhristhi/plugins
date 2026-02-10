@@ -228,5 +228,10 @@
   "screen": "Pantalla",
   "responsive": "Responsivo",
   "op_arr_equals": "Incluye",
-  "op_arr_not_equals": "No incluye"
+  "op_arr_not_equals": "No incluye",
+  "conditionalLogic": {
+    "field": "Campo",
+    "operator": "Operador",
+    "value": "Valor"
+  }
 }
