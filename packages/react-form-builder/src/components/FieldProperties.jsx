@@ -359,7 +359,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
           type: 'file',
         };
       }
-
       setLocalField(updatedField);
       if (field.isLayout) {
         setLayout(field.type);
@@ -516,7 +515,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
           }
         }
       }
-
       setLocalField(updatedField);
       onFieldUpdate(updatedField);
 
@@ -532,7 +530,15 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
   };
 
   const getCompatibleFieldTypes = () => {
-    const currentSchemaType = localField.schema?.type;
+    const toCheckedTypes = ['select', 'radio'];
+    const toCheckedMultiType = ['multiselect', 'multicheckbox'];
+    const currentSchemaType = toCheckedTypes.includes(localField.type)
+      ? 'string'
+      : toCheckedMultiType.includes(localField.type)
+        ? 'array'
+        : localField.type === 'checkbox'
+          ? 'boolean'
+          : localField.schema?.type;
 
     // Check if this is a date range field
     const isDateRange =
@@ -2423,6 +2429,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                               });
                             } else {
                               handleSchemaUpdate({
+                                type: newType,
                                 default: undefined,
                                 enumType: newType,
                                 enum: defaultOptions,
