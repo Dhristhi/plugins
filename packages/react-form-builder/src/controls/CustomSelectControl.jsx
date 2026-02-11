@@ -71,24 +71,24 @@ const CustomSelectControl = (props) => {
       if (entity) {
         const res = await apiCall(entity);
         if (res.length > 0) {
-          const newOptions = res.map((r) => ({
-            label: value ? String(r[value]) : String(r),
-            value: key ? r[key] : r,
-            raw: r,
+          const newOptions = res.map((item) => ({
+            label: value ? String(item[value]) : String(item),
+            value: key ? item[key] : item,
+            raw: item,
           }));
           setOptions(newOptions);
         }
       } else {
         const newOptions =
-          schema.enum?.map((r) => ({
-            label: r,
-            value: r,
-            raw: r,
+          schema.enum?.map((enumItem) => ({
+            label: enumItem,
+            value: enumItem,
+            raw: enumItem,
           })) ||
-          schema.items?.enum?.map((r) => ({
-            label: r,
-            value: r,
-            raw: r,
+          schema.items?.enum?.map((enumItem) => ({
+            label: enumItem,
+            value: enumItem,
+            raw: enumItem,
           })) ||
           [];
         setOptions(newOptions);
