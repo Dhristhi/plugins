@@ -782,8 +782,12 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                   onChange={handleLayoutChange}
                   sx={layoutSelectSx}
                 >
-                  <MenuItem value="vertical-layout">{t('verticalLayout')}</MenuItem>
-                  <MenuItem value="horizontal-layout">{t('horizontalLayout')}</MenuItem>
+                  {visibleFields['vertical-layout'] && (
+                    <MenuItem value="vertical-layout">{t('verticalLayout')}</MenuItem>
+                  )}
+                  {visibleFields['horizontal-layout'] && (
+                    <MenuItem value="horizontal-layout">{t('horizontalLayout')}</MenuItem>
+                  )}
                 </Select>
               </FormControl>
             )}
