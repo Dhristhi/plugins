@@ -298,6 +298,13 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
         setIsMultiSelect(true);
       }
 
+      if (
+        field.type === 'multicheckbox' &&
+        (field.schema?.type === 'array' || field.uischema?.options?.multi === true)
+      ) {
+        setIsMultiCheckbox(true);
+      }
+
       // Ensure date fields have default dateTimeFormat in UI schema
       if (
         (field.schema?.format === 'date' ||
