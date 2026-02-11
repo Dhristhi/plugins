@@ -321,7 +321,7 @@ export const customSelectTester = rankWith(
     const format = uischema?.options?.format;
     const isMulti = uischema?.options?.multi;
 
-    if (format === 'select' || format === 'checkbox') {
+    if (format === 'select' || format === 'checkbox' || format === 'dynamicselect') {
       return true;
     }
 

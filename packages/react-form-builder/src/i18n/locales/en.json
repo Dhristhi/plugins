@@ -67,6 +67,7 @@
   "enableMultiSelect": "Enable Multi-Select",
   "enableMultiCheckbox": "Enable Multi-Checkbox",
   "enableTextarea": "Enable Textarea",
+  "useDynamicData": "Use Dynamic Data",
   "apiEntity": "API Entity",
   "apiEntityHelp": "API endpoint name (e.g., countries, cities)",
   "valueFieldName": "Value Field Name",

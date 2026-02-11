@@ -298,6 +298,13 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
         setIsMultiSelect(true);
       }
 
+      if (
+        field.type === 'multicheckbox' &&
+        (field.schema?.type === 'array' || field.uischema?.options?.multi === true)
+      ) {
+        setIsMultiCheckbox(true);
+      }
+
       // Ensure date fields have default dateTimeFormat in UI schema
       if (
         (field.schema?.format === 'date' ||
@@ -2286,6 +2293,8 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
 
                   {/* Dynamic Data Toggle for select fields */}
                   {(localField.type === 'select' ||
+                    localField.type === 'multiselect' ||
+                    localField.type === 'multicheckbox' ||
                     (localField.schema?.type === 'array' &&
                       localField.uischema?.options?.multi)) && (
                     <FormControlLabel
