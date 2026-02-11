@@ -24,15 +24,17 @@ import { updateNestedValue } from '../utils';
 const { MaterialEnumControl } = Unwrapped;
 
 const CustomSelectControl = (props) => {
-  const { core } = useJsonForms();
   const { t } = useTranslation();
+  const { core } = useJsonForms();
 
   const [options, setOptions] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [showAllChips, setShowAllChips] = useState(false);
 
   const { schema, uischema, path, handleChange, data, errors, label, visible, enabled, required } =
     props;
   const {
+    entity,
     key,
     value,
     multi,
@@ -45,26 +47,57 @@ const CustomSelectControl = (props) => {
   const maxSelections = rawMaxSelections && rawMaxSelections > 1 ? rawMaxSelections : undefined;
 
   const formData = core?.data || {};
+
+  // Determine if this is a multi-select field
+  const isMulti = multi || schema.type === 'array' || displayType === 'checkbox';
+
+  const apiCall = async (entity) => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(entity);
+      const json = await response.json();
+      setIsLoading(false);
+      // Handle nested data structure (e.g., {data: [...]} or direct array)
+      return Array.isArray(json) ? json : json.data || [];
+    } catch (error) {
+      console.error('API call failed:', error);
+      setIsLoading(false);
+      return [];
+    }
+  };
+
   useEffect(() => {
     const fetchOptions = async () => {
-      const newOptions =
-        schema.enum?.map((r) => ({
-          label: r,
-          value: r,
-          raw: r,
-        })) ||
-        schema.items?.enum?.map((r) => ({
-          label: r,
-          value: r,
-          raw: r,
-        })) ||
-        [];
-      setOptions(newOptions);
+      if (entity) {
+        const res = await apiCall(entity);
+        if (res.length > 0) {
+          const newOptions = res.map((item) => ({
+            label: value ? String(item[value]) : String(item),
+            value: key ? item[key] : item,
+            raw: item,
+          }));
+          setOptions(newOptions);
+        }
+      } else {
+        const newOptions =
+          schema.enum?.map((enumItem) => ({
+            label: enumItem,
+            value: enumItem,
+            raw: enumItem,
+          })) ||
+          schema.items?.enum?.map((enumItem) => ({
+            label: enumItem,
+            value: enumItem,
+            raw: enumItem,
+          })) ||
+          [];
+        setOptions(newOptions);
+      }
     };
     fetchOptions();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key, value, schema]);
+  }, [entity, key, value, schema]);
 
   const handleOnChange = (event, selectedVal) => {
     handleChange(path, selectedVal);
@@ -74,11 +107,12 @@ const CustomSelectControl = (props) => {
   const hasError = errors && errors.length > 0;
   const validationError = hasError ? errors : null;
 
-  const isReadOnly = uischema.options?.readonly || false;
+  const isReadOnly = uischema.options?.readonly || isLoading || false;
 
   const fieldLabel = label || schema.title || 'Select';
   if (!visible) return null;
-  return multi ? (
+
+  return isMulti ? (
     displayType === 'autocomplete' || uischema.options?.autocomplete ? (
       <FormControl fullWidth error={hasError}>
         <Autocomplete
@@ -287,7 +321,7 @@ export const customSelectTester = rankWith(
     const format = uischema?.options?.format;
     const isMulti = uischema?.options?.multi;
 
-    if (format === 'select' || format === 'checkbox') {
+    if (format === 'select' || format === 'checkbox' || format === 'dynamicselect') {
       return true;
     }
 
