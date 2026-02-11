@@ -5,3 +5,4 @@
 # https://help.github.com/articles/about-codeowners/
 
 *                                                 @dhristhi/maintainers @dhristhi/reviewers
+develop                                           @dhristhi/product-engineering-team
