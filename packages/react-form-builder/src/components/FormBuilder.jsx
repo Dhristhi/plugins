@@ -57,6 +57,7 @@ const FormBuilder = ({ onSave, onExport, schemas = [] } = {}) => {
   const [propertiesDrawerOpen, setPropertiesDrawerOpen] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState({ open: false, schemaId: null });
   const [loadedSchemaId, setLoadedSchemaId] = useState('');
+  const [visibleFields, setVisibleFields] = useState({});
 
   // Drag and Drop state
   const [activeId, setActiveId] = useState(null);
@@ -618,6 +619,8 @@ const FormBuilder = ({ onSave, onExport, schemas = [] } = {}) => {
                   description: s.description,
                 }))}
                 loadedSchemaId={loadedSchemaId}
+                visibleFields={visibleFields}
+                onVisibleFieldsChange={setVisibleFields}
               />{' '}
             </Box>
 
@@ -736,6 +739,7 @@ const FormBuilder = ({ onSave, onExport, schemas = [] } = {}) => {
                 setFields={setFields}
                 onFieldUpdate={handleFieldUpdate}
                 field={editingField || selectedField}
+                visibleFields={visibleFields}
               />
             </Box>
             <Box sx={propertiesPanelFooter}>

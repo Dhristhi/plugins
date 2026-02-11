@@ -56,12 +56,16 @@
   "helpText": "Texto de ayuda mostrado debajo del campo",
   "visibleChipsCount": "Número de chips visibles",
   "chipsCountHelp": "Número de chips que se mostrarán antes de «ver más»",
+  "maxSelections": "Selecciones máximas",
+  "maxSelectionsHelp": "Número máximo de selecciones permitidas",
+  "maxSelectionsHint": "Seleccionado {{current}} de {{max}} máximo",
   "requirePasswordConfirmation": "Requerir confirmación de contraseña",
   "makeFieldElementLabel": "Usar el campo como etiqueta del elemento",
   "allowedFileTypes": "Tipos de archivo permitidos",
   "selectFileTypes": "Selecciona tipos de archivo",
   "enumValues": "Valores enumerados",
   "enableMultiSelect": "Habilitar selección múltiple",
+  "enableMultiCheckbox": "Habilitar casillas múltiples",
   "enableTextarea": "Habilitar área de texto",
   "apiEntity": "Entidad de API",
   "apiEntityHelp": "Nombre del endpoint de la API (p. ej., countries, cities)",
@@ -110,6 +114,9 @@
   "fieldType_number": "Número",
   "fieldType_integer": "Entero",
   "fieldType_text": "Entrada de texto",
+  "textType": "Tipo de texto",
+  "singleLineText": "Texto de una línea",
+  "multiLineText": "Texto de múltiples líneas",
   "fieldType_textarea": "Área de texto",
   "fieldType_email": "Correo electrónico",
   "fieldType_password": "Contraseña",
@@ -175,6 +182,8 @@
   "desktop": "Escritorio",
   "tablet": "Tableta",
   "mobile": "Móvil",
+  "fullscreen": "Pantalla completa",
+  "exitFullscreen": "Salir de pantalla completa",
 
   "isDependent": "Es dependiente",
   "chooseEffect": "Elegir efecto",
@@ -223,16 +232,14 @@
     "maximum": "El valor debe ser como máximo {{limit}}"
   },
   "rotate": "Girar",
-  "exitFullscreen": "Salir de pantalla completa",
-  "fullscreen": "Pantalla completa",
   "screen": "Pantalla",
   "responsive": "Responsivo",
-  "enableInteger": "Habilitar entero",
   "op_arr_equals": "Incluye",
   "op_arr_not_equals": "No incluye",
   "conditionalLogic": {
     "field": "Campo",
     "operator": "Operador",
     "value": "Valor"
-  }
+  },
+  "enableInteger": "Habilitar entero"
 }
