@@ -26,7 +26,7 @@ import { defaultFieldTypes } from '../types';
 import IconSelector from '../utils/IconSelector';
 import { updateFieldById } from '../lib/structure/treeOps';
 
-const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
+const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleFields = {} }) => {
   const { t } = useTranslation();
   const [layout, setLayout] = useState('');
   const [newOption, setNewOption] = useState('');
@@ -582,7 +582,9 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
     });
   };
 
-  const availableFieldTypes = defaultFieldTypes.filter((ft) => !ft.isLayout);
+  const availableFieldTypes = defaultFieldTypes.filter(
+    (ft) => !ft.isLayout && visibleFields[ft.id] !== false
+  );
   const hasEnumOptions =
     ['select', 'radio', 'multiselect', 'multicheckbox'].includes(localField.type) ||
     (localField.schema?.type === 'array' &&
