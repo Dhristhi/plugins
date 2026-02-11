@@ -239,6 +239,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
             ...child,
             isElementLabel: false,
           };
+          //test comment
           // Update fields directly without changing selected field
           setFields((prev) => updateFieldById(prev, updatedChild));
           return updatedChild;
