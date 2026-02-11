@@ -298,6 +298,13 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
         setIsMultiSelect(true);
       }
 
+      if (
+        field.type === 'multicheckbox' &&
+        (field.schema?.type === 'array' || field.uischema?.options?.multi === true)
+      ) {
+        setIsMultiCheckbox(true);
+      }
+
       // Ensure date fields have default dateTimeFormat in UI schema
       if (
         (field.schema?.format === 'date' ||
@@ -352,7 +359,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
           type: 'file',
         };
       }
-
       setLocalField(updatedField);
       if (field.isLayout) {
         setLayout(field.type);
@@ -509,7 +515,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
           }
         }
       }
-
       setLocalField(updatedField);
       onFieldUpdate(updatedField);
 
@@ -525,7 +530,15 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
   };
 
   const getCompatibleFieldTypes = () => {
-    const currentSchemaType = localField.schema?.type;
+    const toCheckedTypes = ['select', 'radio'];
+    const toCheckedMultiType = ['multiselect', 'multicheckbox'];
+    const currentSchemaType = toCheckedTypes.includes(localField.type)
+      ? 'string'
+      : toCheckedMultiType.includes(localField.type)
+        ? 'array'
+        : localField.type === 'checkbox'
+          ? 'boolean'
+          : localField.schema?.type;
 
     // Check if this is a date range field
     const isDateRange =
@@ -2372,6 +2385,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields }) => {
                               });
                             } else {
                               handleSchemaUpdate({
+                                type: newType,
                                 default: undefined,
                                 enumType: newType,
                                 enum: defaultOptions,
