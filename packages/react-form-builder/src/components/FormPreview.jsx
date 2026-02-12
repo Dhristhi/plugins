@@ -176,6 +176,7 @@ const FormPreview = ({
   showSchemaEditor,
   setShowSchemaEditor,
   exportForm,
+  currencyIcon = '$',
 }) => {
   const formRef = useRef();
   const userActions = useRef(false);
@@ -570,13 +571,14 @@ const FormPreview = ({
           <div ref={formRef}>
             <FormResponsivePreview isFullscreen={isFullscreen} setIsFullscreen={setIsFullscreen}>
               <JsonForms
-                key={key} // Force re-render when validation state changes
+                key={key}
                 ajv={ajv}
                 config={{
                   ...config,
                   trim: false,
                   hideRequiredAsterisk: false,
                   customValidationErrors: hasValidated ? validationErrors : [],
+                  currencyIcon,
                 }}
                 cells={getCells()}
                 data={dataWithDefaults ?? formState.data}

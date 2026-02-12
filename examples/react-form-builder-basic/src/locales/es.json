@@ -242,5 +242,6 @@
     "operator": "Operador",
     "value": "Valor"
   },
-  "enableInteger": "Habilitar entero"
+  "enableInteger": "Habilitar entero",
+  "useAsCurrency": "Usar como moneda"
 }
