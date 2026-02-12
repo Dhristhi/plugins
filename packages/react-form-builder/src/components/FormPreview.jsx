@@ -333,6 +333,10 @@ const FormPreview = ({
     if (Array.isArray(value)) {
       return value.length > 0;
     }
+    // For objects (like date-range), check if any property has content
+    if (typeof value === 'object' && !Array.isArray(value)) {
+      return Object.values(value).some((v) => v !== '' && v !== null && v !== undefined);
+    }
     // For boolean (checkbox), false is considered no content for required validation
     if (typeof value === 'boolean') {
       return value === true;
@@ -346,16 +350,32 @@ const FormPreview = ({
     // Handle required field errors
     const requiredErrors = errors.filter((err) => err.keyword === 'required');
     requiredErrors.forEach((error) => {
-      const fieldKey = error.params?.missingProperty;
-      if (fieldKey) {
-        const fieldValue = data[fieldKey];
-        const hasContent = hasFieldContent(fieldValue);
+      const instancePath = error.instancePath || '';
+      const missingProperty = error.params?.missingProperty;
 
+      // For nested properties (like date-range fields)
+      if (instancePath) {
+        const pathParts = instancePath.replace(/^\//, '').split('/');
+        let fieldValue = data;
+
+        // Navigate to the nested value
+        for (const part of pathParts) {
+          fieldValue = fieldValue?.[part];
+        }
+
+        // Check the missing property within the nested object
+        if (missingProperty) {
+          const nestedValue = fieldValue?.[missingProperty];
+          if (!nestedValue || nestedValue === '') {
+            filteredErrors.push(error);
+          }
+        }
+      } else if (missingProperty) {
+        // Top-level property
+        const fieldValue = data[missingProperty];
+        const hasContent = hasFieldContent(fieldValue);
         if (!hasContent) {
-          // Create error with correct instancePath for the field
-          filteredErrors.push({
-            ...error,
-          });
+          filteredErrors.push(error);
         }
       }
     });
@@ -409,11 +429,21 @@ const FormPreview = ({
     // Create validation data where empty strings become undefined for required validation
     const validationData = { ...data };
     Object.keys(validationData).forEach((key) => {
-      if (
-        validationData[key] === '' ||
-        validationData[key] === null ||
-        (Array.isArray(validationData[key]) && validationData[key].length === 0) ||
-        validationData[key] === false
+      const value = validationData[key];
+      const prop = formState.schema?.properties?.[key];
+
+      // For date-range objects, keep the structure but clean nested values
+      if (prop?.type === 'object' && prop.properties?.startDate && prop.properties?.endDate) {
+        const dateRangeData = value || {};
+        validationData[key] = {
+          startDate: dateRangeData.startDate || undefined,
+          endDate: dateRangeData.endDate || undefined,
+        };
+      } else if (
+        value === '' ||
+        value === null ||
+        (Array.isArray(value) && value.length === 0) ||
+        value === false
       ) {
         delete validationData[key];
       }
@@ -490,6 +520,19 @@ const FormPreview = ({
       ) {
         formState.data[key] = prop.default;
       }
+      // Handle date-range fields (object with startDate/endDate)
+      if (prop.type === 'object' && prop.properties?.startDate && prop.properties?.endDate) {
+        const existingData = formState.data[key] || {};
+        const startDefault = prop.properties.startDate?.default;
+        const endDefault = prop.properties.endDate?.default;
+
+        if (startDefault || endDefault) {
+          formState.data[key] = {
+            startDate: existingData.startDate ?? startDefault ?? '',
+            endDate: existingData.endDate ?? endDefault ?? '',
+          };
+        }
+      }
     });
     return data;
   };
@@ -533,6 +576,7 @@ const FormPreview = ({
                   ...config,
                   trim: false,
                   hideRequiredAsterisk: false,
+                  customValidationErrors: hasValidated ? validationErrors : [],
                 }}
                 cells={getCells()}
                 data={dataWithDefaults ?? formState.data}
