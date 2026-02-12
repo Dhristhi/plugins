@@ -44,7 +44,7 @@ import {
   reorderFieldRelative,
 } from '../lib/structure/treeOps';
 
-const FormBuilder = ({ onSave, onExport, schemas = [] } = {}) => {
+const FormBuilder = ({ onSave, onExport, schemas = [], currencyIcon = '$' } = {}) => {
   const { t } = useTranslation();
 
   const [fields, setFields] = useState([]);
@@ -653,6 +653,7 @@ const FormBuilder = ({ onSave, onExport, schemas = [] } = {}) => {
                       showSchemaEditor={showSchemaEditor}
                       setShowSchemaEditor={setShowSchemaEditor}
                       exportForm={exportForm}
+                      currencyIcon={currencyIcon}
                     />
                   ) : (
                     /* Form Structure Mode */

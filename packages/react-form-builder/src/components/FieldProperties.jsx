@@ -121,6 +121,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
   const [isInteger, setIsInteger] = useState(false);
   const [isMultiSelect, setIsMultiSelect] = useState(false);
   const [isMultiCheckbox, setIsMultiCheckbox] = useState(false);
+  const [isCurrency, setIsCurrency] = useState(false);
 
   const updateCondition = (index, key, value) => {
     const updated = [...rows];
@@ -289,6 +290,10 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
 
       if (field.type === 'integer') {
         setIsInteger(true);
+      }
+
+      if (field.type === 'number' || field.type === 'integer') {
+        setIsCurrency(field.uischema?.options?.currency === true);
       }
 
       if (
@@ -899,35 +904,60 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
             )}
 
             {(localField.type === 'number' || localField.type === 'integer') && (
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={isInteger}
-                    onChange={(e) => {
-                      const isInt = e.target.checked;
-                      setIsInteger(isInt);
-                      let key = convertFieldKey(isInt, localField.key);
+              <>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={isInteger}
+                      onChange={(e) => {
+                        const isInt = e.target.checked;
+                        setIsInteger(isInt);
+                        let key = convertFieldKey(isInt, localField.key);
 
-                      const type = isInt ? 'integer' : 'number';
-                      const label = isInt ? 'Integer' : 'Number';
-                      const updatedSchema = {
-                        ...localField.schema,
-                        type,
-                        title: label,
-                      };
-                      handleUpdate({
-                        type,
-                        label,
-                        key,
-                        schema: updatedSchema,
-                      });
-                    }}
-                    color="primary"
-                  />
-                }
-                label={t('enableInteger')}
-                sx={{ mb: 2, display: 'block' }}
-              />
+                        const type = isInt ? 'integer' : 'number';
+                        const label = isInt ? 'Integer' : 'Number';
+                        const updatedSchema = {
+                          ...localField.schema,
+                          type,
+                          title: label,
+                        };
+                        handleUpdate({
+                          type,
+                          label,
+                          key,
+                          schema: updatedSchema,
+                        });
+                      }}
+                      color="primary"
+                    />
+                  }
+                  label={t('enableInteger')}
+                  sx={{ mb: 2, display: 'block' }}
+                />
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={isCurrency}
+                      onChange={(e) => {
+                        const useCurrency = e.target.checked;
+                        setIsCurrency(useCurrency);
+                        const updatedUISchema = {
+                          ...localField.uischema,
+                          options: {
+                            ...localField.uischema?.options,
+                            currency: useCurrency,
+                            format: useCurrency ? 'currency' : undefined,
+                          },
+                        };
+                        handleUpdate({ uischema: updatedUISchema });
+                      }}
+                      color="primary"
+                    />
+                  }
+                  label={t('useAsCurrency')}
+                  sx={{ mb: 2, display: 'block' }}
+                />
+              </>
             )}
 
             {/* Multi-select toggle for checkbox fields */}

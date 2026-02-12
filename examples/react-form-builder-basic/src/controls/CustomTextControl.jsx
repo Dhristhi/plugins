@@ -12,14 +12,16 @@ const { MaterialTextControl } = Unwrapped;
 
 const CustomTextControl = (props) => {
   const params = useParams();
-  const { core } = useJsonForms();
+  const { core, config } = useJsonForms();
 
   const [isLoading] = useState(false);
   const [displayValue, setDisplayValue] = useState('');
 
   const { schema, uischema, path, handleChange, data, label, required, errors, description } =
     props;
-  const { referencePath, query, relatedDefaults, computedFields, format } = uischema.options || {};
+  const { referencePath, query, relatedDefaults, computedFields, format, currency } =
+    uischema.options || {};
+  const currencyIcon = config?.currencyIcon || '$';
 
   // Get currency from form data for dynamic formatting (memoized to prevent unnecessary re-renders)
   const getCurrencyFromFormData = useCallback(() => {
@@ -32,15 +34,21 @@ const CustomTextControl = (props) => {
 
   // Sync display value when data changes
   useEffect(() => {
-    if (format === 'currency') {
+    if (currency === true || format === 'currency') {
       if (typeof data === 'number' && !isNaN(data)) {
-        const currency = getCurrencyFromFormData();
-        setDisplayValue(formatCurrencyAmount(data, currency));
+        const currencyCode = getCurrencyFromFormData();
+        setDisplayValue(formatCurrencyAmount(data, currencyCode));
       } else {
         setDisplayValue('');
       }
     }
-  }, [data, format, core.data?.employment_info?.salary?.currency, getCurrencyFromFormData]);
+  }, [
+    data,
+    format,
+    currency,
+    core.data?.employment_info?.salary?.currency,
+    getCurrencyFromFormData,
+  ]);
 
   useEffect(() => {
     if (referencePath) {
@@ -121,7 +129,7 @@ const CustomTextControl = (props) => {
     let processedValue = selectedVal;
 
     // Handle number conversion for non-currency fields
-    if (schema.type === 'number' && selectedVal && format !== 'currency') {
+    if (schema.type === 'number' && selectedVal && currency !== true && format !== 'currency') {
       processedValue = toNumber(selectedVal);
     }
 
@@ -145,8 +153,8 @@ const CustomTextControl = (props) => {
     );
   }
 
-  // For currency fields, render custom TextField (no real-time icon for simplicity)
-  if (format === 'currency') {
+  // For currency fields, render custom TextField with currency icon
+  if (currency === true || format === 'currency') {
     return (
       <div>
         <TextField
@@ -159,6 +167,11 @@ const CustomTextControl = (props) => {
           helperText={errors && errors.length > 0 ? errors[0].message : description || ''}
           fullWidth
           variant="outlined"
+          InputProps={{
+            startAdornment: (
+              <span style={{ marginRight: '8px', color: '#666' }}>{currencyIcon}</span>
+            ),
+          }}
         />
       </div>
     );
@@ -186,8 +199,8 @@ export const customTextTester = rankWith(
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const customCurrencyTester = rankWith(
-  Number.MAX_VALUE + 1, // Higher priority than default text control
-  and(isControl, optionIs('format', 'currency'))
+  Number.MAX_VALUE + 1,
+  and(isControl, optionIs('currency', true))
 );
 
 const CustomTextControlWrapper = withJsonFormsControlProps(CustomTextControl);

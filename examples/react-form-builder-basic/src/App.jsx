@@ -1252,6 +1252,7 @@ export default function App() {
         selectedLanguage="en"
         onSave={handleSchemaSave}
         translationResources={{ es: { translation: es } }}
+        currencyIcon="₹"
       />
     </div>
   );

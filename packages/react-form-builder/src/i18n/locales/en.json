@@ -244,5 +244,6 @@
     "operator": "Operator",
     "value": "Value"
   },
-  "enableInteger": "Enable Integer"
+  "enableInteger": "Enable Integer",
+  "useAsCurrency": "Use as Currency"
 }
