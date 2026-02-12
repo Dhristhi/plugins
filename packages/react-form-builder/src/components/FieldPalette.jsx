@@ -223,7 +223,15 @@ const FieldPalette = ({
   const layoutFieldIds = allTypes
     .filter((ft) => ft.isLayout && ft.id !== 'object')
     .map((ft) => ft.id);
-  const formFieldIds = allTypes.filter((ft) => !ft.isLayout).map((ft) => ft.id);
+  const formFieldIds = allTypes
+    .filter(
+      (ft) =>
+        !ft.isLayout &&
+        ft.type !== 'integer' &&
+        ft.id !== 'multiselect' &&
+        ft.id !== 'multicheckbox'
+    )
+    .map((ft) => ft.id);
 
   const allLayoutsVisible =
     layoutFieldIds.length > 0 && layoutFieldIds.every((id) => visibleFields[id]);
@@ -372,6 +380,7 @@ const FieldPalette = ({
                           checked={visibleFields[fieldType.id] || false}
                           onChange={() => handleFieldVisibilityChange(fieldType.id)}
                           size="small"
+                          color="primary"
                         />
                       }
                       label={
@@ -424,6 +433,7 @@ const FieldPalette = ({
                           checked={visibleFields[fieldType.id] || false}
                           onChange={() => handleFieldVisibilityChange(fieldType.id)}
                           size="small"
+                          color="primary"
                         />
                       }
                       label={

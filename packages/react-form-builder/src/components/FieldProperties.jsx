@@ -439,6 +439,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
     if (newOption.trim()) {
       const convertedValue = convertEnumValue(newOption.trim(), enumDataType);
       if (Number.isNaN(convertedValue)) return;
+      if (enumOptions.includes(convertedValue)) return;
       const newOptions = [...enumOptions, convertedValue];
       setEnumOptions(newOptions);
       if (localField.schema?.type === 'array' && localField.schema?.items) {
@@ -593,9 +594,21 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
     });
   };
 
-  const availableFieldTypes = defaultFieldTypes.filter(
-    (ft) => !ft.isLayout && visibleFields[ft.id] !== false
-  );
+  const availableFieldTypes = defaultFieldTypes.filter((ft) => {
+    if (ft.isLayout) return false;
+
+    // multiselect should depend on select field visibility
+    if (ft.id === 'multiselect') {
+      return visibleFields[ft.id] !== false && visibleFields['select'] !== false;
+    }
+
+    // multicheckbox should depend on checkbox field visibility
+    if (ft.id === 'multicheckbox') {
+      return visibleFields[ft.id] !== false && visibleFields['checkbox'] !== false;
+    }
+
+    return visibleFields[ft.id] !== false;
+  });
   const hasEnumOptions =
     ['select', 'radio', 'multiselect', 'multicheckbox'].includes(localField.type) ||
     (localField.schema?.type === 'array' &&
@@ -726,19 +739,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
 
   const formControlLabelSx = { mb: 1, display: 'block' };
 
-  const parseCommaSeparated = (value) => {
-    if (typeof value !== 'string') return value;
-
-    let tempVal = value.includes(',') ? value.split(',').map((v) => v) : value;
-    let trimmed;
-    if (Array.isArray(tempVal)) {
-      trimmed = [...tempVal.map((item) => item.trim())];
-      return trimmed;
-    } else {
-      trimmed = tempVal.trim();
-    }
-  };
-
   const flattenFields = (fields) => {
     const result = [];
 
@@ -771,6 +771,14 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
     return key;
   };
 
+  const arrEnumTypes = ['select', 'multiselect', 'radio', 'multicheckbox'];
+
+  const getEnumData = (field) => {
+    return ['select', 'radio'].includes(field.type)
+      ? field.schema?.enum
+      : field.schema?.items?.enum;
+  };
+
   return (
     <Box>
       {/* Basic Properties */}
@@ -793,8 +801,12 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                   onChange={handleLayoutChange}
                   sx={layoutSelectSx}
                 >
-                  <MenuItem value="vertical-layout">{t('verticalLayout')}</MenuItem>
-                  <MenuItem value="horizontal-layout">{t('horizontalLayout')}</MenuItem>
+                  {visibleFields['vertical-layout'] && (
+                    <MenuItem value="vertical-layout">{t('verticalLayout')}</MenuItem>
+                  )}
+                  {visibleFields['horizontal-layout'] && (
+                    <MenuItem value="horizontal-layout">{t('horizontalLayout')}</MenuItem>
+                  )}
                 </Select>
               </FormControl>
             )}
@@ -1944,7 +1956,8 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
               ) : // Default Value field for non-date fields
               localField.type !== 'array' &&
                 localField.type !== 'checkbox' &&
-                localField.type !== 'file' ? (
+                localField.type !== 'file' &&
+                !arrEnumTypes.includes(localField.type) ? (
                 <TextField
                   label={t('defaultValue')}
                   fullWidth
@@ -1966,34 +1979,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                       defaultValue = defaultValue ? Number(defaultValue) : undefined;
                     } else if (localField.type === 'checkbox') {
                       defaultValue = defaultValue.toLowerCase() === 'true';
-                    }
-                    if (localField.type === 'multiselect' || localField.type === 'multicheckbox') {
-                      const valu1 = parseCommaSeparated(defaultValue);
-                      let defaultArray = [];
-                      if (!Array.isArray(valu1)) {
-                        defaultArray.push(defaultValue);
-                      } else {
-                        defaultArray = valu1;
-                      }
-                      // Filter and convert to match enum type
-                      const matchedValues = defaultArray
-                        .map((val) => {
-                          const matched = enumOptions.find(
-                            (opt) => String(opt).toLowerCase() === String(val).toLowerCase()
-                          );
-                          return matched !== undefined ? matched : null;
-                        })
-                        .filter((val) => val !== null);
-                      handleSchemaUpdate({
-                        default: matchedValues.length > 0 ? matchedValues : undefined,
-                      });
-                    } else if (localField.type === 'select' || localField.type === 'radio') {
-                      const matchedValue = enumOptions.find(
-                        (opt) => String(opt).toLowerCase() === String(defaultValue).toLowerCase()
-                      );
-                      handleSchemaUpdate({
-                        default: matchedValue !== undefined ? matchedValue : defaultValue,
-                      });
                     } else {
                       handleSchemaUpdate({ default: defaultValue });
                     }
@@ -2015,6 +2000,29 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                   }
                   label={t('checkedByDefault')}
                 />
+              ) : arrEnumTypes.includes(localField.type) ? (
+                <FormControl fullWidth margin="normal">
+                  <InputLabel>{t('defaultValue')}</InputLabel>
+                  <Select
+                    value={localField.schema?.default || []}
+                    multiple={
+                      localField.type === 'multiselect' || localField.type === 'multicheckbox'
+                    }
+                    label={t('defaultValue')}
+                    onChange={(e) => {
+                      handleSchemaUpdate({
+                        default: e.target.value,
+                      });
+                    }}
+                    sx={layoutSelectSx}
+                  >
+                    {getEnumData(localField).map((opt) => (
+                      <MenuItem key={opt} value={opt}>
+                        {opt}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
               ) : null}
               {/* Array Item Type Selector */}
               {localField.type === 'array' && (
