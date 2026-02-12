@@ -589,9 +589,21 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
     });
   };
 
-  const availableFieldTypes = defaultFieldTypes.filter(
-    (ft) => !ft.isLayout && visibleFields[ft.id] !== false
-  );
+  const availableFieldTypes = defaultFieldTypes.filter((ft) => {
+    if (ft.isLayout) return false;
+
+    // multiselect should depend on select field visibility
+    if (ft.id === 'multiselect') {
+      return visibleFields[ft.id] !== false && visibleFields['select'] !== false;
+    }
+
+    // multicheckbox should depend on checkbox field visibility
+    if (ft.id === 'multicheckbox') {
+      return visibleFields[ft.id] !== false && visibleFields['checkbox'] !== false;
+    }
+
+    return visibleFields[ft.id] !== false;
+  });
   const hasEnumOptions =
     ['select', 'radio', 'multiselect', 'multicheckbox'].includes(localField.type) ||
     (localField.schema?.type === 'array' &&
@@ -784,8 +796,12 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                   onChange={handleLayoutChange}
                   sx={layoutSelectSx}
                 >
-                  <MenuItem value="vertical-layout">{t('verticalLayout')}</MenuItem>
-                  <MenuItem value="horizontal-layout">{t('horizontalLayout')}</MenuItem>
+                  {visibleFields['vertical-layout'] && (
+                    <MenuItem value="vertical-layout">{t('verticalLayout')}</MenuItem>
+                  )}
+                  {visibleFields['horizontal-layout'] && (
+                    <MenuItem value="horizontal-layout">{t('horizontalLayout')}</MenuItem>
+                  )}
                 </Select>
               </FormControl>
             )}
