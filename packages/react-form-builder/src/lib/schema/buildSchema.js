@@ -77,6 +77,15 @@ export const buildSchemaFromFields = (fieldsArray, parentKey = null) => {
         objectSchema.required = childSchema.required;
       }
 
+      // For date-range fields, if parent is required, mark startDate and endDate as required
+      if (
+        field.required &&
+        objectSchema.properties?.startDate &&
+        objectSchema.properties?.endDate
+      ) {
+        objectSchema.required = ['startDate', 'endDate'];
+      }
+
       properties[field.key] = objectSchema;
       if (field.required) {
         required.push(field.key);

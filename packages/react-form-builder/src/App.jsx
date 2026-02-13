@@ -15,6 +15,7 @@ export const App = ({
   defaultLanguage = 'en',
   selectedLanguage = 'en',
   translationResources = {},
+  currencyIcon = '$',
 }) => {
   bootstrapDefaultFieldTypes();
 
@@ -36,6 +37,7 @@ export const App = ({
           schemas={schemas}
           onExport={onExport}
           selectedLanguage={selectedLanguage}
+          currencyIcon={currencyIcon}
         />
       </I18nextProvider>
     </ThemeProvider>

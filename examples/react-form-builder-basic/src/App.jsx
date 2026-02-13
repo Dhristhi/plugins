@@ -500,9 +500,14 @@ const schemas = [
           },
           uniqueItems: true,
         },
-        multiselect_checkbox: {
+        checkbox_single: {
+          type: 'boolean',
+          title: 'Single Checkbox (Toggle to Multi)',
+          default: false,
+        },
+        checkbox_multi_example: {
           type: 'array',
-          title: 'Multi-Select Checkbox',
+          title: 'Multi-Select Checkbox (New)',
           items: {
             type: 'string',
             enum: ['Option A', 'Option B', 'Option C', 'Option D'],
@@ -1247,6 +1252,7 @@ export default function App() {
         selectedLanguage="en"
         onSave={handleSchemaSave}
         translationResources={{ es: { translation: es } }}
+        currencyIcon="₹"
       />
     </div>
   );

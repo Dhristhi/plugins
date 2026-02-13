@@ -44,7 +44,7 @@ import {
   reorderFieldRelative,
 } from '../lib/structure/treeOps';
 
-const FormBuilder = ({ onSave, onExport, schemas = [] } = {}) => {
+const FormBuilder = ({ onSave, onExport, schemas = [], currencyIcon = '$' } = {}) => {
   const { t } = useTranslation();
 
   const [fields, setFields] = useState([]);
@@ -57,6 +57,7 @@ const FormBuilder = ({ onSave, onExport, schemas = [] } = {}) => {
   const [propertiesDrawerOpen, setPropertiesDrawerOpen] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState({ open: false, schemaId: null });
   const [loadedSchemaId, setLoadedSchemaId] = useState('');
+  const [visibleFields, setVisibleFields] = useState({});
 
   // Drag and Drop state
   const [activeId, setActiveId] = useState(null);
@@ -618,6 +619,8 @@ const FormBuilder = ({ onSave, onExport, schemas = [] } = {}) => {
                   description: s.description,
                 }))}
                 loadedSchemaId={loadedSchemaId}
+                visibleFields={visibleFields}
+                onVisibleFieldsChange={setVisibleFields}
               />{' '}
             </Box>
 
@@ -650,6 +653,7 @@ const FormBuilder = ({ onSave, onExport, schemas = [] } = {}) => {
                       showSchemaEditor={showSchemaEditor}
                       setShowSchemaEditor={setShowSchemaEditor}
                       exportForm={exportForm}
+                      currencyIcon={currencyIcon}
                     />
                   ) : (
                     /* Form Structure Mode */
@@ -736,6 +740,7 @@ const FormBuilder = ({ onSave, onExport, schemas = [] } = {}) => {
                 setFields={setFields}
                 onFieldUpdate={handleFieldUpdate}
                 field={editingField || selectedField}
+                visibleFields={visibleFields}
               />
             </Box>
             <Box sx={propertiesPanelFooter}>

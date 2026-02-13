@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { IconEye, IconCode } from '@tabler/icons-react';
+import { IconEye, IconCode, IconDeviceFloppy } from '@tabler/icons-react';
 import { Box, Typography, Button, ButtonGroup } from '@mui/material';
 
 const headerContainerSx = {
@@ -65,6 +65,8 @@ const CommonHeader = ({
   setShowFormPreview,
   showSchemaEditor,
   setShowSchemaEditor,
+  onApplyChanges,
+  showApplyButton = false,
 }) => {
   const { t } = useTranslation();
 
@@ -88,6 +90,24 @@ const CommonHeader = ({
         {/* Action Buttons */}
 
         <Box sx={actionContainerSx}>
+          {showApplyButton && (
+            <Button
+              onClick={onApplyChanges}
+              variant="contained"
+              size="small"
+              startIcon={<IconDeviceFloppy size={16} />}
+              sx={{
+                fontSize: '0.875rem',
+                fontWeight: 600,
+                textTransform: 'none',
+                px: 2,
+                py: 0.75,
+              }}
+            >
+              {t('applyChanges')}
+            </Button>
+          )}
+
           <ButtonGroup variant="outlined" size="small" sx={buttonGroupSx}>
             <Button
               onClick={() => {

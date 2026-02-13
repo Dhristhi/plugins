@@ -255,8 +255,34 @@ export const defaultFieldTypes = [
     uischema: {
       type: 'Control',
       scope: '#/properties/field',
+    },
+  },
+  {
+    id: 'multiselect',
+    type: 'array',
+    labelKey: 'fieldType_multiselect',
+    translationKey: 'fieldType_multiselect',
+    label: 'Multi-Select',
+    icon: IconChevronDown,
+    schema: {
+      type: 'array',
+      items: {
+        type: 'string',
+        enum: ['Option 1', 'Option 2', 'Option 3'],
+      },
+      uniqueItems: true,
+    },
+    uischema: {
+      type: 'Control',
+      scope: '#/properties/field',
       options: {
-        multi: false,
+        multi: true,
+        format: 'select',
+        autocomplete: true,
+        displayType: 'autocomplete',
+        autocompleteProps: {
+          limitTags: 5,
+        },
       },
     },
   },

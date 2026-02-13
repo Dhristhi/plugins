@@ -56,13 +56,18 @@
   "helpText": "Help text displayed below the field",
   "visibleChipsCount": "Visible Chips Count",
   "chipsCountHelp": "Number of chips to show before 'show more'",
+  "maxSelections": "Max Selections",
+  "maxSelectionsHelp": "Maximum number of selections allowed",
+  "maxSelectionsHint": "Selected {{current}} of {{max}} maximum",
   "requirePasswordConfirmation": "Require Password Confirmation",
   "makeFieldElementLabel": "Make Field as Element Label",
   "allowedFileTypes": "Allowed File Types",
   "selectFileTypes": "Select file types",
   "enumValues": "Enum Values",
   "enableMultiSelect": "Enable Multi-Select",
+  "enableMultiCheckbox": "Enable Multi-Checkbox",
   "enableTextarea": "Enable Textarea",
+  "useDynamicData": "Use Dynamic Data",
   "apiEntity": "API Entity",
   "apiEntityHelp": "API endpoint name (e.g., countries, cities)",
   "valueFieldName": "Value Field Name",
@@ -238,5 +243,13 @@
     "field": "Field",
     "operator": "Operator",
     "value": "Value"
+  },
+  "enableInteger": "Enable Integer",
+  "useAsCurrency": "Use as Currency",
+  "Array": {
+    "deleteDialogTitle": "Delete item",
+    "deleteDialogMessage": "Are you sure you want to delete this item?",
+    "deleteDialogAccept": "Delete",
+    "deleteDialogDecline": "Cancel"
   }
 }

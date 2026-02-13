@@ -318,7 +318,7 @@ const SortableFieldItem = ({
 };
 
 // Drop zone component
-const DropZone = ({ parentId, index, accepts, isEmpty = false, onAddField }) => {
+const DropZone = ({ parentId, index, accepts, isEmpty = false }) => {
   const { t } = useTranslation();
   const { isOver, setNodeRef } = useDroppable({
     id: `drop-${parentId || 'root'}-${index}`,
@@ -365,7 +365,7 @@ const DropZone = ({ parentId, index, accepts, isEmpty = false, onAddField }) => 
 
   if (isEmpty) {
     return (
-      <Box ref={setNodeRef} sx={dropZoneBoxSx(isOver)} onClick={onAddField}>
+      <Box ref={setNodeRef} sx={dropZoneBoxSx(isOver)}>
         <Box sx={dropZoneHeaderSx}>
           {isOver ? <IconTarget size={20} /> : <IconPlus size={20} />}
           <Typography variant="body2" sx={dropZoneTitleSx}>

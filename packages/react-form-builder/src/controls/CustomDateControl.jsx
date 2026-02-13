@@ -8,8 +8,19 @@ import { formatDate } from '../utils';
 const CustomDateControl = (props) => {
   const { t } = useTranslation();
 
-  const { data, handleChange, path, label, required, errors, uischema, schema, visible, enabled } =
-    props;
+  const {
+    data,
+    handleChange,
+    path,
+    label,
+    required,
+    errors,
+    uischema,
+    schema,
+    visible,
+    enabled,
+    config,
+  } = props;
 
   // Check if this is a date range field
   const isDateRange =
@@ -109,13 +120,27 @@ const CustomDateControl = (props) => {
 
   // Handle Date Range
   if (isDateRange) {
-    const startDate = data?.startDate || schema?.properties?.startDate?.default || '';
-    const endDate = data?.endDate || schema?.properties?.endDate?.default || '';
+    const startDate = data?.startDate ?? '';
+    const endDate = data?.endDate ?? '';
 
     const getFormattedDateText = (dateValue) => {
       if (!dateValue || isReadOnly) return null;
       return formatDate(dateValue, dateFormat);
     };
+
+    // Extract errors for startDate and endDate from both errors and customValidationErrors
+    const customErrors = config?.customValidationErrors || [];
+    const allErrors = [...(Array.isArray(errors) ? errors : []), ...customErrors];
+    const startDateErrors = allErrors.filter(
+      (err) =>
+        (err.instancePath === `/${path}` && err.params?.missingProperty === 'startDate') ||
+        err.instancePath === `/${path}/startDate`
+    );
+    const endDateErrors = allErrors.filter(
+      (err) =>
+        (err.instancePath === `/${path}` && err.params?.missingProperty === 'endDate') ||
+        err.instancePath === `/${path}/endDate`
+    );
 
     return (
       <Box>
@@ -138,16 +163,11 @@ const CustomDateControl = (props) => {
                   startDate: e.target.value,
                 });
               }}
-              error={errors && (Array.isArray(errors) ? errors.length > 0 : !!errors)}
+              error={startDateErrors && startDateErrors.length > 0}
               helperText={(() => {
-                if (!errors) return undefined;
-                if (Array.isArray(errors) && errors.length > 0) {
-                  return errors[0].message || errors[0];
-                }
-                if (typeof errors === 'string') {
-                  return errors;
-                }
-                return undefined;
+                if (!startDateErrors || startDateErrors.length === 0) return undefined;
+                const error = startDateErrors[0];
+                return t(error.message) || error.message || error;
               })()}
               variant="outlined"
               InputLabelProps={{
@@ -204,16 +224,11 @@ const CustomDateControl = (props) => {
                   endDate: e.target.value,
                 });
               }}
-              error={errors && (Array.isArray(errors) ? errors.length > 0 : !!errors)}
+              error={endDateErrors && endDateErrors.length > 0}
               helperText={(() => {
-                if (!errors) return undefined;
-                if (Array.isArray(errors) && errors.length > 0) {
-                  return errors[0].message || errors[0];
-                }
-                if (typeof errors === 'string') {
-                  return errors;
-                }
-                return undefined;
+                if (!endDateErrors || endDateErrors.length === 0) return undefined;
+                const error = endDateErrors[0];
+                return t(error.message) || error.message || error;
               })()}
               variant="outlined"
               InputLabelProps={{
