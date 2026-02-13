@@ -243,5 +243,11 @@
     "value": "Valor"
   },
   "enableInteger": "Habilitar entero",
-  "useAsCurrency": "Usar como moneda"
+  "useAsCurrency": "Usar como moneda",
+  "Array": {
+    "deleteDialogTitle": "Eliminar elemento",
+    "deleteDialogMessage": "Seguro que quieres eliminar este elemento?",
+    "deleteDialogAccept": "Eliminar",
+    "deleteDialogDecline": "Cancelar"
+  }
 }
