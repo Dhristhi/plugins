@@ -83,40 +83,39 @@ const CustomTextControl = (props) => {
 
   const handleCurrencyChange = (event) => {
     const inputValue = event.target.value;
-
-    // Remove existing commas for processing
     const cleanValue = inputValue.replace(/,/g, '');
-
-    // Allow only digits during typing
-    const allowedCharsRegex = /^[0-9]*$/;
+    const allowedCharsRegex = /^[0-9]*\.?[0-9]*$/;
     if (!allowedCharsRegex.test(cleanValue)) {
-      return; // Block invalid characters
+      return;
     }
 
-    // Format the number with commas for display
-    let formattedValue = '';
-    let numericValue;
-
-    if (cleanValue !== '') {
-      numericValue = Number(cleanValue);
-      if (!isNaN(numericValue)) {
-        const currency = getCurrencyFromFormData();
-        formattedValue = formatCurrencyAmount(numericValue, currency);
+    let numericValue = undefined;
+    if (cleanValue !== '' && cleanValue !== '.') {
+      const parsed = Number(cleanValue);
+      if (!isNaN(parsed)) {
+        numericValue = parsed;
       }
-    } else {
-      // Handle empty input - set to undefined for JsonForms
-      numericValue = undefined;
     }
 
-    // Update display value first
-    setDisplayValue(formattedValue);
+    let formattedValue = cleanValue;
 
-    // Update form data with numeric value - let JsonForms handle the data
+    if (cleanValue !== '' && cleanValue !== '.' && !isNaN(Number(cleanValue))) {
+      const currency = getCurrencyFromFormData();
+      const hasTrailingDot = cleanValue.endsWith('.');
+      const n = Number(cleanValue);
+
+      formattedValue = formatCurrencyAmount(n, currency);
+
+      if (hasTrailingDot && !formattedValue.includes('.')) {
+        formattedValue = formattedValue + '.';
+      }
+    }
+
+    setDisplayValue(formattedValue);
     handleChange(path, numericValue);
 
     if (computedFields?.length > 0) {
       computedFields.forEach(({ scope, fn }) => {
-        // Use core.data to get the most up-to-date form data
         const currentFormData = core?.data || {};
         const updatedFormData = { ...currentFormData, [path]: numericValue };
         const computedValue = fn(updatedFormData, params);
