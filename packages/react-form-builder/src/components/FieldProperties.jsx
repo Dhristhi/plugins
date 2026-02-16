@@ -491,6 +491,21 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
         },
       };
 
+      // Update isInteger state and key when switching between number and integer
+      if (newTypeId === 'integer') {
+        setIsInteger(true);
+        const newKey = convertFieldKey(true, localField.key);
+        updatedField.key = newKey;
+        updatedField.label = 'Integer';
+        updatedField.uischema.scope = `#/properties/${newKey}`;
+      } else if (newTypeId === 'number') {
+        setIsInteger(false);
+        const newKey = convertFieldKey(false, localField.key);
+        updatedField.key = newKey;
+        updatedField.label = 'Number';
+        updatedField.uischema.scope = `#/properties/${newKey}`;
+      }
+
       // Preserve enum options and uischema options
       if (
         hasEnumOptions &&

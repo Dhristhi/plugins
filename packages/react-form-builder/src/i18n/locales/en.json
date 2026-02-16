@@ -245,5 +245,11 @@
     "value": "Value"
   },
   "enableInteger": "Enable Integer",
-  "useAsCurrency": "Use as Currency"
+  "useAsCurrency": "Use as Currency",
+  "Array": {
+    "deleteDialogTitle": "Delete item",
+    "deleteDialogMessage": "Are you sure you want to delete this item?",
+    "deleteDialogAccept": "Delete",
+    "deleteDialogDecline": "Cancel"
+  }
 }
