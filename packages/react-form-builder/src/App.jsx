@@ -16,12 +16,11 @@ export const App = ({
   selectedLanguage = 'en',
   translationResources = {},
   currencyIcon = '$',
+  screenResolutions = [],
 }) => {
   bootstrapDefaultFieldTypes();
-
   const appliedTheme = customTheme || defaultTheme;
   const i18n = initI18Instance(translationResources, defaultLanguage);
-
   useEffect(() => {
     if (i18n && i18n.changeLanguage && selectedLanguage && i18n.language !== selectedLanguage) {
       i18n.changeLanguage(selectedLanguage);
@@ -38,6 +37,7 @@ export const App = ({
           onExport={onExport}
           selectedLanguage={selectedLanguage}
           currencyIcon={currencyIcon}
+          screenResolutions={screenResolutions}
         />
       </I18nextProvider>
     </ThemeProvider>
