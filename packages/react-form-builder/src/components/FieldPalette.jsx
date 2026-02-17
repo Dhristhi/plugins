@@ -170,6 +170,12 @@ const FieldPalette = ({
     setIsSettingsDrawerOpen(true);
   };
 
+  // Check if there are any changes to enable/disable save button
+  const hasChanges = React.useMemo(() => {
+    if (!isSettingsDrawerOpen) return false;
+    return JSON.stringify(tempVisibleFields) !== JSON.stringify(visibleFields);
+  }, [tempVisibleFields, visibleFields, isSettingsDrawerOpen]);
+
   const handleSettingsSave = () => {
     if (onVisibleFieldsChange) {
       onVisibleFieldsChange(tempVisibleFields);
@@ -360,7 +366,7 @@ const FieldPalette = ({
           onClose={handleSettingsCancel}
           sx={{
             '& .MuiDrawer-paper': {
-              width: 320,
+              width: 400,
               boxSizing: 'border-box',
             },
           }}
@@ -522,12 +528,17 @@ const FieldPalette = ({
             </Box>
 
             {/* Action Buttons */}
-            <Box sx={{ mt: 2, display: 'flex', gap: 1, justifyContent: 'space-between' }}>
-              <Button variant="outlined" onClick={handleSettingsCancel}>
-                {t('cancel', 'Cancel')}
-              </Button>
-              <Button variant="contained" onClick={handleSettingsSave}>
+            <Box sx={{ mt: 2, display: 'flex', gap: 1 }}>
+              <Button
+                fullWidth
+                variant="contained"
+                onClick={handleSettingsSave}
+                disabled={!hasChanges}
+              >
                 {t('save', 'Save')}
+              </Button>
+              <Button fullWidth onClick={handleSettingsCancel} variant="outlined">
+                {t('cancel', 'Cancel')}
               </Button>
             </Box>
           </Box>
