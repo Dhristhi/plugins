@@ -106,6 +106,7 @@
   "jsonSchema": "Esquema JSON",
   "uiSchema": "Esquema de UI",
   "applyChanges": "Aplicar cambios",
+  "exportSchema": "Exportar esquema",
   "invalidJson": "Formato JSON no válido",
   "preview": "Vista previa",
   "schema": "Esquema",
