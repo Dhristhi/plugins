@@ -106,6 +106,7 @@
   "jsonSchema": "JSON Schema",
   "uiSchema": "UI Schema",
   "applyChanges": "Apply Changes",
+  "exportSchema": "Export Schema",
   "invalidJson": "Invalid JSON format",
   "preview": "Preview",
   "schema": "Schema",
