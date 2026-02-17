@@ -10,15 +10,25 @@ import {
   Select,
   MenuItem,
   IconButton,
-  Popover,
+  Drawer,
+  Button,
   FormControlLabel,
   Checkbox,
   List,
   ListItem,
   Tooltip,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
 } from '@mui/material';
 import { useDraggable } from '@dnd-kit/core';
-import { IconLayersLinked, IconForms, IconClipboard, IconSettings } from '@tabler/icons-react';
+import {
+  IconLayersLinked,
+  IconForms,
+  IconClipboard,
+  IconSettings,
+  IconChevronDown,
+} from '@tabler/icons-react';
 
 import '../lib/registry/init';
 import { getFieldTypes } from '../lib/registry/fieldRegistry';
@@ -119,7 +129,12 @@ const FieldPalette = ({
 }) => {
   const { t } = useTranslation();
   const [selectedSchema, setSelectedSchema] = useState(loadedSchemaId);
-  const [settingsAnchorEl, setSettingsAnchorEl] = useState(null);
+  const [isSettingsDrawerOpen, setIsSettingsDrawerOpen] = useState(false);
+  const [tempVisibleFields, setTempVisibleFields] = useState({});
+  const [expandedAccordions, setExpandedAccordions] = useState({
+    layouts: false,
+    formFields: false,
+  });
 
   React.useEffect(() => {
     setSelectedSchema(loadedSchemaId);
@@ -150,21 +165,41 @@ const FieldPalette = ({
     }
   };
 
-  const handleSettingsClick = (event) => {
-    setSettingsAnchorEl(event.currentTarget);
+  const handleSettingsClick = () => {
+    setTempVisibleFields(visibleFields);
+    setIsSettingsDrawerOpen(true);
   };
 
-  const handleSettingsClose = () => {
-    setSettingsAnchorEl(null);
+  // Check if there are any changes to enable/disable save button
+  const hasChanges = React.useMemo(() => {
+    if (!isSettingsDrawerOpen) return false;
+    return JSON.stringify(tempVisibleFields) !== JSON.stringify(visibleFields);
+  }, [tempVisibleFields, visibleFields, isSettingsDrawerOpen]);
+
+  const handleSettingsSave = () => {
+    if (onVisibleFieldsChange) {
+      onVisibleFieldsChange(tempVisibleFields);
+    }
+    setIsSettingsDrawerOpen(false);
+  };
+
+  const handleSettingsCancel = () => {
+    setTempVisibleFields(visibleFields);
+    setIsSettingsDrawerOpen(false);
+  };
+
+  const handleAccordionChange = (panel) => (_, isExpanded) => {
+    setExpandedAccordions((prev) => ({
+      ...prev,
+      [panel]: isExpanded,
+    }));
   };
 
   const handleFieldVisibilityChange = (fieldId) => {
-    if (onVisibleFieldsChange) {
-      onVisibleFieldsChange((prev) => ({
-        ...prev,
-        [fieldId]: !prev[fieldId],
-      }));
-    }
+    setTempVisibleFields((prev) => ({
+      ...prev,
+      [fieldId]: !prev[fieldId],
+    }));
   };
 
   const handleLayoutsToggle = () => {
@@ -172,20 +207,18 @@ const FieldPalette = ({
     const layoutFieldIds = allTypes
       .filter((ft) => ft.isLayout && ft.id !== 'object')
       .map((ft) => ft.id);
-    const allLayoutsCurrentlyVisible = layoutFieldIds.every((id) => visibleFields[id]);
+    const allLayoutsCurrentlyVisible = layoutFieldIds.every((id) => tempVisibleFields[id]);
 
     // If all are visible, hide all. If some or none are visible, show all.
     const newVisibility = !allLayoutsCurrentlyVisible;
 
-    if (onVisibleFieldsChange) {
-      onVisibleFieldsChange((prev) => {
-        const updated = { ...prev };
-        layoutFieldIds.forEach((id) => {
-          updated[id] = newVisibility;
-        });
-        return updated;
+    setTempVisibleFields((prev) => {
+      const updated = { ...prev };
+      layoutFieldIds.forEach((id) => {
+        updated[id] = newVisibility;
       });
-    }
+      return updated;
+    });
   };
 
   const handleFormFieldsToggle = () => {
@@ -199,23 +232,19 @@ const FieldPalette = ({
           ft.id !== 'multicheckbox'
       )
       .map((ft) => ft.id);
-    const allFormFieldsCurrentlyVisible = formFieldIds.every((id) => visibleFields[id]);
+    const allFormFieldsCurrentlyVisible = formFieldIds.every((id) => tempVisibleFields[id]);
 
     // If all are visible, hide all. If some or none are visible, show all.
     const newVisibility = !allFormFieldsCurrentlyVisible;
 
-    if (onVisibleFieldsChange) {
-      onVisibleFieldsChange((prev) => {
-        const updated = { ...prev };
-        formFieldIds.forEach((id) => {
-          updated[id] = newVisibility;
-        });
-        return updated;
+    setTempVisibleFields((prev) => {
+      const updated = { ...prev };
+      formFieldIds.forEach((id) => {
+        updated[id] = newVisibility;
       });
-    }
+      return updated;
+    });
   };
-
-  const isSettingsOpen = Boolean(settingsAnchorEl);
 
   const allTypes = getFieldTypes();
 
@@ -233,13 +262,15 @@ const FieldPalette = ({
     )
     .map((ft) => ft.id);
 
-  const allLayoutsVisible =
-    layoutFieldIds.length > 0 && layoutFieldIds.every((id) => visibleFields[id]);
-  const allFormFieldsVisible =
-    formFieldIds.length > 0 && formFieldIds.every((id) => visibleFields[id]);
+  const currentFields = isSettingsDrawerOpen ? tempVisibleFields : visibleFields;
 
-  const someLayoutsVisible = layoutFieldIds.some((id) => visibleFields[id]);
-  const someFormFieldsVisible = formFieldIds.some((id) => visibleFields[id]);
+  const allLayoutsVisible =
+    layoutFieldIds.length > 0 && layoutFieldIds.every((id) => currentFields[id]);
+  const allFormFieldsVisible =
+    formFieldIds.length > 0 && formFieldIds.every((id) => currentFields[id]);
+
+  const someLayoutsVisible = layoutFieldIds.some((id) => currentFields[id]);
+  const someFormFieldsVisible = formFieldIds.some((id) => currentFields[id]);
 
   const layoutTypes = allTypes.filter(
     (ft) => ft.isLayout && ft.id !== 'object' && visibleFields[ft.id]
@@ -328,126 +359,190 @@ const FieldPalette = ({
           </Tooltip>
         </Box>
 
-        {/* Settings Popover */}
-        <Popover
-          open={isSettingsOpen}
-          anchorEl={settingsAnchorEl}
-          onClose={handleSettingsClose}
-          anchorOrigin={{
-            vertical: 'bottom',
-            horizontal: 'left',
-          }}
-          transformOrigin={{
-            vertical: 'top',
-            horizontal: 'left',
+        {/* Settings Drawer */}
+        <Drawer
+          anchor="left"
+          open={isSettingsDrawerOpen}
+          onClose={handleSettingsCancel}
+          sx={{
+            '& .MuiDrawer-paper': {
+              width: 400,
+              boxSizing: 'border-box',
+            },
           }}
         >
-          <Box sx={{ p: 2, minWidth: 250, maxHeight: 400, overflow: 'auto' }}>
-            <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
+          <Box sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
+            <Typography variant="h6" sx={{ mb: 1, fontWeight: 600 }}>
               {t('fieldVisibility', 'Field Visibility')}
             </Typography>
 
             <Divider sx={{ mb: 2 }} />
 
-            {/* Layout Controls */}
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={allLayoutsVisible}
-                  indeterminate={someLayoutsVisible && !allLayoutsVisible}
-                  onChange={handleLayoutsToggle}
-                  size="small"
-                  color="primary"
-                />
-              }
-              label={
-                <Typography variant="body2" sx={{ fontWeight: 500, color: 'primary.main' }}>
-                  <IconLayersLinked size={16} style={{ marginRight: 4, verticalAlign: 'middle' }} />
-                  {t('layouts')}
-                </Typography>
-              }
-              sx={{ m: 0 }}
-            />
-
-            <List dense sx={{ pl: 2 }}>
-              {allTypes
-                .filter((ft) => ft.isLayout && ft.id !== 'object')
-                .map((fieldType) => (
-                  <ListItem key={fieldType.id} sx={{ py: 0.5 }}>
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          checked={visibleFields[fieldType.id] || false}
-                          onChange={() => handleFieldVisibilityChange(fieldType.id)}
-                          size="small"
-                          color="primary"
+            <Box sx={{ flex: 1, overflow: 'auto' }}>
+              {/* Layout Controls Accordion */}
+              <Accordion
+                expanded={expandedAccordions.layouts}
+                onChange={handleAccordionChange('layouts')}
+                sx={{ boxShadow: 'none', '&:before': { display: 'none' } }}
+              >
+                <AccordionSummary
+                  expandIcon={<IconChevronDown size={20} />}
+                  sx={{
+                    px: 0,
+                    minHeight: '48px',
+                    '& .MuiAccordionSummary-content': {
+                      margin: 0,
+                      alignItems: 'center',
+                    },
+                  }}
+                >
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={allLayoutsVisible}
+                        indeterminate={someLayoutsVisible && !allLayoutsVisible}
+                        onChange={(e) => {
+                          e.stopPropagation();
+                          handleLayoutsToggle();
+                        }}
+                        size="small"
+                        color="primary"
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    }
+                    label={
+                      <Typography variant="body2" sx={{ fontWeight: 500, color: 'primary.main' }}>
+                        <IconLayersLinked
+                          size={16}
+                          style={{ marginRight: 4, verticalAlign: 'middle' }}
                         />
-                      }
-                      label={
-                        <Typography variant="body2">
-                          {fieldType.labelKey ? t(fieldType.labelKey) : fieldType.label}
-                        </Typography>
-                      }
-                      sx={{ m: 0 }}
-                    />
-                  </ListItem>
-                ))}
-            </List>
+                        {t('layouts')}
+                      </Typography>
+                    }
+                    sx={{ m: 0 }}
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                </AccordionSummary>
+                <AccordionDetails sx={{ px: 0, pt: 0 }}>
+                  <List dense sx={{ pl: 2 }}>
+                    {allTypes
+                      .filter((ft) => ft.isLayout && ft.id !== 'object')
+                      .map((fieldType) => (
+                        <ListItem key={fieldType.id} sx={{ py: 0.5 }}>
+                          <FormControlLabel
+                            control={
+                              <Checkbox
+                                checked={currentFields[fieldType.id] || false}
+                                onChange={() => handleFieldVisibilityChange(fieldType.id)}
+                                size="small"
+                                color="primary"
+                              />
+                            }
+                            label={
+                              <Typography variant="body2">
+                                {fieldType.labelKey ? t(fieldType.labelKey) : fieldType.label}
+                              </Typography>
+                            }
+                            sx={{ m: 0 }}
+                          />
+                        </ListItem>
+                      ))}
+                  </List>
+                </AccordionDetails>
+              </Accordion>
 
-            <Divider sx={{ my: 1 }} />
+              {/* Field Controls Accordion */}
+              <Accordion
+                expanded={expandedAccordions.formFields}
+                onChange={handleAccordionChange('formFields')}
+                sx={{ boxShadow: 'none', '&:before': { display: 'none' } }}
+              >
+                <AccordionSummary
+                  expandIcon={<IconChevronDown size={20} />}
+                  sx={{
+                    px: 0,
+                    minHeight: '48px',
+                    '& .MuiAccordionSummary-content': {
+                      margin: 0,
+                      alignItems: 'center',
+                    },
+                  }}
+                >
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={allFormFieldsVisible}
+                        indeterminate={someFormFieldsVisible && !allFormFieldsVisible}
+                        onChange={(e) => {
+                          e.stopPropagation();
+                          handleFormFieldsToggle();
+                        }}
+                        size="small"
+                        color="primary"
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    }
+                    label={
+                      <Typography variant="body2" sx={{ fontWeight: 500, color: 'primary.main' }}>
+                        <IconForms size={16} style={{ marginRight: 4, verticalAlign: 'middle' }} />
+                        {t('formFields')}
+                      </Typography>
+                    }
+                    sx={{ m: 0 }}
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                </AccordionSummary>
+                <AccordionDetails sx={{ px: 0, pt: 0 }}>
+                  <List dense sx={{ pl: 2 }}>
+                    {allTypes
+                      .filter(
+                        (ft) =>
+                          !ft.isLayout &&
+                          ft.type !== 'integer' &&
+                          ft.id !== 'multiselect' &&
+                          ft.id !== 'multicheckbox'
+                      )
+                      .map((fieldType) => (
+                        <ListItem key={fieldType.id} sx={{ py: 0.5 }}>
+                          <FormControlLabel
+                            control={
+                              <Checkbox
+                                checked={currentFields[fieldType.id] || false}
+                                onChange={() => handleFieldVisibilityChange(fieldType.id)}
+                                size="small"
+                                color="primary"
+                              />
+                            }
+                            label={
+                              <Typography variant="body2">
+                                {fieldType.labelKey ? t(fieldType.labelKey) : fieldType.label}
+                              </Typography>
+                            }
+                            sx={{ m: 0 }}
+                          />
+                        </ListItem>
+                      ))}
+                  </List>
+                </AccordionDetails>
+              </Accordion>
+            </Box>
 
-            {/* Field Controls */}
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={allFormFieldsVisible}
-                  indeterminate={someFormFieldsVisible && !allFormFieldsVisible}
-                  onChange={handleFormFieldsToggle}
-                  size="small"
-                  color="primary"
-                />
-              }
-              label={
-                <Typography variant="body2" sx={{ fontWeight: 500, color: 'primary.main' }}>
-                  <IconForms size={16} style={{ marginRight: 4, verticalAlign: 'middle' }} />
-                  {t('formFields')}
-                </Typography>
-              }
-              sx={{ m: 0 }}
-            />
-
-            <List dense sx={{ pl: 2 }}>
-              {allTypes
-                .filter(
-                  (ft) =>
-                    !ft.isLayout &&
-                    ft.type !== 'integer' &&
-                    ft.id !== 'multiselect' &&
-                    ft.id !== 'multicheckbox'
-                )
-                .map((fieldType) => (
-                  <ListItem key={fieldType.id} sx={{ py: 0.5 }}>
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          checked={visibleFields[fieldType.id] || false}
-                          onChange={() => handleFieldVisibilityChange(fieldType.id)}
-                          size="small"
-                          color="primary"
-                        />
-                      }
-                      label={
-                        <Typography variant="body2">
-                          {fieldType.labelKey ? t(fieldType.labelKey) : fieldType.label}
-                        </Typography>
-                      }
-                      sx={{ m: 0 }}
-                    />
-                  </ListItem>
-                ))}
-            </List>
+            {/* Action Buttons */}
+            <Box sx={{ mt: 2, display: 'flex', gap: 1 }}>
+              <Button
+                fullWidth
+                variant="contained"
+                onClick={handleSettingsSave}
+                disabled={!hasChanges}
+              >
+                {t('save', 'Save')}
+              </Button>
+              <Button fullWidth onClick={handleSettingsCancel} variant="outlined">
+                {t('cancel', 'Cancel')}
+              </Button>
+            </Box>
           </Box>
-        </Popover>
+        </Drawer>
       </Box>
 
       <FormControl fullWidth size="small" sx={{ mb: 1 }}>
