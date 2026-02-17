@@ -6,16 +6,16 @@ import { Typography, Button, Box } from '@mui/material';
 import { useState, useMemo, useRef, useEffect, useLayoutEffect } from 'react';
 
 import CommonHeader from './CommonHeader';
-import { DeviceToolbar, DEVICE_PRESETS } from './DeviceToolbar';
+import { DeviceToolbar } from './DeviceToolbar';
 import { getRenderers, getCells, config } from '../controls/renders';
 
 let MAX_WIDTH_BEFORE_SCALE = 1376;
 
-const FormResponsivePreview = ({ isFullscreen, setIsFullscreen, children }) => {
+const FormResponsivePreview = ({ isFullscreen, setIsFullscreen, screenResolutions, children }) => {
   const [deviceId, setDeviceId] = useState('responsive');
   // const [orientation, setOrientation] = useState('portrait');
   const preset = useMemo(
-    () => DEVICE_PRESETS.find((d) => d.id === deviceId) ?? DEVICE_PRESETS[0],
+    () => screenResolutions.find((d) => d.id === deviceId) ?? screenResolutions[0],
     [deviceId]
   );
 
@@ -41,7 +41,6 @@ const FormResponsivePreview = ({ isFullscreen, setIsFullscreen, children }) => {
 
     const { clientWidth, clientHeight } = viewportRef.current;
     MAX_WIDTH_BEFORE_SCALE = clientWidth;
-
     if (deviceWidth <= MAX_WIDTH_BEFORE_SCALE) {
       setScale(1);
       return;
@@ -136,6 +135,9 @@ const FormResponsivePreview = ({ isFullscreen, setIsFullscreen, children }) => {
     '& .MuiFormHelperText-root': {
       textAlign: 'left',
     },
+    '& p.MuiTypography-root.MuiTypography-body2.fileUploadLabel': {
+      textAlign: 'left',
+    },
   };
 
   const innerSx = {
@@ -158,6 +160,7 @@ const FormResponsivePreview = ({ isFullscreen, setIsFullscreen, children }) => {
         onToggleOrientation={toggleOrientation}
         isFullscreen={isFullscreen}
         setIsFullscreen={setIsFullscreen}
+        screenResolutions={screenResolutions}
       />
       <Box sx={viewportSx} ref={viewportRef}>
         <Box sx={deviceFrameSx}>
@@ -177,6 +180,7 @@ const FormPreview = ({
   setShowSchemaEditor,
   exportForm,
   currencyIcon = '$',
+  screenResolutions,
 }) => {
   const formRef = useRef();
   const userActions = useRef(false);
@@ -569,7 +573,11 @@ const FormPreview = ({
       <Box sx={{ p: 2, paddingBottom: '80px' }}>
         {formState.schema.properties && Object.keys(formState.schema.properties).length > 0 ? (
           <div ref={formRef}>
-            <FormResponsivePreview isFullscreen={isFullscreen} setIsFullscreen={setIsFullscreen}>
+            <FormResponsivePreview
+              isFullscreen={isFullscreen}
+              setIsFullscreen={setIsFullscreen}
+              screenResolutions={screenResolutions}
+            >
               <JsonForms
                 key={key}
                 ajv={ajv}
