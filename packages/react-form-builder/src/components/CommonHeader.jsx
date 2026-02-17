@@ -104,7 +104,7 @@ const CommonHeader = ({
                 py: 0.75,
               }}
             >
-              {t('applyChanges')}
+              {t('exportSchema')}
             </Button>
           )}
 
