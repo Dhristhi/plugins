@@ -45,7 +45,6 @@ import {
 } from '../lib/structure/treeOps';
 
 const FormBuilder = ({
-  onSave,
   onExport,
   schemas = [],
   currencyIcon = '$',
@@ -600,9 +599,6 @@ const FormBuilder = ({
     transition: 'all 0.2s ease-in-out',
     '&:hover': {
       transform: 'translateY(-1px)',
-      backgroundColor: 'primary.light',
-      borderColor: 'primary.dark',
-      color: 'primary.dark',
     },
     '&:active': {
       transform: 'translateY(0px)',
@@ -671,7 +667,7 @@ const FormBuilder = ({
                   showSchemaEditor={showSchemaEditor}
                   setShowSchemaEditor={setShowSchemaEditor}
                   exportForm={exportForm}
-                  onSave={onSave}
+                  onExport={onExport}
                 />
               )}
 
@@ -794,6 +790,7 @@ const FormBuilder = ({
               <Button
                 fullWidth
                 type="button"
+                color="secondary"
                 sx={cancelButton}
                 variant="outlined"
                 onClick={handleCancelChanges}

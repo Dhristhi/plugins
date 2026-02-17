@@ -1262,8 +1262,8 @@ const devicePresets = [
 ];
 
 export default function App() {
-  const handleSchemaSave = (schema, uischema) => {
-    console.log('Schema changed:', { schema, uischema });
+  const handleSchemaExport = (schema, uischema) => {
+    console.log('Schema exported:', { schema, uischema });
   };
   //You can Pass theme={customTheme} to FormBuilder to apply the custom theme
   return (
@@ -1272,7 +1272,7 @@ export default function App() {
         schemas={schemas}
         defaultLanguage="en"
         selectedLanguage="en"
-        onSave={handleSchemaSave}
+        onExport={handleSchemaExport}
         translationResources={{ es: { translation: es } }}
         currencyIcon="₹"
         screenResolutions={devicePresets}
