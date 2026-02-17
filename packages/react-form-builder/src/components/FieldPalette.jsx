@@ -15,6 +15,7 @@ import {
   Checkbox,
   List,
   ListItem,
+  Tooltip,
 } from '@mui/material';
 import { useDraggable } from '@dnd-kit/core';
 import { IconLayersLinked, IconForms, IconClipboard, IconSettings } from '@tabler/icons-react';
@@ -109,11 +110,16 @@ const DraggableFieldItem = ({ fieldType }) => {
   );
 };
 
-const FieldPalette = ({ onLoadSchema, schemas = [], loadedSchemaId = '' }) => {
+const FieldPalette = ({
+  onLoadSchema,
+  schemas = [],
+  loadedSchemaId = '',
+  visibleFields = {},
+  onVisibleFieldsChange,
+}) => {
   const { t } = useTranslation();
   const [selectedSchema, setSelectedSchema] = useState(loadedSchemaId);
   const [settingsAnchorEl, setSettingsAnchorEl] = useState(null);
-  const [visibleFields, setVisibleFields] = useState({});
 
   React.useEffect(() => {
     setSelectedSchema(loadedSchemaId);
@@ -121,13 +127,15 @@ const FieldPalette = ({ onLoadSchema, schemas = [], loadedSchemaId = '' }) => {
 
   // Initialize visible fields state with all fields visible by default
   React.useEffect(() => {
-    const allTypes = getFieldTypes();
-    const initialVisibility = {};
-    allTypes.forEach((fieldType) => {
-      initialVisibility[fieldType.id] = true;
-    });
-    setVisibleFields(initialVisibility);
-  }, []);
+    if (onVisibleFieldsChange && Object.keys(visibleFields).length === 0) {
+      const allTypes = getFieldTypes();
+      const initialVisibility = {};
+      allTypes.forEach((fieldType) => {
+        if (fieldType.type !== 'integer') initialVisibility[fieldType.id] = true;
+      });
+      onVisibleFieldsChange(initialVisibility);
+    }
+  }, [onVisibleFieldsChange, visibleFields]);
 
   const handleSchemaChange = (event) => {
     const schemaId = event.target.value;
@@ -151,10 +159,12 @@ const FieldPalette = ({ onLoadSchema, schemas = [], loadedSchemaId = '' }) => {
   };
 
   const handleFieldVisibilityChange = (fieldId) => {
-    setVisibleFields((prev) => ({
-      ...prev,
-      [fieldId]: !prev[fieldId],
-    }));
+    if (onVisibleFieldsChange) {
+      onVisibleFieldsChange((prev) => ({
+        ...prev,
+        [fieldId]: !prev[fieldId],
+      }));
+    }
   };
 
   const handleLayoutsToggle = () => {
@@ -167,30 +177,42 @@ const FieldPalette = ({ onLoadSchema, schemas = [], loadedSchemaId = '' }) => {
     // If all are visible, hide all. If some or none are visible, show all.
     const newVisibility = !allLayoutsCurrentlyVisible;
 
-    setVisibleFields((prev) => {
-      const updated = { ...prev };
-      layoutFieldIds.forEach((id) => {
-        updated[id] = newVisibility;
+    if (onVisibleFieldsChange) {
+      onVisibleFieldsChange((prev) => {
+        const updated = { ...prev };
+        layoutFieldIds.forEach((id) => {
+          updated[id] = newVisibility;
+        });
+        return updated;
       });
-      return updated;
-    });
+    }
   };
 
   const handleFormFieldsToggle = () => {
     const allTypes = getFieldTypes();
-    const formFieldIds = allTypes.filter((ft) => !ft.isLayout).map((ft) => ft.id);
+    const formFieldIds = allTypes
+      .filter(
+        (ft) =>
+          !ft.isLayout &&
+          ft.type !== 'integer' &&
+          ft.id !== 'multiselect' &&
+          ft.id !== 'multicheckbox'
+      )
+      .map((ft) => ft.id);
     const allFormFieldsCurrentlyVisible = formFieldIds.every((id) => visibleFields[id]);
 
     // If all are visible, hide all. If some or none are visible, show all.
     const newVisibility = !allFormFieldsCurrentlyVisible;
 
-    setVisibleFields((prev) => {
-      const updated = { ...prev };
-      formFieldIds.forEach((id) => {
-        updated[id] = newVisibility;
+    if (onVisibleFieldsChange) {
+      onVisibleFieldsChange((prev) => {
+        const updated = { ...prev };
+        formFieldIds.forEach((id) => {
+          updated[id] = newVisibility;
+        });
+        return updated;
       });
-      return updated;
-    });
+    }
   };
 
   const isSettingsOpen = Boolean(settingsAnchorEl);
@@ -201,7 +223,15 @@ const FieldPalette = ({ onLoadSchema, schemas = [], loadedSchemaId = '' }) => {
   const layoutFieldIds = allTypes
     .filter((ft) => ft.isLayout && ft.id !== 'object')
     .map((ft) => ft.id);
-  const formFieldIds = allTypes.filter((ft) => !ft.isLayout).map((ft) => ft.id);
+  const formFieldIds = allTypes
+    .filter(
+      (ft) =>
+        !ft.isLayout &&
+        ft.type !== 'integer' &&
+        ft.id !== 'multiselect' &&
+        ft.id !== 'multicheckbox'
+    )
+    .map((ft) => ft.id);
 
   const allLayoutsVisible =
     layoutFieldIds.length > 0 && layoutFieldIds.every((id) => visibleFields[id]);
@@ -214,7 +244,14 @@ const FieldPalette = ({ onLoadSchema, schemas = [], loadedSchemaId = '' }) => {
   const layoutTypes = allTypes.filter(
     (ft) => ft.isLayout && ft.id !== 'object' && visibleFields[ft.id]
   );
-  const fieldTypes = allTypes.filter((ft) => !ft.isLayout && visibleFields[ft.id]);
+  const fieldTypes = allTypes.filter(
+    (ft) =>
+      !ft.isLayout &&
+      ft.type !== 'integer' &&
+      ft.id !== 'multiselect' &&
+      ft.id !== 'multicheckbox' &&
+      visibleFields[ft.id]
+  );
 
   const sidebarContainerSx = {
     p: { xs: 2, sm: 3 },
@@ -273,20 +310,22 @@ const FieldPalette = ({ onLoadSchema, schemas = [], loadedSchemaId = '' }) => {
           {t('formTemplates')}
         </Typography>
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', ml: '84px' }}>
-          <IconButton
-            onClick={handleSettingsClick}
-            size="small"
-            sx={{
-              border: 1,
-              borderColor: 'grey.300',
-              '&:hover': {
-                backgroundColor: 'grey.100',
-                borderColor: 'primary.main',
-              },
-            }}
-          >
-            <IconSettings size={18} />
-          </IconButton>
+          <Tooltip title="Settings" arrow>
+            <IconButton
+              onClick={handleSettingsClick}
+              size="small"
+              sx={{
+                border: 1,
+                borderColor: 'grey.300',
+                '&:hover': {
+                  backgroundColor: 'grey.100',
+                  borderColor: 'primary.main',
+                },
+              }}
+            >
+              <IconSettings size={18} />
+            </IconButton>
+          </Tooltip>
         </Box>
 
         {/* Settings Popover */}
@@ -341,6 +380,7 @@ const FieldPalette = ({ onLoadSchema, schemas = [], loadedSchemaId = '' }) => {
                           checked={visibleFields[fieldType.id] || false}
                           onChange={() => handleFieldVisibilityChange(fieldType.id)}
                           size="small"
+                          color="primary"
                         />
                       }
                       label={
@@ -378,7 +418,13 @@ const FieldPalette = ({ onLoadSchema, schemas = [], loadedSchemaId = '' }) => {
 
             <List dense sx={{ pl: 2 }}>
               {allTypes
-                .filter((ft) => !ft.isLayout)
+                .filter(
+                  (ft) =>
+                    !ft.isLayout &&
+                    ft.type !== 'integer' &&
+                    ft.id !== 'multiselect' &&
+                    ft.id !== 'multicheckbox'
+                )
                 .map((fieldType) => (
                   <ListItem key={fieldType.id} sx={{ py: 0.5 }}>
                     <FormControlLabel
@@ -387,6 +433,7 @@ const FieldPalette = ({ onLoadSchema, schemas = [], loadedSchemaId = '' }) => {
                           checked={visibleFields[fieldType.id] || false}
                           onChange={() => handleFieldVisibilityChange(fieldType.id)}
                           size="small"
+                          color="primary"
                         />
                       }
                       label={

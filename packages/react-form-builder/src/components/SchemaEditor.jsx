@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { IconCode } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
-import { Typography, TextField, Button, Box } from '@mui/material';
+import { Typography, TextField, Box } from '@mui/material';
 
 import CommonHeader from './CommonHeader';
 
@@ -107,6 +107,8 @@ const SchemaEditor = ({
         showSchemaEditor={showSchemaEditor}
         setShowSchemaEditor={setShowSchemaEditor}
         exportForm={exportForm}
+        onApplyChanges={handleApply}
+        showApplyButton={true}
       />
 
       <Box sx={contentContainerSx}>
@@ -152,12 +154,6 @@ const SchemaEditor = ({
               }}
             />
           </Box>
-        </Box>
-
-        <Box display="flex" gap={2} alignItems="center">
-          <Button variant="contained" onClick={handleApply}>
-            {t('applyChanges')}
-          </Button>
         </Box>
       </Box>
     </Box>
