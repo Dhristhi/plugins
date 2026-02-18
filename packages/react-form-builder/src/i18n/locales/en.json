@@ -247,6 +247,8 @@
   },
   "enableInteger": "Enable Integer",
   "useAsCurrency": "Use as Currency",
+  "settings": "Settings",
+  "fieldVisibility": "Field Visibility",
   "Array": {
     "deleteDialogTitle": "Delete item",
     "deleteDialogMessage": "Are you sure you want to delete this item?",

@@ -1475,7 +1475,47 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                           readonly: e.target.checked,
                         },
                       };
-                      handleUpdate({ uischema: updatedUISchema });
+
+                      if (e.target.checked) {
+                        // Clear all validation rules when readonly is enabled
+                        const clearedSchema = {
+                          ...localField.schema,
+                          required: undefined,
+                          minLength: undefined,
+                          maxLength: undefined,
+                          pattern: undefined,
+                          minimum: undefined,
+                          maximum: undefined,
+                          formatMinimum: undefined,
+                          formatMaximum: undefined,
+                          minItems: undefined,
+                          maxItems: undefined,
+                        };
+
+                        if (clearedSchema.properties?.startDate) {
+                          clearedSchema.properties.startDate = {
+                            ...clearedSchema.properties.startDate,
+                            formatMinimum: undefined,
+                            formatMaximum: undefined,
+                          };
+                        }
+
+                        if (clearedSchema.properties?.endDate) {
+                          clearedSchema.properties.endDate = {
+                            ...clearedSchema.properties.endDate,
+                            formatMinimum: undefined,
+                            formatMaximum: undefined,
+                          };
+                        }
+
+                        handleUpdate({
+                          uischema: updatedUISchema,
+                          schema: clearedSchema,
+                          required: false,
+                        });
+                      } else {
+                        handleUpdate({ uischema: updatedUISchema });
+                      }
                     }}
                     color="primary"
                   />
@@ -2538,7 +2578,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
       )}
       {/* Validation Rules */}
       {!isLayout && !isGroup && (
-        <Accordion sx={accordionSx}>
+        <Accordion sx={accordionSx} disabled={localField.uischema?.options?.readonly || false}>
           <AccordionSummary expandIcon={<IconChevronDown />} sx={accordionSummarySx}>
             <Typography variant="subtitle1" fontWeight={600}>
               {t('validationRules')}
@@ -2552,6 +2592,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                   checked={localField.required || false}
                   onChange={(e) => handleUpdate({ required: e.target.checked })}
                   color="primary"
+                  disabled={localField.uischema?.options?.readonly || false}
                 />
               }
               label={t('requiredField')}
@@ -2582,6 +2623,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                         }}
                         margin="normal"
                         variant="outlined"
+                        disabled={localField.uischema?.options?.readonly || false}
                         inputProps={{
                           step: 1,
                           min: 0,
@@ -2607,6 +2649,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                         }}
                         margin="normal"
                         variant="outlined"
+                        disabled={localField.uischema?.options?.readonly || false}
                         inputProps={{
                           step: 1,
                           min: 0,
@@ -2627,6 +2670,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                     }
                     margin="normal"
                     variant="outlined"
+                    disabled={localField.uischema?.options?.readonly || false}
                     helperText={t('patternHelp')}
                     sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                   />
@@ -2645,6 +2689,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                   }
                   margin="normal"
                   variant="outlined"
+                  disabled={localField.uischema?.options?.readonly || false}
                   helperText={t('patternHelp')}
                   sx={outlinedTextFieldSx}
                 />
@@ -2664,6 +2709,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                       }
                       margin="normal"
                       variant="outlined"
+                      disabled={localField.uischema?.options?.readonly || false}
                       inputProps={localField.type === 'integer' ? { step: 1 } : {}}
                       sx={outlinedTextFieldSx}
                     />
@@ -2682,6 +2728,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                       }
                       margin="normal"
                       variant="outlined"
+                      disabled={localField.uischema?.options?.readonly || false}
                       inputProps={localField.type === 'integer' ? { step: 1 } : {}}
                       sx={outlinedTextFieldSx}
                     />
@@ -2773,6 +2820,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                         }}
                         margin="normal"
                         variant="outlined"
+                        disabled={localField.uischema?.options?.readonly || false}
                         helperText={t('minDateHelp')}
                         InputLabelProps={{
                           shrink: true,
@@ -2784,6 +2832,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                                 size="small"
                                 onClick={() => handleSchemaUpdate({ formatMinimum: undefined })}
                                 edge="end"
+                                disabled={localField.uischema?.options?.readonly || false}
                                 sx={{
                                   color: 'text.secondary',
                                   '&:hover': { color: 'error.main' },
@@ -2870,6 +2919,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                         }}
                         margin="normal"
                         variant="outlined"
+                        disabled={localField.uischema?.options?.readonly || false}
                         helperText={t('maxDateHelp')}
                         InputLabelProps={{
                           shrink: true,
@@ -2881,6 +2931,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                                 size="small"
                                 onClick={() => handleSchemaUpdate({ formatMaximum: undefined })}
                                 edge="end"
+                                disabled={localField.uischema?.options?.readonly || false}
                                 sx={{
                                   color: 'text.secondary',
                                   '&:hover': { color: 'error.main' },
@@ -2970,6 +3021,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                           }}
                           margin="normal"
                           variant="outlined"
+                          disabled={localField.uischema?.options?.readonly || false}
                           helperText={t('minDateRangeHelp')}
                           InputLabelProps={{
                             shrink: true,
@@ -2996,6 +3048,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                                     })
                                   }
                                   edge="end"
+                                  disabled={localField.uischema?.options?.readonly || false}
                                   sx={{
                                     color: 'text.secondary',
                                     '&:hover': { color: 'error.main' },
@@ -3074,6 +3127,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                           }}
                           margin="normal"
                           variant="outlined"
+                          disabled={localField.uischema?.options?.readonly || false}
                           helperText={t('maxDateRangeHelp')}
                           InputLabelProps={{
                             shrink: true,
@@ -3099,6 +3153,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                                     })
                                   }
                                   edge="end"
+                                  disabled={localField.uischema?.options?.readonly || false}
                                   sx={{
                                     color: 'text.secondary',
                                     '&:hover': { color: 'error.main' },
@@ -3131,6 +3186,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                       }
                       margin="normal"
                       variant="outlined"
+                      disabled={localField.uischema?.options?.readonly || false}
                       helperText={t('minItemsHelp')}
                       inputProps={{ min: 0 }}
                       sx={outlinedTextFieldSx}
@@ -3150,6 +3206,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                       }
                       margin="normal"
                       variant="outlined"
+                      disabled={localField.uischema?.options?.readonly || false}
                       helperText={t('maxItemsHelp')}
                       inputProps={{ min: 0 }}
                       sx={outlinedTextFieldSx}
@@ -3188,6 +3245,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                         }}
                         margin="normal"
                         variant="outlined"
+                        disabled={localField.uischema?.options?.readonly || false}
                         helperText={t('maxFileSizeHelp')}
                         inputProps={{
                           step: 0.1,
