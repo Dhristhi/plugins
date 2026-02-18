@@ -45,7 +45,6 @@ import {
 } from '../lib/structure/treeOps';
 
 const FormBuilder = ({
-  onSave,
   onExport,
   schemas = [],
   currencyIcon = '$',
@@ -85,6 +84,12 @@ const FormBuilder = ({
       { id: 'nest-hub-max', label: 'Nest Hub Max', width: 1280, height: 800 },
       { id: 'hd-720p', label: 'HD 720p', width: 1280, height: 720 },
       { id: 'full-hd-1080p', label: 'Full HD 1080p', width: 1920, height: 1080 },
+    ];
+  } else {
+    const newScreens = screenResolutions.filter((obj) => obj.id !== 'responsive');
+    screenResolutions = [
+      { id: 'responsive', label: 'Responsive', width: 1376, height: 570 },
+      ...newScreens,
     ];
   }
 
@@ -594,9 +599,6 @@ const FormBuilder = ({
     transition: 'all 0.2s ease-in-out',
     '&:hover': {
       transform: 'translateY(-1px)',
-      backgroundColor: 'primary.light',
-      borderColor: 'primary.dark',
-      color: 'primary.dark',
     },
     '&:active': {
       transform: 'translateY(0px)',
@@ -665,7 +667,7 @@ const FormBuilder = ({
                   showSchemaEditor={showSchemaEditor}
                   setShowSchemaEditor={setShowSchemaEditor}
                   exportForm={exportForm}
-                  onSave={onSave}
+                  onExport={onExport}
                 />
               )}
 
@@ -788,6 +790,7 @@ const FormBuilder = ({
               <Button
                 fullWidth
                 type="button"
+                color="secondary"
                 sx={cancelButton}
                 variant="outlined"
                 onClick={handleCancelChanges}

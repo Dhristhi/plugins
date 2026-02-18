@@ -1240,7 +1240,6 @@ const schemas = [
 ];
 
 const devicePresets = [
-  { id: 'responsive', label: 'Responsive', width: 1376, height: 570 },
   { id: 'iphone-se', label: 'iPhone SE', width: 375, height: 667 },
   { id: 'iphone-xr', label: 'iPhone XR', width: 414, height: 896 },
   { id: 'iphone-12-pro', label: 'iPhone 12 Pro', width: 390, height: 844 },
@@ -1259,11 +1258,12 @@ const devicePresets = [
   { id: 'nest-hub', label: 'Nest Hub', width: 1024, height: 600 },
   { id: 'nest-hub-max', label: 'Nest Hub Max', width: 1280, height: 800 },
   { id: 'hd-720p', label: 'HD 720p', width: 1280, height: 720 },
+  { id: 'full-hd-1080p', label: 'Full HD 1080p', width: 1920, height: 1080 },
 ];
 
 export default function App() {
-  const handleSchemaSave = (schema, uischema) => {
-    console.log('Schema changed:', { schema, uischema });
+  const handleSchemaExport = (schema, uischema) => {
+    console.log('Schema exported:', { schema, uischema });
   };
   //You can Pass theme={customTheme} to FormBuilder to apply the custom theme
   return (
@@ -1272,7 +1272,7 @@ export default function App() {
         schemas={schemas}
         defaultLanguage="en"
         selectedLanguage="en"
-        onSave={handleSchemaSave}
+        onExport={handleSchemaExport}
         translationResources={{ es: { translation: es } }}
         currencyIcon="₹"
         screenResolutions={devicePresets}
