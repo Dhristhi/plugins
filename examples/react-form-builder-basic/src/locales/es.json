@@ -245,6 +245,8 @@
   },
   "enableInteger": "Habilitar entero",
   "useAsCurrency": "Usar como moneda",
+  "settings": "Configuración",
+  "fieldVisibility": "Visibilidad de Campos",
   "Array": {
     "deleteDialogTitle": "Eliminar elemento",
     "deleteDialogMessage": "Seguro que quieres eliminar este elemento?",
