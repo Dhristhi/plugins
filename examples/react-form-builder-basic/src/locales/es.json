@@ -243,7 +243,7 @@
     "operator": "Operador",
     "value": "Valor"
   },
-  "acceptInteger": "Aceptar entero",
+  "acceptInteger": "Aceptar número entero",
   "useAsCurrencyPrefix": "Utilizar como prefijo de moneda",
   "settings": "Configuración",
   "fieldVisibility": "Visibilidad de Campos",
