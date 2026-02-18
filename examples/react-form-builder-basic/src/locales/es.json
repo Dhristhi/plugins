@@ -77,7 +77,7 @@
   "enumDataType": "Tipo de datos del enum",
   "addEnum": "Añadir valor",
   "newOption": "Nueva opción",
-  "validationRules": "Reglas de validación",
+  "validationRules": "Validaciones",
   "requiredField": "Campo obligatorio",
   "minLength": "Longitud mínima",
   "maxLength": "Longitud máxima",
@@ -245,10 +245,13 @@
   },
   "enableInteger": "Habilitar entero",
   "useAsCurrency": "Usar como moneda",
+  "settings": "Configuración",
+  "fieldVisibility": "Visibilidad de Campos",
   "Array": {
     "deleteDialogTitle": "Eliminar elemento",
     "deleteDialogMessage": "Seguro que quieres eliminar este elemento?",
     "deleteDialogAccept": "Eliminar",
     "deleteDialogDecline": "Cancelar"
-  }
+  },
+  "rules": "Reglas"
 }
