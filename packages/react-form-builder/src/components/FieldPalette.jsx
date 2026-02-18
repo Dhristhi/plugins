@@ -28,6 +28,7 @@ import {
   IconClipboard,
   IconSettings,
   IconChevronDown,
+  IconX,
 } from '@tabler/icons-react';
 
 import '../lib/registry/init';
@@ -135,6 +136,52 @@ const FieldPalette = ({
     layouts: false,
     formFields: false,
   });
+
+  const accordionSx = {
+    mb: 2,
+    borderRadius: 0,
+    border: '1px solid',
+    borderColor: 'divider',
+    boxShadow: 'none',
+    mx: -2,
+    transition: 'all 0.2s ease-in-out',
+    '&:before': {
+      display: 'none',
+    },
+    '&.Mui-expanded': {
+      margin: '15px -15px',
+      boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
+    },
+    '&:hover': {
+      borderRadius: 0,
+      boxShadow: '0 4px 16px rgba(0,0,0,0.06)',
+    },
+  };
+
+  const accordionSummarySx = {
+    '& .MuiAccordionSummary-content': {
+      alignItems: 'center',
+    },
+    '&:hover': {
+      borderRadius: 0,
+      backgroundColor: 'action.hover',
+    },
+    borderRadius: 3,
+  };
+
+  const propertiesPanelFooter = {
+    p: '10px',
+    bgcolor: 'background.paper',
+    borderTop: 1,
+    borderColor: 'divider',
+    display: 'flex',
+    gap: 2,
+    boxShadow: '0 -2px 10px rgba(0,0,0,0.1)',
+    position: 'sticky',
+    bottom: 0,
+    zIndex: 10,
+    height: 64,
+  };
 
   React.useEffect(() => {
     setSelectedSchema(loadedSchemaId);
@@ -371,164 +418,202 @@ const FieldPalette = ({
             },
           }}
         >
-          <Box sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
-            <Typography variant="h6" sx={{ mb: 1, fontWeight: 600 }}>
-              {t('fieldVisibility', 'Field Visibility')}
-            </Typography>
-
-            <Divider sx={{ mb: 2 }} />
-
-            <Box sx={{ flex: 1, overflow: 'auto' }}>
-              {/* Layout Controls Accordion */}
-              <Accordion
-                expanded={expandedAccordions.layouts}
-                onChange={handleAccordionChange('layouts')}
-                sx={{ boxShadow: 'none', '&:before': { display: 'none' } }}
+          <Box sx={{ p: 0, height: '100%', display: 'flex', flexDirection: 'column' }}>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                mb: 1,
+                p: 3,
+              }}
+            >
+              <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                {t('settings')}
+              </Typography>
+              <IconButton
+                onClick={handleSettingsCancel}
+                size="small"
+                sx={{
+                  '&:hover': {
+                    backgroundColor: 'grey.100',
+                  },
+                }}
               >
-                <AccordionSummary
-                  expandIcon={<IconChevronDown size={20} />}
-                  sx={{
-                    px: 0,
-                    minHeight: '48px',
-                    '& .MuiAccordionSummary-content': {
-                      margin: 0,
-                      alignItems: 'center',
-                    },
-                  }}
-                >
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={allLayoutsVisible}
-                        indeterminate={someLayoutsVisible && !allLayoutsVisible}
-                        onChange={(e) => {
-                          e.stopPropagation();
-                          handleLayoutsToggle();
+                <IconX size={20} />
+              </IconButton>
+            </Box>
+            <Divider sx={{ mb: 2, width: '100%' }} />
+            <Box sx={{ flex: 1, overflow: 'auto', mb: 2 }} width={400} px={2}>
+              <Accordion defaultExpanded sx={accordionSx}>
+                <AccordionSummary expandIcon={<IconChevronDown />} sx={accordionSummarySx}>
+                  <Typography variant="subtitle1" fontWeight={600}>
+                    {t('fieldVisibility')}
+                  </Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <Box sx={{ overflow: 'auto' }}>
+                    {/* Layout Controls Accordion */}
+                    <Accordion
+                      expanded={expandedAccordions.layouts}
+                      onChange={handleAccordionChange('layouts')}
+                      sx={{ boxShadow: 'none', '&:before': { display: 'none' } }}
+                    >
+                      <AccordionSummary
+                        expandIcon={<IconChevronDown size={20} />}
+                        sx={{
+                          px: 0,
+                          minHeight: '48px',
+                          '& .MuiAccordionSummary-content': {
+                            margin: 0,
+                            alignItems: 'center',
+                          },
                         }}
-                        size="small"
-                        color="primary"
-                        onClick={(e) => e.stopPropagation()}
-                      />
-                    }
-                    label={
-                      <Typography variant="body2" sx={{ fontWeight: 500, color: 'primary.main' }}>
-                        <IconLayersLinked
-                          size={16}
-                          style={{ marginRight: 4, verticalAlign: 'middle' }}
+                      >
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              checked={allLayoutsVisible}
+                              indeterminate={someLayoutsVisible && !allLayoutsVisible}
+                              onChange={(e) => {
+                                e.stopPropagation();
+                                handleLayoutsToggle();
+                              }}
+                              size="small"
+                              color="primary"
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                          }
+                          label={
+                            <Typography
+                              variant="body2"
+                              sx={{ fontWeight: 500, color: 'primary.main' }}
+                            >
+                              <IconLayersLinked
+                                size={16}
+                                style={{ marginRight: 4, verticalAlign: 'middle' }}
+                              />
+                              {t('layouts')}
+                            </Typography>
+                          }
+                          sx={{ m: 0 }}
+                          onClick={(e) => e.stopPropagation()}
                         />
-                        {t('layouts')}
-                      </Typography>
-                    }
-                    sx={{ m: 0 }}
-                    onClick={(e) => e.stopPropagation()}
-                  />
-                </AccordionSummary>
-                <AccordionDetails sx={{ px: 0, pt: 0 }}>
-                  <List dense sx={{ pl: 2 }}>
-                    {allTypes
-                      .filter((ft) => ft.isLayout && ft.id !== 'object')
-                      .map((fieldType) => (
-                        <ListItem key={fieldType.id} sx={{ py: 0.5 }}>
-                          <FormControlLabel
-                            control={
-                              <Checkbox
-                                checked={currentFields[fieldType.id] || false}
-                                onChange={() => handleFieldVisibilityChange(fieldType.id)}
-                                size="small"
-                                color="primary"
-                              />
-                            }
-                            label={
-                              <Typography variant="body2">
-                                {fieldType.labelKey ? t(fieldType.labelKey) : fieldType.label}
-                              </Typography>
-                            }
-                            sx={{ m: 0 }}
-                          />
-                        </ListItem>
-                      ))}
-                  </List>
-                </AccordionDetails>
-              </Accordion>
+                      </AccordionSummary>
+                      <AccordionDetails sx={{ px: 0, pt: 0 }}>
+                        <List dense sx={{ pl: 2 }}>
+                          {allTypes
+                            .filter((ft) => ft.isLayout && ft.id !== 'object')
+                            .map((fieldType) => (
+                              <ListItem key={fieldType.id} sx={{ py: 0.5 }}>
+                                <FormControlLabel
+                                  control={
+                                    <Checkbox
+                                      checked={currentFields[fieldType.id] || false}
+                                      onChange={() => handleFieldVisibilityChange(fieldType.id)}
+                                      size="small"
+                                      color="primary"
+                                    />
+                                  }
+                                  label={
+                                    <Typography variant="body2">
+                                      {fieldType.labelKey ? t(fieldType.labelKey) : fieldType.label}
+                                    </Typography>
+                                  }
+                                  sx={{ m: 0 }}
+                                />
+                              </ListItem>
+                            ))}
+                        </List>
+                      </AccordionDetails>
+                    </Accordion>
 
-              {/* Field Controls Accordion */}
-              <Accordion
-                expanded={expandedAccordions.formFields}
-                onChange={handleAccordionChange('formFields')}
-                sx={{ boxShadow: 'none', '&:before': { display: 'none' } }}
-              >
-                <AccordionSummary
-                  expandIcon={<IconChevronDown size={20} />}
-                  sx={{
-                    px: 0,
-                    minHeight: '48px',
-                    '& .MuiAccordionSummary-content': {
-                      margin: 0,
-                      alignItems: 'center',
-                    },
-                  }}
-                >
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={allFormFieldsVisible}
-                        indeterminate={someFormFieldsVisible && !allFormFieldsVisible}
-                        onChange={(e) => {
-                          e.stopPropagation();
-                          handleFormFieldsToggle();
+                    {/* Field Controls Accordion */}
+                    <Accordion
+                      expanded={expandedAccordions.formFields}
+                      onChange={handleAccordionChange('formFields')}
+                      sx={{ boxShadow: 'none', '&:before': { display: 'none' } }}
+                    >
+                      <AccordionSummary
+                        expandIcon={<IconChevronDown size={20} />}
+                        sx={{
+                          px: 0,
+                          minHeight: '48px',
+                          '& .MuiAccordionSummary-content': {
+                            margin: 0,
+                            alignItems: 'center',
+                          },
                         }}
-                        size="small"
-                        color="primary"
-                        onClick={(e) => e.stopPropagation()}
-                      />
-                    }
-                    label={
-                      <Typography variant="body2" sx={{ fontWeight: 500, color: 'primary.main' }}>
-                        <IconForms size={16} style={{ marginRight: 4, verticalAlign: 'middle' }} />
-                        {t('formFields')}
-                      </Typography>
-                    }
-                    sx={{ m: 0 }}
-                    onClick={(e) => e.stopPropagation()}
-                  />
-                </AccordionSummary>
-                <AccordionDetails sx={{ px: 0, pt: 0 }}>
-                  <List dense sx={{ pl: 2 }}>
-                    {allTypes
-                      .filter(
-                        (ft) =>
-                          !ft.isLayout &&
-                          ft.type !== 'integer' &&
-                          ft.id !== 'multiselect' &&
-                          ft.id !== 'multicheckbox'
-                      )
-                      .map((fieldType) => (
-                        <ListItem key={fieldType.id} sx={{ py: 0.5 }}>
-                          <FormControlLabel
-                            control={
-                              <Checkbox
-                                checked={currentFields[fieldType.id] || false}
-                                onChange={() => handleFieldVisibilityChange(fieldType.id)}
-                                size="small"
-                                color="primary"
+                      >
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              checked={allFormFieldsVisible}
+                              indeterminate={someFormFieldsVisible && !allFormFieldsVisible}
+                              onChange={(e) => {
+                                e.stopPropagation();
+                                handleFormFieldsToggle();
+                              }}
+                              size="small"
+                              color="primary"
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                          }
+                          label={
+                            <Typography
+                              variant="body2"
+                              sx={{ fontWeight: 500, color: 'primary.main' }}
+                            >
+                              <IconForms
+                                size={16}
+                                style={{ marginRight: 4, verticalAlign: 'middle' }}
                               />
-                            }
-                            label={
-                              <Typography variant="body2">
-                                {fieldType.labelKey ? t(fieldType.labelKey) : fieldType.label}
-                              </Typography>
-                            }
-                            sx={{ m: 0 }}
-                          />
-                        </ListItem>
-                      ))}
-                  </List>
+                              {t('formFields')}
+                            </Typography>
+                          }
+                          sx={{ m: 0 }}
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                      </AccordionSummary>
+                      <AccordionDetails sx={{ px: 0, pt: 0 }}>
+                        <List dense sx={{ pl: 2 }}>
+                          {allTypes
+                            .filter(
+                              (ft) =>
+                                !ft.isLayout &&
+                                ft.type !== 'integer' &&
+                                ft.id !== 'multiselect' &&
+                                ft.id !== 'multicheckbox'
+                            )
+                            .map((fieldType) => (
+                              <ListItem key={fieldType.id} sx={{ py: 0.5 }}>
+                                <FormControlLabel
+                                  control={
+                                    <Checkbox
+                                      checked={currentFields[fieldType.id] || false}
+                                      onChange={() => handleFieldVisibilityChange(fieldType.id)}
+                                      size="small"
+                                      color="primary"
+                                    />
+                                  }
+                                  label={
+                                    <Typography variant="body2">
+                                      {fieldType.labelKey ? t(fieldType.labelKey) : fieldType.label}
+                                    </Typography>
+                                  }
+                                  sx={{ m: 0 }}
+                                />
+                              </ListItem>
+                            ))}
+                        </List>
+                      </AccordionDetails>
+                    </Accordion>
+                  </Box>
                 </AccordionDetails>
               </Accordion>
             </Box>
-
-            {/* Action Buttons */}
-            <Box sx={{ mt: 2, display: 'flex', gap: 1 }}>
+            {/* Fixed Action Buttons at Bottom */}
+            <Box sx={propertiesPanelFooter}>
               <Button
                 fullWidth
                 variant="contained"
@@ -572,7 +657,7 @@ const FieldPalette = ({
         </Select>
       </FormControl>
 
-      <Divider sx={{ my: 2 }} />
+      <Divider sx={{ my: 2, width: '100%' }} />
 
       {/* Layout Elements Section */}
       {(someLayoutsVisible || allLayoutsVisible) && (
@@ -595,7 +680,7 @@ const FieldPalette = ({
               <DraggableFieldItem key={fieldType.id} fieldType={fieldType} />
             ))}
           </Box>
-          <Divider sx={{ my: 2 }} />
+          <Divider sx={{ my: 2, width: '100%' }} />
         </Box>
       )}
 
