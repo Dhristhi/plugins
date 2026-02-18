@@ -77,7 +77,7 @@
   "enumDataType": "Tipo de datos del enum",
   "addEnum": "Añadir valor",
   "newOption": "Nueva opción",
-  "validationRules": "Reglas de validación",
+  "validationRules": "Validaciones",
   "requiredField": "Campo obligatorio",
   "minLength": "Longitud mínima",
   "maxLength": "Longitud máxima",
@@ -250,5 +250,6 @@
     "deleteDialogMessage": "Seguro que quieres eliminar este elemento?",
     "deleteDialogAccept": "Eliminar",
     "deleteDialogDecline": "Cancelar"
-  }
+  },
+  "rules": "Reglas"
 }

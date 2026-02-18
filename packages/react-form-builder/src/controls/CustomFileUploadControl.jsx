@@ -6,7 +6,8 @@ import { and, isControl, optionIs, rankWith } from '@jsonforms/core';
 import { Box, Typography, Alert, FormHelperText } from '@mui/material';
 
 const CustomFileUploadControl = (props) => {
-  const { data, handleChange, path, errors, uischema, schema, label, visible, enabled } = props;
+  const { data, handleChange, path, errors, uischema, schema, label, visible, enabled, required } =
+    props;
 
   const { t } = useTranslation();
   const [localError, setLocalError] = useState(null);
@@ -158,13 +159,21 @@ const CustomFileUploadControl = (props) => {
     objectFit: 'contain',
   };
 
+  const fileNameSx = {
+    mt: 0.5,
+    width: '180px',
+    overflowWrap: 'break-word',
+    wordBreak: 'break-word',
+    whiteSpace: 'normal',
+  };
+
   // read-only mode with multiple images/files
   if (isReadOnly && hasFiles) {
     return (
       <Box sx={{ mb: 2 }}>
         {label && (
-          <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
-            {label}
+          <Typography className="fileUploadLabel" variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
+            {label} {required && <span> *</span>}
           </Typography>
         )}
         <Box sx={readOnlyContainer}>
@@ -244,8 +253,8 @@ const CustomFileUploadControl = (props) => {
   };
 
   const previewContainer = {
-    width: 150,
-    height: 150,
+    width: 180,
+    height: 180,
     borderRadius: '4px',
     border: '1px solid',
     borderColor: 'divider',
@@ -290,8 +299,8 @@ const CustomFileUploadControl = (props) => {
   return (
     <Box sx={{ mb: 2 }}>
       {label && (
-        <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
-          {label}
+        <Typography className="fileUploadLabel" variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
+          {label} {required && <span> *</span>}
         </Typography>
       )}
       <Box
@@ -353,7 +362,7 @@ const CustomFileUploadControl = (props) => {
                         </Box>
                       )}
                     </Box>
-                    <Typography variant="caption" sx={{ mt: 0.5 }}>
+                    <Typography variant="caption" sx={fileNameSx}>
                       {item.name}
                     </Typography>
                   </Box>
