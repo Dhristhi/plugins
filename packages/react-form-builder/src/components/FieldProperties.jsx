@@ -700,7 +700,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
     },
     '&.Mui-expanded': {
       margin: '15px -15px',
-      boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
     },
     '&:hover': {
       borderRadius: 0,

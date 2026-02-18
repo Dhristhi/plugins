@@ -241,6 +241,7 @@ export const buildUISchemaFromFields = (fieldsArray, parentKey = null) => {
                 i18n: field.i18nKey ? `${field.i18nKey}_confirm` : `${field.key}_confirm`,
                 options: {
                   format: 'password',
+                  readonly: field.uischema.options?.readonly ? true : false,
                 },
                 rule: rule,
               },
@@ -260,6 +261,7 @@ export const buildUISchemaFromFields = (fieldsArray, parentKey = null) => {
               i18n: field.i18nKey ? `${field.i18nKey}_confirm` : `${field.key}_confirm`,
               options: {
                 format: 'password',
+                readonly: field.uischema.options?.readonly ? true : false,
               },
             },
           ];
