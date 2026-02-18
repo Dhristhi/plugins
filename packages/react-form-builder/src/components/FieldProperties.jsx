@@ -966,7 +966,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                       color="primary"
                     />
                   }
-                  label={t('enableInteger')}
+                  label={t('acceptInteger')}
                   sx={{ mb: 2, display: 'block' }}
                 />
                 <FormControlLabel
@@ -989,7 +989,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                       color="primary"
                     />
                   }
-                  label={t('useAsCurrency')}
+                  label={t('useAsCurrencyPrefix')}
                   sx={{ mb: 2, display: 'block' }}
                 />
               </>
