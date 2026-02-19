@@ -20,6 +20,8 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
+  TextField,
+  Switch,
 } from '@mui/material';
 import { useDraggable } from '@dnd-kit/core';
 import {
@@ -29,6 +31,7 @@ import {
   IconSettings,
   IconChevronDown,
   IconX,
+  IconTrash,
 } from '@tabler/icons-react';
 
 import '../lib/registry/init';
@@ -127,6 +130,9 @@ const FieldPalette = ({
   loadedSchemaId = '',
   visibleFields = {},
   onVisibleFieldsChange,
+  screenResolutions,
+  onScreenChanged,
+  responsiveState,
 }) => {
   const { t } = useTranslation();
   const [selectedSchema, setSelectedSchema] = useState(loadedSchemaId);
@@ -217,15 +223,12 @@ const FieldPalette = ({
     setIsSettingsDrawerOpen(true);
   };
 
-  // Check if there are any changes to enable/disable save button
-  const hasChanges = React.useMemo(() => {
-    if (!isSettingsDrawerOpen) return false;
-    return JSON.stringify(tempVisibleFields) !== JSON.stringify(visibleFields);
-  }, [tempVisibleFields, visibleFields, isSettingsDrawerOpen]);
-
   const handleSettingsSave = () => {
     if (onVisibleFieldsChange) {
       onVisibleFieldsChange(tempVisibleFields);
+    }
+    if (hasChanges) {
+      onScreenChanged({ rows: rows, layout: resonsiveLayoutState });
     }
     setIsSettingsDrawerOpen(false);
   };
@@ -377,6 +380,65 @@ const FieldPalette = ({
     fontWeight: 500,
   };
 
+  const [rows, setRows] = useState([]);
+
+  React.useEffect(() => {
+    setRows(screenResolutions);
+  }, [screenResolutions]);
+
+  const handleChange = (index, field) => (event) => {
+    setIsScreenChanged(true);
+    const value = event.target.value;
+    setRows((prev) => {
+      const copy = [...prev];
+      copy[index] = {
+        ...copy[index],
+        [field]:
+          field === 'width' || field === 'height' ? (value === '' ? '' : Number(value)) : value,
+      };
+      return copy;
+    });
+  };
+
+  const handleToggleEnabled = (index) => (event) => {
+    setIsScreenChanged(true);
+    const checked = event.target.checked;
+    setRows((prev) => {
+      const copy = [...prev];
+      copy[index] = { ...copy[index], enabled: checked };
+      return copy;
+    });
+  };
+
+  const handleDelete = (index) => () => {
+    setIsScreenChanged(true);
+    setRows((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleAdd = () => {
+    setIsScreenChanged(true);
+    setRows((prev) => [
+      ...prev,
+      {
+        id: `custom-${Date.now()}`,
+        label: '',
+        width: '',
+        height: '',
+        enabled: true,
+        isNew: true,
+      },
+    ]);
+  };
+
+  const [isScreenChanged, setIsScreenChanged] = useState(false);
+  // Check if there are any changes to enable/disable save button
+  const hasChanges = React.useMemo(() => {
+    if (!isSettingsDrawerOpen) return false;
+    if (JSON.stringify(tempVisibleFields) !== JSON.stringify(visibleFields)) return true;
+    if (isScreenChanged) return true;
+  }, [tempVisibleFields, visibleFields, isSettingsDrawerOpen, isScreenChanged]);
+
+  const [resonsiveLayoutState, setResonsiveLayoutState] = useState(responsiveState || false);
   return (
     <Box sx={sidebarContainerSx}>
       {/* Schema Loader Section */}
@@ -413,7 +475,7 @@ const FieldPalette = ({
           onClose={handleSettingsCancel}
           sx={{
             '& .MuiDrawer-paper': {
-              width: 400,
+              width: 500,
               boxSizing: 'border-box',
             },
           }}
@@ -444,7 +506,7 @@ const FieldPalette = ({
               </IconButton>
             </Box>
             <Divider sx={{ mb: 2, width: '100%' }} />
-            <Box sx={{ flex: 1, overflow: 'auto', mb: 2 }} width={400} px={2}>
+            <Box sx={{ flex: 1, overflow: 'auto', mb: 2 }} width={500} px={2}>
               <Accordion defaultExpanded sx={accordionSx}>
                 <AccordionSummary expandIcon={<IconChevronDown />} sx={accordionSummarySx}>
                   <Typography variant="subtitle1" fontWeight={600}>
@@ -608,6 +670,172 @@ const FieldPalette = ({
                         </List>
                       </AccordionDetails>
                     </Accordion>
+                  </Box>
+                </AccordionDetails>
+              </Accordion>
+              <Accordion defaultExpanded sx={accordionSx}>
+                <AccordionSummary expandIcon={<IconChevronDown />} sx={accordionSummarySx}>
+                  <Typography variant="subtitle1" fontWeight={600}>
+                    {t('responsiveScreens')}
+                  </Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <Box sx={{ overflow: 'auto' }}>
+                    {/* Layout Controls Accordion */}
+                    <Accordion
+                      expanded={expandedAccordions.layouts}
+                      onChange={handleAccordionChange('layouts')}
+                      sx={{ boxShadow: 'none', '&:before': { display: 'none' } }}
+                    >
+                      <AccordionDetails sx={{ px: 0, pt: 0 }}>
+                        <Box>
+                          <FormControlLabel
+                            control={
+                              <Switch
+                                checked={resonsiveLayoutState.showResplayout}
+                                onChange={(e) => {
+                                  const status = e.target.checked;
+                                  setResonsiveLayoutState({
+                                    ...resonsiveLayoutState,
+                                    showResplayout: status,
+                                  });
+                                  setIsScreenChanged(true);
+                                }}
+                                color="primary"
+                              />
+                            }
+                            label={t('showResponsiveLayout')}
+                            sx={{ mb: 2, display: 'block' }}
+                          />
+                          {resonsiveLayoutState.showResplayout && (
+                            <FormControlLabel
+                              control={
+                                <Switch
+                                  checked={resonsiveLayoutState.showRotateOption}
+                                  onChange={(e) => {
+                                    const status = e.target.checked;
+                                    setResonsiveLayoutState({
+                                      ...resonsiveLayoutState,
+                                      showRotateOption: status,
+                                    });
+                                    setIsScreenChanged(true);
+                                  }}
+                                  color="primary"
+                                />
+                              }
+                              label={t('showRotateOption')}
+                              sx={{ mb: 2, display: 'block' }}
+                            />
+                          )}
+                        </Box>
+                        {resonsiveLayoutState.showResplayout && (
+                          <Box>
+                            <Typography variant="h6" sx={{ mb: 2 }}></Typography>
+
+                            {rows.map((row, index) => (
+                              <Box
+                                key={row.id}
+                                sx={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: 2,
+                                  mb: 1,
+                                }}
+                              >
+                                <Checkbox
+                                  checked={row.enabled}
+                                  onChange={handleToggleEnabled(index)}
+                                  disabled={index === 0}
+                                />
+                                {row.isNew ? (
+                                  <TextField
+                                    label="Label"
+                                    size="small"
+                                    value={row.label}
+                                    onChange={handleChange(index, 'label')}
+                                    InputProps={{
+                                      sx: {
+                                        '& input': {
+                                          fontSize: '14px', // 14px
+                                          paddingLeft: '8px',
+                                          paddingRight: '8px',
+                                        },
+                                      },
+                                    }}
+                                    disabled={index === 0}
+                                    sx={{ minWidth: 180 }}
+                                  />
+                                ) : (
+                                  <Typography sx={{ minWidth: 180 }}>{row.label}</Typography>
+                                )}
+
+                                {row.isNew ? (
+                                  <TextField
+                                    label="Width"
+                                    type="number"
+                                    size="small"
+                                    value={row.width}
+                                    onChange={handleChange(index, 'width')}
+                                    InputProps={{
+                                      sx: {
+                                        '& input': {
+                                          fontSize: '14px', // 14px
+                                          paddingLeft: '8px',
+                                          paddingRight: '8px',
+                                        },
+                                      },
+                                    }}
+                                    disabled={index === 0}
+                                    sx={{ width: 120 }}
+                                  />
+                                ) : (
+                                  <Typography sx={{ width: 120 }}>{row.width}</Typography>
+                                )}
+
+                                {row.isNew ? (
+                                  <TextField
+                                    label="Height"
+                                    type="number"
+                                    size="small"
+                                    value={row.height}
+                                    onChange={handleChange(index, 'height')}
+                                    InputProps={{
+                                      sx: {
+                                        '& input': {
+                                          fontSize: '14px', // 14px
+                                          paddingLeft: '8px',
+                                          paddingRight: '8px',
+                                        },
+                                      },
+                                    }}
+                                    disabled={index === 0}
+                                    sx={{ width: 120 }}
+                                  />
+                                ) : (
+                                  <Typography sx={{ width: 120 }}>{row.height}</Typography>
+                                )}
+
+                                {row.isNew && (
+                                  <IconButton
+                                    aria-label="delete"
+                                    color="error"
+                                    onClick={handleDelete(index)}
+                                  >
+                                    <IconTrash size={15} />
+                                  </IconButton>
+                                )}
+                              </Box>
+                            ))}
+
+                            <Button variant="outlined" onClick={handleAdd}>
+                              Add resolution
+                            </Button>
+                          </Box>
+                        )}
+                      </AccordionDetails>
+                    </Accordion>
+
+                    {/* Field Controls Accordion */}
                   </Box>
                 </AccordionDetails>
               </Accordion>
