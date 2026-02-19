@@ -326,12 +326,20 @@ export const buildUISchemaFromFields = (fieldsArray, parentKey = null) => {
           const scope = parentKey
             ? `#/properties/${parentKey}/properties/${field.key}`
             : `#/properties/${field.key}`;
+
+          // Ensure enum fields have format: 'select' for custom control
+          const options = field.uischema?.options || {};
+          if (field.schema?.enum && !options.format) {
+            options.format = 'select';
+          }
+
           if (field.visibility && field.visibility.length > 0 && field.parentVisibility)
             return {
               ...field.uischema,
               scope: scope,
               label: field.label,
               i18n: field.i18nKey || field.label,
+              options: options,
               rule: rule,
             };
           return {
@@ -339,6 +347,7 @@ export const buildUISchemaFromFields = (fieldsArray, parentKey = null) => {
             scope: scope,
             label: field.label,
             i18n: field.i18nKey || field.label,
+            options: options,
           };
         }
       }

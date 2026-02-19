@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { Unwrapped } from '@jsonforms/material-renderers';
 import { and, isControl, rankWith } from '@jsonforms/core';
 import { useJsonForms, withJsonFormsControlProps } from '@jsonforms/react';
 import {
@@ -20,9 +19,6 @@ import { useTranslation } from 'react-i18next';
 
 import { updateNestedValue } from '../utils';
 
-// Extract MaterialEnumControl from Unwrapped
-const { MaterialEnumControl } = Unwrapped;
-
 const CustomSelectControl = (props) => {
   const { t } = useTranslation();
   const { core } = useJsonForms();
@@ -41,6 +37,8 @@ const CustomSelectControl = (props) => {
     displayType,
     maxSelections: rawMaxSelections,
     autocompleteProps: { limitTags: visibleChipsCount } = {},
+    cascadeFrom,
+    cascadeRules,
   } = uischema.options || {};
 
   // Ensure maxSelections is at least 2 for multi-select fields
@@ -79,25 +77,68 @@ const CustomSelectControl = (props) => {
           setOptions(newOptions);
         }
       } else {
-        const newOptions =
+        let allOptions =
           schema.enum?.map((enumItem) => ({
-            label: enumItem,
+            label: String(enumItem),
             value: enumItem,
             raw: enumItem,
           })) ||
           schema.items?.enum?.map((enumItem) => ({
-            label: enumItem,
+            label: String(enumItem),
             value: enumItem,
             raw: enumItem,
           })) ||
           [];
-        setOptions(newOptions);
+
+        // Apply cascading filter if configured
+        if (cascadeFrom && cascadeRules) {
+          const parentValue = formData[cascadeFrom];
+          const parentValues = Array.isArray(parentValue)
+            ? parentValue
+            : parentValue
+              ? [parentValue]
+              : [];
+
+          if (parentValues.length > 0) {
+            const allAllowedValues = new Set();
+            parentValues.forEach((pVal) => {
+              if (cascadeRules[pVal]) {
+                cascadeRules[pVal].forEach((v) => allAllowedValues.add(v));
+              }
+            });
+
+            if (allAllowedValues.size > 0) {
+              allOptions = allOptions.filter((opt) => allAllowedValues.has(opt.value));
+
+              if (isMulti && Array.isArray(data)) {
+                const invalidValues = data.filter((v) => !allAllowedValues.has(v));
+                if (invalidValues.length > 0) {
+                  const validData = data.filter((v) => allAllowedValues.has(v));
+                  handleChange(path, validData.length > 0 ? validData : []);
+                }
+              } else if (data && !allAllowedValues.has(data)) {
+                handleChange(path, undefined);
+              }
+            } else {
+              allOptions = [];
+              if (data) {
+                handleChange(path, isMulti ? [] : undefined);
+              }
+            }
+          } else {
+            allOptions = [];
+            if (data) {
+              handleChange(path, isMulti ? [] : undefined);
+            }
+          }
+        }
+        setOptions(allOptions);
       }
     };
     fetchOptions();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [entity, key, value, schema]);
+  }, [entity, key, value, schema, cascadeFrom, cascadeRules, formData[cascadeFrom]]);
 
   const handleOnChange = (event, selectedVal) => {
     handleChange(path, selectedVal);
@@ -302,15 +343,28 @@ const CustomSelectControl = (props) => {
       </FormControl>
     )
   ) : (
-    <MaterialEnumControl
-      {...props}
-      path={path}
-      schema={{ ...schema, title: fieldLabel }}
-      options={options}
-      uischema={uischema}
-      disabled={isReadOnly}
-      handleChange={handleOnChange}
-    />
+    <FormControl fullWidth error={hasError}>
+      <InputLabel>{fieldLabel}</InputLabel>
+      <Select
+        label={fieldLabel}
+        disabled={isReadOnly || !enabled}
+        value={data || ''}
+        onChange={(e) => {
+          if (isReadOnly) {
+            return;
+          }
+          handleOnChange(e, e.target.value);
+        }}
+      >
+        {options.map((opt) => (
+          <MenuItem key={opt.value} value={opt.value} sx={{ textTransform: 'capitalize' }}>
+            {opt.label}
+          </MenuItem>
+        ))}
+      </Select>
+      {schema?.description && <FormHelperText>{schema?.description}</FormHelperText>}
+      {hasError && <FormHelperText>{validationError}</FormHelperText>}
+    </FormControl>
   );
 };
 
@@ -320,12 +374,23 @@ export const customSelectTester = rankWith(
   and(isControl, (uischema, schema) => {
     const format = uischema?.options?.format;
     const isMulti = uischema?.options?.multi;
+    const hasCascading = uischema?.options?.cascadeFrom !== undefined;
+
+    // Handle cascading fields
+    if (hasCascading && schema?.enum) {
+      return true;
+    }
 
     if (format === 'select' || format === 'checkbox' || format === 'dynamicselect') {
       return true;
     }
 
     if (isMulti && schema?.type === 'array' && schema?.items?.enum) {
+      return true;
+    }
+
+    // Handle regular enum fields (select/radio)
+    if (schema?.enum && !format) {
       return true;
     }
 

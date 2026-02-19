@@ -2067,6 +2067,32 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                     {t('enumValues')}
                   </Typography>
 
+                  {/* Cascading Enum Toggle */}
+                  {(localField.type === 'select' || localField.type === 'radio') && (
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          checked={localField.uischema?.options?.cascadeFrom !== undefined}
+                          onChange={(e) => {
+                            const isCascading = e.target.checked;
+                            const updatedUISchema = {
+                              ...localField.uischema,
+                              options: {
+                                ...localField.uischema?.options,
+                                cascadeFrom: isCascading ? '' : undefined,
+                                cascadeRules: isCascading ? {} : undefined,
+                              },
+                            };
+                            handleUpdate({ uischema: updatedUISchema });
+                          }}
+                          color="primary"
+                        />
+                      }
+                      label={t('enableCascading') || 'Enable Cascading'}
+                      sx={{ mb: 2 }}
+                    />
+                  )}
+
                   {/* Dynamic Data Toggle for select fields */}
                   {(localField.type === 'select' ||
                     localField.type === 'multiselect' ||
@@ -2104,7 +2130,117 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                     />
                   )}
 
-                  {localField.uischema?.options?.entity !== undefined ? (
+                  {localField.uischema?.options?.cascadeFrom !== undefined ? (
+                    <Box>
+                      <FormControl fullWidth margin="normal">
+                        <InputLabel>{t('cascadeFromField') || 'Cascade From Field'}</InputLabel>
+                        <Select
+                          value={localField.uischema?.options?.cascadeFrom || ''}
+                          label={t('cascadeFromField') || 'Cascade From Field'}
+                          onChange={(e) => {
+                            const updatedUISchema = {
+                              ...localField.uischema,
+                              options: {
+                                ...localField.uischema?.options,
+                                cascadeFrom: e.target.value,
+                              },
+                            };
+                            handleUpdate({ uischema: updatedUISchema });
+                          }}
+                          sx={layoutSelectSx}
+                        >
+                          {filteredFields
+                            .filter(
+                              (f) =>
+                                f.id !== field.id &&
+                                arrEnumTypes.includes(f.type) &&
+                                (f.type === 'select' || f.type === 'radio')
+                            )
+                            .map((f) => (
+                              <MenuItem key={f.key} value={f.key}>
+                                {f.label}
+                              </MenuItem>
+                            ))}
+                        </Select>
+                      </FormControl>
+
+                      {localField.uischema?.options?.cascadeFrom && (
+                        <Box sx={{ mt: 2 }}>
+                          <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
+                            {t('cascadeRules') || 'Cascading Rules'}
+                          </Typography>
+                          <Typography
+                            variant="caption"
+                            color="text.secondary"
+                            sx={{ mb: 2, display: 'block' }}
+                          >
+                            {t('cascadeRulesHelp') ||
+                              'Define which options to show based on parent field value'}
+                          </Typography>
+
+                          {(() => {
+                            const parentField = filteredFields.find(
+                              (f) => f.key === localField.uischema?.options?.cascadeFrom
+                            );
+                            const parentOptions = getEnumData(parentField) || [];
+                            const cascadeRules = localField.uischema?.options?.cascadeRules || {};
+
+                            return parentOptions.map((parentValue) => (
+                              <Box
+                                key={parentValue}
+                                sx={{
+                                  mb: 2,
+                                  p: 2,
+                                  border: '1px solid',
+                                  borderColor: 'divider',
+                                  borderRadius: 1,
+                                }}
+                              >
+                                <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                                  {t('whenParentIs') || 'When'} "{parentValue}"{' '}
+                                  {t('show') || 'show'}:
+                                </Typography>
+                                <FormControl fullWidth size="small">
+                                  <InputLabel>
+                                    {t('availableOptions') || 'Available Options'}
+                                  </InputLabel>
+                                  <Select
+                                    multiple
+                                    value={cascadeRules[parentValue] || []}
+                                    label={t('availableOptions') || 'Available Options'}
+                                    onChange={(e) => {
+                                      const updatedRules = {
+                                        ...cascadeRules,
+                                        [parentValue]: e.target.value,
+                                      };
+                                      const updatedUISchema = {
+                                        ...localField.uischema,
+                                        options: {
+                                          ...localField.uischema?.options,
+                                          cascadeRules: updatedRules,
+                                        },
+                                      };
+                                      handleUpdate({ uischema: updatedUISchema });
+                                    }}
+                                    renderValue={(selected) => selected.join(', ')}
+                                  >
+                                    {enumOptions.map((opt) => (
+                                      <MenuItem key={opt} value={opt}>
+                                        <Checkbox
+                                          checked={(cascadeRules[parentValue] || []).includes(opt)}
+                                        />
+                                        {opt}
+                                      </MenuItem>
+                                    ))}
+                                  </Select>
+                                </FormControl>
+                              </Box>
+                            ));
+                          })()}
+                        </Box>
+                      )}
+                    </Box>
+                  ) : localField.uischema?.options?.entity !== undefined ? (
                     <Box>
                       <TextField
                         label={t('apiEntity')}
