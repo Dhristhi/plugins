@@ -180,7 +180,7 @@
   "fileTypeNotAllowed": "El archivo seleccionado \"{{fileName}}\" no es un tipo de archivo permitido.",
   "fileSizeExceeded": "El archivo seleccionado \"{{fileName}}\" excede el tamaño máximo de {{maxSize}}MB.",
   "fileProcessingError": "Error inesperado al procesar los archivos.",
-
+  "download": "Descargar",
   "desktop": "Escritorio",
   "tablet": "Tableta",
   "mobile": "Móvil",
