@@ -1707,8 +1707,10 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                     // Convert to appropriate type
                     if (localField.type === 'number' || localField.type === 'integer') {
                       defaultValue = defaultValue ? Number(defaultValue) : undefined;
+                      handleSchemaUpdate({ default: defaultValue });
                     } else if (localField.type === 'checkbox') {
                       defaultValue = defaultValue.toLowerCase() === 'true';
+                      handleSchemaUpdate({ default: defaultValue });
                     } else {
                       handleSchemaUpdate({ default: defaultValue });
                     }
