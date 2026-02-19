@@ -243,8 +243,10 @@
     "operator": "Operador",
     "value": "Valor"
   },
-  "enableInteger": "Habilitar entero",
-  "useAsCurrency": "Usar como moneda",
+  "acceptInteger": "Aceptar número entero",
+  "useAsCurrencyPrefix": "Utilizar como prefijo de moneda",
+  "settings": "Configuración",
+  "fieldVisibility": "Visibilidad de Campos",
   "Array": {
     "deleteDialogTitle": "Eliminar elemento",
     "deleteDialogMessage": "Seguro que quieres eliminar este elemento?",

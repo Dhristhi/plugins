@@ -789,7 +789,7 @@ const FormBuilder = ({
               <Button
                 fullWidth
                 type="button"
-                color="secondary"
+                color="primary"
                 sx={cancelButton}
                 variant="outlined"
                 onClick={handleCancelChanges}

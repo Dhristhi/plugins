@@ -245,8 +245,10 @@
     "operator": "Operator",
     "value": "Value"
   },
-  "enableInteger": "Enable Integer",
-  "useAsCurrency": "Use as Currency",
+  "acceptInteger": "Accept Whole Number",
+  "useAsCurrencyPrefix": "Use as Currency Prefix",
+  "settings": "Settings",
+  "fieldVisibility": "Field Visibility",
   "Array": {
     "deleteDialogTitle": "Delete item",
     "deleteDialogMessage": "Are you sure you want to delete this item?",
