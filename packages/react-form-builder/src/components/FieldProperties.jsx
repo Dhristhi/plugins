@@ -966,7 +966,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                       color="primary"
                     />
                   }
-                  label={t('enableInteger')}
+                  label={t('acceptInteger')}
                   sx={{ mb: 2, display: 'block' }}
                 />
                 <FormControlLabel
@@ -989,7 +989,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                       color="primary"
                     />
                   }
-                  label={t('useAsCurrency')}
+                  label={t('useAsCurrencyPrefix')}
                   sx={{ mb: 2, display: 'block' }}
                 />
               </>
@@ -1707,8 +1707,10 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                     // Convert to appropriate type
                     if (localField.type === 'number' || localField.type === 'integer') {
                       defaultValue = defaultValue ? Number(defaultValue) : undefined;
+                      handleSchemaUpdate({ default: defaultValue });
                     } else if (localField.type === 'checkbox') {
                       defaultValue = defaultValue.toLowerCase() === 'true';
+                      handleSchemaUpdate({ default: defaultValue });
                     } else {
                       handleSchemaUpdate({ default: defaultValue });
                     }
