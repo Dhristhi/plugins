@@ -244,6 +244,8 @@ const FieldPalette = ({
     setIsScreenChanged(false);
     setTempVisibleFields(visibleFields);
     setTempToolbarVisibility(toolbarVisibility);
+    setRows(screenResolutions);
+    setResonsiveLayoutState(responsiveState || false);
     setIsSettingsDrawerOpen(false);
   };
 

@@ -69,7 +69,7 @@
   "enableTextarea": "Habilitar área de texto",
   "useDynamicData": "Usar datos dinámicos",
   "apiEntity": "Entidad de API",
-  "apiEntityHelp": "Nombre del endpoint de la API (p. ej., countries, cities)",
+  "apiEntityHelp": "URL del endpoint de la API (p. ej., https://api.example.com/products)",
   "valueFieldName": "Nombre del campo de valor",
   "valueFieldHelp": "Nombre del campo para el valor almacenado (p. ej., code, id). Déjalo vacío para arreglos primitivos.",
   "labelFieldName": "Nombre del campo de etiqueta",
