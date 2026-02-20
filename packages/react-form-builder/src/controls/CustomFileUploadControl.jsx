@@ -1,9 +1,9 @@
 import { useTranslation } from 'react-i18next';
 import { useState, useCallback, useRef } from 'react';
-import { IconUpload, IconFile, IconX } from '@tabler/icons-react';
+import { IconUpload, IconFile, IconX, IconDownload } from '@tabler/icons-react';
 import { withJsonFormsControlProps } from '@jsonforms/react';
 import { and, isControl, optionIs, rankWith } from '@jsonforms/core';
-import { Box, Typography, Alert, FormHelperText } from '@mui/material';
+import { Box, Typography, Alert, FormHelperText, Link } from '@mui/material';
 
 const CustomFileUploadControl = (props) => {
   const { data, handleChange, path, errors, uischema, schema, label, visible, enabled, required } =
@@ -165,6 +165,23 @@ const CustomFileUploadControl = (props) => {
     overflowWrap: 'break-word',
     wordBreak: 'break-word',
     whiteSpace: 'normal',
+    textAlign: 'center',
+  };
+
+  const downloadLinkSx = {
+    mt: 0.5,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 0.5,
+    cursor: 'pointer',
+    color: 'primary.main',
+    textDecoration: 'none',
+    fontSize: '0.75rem',
+    '&:hover': {
+      textDecoration: 'underline',
+      color: 'primary.dark',
+    },
   };
 
   // read-only mode with multiple images/files
@@ -180,7 +197,10 @@ const CustomFileUploadControl = (props) => {
           {filesData.map((item, idx) => {
             const isImage = isImageDataUrl(item.dataUrl);
             return (
-              <Box key={idx} sx={{ mb: 1 }}>
+              <Box
+                key={idx}
+                sx={{ mb: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}
+              >
                 {isImage ? (
                   <Box
                     component="img"
@@ -206,6 +226,37 @@ const CustomFileUploadControl = (props) => {
                     </Typography>
                   </Box>
                 )}
+                {isImage && (
+                  <Typography variant="body2" sx={{ mt: 0.5 }}>
+                    {item.name || t('file', { index: idx + 1 })}
+                  </Typography>
+                )}
+                <Link
+                  component="button"
+                  variant="caption"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDownload(item, idx);
+                  }}
+                  sx={{
+                    mt: 0.5,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 0.5,
+                    cursor: 'pointer',
+                    color: 'primary.main',
+                    textDecoration: 'none',
+                    fontSize: '0.75rem',
+                    '&:hover': {
+                      textDecoration: 'underline',
+                      color: 'primary.dark',
+                    },
+                  }}
+                >
+                  <IconDownload size={14} />
+                  {t('download')}
+                </Link>
               </Box>
             );
           })}
@@ -278,6 +329,22 @@ const CustomFileUploadControl = (props) => {
     if (isReadOnly) return;
     const updated = filesData.filter((_, i) => i !== index);
     handleChange(path, updated);
+  };
+
+  const handleDownload = (item, index) => {
+    if (!item.dataUrl) return;
+
+    try {
+      // Create a temporary anchor element
+      const link = document.createElement('a');
+      link.href = item.dataUrl;
+      link.download = item.name || `file-${index + 1}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error('Download failed:', error);
+    }
   };
 
   const removeFileIconSx = {
@@ -365,6 +432,18 @@ const CustomFileUploadControl = (props) => {
                     <Typography variant="caption" sx={fileNameSx}>
                       {item.name}
                     </Typography>
+                    <Link
+                      component="button"
+                      variant="caption"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDownload(item, idx);
+                      }}
+                      sx={downloadLinkSx}
+                    >
+                      <IconDownload size={14} />
+                      {t('download')}
+                    </Link>
                   </Box>
                 );
               })}
