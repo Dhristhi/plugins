@@ -468,28 +468,28 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
   const handleFieldTypeChange = (newTypeId) => {
     const newFieldType = defaultFieldTypes.find((ft) => ft.id === newTypeId);
     if (newFieldType && !newFieldType.isLayout) {
+      // Generate new key based on field type
+      const keyParts = localField.key.split('_');
+      const newKey =
+        keyParts.length > 1 ? `${newTypeId}_${keyParts[1]}` : `${newTypeId}_${keyParts[0]}`;
+
       const updatedField = {
         ...localField,
         type: newFieldType.id,
-        schema: { ...newFieldType.schema, title: localField.label },
+        label: newFieldType.label,
+        key: newKey,
+        schema: { ...newFieldType.schema, title: newFieldType.label },
         uischema: {
           ...newFieldType.uischema,
-          scope: `#/properties/${localField.key}`,
+          scope: `#/properties/${newKey}`,
         },
       };
 
+      // Update isInteger state when switching between number and integer
       if (newTypeId === 'integer') {
         setIsInteger(true);
-        const newKey = convertFieldKey(true, localField.key);
-        updatedField.key = newKey;
-        updatedField.label = 'Integer';
-        updatedField.uischema.scope = `#/properties/${newKey}`;
       } else if (newTypeId === 'number') {
         setIsInteger(false);
-        const newKey = convertFieldKey(false, localField.key);
-        updatedField.key = newKey;
-        updatedField.label = 'Number';
-        updatedField.uischema.scope = `#/properties/${newKey}`;
       }
 
       if (
@@ -853,9 +853,17 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                       let updatedSchema = { ...localField.schema };
                       let updatedUISchema = { ...localField.uischema };
                       let type = '';
+                      let label = '';
+                      let newKey = '';
                       delete updatedSchema.default;
                       if (isMulti) {
                         type = 'multiselect';
+                        label = 'Multi Select';
+                        const keyParts = localField.key.split('_');
+                        newKey =
+                          keyParts.length > 1
+                            ? `multiselect_${keyParts[1]}`
+                            : `multiselect_${keyParts[0]}`;
                         updatedSchema.type = 'array';
                         updatedSchema.items = {
                           type: 'string',
@@ -872,8 +880,13 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                             limitTags: 5,
                           },
                         };
+                        updatedUISchema.scope = `#/properties/${newKey}`;
                       } else {
                         type = 'select';
+                        label = 'Select';
+                        const keyParts = localField.key.split('_');
+                        newKey =
+                          keyParts.length > 1 ? `select_${keyParts[1]}` : `select_${keyParts[0]}`;
                         updatedSchema.type = 'string';
                         updatedSchema.enum = enumOptions;
                         delete updatedSchema.items;
@@ -884,11 +897,14 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                         };
                         delete updatedUISchema.options.displayType;
                         delete updatedUISchema.options.autocompleteProps;
+                        updatedUISchema.scope = `#/properties/${newKey}`;
                       }
 
                       handleUpdate(
                         {
                           type,
+                          label,
+                          key: newKey,
                           schema: updatedSchema,
                           uischema: updatedUISchema,
                         },
@@ -975,8 +991,16 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                       let updatedUISchema = { ...localField.uischema };
                       delete updatedSchema.default;
                       let type = '';
+                      let label = '';
+                      let newKey = '';
                       if (isMulti) {
                         type = 'multicheckbox';
+                        label = 'Multi Checkbox';
+                        const keyParts = localField.key.split('_');
+                        newKey =
+                          keyParts.length > 1
+                            ? `multicheckbox_${keyParts[1]}`
+                            : `multicheckbox_${keyParts[0]}`;
                         const defaultEnumOptions =
                           enumOptions.length > 0
                             ? enumOptions
@@ -993,11 +1017,20 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                           format: 'checkbox',
                           displayType: 'checkbox',
                         };
+                        updatedUISchema.scope = `#/properties/${newKey}`;
+                        // Initialize enum options if not already set
                         if (enumOptions.length === 0) {
                           setEnumOptions(defaultEnumOptions);
                         }
                       } else {
                         type = 'checkbox';
+                        label = 'Checkbox';
+                        const keyParts = localField.key.split('_');
+                        newKey =
+                          keyParts.length > 1
+                            ? `checkbox_${keyParts[1]}`
+                            : `checkbox_${keyParts[0]}`;
+                        // Convert to single checkbox (boolean)
                         updatedSchema.type = 'boolean';
                         delete updatedSchema.items;
                         delete updatedSchema.uniqueItems;
@@ -1008,11 +1041,14 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                         };
                         delete updatedUISchema.options.format;
                         delete updatedUISchema.options.displayType;
+                        updatedUISchema.scope = `#/properties/${newKey}`;
                       }
 
                       handleUpdate(
                         {
                           type,
+                          label,
+                          key: newKey,
                           schema: updatedSchema,
                           uischema: updatedUISchema,
                         },
