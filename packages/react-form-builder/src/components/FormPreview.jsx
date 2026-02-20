@@ -11,7 +11,13 @@ import { getRenderers, getCells, config } from '../controls/renders';
 
 let MAX_WIDTH_BEFORE_SCALE = 1376;
 
-const FormResponsivePreview = ({ isFullscreen, setIsFullscreen, screenResolutions, children }) => {
+const FormResponsivePreview = ({
+  isFullscreen,
+  setIsFullscreen,
+  screenResolutions,
+  responsiveState,
+  children,
+}) => {
   const [deviceId, setDeviceId] = useState('responsive');
   // const [orientation, setOrientation] = useState('portrait');
   const preset = useMemo(
@@ -152,20 +158,22 @@ const FormResponsivePreview = ({ isFullscreen, setIsFullscreen, screenResolution
     transform: `scale(${scale})`,
     transformOrigin: 'top',
   };
-
   return (
     <Box sx={outerSx}>
-      <DeviceToolbar
-        selectedId={deviceId}
-        onChangeDevice={setDeviceId}
-        width={deviceWidth}
-        height={deviceHeight}
-        onChangeSize={setSize}
-        onToggleOrientation={toggleOrientation}
-        isFullscreen={isFullscreen}
-        setIsFullscreen={setIsFullscreen}
-        screenResolutions={screenResolutions}
-      />
+      {responsiveState.showResplayout && (
+        <DeviceToolbar
+          selectedId={deviceId}
+          onChangeDevice={setDeviceId}
+          width={deviceWidth}
+          height={deviceHeight}
+          onChangeSize={setSize}
+          onToggleOrientation={toggleOrientation}
+          isFullscreen={isFullscreen}
+          setIsFullscreen={setIsFullscreen}
+          screenResolutions={screenResolutions}
+          responsiveState={responsiveState}
+        />
+      )}
       <Box sx={viewportSx} ref={viewportRef}>
         <Box sx={deviceFrameSx}>
           <Box sx={innerSx}>{children}</Box>
@@ -185,6 +193,7 @@ const FormPreview = ({
   exportForm,
   currencyIcon = '$',
   screenResolutions,
+  responsiveState,
 }) => {
   const formRef = useRef();
   const userActions = useRef(false);
@@ -581,6 +590,7 @@ const FormPreview = ({
               isFullscreen={isFullscreen}
               setIsFullscreen={setIsFullscreen}
               screenResolutions={screenResolutions}
+              responsiveState={responsiveState}
             >
               <JsonForms
                 key={key}
