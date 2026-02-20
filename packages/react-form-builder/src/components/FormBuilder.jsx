@@ -62,36 +62,46 @@ const FormBuilder = ({
   const [confirmDialog, setConfirmDialog] = useState({ open: false, schemaId: null });
   const [loadedSchemaId, setLoadedSchemaId] = useState('');
   const [visibleFields, setVisibleFields] = useState({});
-  if (screenResolutions.length === 0) {
-    screenResolutions = [
-      { id: 'responsive', label: 'Responsive', width: 1376, height: 570 },
-      { id: 'iphone-se', label: 'iPhone SE', width: 375, height: 667 },
-      { id: 'iphone-xr', label: 'iPhone XR', width: 414, height: 896 },
-      { id: 'iphone-12-pro', label: 'iPhone 12 Pro', width: 390, height: 844 },
-      { id: 'iphone-14-pro-max', label: 'iPhone 14 Pro Max', width: 430, height: 932 },
-      { id: 'pixel-7', label: 'Pixel 7', width: 412, height: 915 },
-      { id: 'samsung-galaxy-s8-plus', label: 'Samsung Galaxy S8+', width: 360, height: 740 },
-      { id: 'samsung-s20-ultra', label: 'Samsung Galaxy S20 Ultra', width: 412, height: 915 },
-      { id: 'ipad-mini', label: 'iPad Mini', width: 768, height: 1024 },
-      { id: 'ipad-air', label: 'iPad Air', width: 820, height: 1180 },
-      { id: 'ipad-pro', label: 'iPad Pro', width: 1024, height: 1366 },
-      { id: 'surface-pro-7', label: 'Surface Pro 7', width: 912, height: 1368 },
-      { id: 'surface-duo', label: 'Surface Duo', width: 540, height: 720 },
-      { id: 'galaxy-z-fold-5', label: 'Galaxy Z Fold 5', width: 344, height: 882 },
-      { id: 'asus-zenbook-fold', label: 'Asus Zenbook Fold', width: 853, height: 1280 },
-      { id: 'samsung-galaxy-a51-71', label: 'Samsung Galaxy A51/71', width: 412, height: 914 },
-      { id: 'nest-hub', label: 'Nest Hub', width: 1024, height: 600 },
-      { id: 'nest-hub-max', label: 'Nest Hub Max', width: 1280, height: 800 },
-      { id: 'hd-720p', label: 'HD 720p', width: 1280, height: 720 },
-      { id: 'full-hd-1080p', label: 'Full HD 1080p', width: 1920, height: 1080 },
-    ];
-  } else {
-    const newScreens = screenResolutions.filter((obj) => obj.id !== 'responsive');
-    screenResolutions = [
-      { id: 'responsive', label: 'Responsive', width: 1376, height: 570 },
-      ...newScreens,
-    ];
-  }
+  const [screens, setScreens] = useState(screenResolutions);
+  const [responsiveState, setResponsiveState] = useState({
+    showResplayout: false,
+    showRotateOption: false,
+  });
+
+  useEffect(() => {
+    if (screenResolutions.length === 0) {
+      screenResolutions = [
+        { id: 'responsive', label: 'Responsive', width: 1376, height: 570 },
+        { id: 'iphone-se', label: 'iPhone SE', width: 375, height: 667 },
+        { id: 'iphone-xr', label: 'iPhone XR', width: 414, height: 896 },
+        { id: 'iphone-12-pro', label: 'iPhone 12 Pro', width: 390, height: 844 },
+        { id: 'iphone-14-pro-max', label: 'iPhone 14 Pro Max', width: 430, height: 932 },
+        { id: 'pixel-7', label: 'Pixel 7', width: 412, height: 915 },
+        { id: 'samsung-galaxy-s8-plus', label: 'Samsung Galaxy S8+', width: 360, height: 740 },
+        { id: 'samsung-s20-ultra', label: 'Samsung Galaxy S20 Ultra', width: 412, height: 915 },
+        { id: 'ipad-mini', label: 'iPad Mini', width: 768, height: 1024 },
+        { id: 'ipad-air', label: 'iPad Air', width: 820, height: 1180 },
+        { id: 'ipad-pro', label: 'iPad Pro', width: 1024, height: 1366 },
+        { id: 'surface-pro-7', label: 'Surface Pro 7', width: 912, height: 1368 },
+        { id: 'surface-duo', label: 'Surface Duo', width: 540, height: 720 },
+        { id: 'galaxy-z-fold-5', label: 'Galaxy Z Fold 5', width: 344, height: 882 },
+        { id: 'asus-zenbook-fold', label: 'Asus Zenbook Fold', width: 853, height: 1280 },
+        { id: 'samsung-galaxy-a51-71', label: 'Samsung Galaxy A51/71', width: 412, height: 914 },
+        { id: 'nest-hub', label: 'Nest Hub', width: 1024, height: 600 },
+        { id: 'nest-hub-max', label: 'Nest Hub Max', width: 1280, height: 800 },
+        { id: 'hd-720p', label: 'HD 720p', width: 1280, height: 720 },
+        { id: 'full-hd-1080p', label: 'Full HD 1080p', width: 1920, height: 1080 },
+      ];
+      setScreens(screenResolutions.map((r) => ({ ...r, enabled: true, isNew: false })));
+    } else {
+      const newScreens = screenResolutions.filter((obj) => obj.id !== 'responsive');
+      screenResolutions = [
+        { id: 'responsive', label: 'Responsive', width: 1376, height: 570 },
+        ...newScreens,
+      ];
+      setScreens(screenResolutions.map((r) => ({ ...r, enabled: true, isNew: false })));
+    }
+  }, [screenResolutions]);
 
   // Drag and Drop state
   const [activeId, setActiveId] = useState(null);
@@ -572,7 +582,6 @@ const FormBuilder = ({
     borderColor: 'divider',
     display: 'flex',
     gap: 2,
-    boxShadow: '0 -2px 10px rgba(0,0,0,0.1)',
     position: 'sticky',
     bottom: 0,
     zIndex: 10,
@@ -626,6 +635,17 @@ const FormBuilder = ({
     }
   }, [showFormPreview]);
 
+  const screenChanged = (data) => {
+    const responsiveData = data.rows
+      .filter((item) => item.label !== '' && item.width !== '' && item.height !== '')
+      .map((item) => {
+        item.isNew = false;
+        return item;
+      });
+    setScreens(responsiveData);
+    setResponsiveState(data.layout);
+  };
+
   return (
     <DndContext
       sensors={sensors}
@@ -652,7 +672,10 @@ const FormBuilder = ({
                 loadedSchemaId={loadedSchemaId}
                 visibleFields={visibleFields}
                 onVisibleFieldsChange={setVisibleFields}
-              />{' '}
+                screenResolutions={screens}
+                onScreenChanged={screenChanged}
+                responsiveState={responsiveState}
+              />
             </Box>
 
             {/* Center Content - Toggle between Form Structure and Form Preview */}
@@ -685,7 +708,8 @@ const FormBuilder = ({
                       setShowSchemaEditor={setShowSchemaEditor}
                       exportForm={exportForm}
                       currencyIcon={currencyIcon}
-                      screenResolutions={screenResolutions}
+                      screenResolutions={screens}
+                      responsiveState={responsiveState}
                     />
                   ) : (
                     /* Form Structure Mode */

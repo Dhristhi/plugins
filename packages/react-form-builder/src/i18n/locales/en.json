@@ -245,8 +245,8 @@
     "operator": "Operator",
     "value": "Value"
   },
-  "enableInteger": "Enable Integer",
-  "useAsCurrency": "Use as Currency",
+  "acceptInteger": "Allow numbers without decimals",
+  "useAsCurrencyPrefix": "Use as Currency Prefix",
   "settings": "Settings",
   "fieldVisibility": "Field Visibility",
   "Array": {
@@ -255,5 +255,9 @@
     "deleteDialogAccept": "Delete",
     "deleteDialogDecline": "Cancel"
   },
-  "rules": "Rules"
+  "rules": "Rules",
+  "responsiveScreens": "Screen Resolutions",
+  "showResponsiveLayout": "Show Responsive Toolbar",
+  "showRotateOption": "Show Rotate Option",
+  "responsiveUi": "Responsive UI"
 }

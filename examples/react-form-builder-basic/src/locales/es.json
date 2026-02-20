@@ -243,8 +243,8 @@
     "operator": "Operador",
     "value": "Valor"
   },
-  "enableInteger": "Habilitar entero",
-  "useAsCurrency": "Usar como moneda",
+  "acceptInteger": "Permitir números sin decimales",
+  "useAsCurrencyPrefix": "Utilizar como prefijo de moneda",
   "settings": "Configuración",
   "fieldVisibility": "Visibilidad de Campos",
   "Array": {
@@ -253,5 +253,8 @@
     "deleteDialogAccept": "Eliminar",
     "deleteDialogDecline": "Cancelar"
   },
-  "rules": "Reglas"
+  "rules": "Reglas",
+  "showResponsiveLayout": "Mostrar barra de herramientas adaptable",
+  "showRotateOption": "Mostrar opción de rotación",
+  "responsiveUi": "Interfaz adaptable"
 }
