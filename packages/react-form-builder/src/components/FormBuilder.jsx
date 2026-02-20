@@ -65,8 +65,8 @@ const FormBuilder = ({
   const [toolbarVisibility, setToolbarVisibility] = useState({});
   const [screens, setScreens] = useState(screenResolutions);
   const [responsiveState, setResponsiveState] = useState({
-    showResplayout: false,
-    showRotateOption: false,
+    showResplayout: true,
+    showRotateOption: true,
   });
 
   useEffect(() => {

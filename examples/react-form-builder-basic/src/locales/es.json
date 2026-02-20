@@ -148,7 +148,7 @@
   "uploading": "Subiendo...",
   "dragAndDropOrClick": "Arrastra y suelta o haz clic para seleccionar",
   "fileUploadSuccess": "¡Archivo subido correctamente!",
-  "clickToChangeFile": "Haz clic para cambiar el archivo",
+  "clickToChangeFile": "Haz clic para agregar archivo",
   "showMore": "Ver más",
   "showLess": "Ver menos",
 
@@ -254,6 +254,7 @@
     "deleteDialogDecline": "Cancelar"
   },
   "rules": "Reglas",
+  "clear": "Limpiar",
   "responsiveScreens": "Resoluciones de pantalla",
   "showResponsiveLayout": "Mostrar barra de herramientas adaptable",
   "showRotateOption": "Mostrar opción de rotación",
