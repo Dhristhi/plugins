@@ -253,5 +253,6 @@
     "deleteDialogAccept": "Eliminar",
     "deleteDialogDecline": "Cancelar"
   },
-  "rules": "Reglas"
+  "rules": "Reglas",
+  "clear": "Limpiar"
 }

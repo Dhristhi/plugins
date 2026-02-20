@@ -157,7 +157,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
 
   const removeRow = (index) => {
     const updated = rows.filter((_, i) => i !== index);
-    // setRows(updated);
     setRows(() => {
       const next = updated;
       handleUpdate({ visibility: next });
@@ -199,7 +198,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
     onFieldUpdate(updatedField);
   };
 
-  // Helper function to find parent array field
   const findParentArrayField = (fieldId, fieldsArray, parentField = null) => {
     for (const f of fieldsArray) {
       if (f.id === fieldId) {
@@ -213,7 +211,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
     return null;
   };
 
-  // Helper function to update elementLabelProp in parent array
   const updateParentArrayElementLabel = (arrayField, newElementLabelProp) => {
     const updatedArrayField = {
       ...arrayField,
@@ -225,11 +222,9 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
         },
       },
     };
-    // Update fields directly without changing selected field
     setFields((prev) => updateFieldById(prev, updatedArrayField));
   };
 
-  // Helper function to clear elementLabelProp from other fields in the same array
   const clearElementLabelFromSiblings = (arrayField, currentFieldKey) => {
     if (!arrayField?.children) return;
 
@@ -240,7 +235,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
             ...child,
             isElementLabel: false,
           };
-          // Update fields directly without changing selected field
           setFields((prev) => updateFieldById(prev, updatedChild));
           return updatedChild;
         }
@@ -264,7 +258,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
     );
   }, [localField?.schema?.default]);
 
-  // Helper function to convert value based on enum data type
   const convertEnumValue = (value, type) => {
     switch (type) {
       case 'number':
@@ -276,7 +269,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
 
   useEffect(() => {
     if (field && fields) {
-      // Check if field is inside an array of objects
       const parentArray = findParentArrayField(field.id, fields);
       setIsInsideArrayOfObjects(!!parentArray);
       setParentArrayField(parentArray);
@@ -310,7 +302,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
         setIsMultiCheckbox(true);
       }
 
-      // Ensure date fields have default dateTimeFormat in UI schema
       if (
         (field.schema?.format === 'date' ||
           field.schema?.format === 'datetime' ||
@@ -334,7 +325,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
         };
       }
 
-      // Ensure date range fields have default dateTimeFormat
       if (
         field.schema?.type === 'object' &&
         field.schema?.properties?.startDate &&
@@ -354,7 +344,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
         };
       }
 
-      // Detect file upload fields and correct their type for display
       if (
         updatedField.schema?.format === 'data-url' ||
         (updatedField.uischema?.options && updatedField.uischema.options['ui:widget'] === 'file')
@@ -370,7 +359,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
       }
       if (field.schema.enum) {
         setEnumOptions([...field.schema.enum]);
-        // Detect enum data type from first value
         const firstValue = field.schema.enum[0];
         if (typeof firstValue === 'number') {
           setEnumDataType('number');
@@ -379,7 +367,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
         }
       } else if (field.schema.items?.enum) {
         setEnumOptions([...field.schema.items.enum]);
-        // Detect enum data type from first value
         const firstValue = field.schema.items.enum[0];
         if (typeof firstValue === 'number') {
           setEnumDataType('number');
@@ -491,7 +478,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
         },
       };
 
-      // Update isInteger state and key when switching between number and integer
       if (newTypeId === 'integer') {
         setIsInteger(true);
         const newKey = convertFieldKey(true, localField.key);
@@ -506,7 +492,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
         updatedField.uischema.scope = `#/properties/${newKey}`;
       }
 
-      // Preserve enum options and uischema options
       if (
         hasEnumOptions &&
         ['select', 'radio', 'multiselect', 'multicheckbox'].includes(newTypeId)
@@ -517,7 +502,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
             enum: enumOptions,
           };
           delete updatedField.schema.enum;
-          // Preserve existing uischema options for multiselect
           if (localField.uischema?.options) {
             updatedField.uischema.options = {
               ...updatedField.uischema.options,
@@ -527,7 +511,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
           }
         } else {
           updatedField.schema.enum = enumOptions;
-          // Set format for radio
           if (newTypeId === 'radio') {
             updatedField.uischema.options = {
               ...updatedField.uischema.options,
@@ -539,7 +522,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
       setLocalField(updatedField);
       onFieldUpdate(updatedField);
 
-      // Update enum options state for new type
       if (newFieldType.schema.enum) {
         setEnumOptions([...newFieldType.schema.enum]);
       } else if (newFieldType.schema.items?.enum) {
@@ -561,38 +543,32 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
           ? 'boolean'
           : localField.schema?.type;
 
-    // Check if this is a date range field
     const isDateRange =
       localField.schema?.type === 'object' &&
       localField.schema?.properties?.startDate &&
       localField.schema?.properties?.endDate;
 
-    // File upload fields should show file type option
     if (localField.type === 'file') {
       return availableFieldTypes.filter((ft) => ft.id === 'file');
     }
 
-    // Array fields with enum items (multiselect) can switch between multiselect types and array
     if (currentSchemaType === 'array' && localField.schema?.items?.enum) {
       return availableFieldTypes.filter(
         (ft) => ft.id === 'multiselect' || ft.id === 'multicheckbox' || ft.id === 'array'
       );
     }
 
-    // Array fields without enum can switch between array and multiselect types
     if (currentSchemaType === 'array' && localField.type !== 'file') {
       return availableFieldTypes.filter(
         (ft) => ft.id === 'array' || ft.id === 'multiselect' || ft.id === 'multicheckbox'
       );
     }
 
-    // Date range fields should show date type option
     if (isDateRange) {
       return availableFieldTypes.filter((ft) => ft.id === 'date');
     }
 
     return availableFieldTypes.filter((ft) => {
-      // Don't allow converting to array types from other types
       if (ft.id === 'array' || ft.id === 'multiselect' || ft.id === 'multicheckbox') return false;
 
       const targetSchemaType = ft.schema?.type;
@@ -600,7 +576,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
         if (targetSchemaType === 'number' || targetSchemaType === 'integer') return true;
       }
 
-      // Allow switching within same schema type
       if (currentSchemaType === targetSchemaType) {
         return true;
       }
@@ -612,12 +587,10 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
   const availableFieldTypes = defaultFieldTypes.filter((ft) => {
     if (ft.isLayout) return false;
 
-    // multiselect should depend on select field visibility
     if (ft.id === 'multiselect') {
       return visibleFields[ft.id] !== false && visibleFields['select'] !== false;
     }
 
-    // multicheckbox should depend on checkbox field visibility
     if (ft.id === 'multicheckbox') {
       return visibleFields[ft.id] !== false && visibleFields['checkbox'] !== false;
     }
@@ -669,7 +642,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
 
   const layoutSelectRuleSx = {
     borderRadius: 2,
-    //width: 110,
     fontSize: 13,
   };
 
@@ -758,12 +730,10 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
 
     function traverse(items) {
       for (const item of items) {
-        // Add current item's id and label
         if (!item.isLayout) {
           result.push(item);
         }
 
-        // If it has children, recursively traverse them
         if (item.children && Array.isArray(item.children)) {
           traverse(item.children);
         }
@@ -885,7 +855,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                       let type = '';
                       delete updatedSchema.default;
                       if (isMulti) {
-                        // Convert to multi-select
                         type = 'multiselect';
                         updatedSchema.type = 'array';
                         updatedSchema.items = {
@@ -904,7 +873,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                           },
                         };
                       } else {
-                        // Convert to single select
                         type = 'select';
                         updatedSchema.type = 'string';
                         updatedSchema.enum = enumOptions;
@@ -1025,13 +993,11 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                           format: 'checkbox',
                           displayType: 'checkbox',
                         };
-                        // Initialize enum options if not already set
                         if (enumOptions.length === 0) {
                           setEnumOptions(defaultEnumOptions);
                         }
                       } else {
                         type = 'checkbox';
-                        // Convert to single checkbox (boolean)
                         updatedSchema.type = 'boolean';
                         delete updatedSchema.items;
                         delete updatedSchema.uniqueItems;
@@ -1151,7 +1117,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                       };
 
                       if (e.target.checked) {
-                        // Clear all validation rules when readonly is enabled
                         const clearedSchema = {
                           ...localField.schema,
                           required: undefined,
@@ -1247,7 +1212,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                           options: { ...localField.uischema?.options },
                         };
 
-                        // Reset values
                         updatedSchema.default = undefined;
                         updatedSchema.formatMinimum = undefined;
                         updatedSchema.formatMaximum = undefined;
@@ -1255,7 +1219,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                         delete updatedSchema.maximum;
 
                         if (type === 'date') {
-                          // Simple date
                           updatedSchema.type = 'string';
                           updatedSchema.format = 'date';
                           updatedUISchema.options.includeTime = false;
@@ -1264,7 +1227,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                           delete updatedSchema.properties;
                           delete updatedSchema.items;
                         } else if (type === 'datetime') {
-                          // Date with time
                           updatedSchema.type = 'string';
                           updatedSchema.format = 'date-time';
                           updatedUISchema.options.includeTime = true;
@@ -1273,7 +1235,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                           delete updatedSchema.properties;
                           delete updatedSchema.items;
                         } else if (type === 'range') {
-                          // Date range
                           updatedSchema.type = 'object';
                           updatedSchema.properties = {
                             startDate: {
@@ -1703,7 +1664,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                   onBlur={(e) => {
                     let defaultValue = e.target.value;
 
-                    // Convert to appropriate type
                     if (localField.type === 'number' || localField.type === 'integer') {
                       defaultValue = defaultValue ? Number(defaultValue) : undefined;
                       handleSchemaUpdate({ default: defaultValue });
@@ -1735,18 +1695,62 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                 <FormControl fullWidth margin="normal">
                   <InputLabel>{t('defaultValue')}</InputLabel>
                   <Select
-                    value={localField.schema?.default || []}
+                    value={
+                      localField.schema?.default !== undefined && localField.schema.default !== null
+                        ? localField.schema.default
+                        : localField.type === 'multiselect' || localField.type === 'multicheckbox'
+                          ? []
+                          : '__CLEAR__'
+                    }
                     multiple={
                       localField.type === 'multiselect' || localField.type === 'multicheckbox'
                     }
                     label={t('defaultValue')}
                     onChange={(e) => {
-                      handleSchemaUpdate({
-                        default: e.target.value,
-                      });
+                      const newValue = e.target.value;
+                      if (
+                        !(
+                          localField.type === 'multiselect' || localField.type === 'multicheckbox'
+                        ) &&
+                        newValue === '__CLEAR__'
+                      ) {
+                        handleSchemaUpdate({
+                          default: undefined,
+                        });
+                      } else {
+                        handleSchemaUpdate({
+                          default: newValue,
+                        });
+                      }
                     }}
                     sx={layoutSelectSx}
+                    renderValue={(selected) => {
+                      if (
+                        localField.type === 'multiselect' ||
+                        localField.type === 'multicheckbox'
+                      ) {
+                        return Array.isArray(selected) && selected.length > 0
+                          ? selected.join(', ')
+                          : '';
+                      }
+                      if (
+                        selected === '__CLEAR__' ||
+                        selected === '' ||
+                        selected === null ||
+                        selected === undefined
+                      ) {
+                        return '';
+                      }
+                      return selected;
+                    }}
                   >
+                    {!(
+                      localField.type === 'multiselect' || localField.type === 'multicheckbox'
+                    ) && (
+                      <MenuItem value="__CLEAR__">
+                        <em style={{ fontStyle: 'italic', color: '#999' }}>— {t('clear')}</em>
+                      </MenuItem>
+                    )}
                     {getEnumData(localField).map((opt) => (
                       <MenuItem key={opt} value={opt}>
                         {opt}
@@ -1767,7 +1771,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                       let updatedSchema = { ...localField.schema };
 
                       if (itemType === 'object') {
-                        // For objects, set up the structure with detail layout
                         updatedSchema.items = {
                           type: 'object',
                           properties: {},
@@ -1789,7 +1792,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                           uischema: updatedUISchema,
                         });
                       } else {
-                        // For primitive types (string/number), remove object-specific properties
                         updatedSchema.items = { type: itemType };
 
                         const updatedUISchema = {
@@ -1958,19 +1960,14 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                         const isChecked = e.target.checked;
 
                         if (isChecked && parentArrayField) {
-                          // Clear element label from other fields in the same array
                           clearElementLabelFromSiblings(parentArrayField, localField.key);
 
-                          // Set this field as element label
                           handleUpdate({ isElementLabel: true });
 
-                          // Update parent array's elementLabelProp
                           updateParentArrayElementLabel(parentArrayField, localField.key);
                         } else {
-                          // Remove element label from this field
                           handleUpdate({ isElementLabel: false });
 
-                          // Clear elementLabelProp from parent array if this was the selected field
                           if (
                             parentArrayField?.uischema?.options?.elementLabelProp === localField.key
                           ) {
@@ -2176,14 +2173,12 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                             const newType = e.target.value;
                             setEnumDataType(newType);
 
-                            // Reset to default options based on type
                             const defaultOptions =
                               newType === 'number'
                                 ? [1, 2, 3]
                                 : ['Option 1', 'Option 2', 'Option 3'];
                             setEnumOptions(defaultOptions);
                             setDefaultInput('');
-                            // Update schema with default options
                             if (localField.schema?.type === 'array' && localField.schema?.items) {
                               handleSchemaUpdate({
                                 default: undefined,
@@ -2453,10 +2448,8 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                           if (dateValue) {
                             const includeTime = localField.uischema?.options?.includeTime;
                             if (includeTime) {
-                              // Keep datetime in local timezone format (YYYY-MM-DDTHH:mm:ss)
                               dateValue = dateValue + ':00';
                             } else {
-                              // Ensure date-only format (YYYY-MM-DD)
                               dateValue = dateValue.split('T')[0];
                             }
                           } else {
@@ -2465,7 +2458,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
 
                           handleSchemaUpdate({ formatMinimum: dateValue });
 
-                          // Clear default if it's now invalid
                           const currentDefault = localField.schema?.default;
                           if (
                             currentDefault &&
@@ -2552,10 +2544,8 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                           if (dateValue) {
                             const includeTime = localField.uischema?.options?.includeTime;
                             if (includeTime) {
-                              // Keep datetime in local timezone format (YYYY-MM-DDTHH:mm:ss)
                               dateValue = dateValue + ':00';
                             } else {
-                              // Ensure date-only format (YYYY-MM-DD)
                               dateValue = dateValue.split('T')[0];
                             }
                           } else {
@@ -2564,7 +2554,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
 
                           handleSchemaUpdate({ formatMaximum: dateValue });
 
-                          // Clear default if it's now invalid
                           const currentDefault = localField.schema?.default;
                           if (
                             currentDefault &&
@@ -2666,7 +2655,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                               },
                             };
 
-                            // Clear defaults if they become invalid
                             const defaultStartDate =
                               localField.schema?.properties?.startDate?.default;
                             const defaultEndDate = localField.schema?.properties?.endDate?.default;
@@ -2772,7 +2760,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                               },
                             };
 
-                            // Clear defaults if they become invalid
                             const defaultStartDate =
                               localField.schema?.properties?.startDate?.default;
                             const defaultEndDate = localField.schema?.properties?.endDate?.default;
@@ -2955,8 +2942,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                     checked={localField.parentVisibility || false}
                     onChange={(e) => {
                       setDependentState(e.target.checked);
-
-                      // handleUpdate({ uischema: updatedUISchema });
                     }}
                     color="primary"
                   />
@@ -3012,10 +2997,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                               size="small"
                               label={t('conditionalLogic.field')}
                               value={row.dependsOn || ''}
-                              onChange={
-                                (e) => updateCondition(index, 'dependsOn', e.target.value)
-                                // updateCurrentSelection(e.target.value)
-                              }
+                              onChange={(e) => updateCondition(index, 'dependsOn', e.target.value)}
                               sx={layoutSelectRuleSx}
                             >
                               {filteredFields
