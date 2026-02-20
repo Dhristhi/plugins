@@ -72,8 +72,27 @@ const CustomSelectControl = (props) => {
       const response = await fetch(entity);
       const json = await response.json();
       setIsLoading(false);
-      // Handle nested data structure (e.g., {data: [...]} or direct array)
-      return Array.isArray(json) ? json : json.data || [];
+
+      // If response is already an array, return it
+      if (Array.isArray(json)) {
+        return json;
+      }
+
+      // Recursively find first array in nested object
+      const findArray = (obj) => {
+        for (const key in obj) {
+          if (Array.isArray(obj[key])) {
+            return obj[key];
+          }
+          if (obj[key] && typeof obj[key] === 'object') {
+            const result = findArray(obj[key]);
+            if (result) return result;
+          }
+        }
+        return null;
+      };
+
+      return findArray(json) || [];
     } catch (error) {
       console.error('API call failed:', error);
       setIsLoading(false);
