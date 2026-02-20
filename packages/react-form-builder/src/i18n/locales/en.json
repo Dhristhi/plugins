@@ -256,6 +256,7 @@
     "deleteDialogDecline": "Cancel"
   },
   "rules": "Rules",
+  "clear": "Clear",
   "responsiveScreens": "Screen Resolutions",
   "showResponsiveLayout": "Show Responsive Toolbar",
   "showRotateOption": "Show Rotate Option",
