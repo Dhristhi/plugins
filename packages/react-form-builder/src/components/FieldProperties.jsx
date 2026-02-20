@@ -1126,7 +1126,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
           </Box>
         </AccordionDetails>
       </Accordion>
-
       {/* Display Options */}
       {!isLayout && !isGroup && (
         <Accordion sx={accordionSx}>

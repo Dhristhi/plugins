@@ -259,5 +259,11 @@
   "responsiveScreens": "Screen Resolutions",
   "showResponsiveLayout": "Show Responsive Toolbar",
   "showRotateOption": "Show Rotate Option",
-  "responsiveUi": "Responsive UI"
+  "responsiveUi": "Responsive UI",
+  "featureToggles": "Feature Toggles",
+  "showFormPreview": "Show Form Preview",
+  "showSchema": "Show Schema",
+  "showFullscreen": "Show Fullscreen",
+  "showValidate": "Show Validate",
+  "addResolution": "Add Resolution"
 }
