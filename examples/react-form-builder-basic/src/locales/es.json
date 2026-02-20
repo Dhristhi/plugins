@@ -258,7 +258,7 @@
   "showResponsiveLayout": "Mostrar barra de herramientas adaptable",
   "showRotateOption": "Mostrar opción de rotación",
   "responsiveUi": "Interfaz adaptable",
-  "toolbarOptions": "Opciones de barra de herramientas",
+  "featureToggles": "Alternar funciones",
   "showFormPreview": "Mostrar vista previa del formulario",
   "showSchema": "Mostrar esquema",
   "showFullscreen": "Mostrar pantalla completa",

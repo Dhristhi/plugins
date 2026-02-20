@@ -260,7 +260,7 @@
   "showResponsiveLayout": "Show Responsive Toolbar",
   "showRotateOption": "Show Rotate Option",
   "responsiveUi": "Responsive UI",
-  "toolbarOptions": "Toolbar Options",
+  "featureToggles": "Feature Toggles",
   "showFormPreview": "Show Form Preview",
   "showSchema": "Show Schema",
   "showFullscreen": "Show Fullscreen",

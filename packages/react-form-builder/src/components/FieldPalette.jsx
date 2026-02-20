@@ -886,7 +886,7 @@ const FieldPalette = ({
               <Accordion defaultExpanded sx={accordionSx}>
                 <AccordionSummary expandIcon={<IconChevronDown />} sx={accordionSummarySx}>
                   <Typography variant="subtitle1" fontWeight={600}>
-                    {t('toolbarOptions')}
+                    {t('featureToggles')}
                   </Typography>
                 </AccordionSummary>
                 <AccordionDetails>
