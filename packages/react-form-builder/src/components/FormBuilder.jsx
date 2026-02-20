@@ -502,7 +502,7 @@ const FormBuilder = ({
     borderRight: { md: 1 },
     borderColor: { md: 'grey.200' },
     borderBottom: { xs: 1, md: 'none' },
-    display: showFormPreview ? 'none' : 'flex',
+    display: showFormPreview || showSchemaEditor ? 'none' : 'flex',
     flexDirection: 'column',
     overflow: 'auto',
     boxShadow: { md: 1 },
