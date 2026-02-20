@@ -148,7 +148,7 @@
   "uploading": "Subiendo...",
   "dragAndDropOrClick": "Arrastra y suelta o haz clic para seleccionar",
   "fileUploadSuccess": "¡Archivo subido correctamente!",
-  "clickToChangeFile": "Haz clic para cambiar el archivo",
+  "clickToChangeFile": "Haz clic para agregar archivo",
   "showMore": "Ver más",
   "showLess": "Ver menos",
 
@@ -243,7 +243,7 @@
     "operator": "Operador",
     "value": "Valor"
   },
-  "acceptInteger": "Aceptar número entero",
+  "acceptInteger": "Permitir números sin decimales",
   "useAsCurrencyPrefix": "Utilizar como prefijo de moneda",
   "settings": "Configuración",
   "fieldVisibility": "Visibilidad de Campos",
@@ -253,5 +253,16 @@
     "deleteDialogAccept": "Eliminar",
     "deleteDialogDecline": "Cancelar"
   },
-  "rules": "Reglas"
+  "rules": "Reglas",
+  "clear": "Limpiar",
+  "responsiveScreens": "Resoluciones de pantalla",
+  "showResponsiveLayout": "Mostrar barra de herramientas adaptable",
+  "showRotateOption": "Mostrar opción de rotación",
+  "responsiveUi": "Interfaz adaptable",
+  "featureToggles": "Alternar funciones",
+  "showFormPreview": "Mostrar vista previa del formulario",
+  "showSchema": "Mostrar esquema",
+  "showFullscreen": "Mostrar pantalla completa",
+  "showValidate": "Mostrar validar",
+  "addResolution": "Añadir resolución"
 }

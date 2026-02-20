@@ -262,7 +262,7 @@ export const defaultFieldTypes = [
     type: 'array',
     labelKey: 'fieldType_multiselect',
     translationKey: 'fieldType_multiselect',
-    label: 'Multi-Select',
+    label: 'Multi Select',
     icon: IconChevronDown,
     schema: {
       type: 'array',

@@ -64,8 +64,8 @@
   "allowedFileTypes": "Allowed File Types",
   "selectFileTypes": "Select file types",
   "enumValues": "Enum Values",
-  "enableMultiSelect": "Enable Multi-Select",
-  "enableMultiCheckbox": "Enable Multi-Checkbox",
+  "enableMultiSelect": "Enable Multi Select",
+  "enableMultiCheckbox": "Enable Multi Checkbox",
   "enableTextarea": "Enable Textarea",
   "useDynamicData": "Use Dynamic Data",
   "apiEntity": "API Entity",
@@ -128,7 +128,7 @@
   "fieldType_checkbox": "Checkbox",
   "fieldType_multicheckbox": "Multi Checkbox",
   "fieldType_select": "Select",
-  "fieldType_multiselect": "Multi-Select",
+  "fieldType_multiselect": "Multi Select",
   "fieldType_radio": "Radio Buttons",
   "fieldType_object": "Object",
   "fieldType_array": "Array",
@@ -149,7 +149,7 @@
   "dragAndDropOrClick": "Drag and drop or click to select",
   "fileUploadSuccess": "File uploaded successfully!",
   "download": "Download",
-  "clickToChangeFile": "Click to change file",
+  "clickToChangeFile": "Click to add file",
   "showMore": "Show more",
   "showLess": "Show less",
 
@@ -246,7 +246,7 @@
     "operator": "Operator",
     "value": "Value"
   },
-  "acceptInteger": "Accept Whole Number",
+  "acceptInteger": "Allow numbers without decimals",
   "useAsCurrencyPrefix": "Use as Currency Prefix",
   "settings": "Settings",
   "fieldVisibility": "Field Visibility",
@@ -256,5 +256,16 @@
     "deleteDialogAccept": "Delete",
     "deleteDialogDecline": "Cancel"
   },
-  "rules": "Rules"
+  "rules": "Rules",
+  "clear": "Clear",
+  "responsiveScreens": "Screen Resolutions",
+  "showResponsiveLayout": "Show Responsive Toolbar",
+  "showRotateOption": "Show Rotate Option",
+  "responsiveUi": "Responsive UI",
+  "featureToggles": "Feature Toggles",
+  "showFormPreview": "Show Form Preview",
+  "showSchema": "Show Schema",
+  "showFullscreen": "Show Fullscreen",
+  "showValidate": "Show Validate",
+  "addResolution": "Add Resolution"
 }
