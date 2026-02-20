@@ -703,7 +703,7 @@ const FieldPalette = ({
                   </Box>
                 </AccordionDetails>
               </Accordion>
-              <Accordion defaultExpanded sx={accordionSx}>
+              <Accordion sx={accordionSx}>
                 <AccordionSummary expandIcon={<IconChevronDown />} sx={accordionSummarySx}>
                   <Typography variant="subtitle1" fontWeight={600}>
                     {t('responsiveUi')}
@@ -891,7 +891,7 @@ const FieldPalette = ({
                   </Box>
                 </AccordionDetails>
               </Accordion>
-              <Accordion defaultExpanded sx={accordionSx}>
+              <Accordion sx={accordionSx}>
                 <AccordionSummary expandIcon={<IconChevronDown />} sx={accordionSummarySx}>
                   <Typography variant="subtitle1" fontWeight={600}>
                     {t('featureToggles')}
