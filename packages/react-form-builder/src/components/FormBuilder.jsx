@@ -637,11 +637,13 @@ const FormBuilder = ({
   }, [showFormPreview]);
 
   const screenChanged = (data) => {
-    console.log('data', data);
-    data.rows.map((item) => {
-      item.isNew = false;
-    });
-    setScreens(data.rows);
+    const responsiveData = data.rows
+      .filter((item) => item.label !== '' && item.width !== '' && item.height !== '')
+      .map((item) => {
+        item.isNew = false;
+        return item;
+      });
+    setScreens(responsiveData);
     setResponsiveState(data.layout);
   };
 

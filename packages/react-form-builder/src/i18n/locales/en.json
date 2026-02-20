@@ -245,7 +245,7 @@
     "operator": "Operator",
     "value": "Value"
   },
-  "acceptInteger": "Accept Whole Number",
+  "acceptInteger": "Allow numbers without decimals",
   "useAsCurrencyPrefix": "Use as Currency Prefix",
   "settings": "Settings",
   "fieldVisibility": "Field Visibility",
