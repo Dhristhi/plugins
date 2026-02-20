@@ -23,6 +23,21 @@ import { updateNestedValue } from '../utils';
 // Extract MaterialEnumControl from Unwrapped
 const { MaterialEnumControl } = Unwrapped;
 
+// Helper function to get nested property value using dot notation
+const getNestedProperty = (obj, path) => {
+  if (!path) return obj;
+  return path.split('.').reduce((acc, part) => acc?.[part], obj);
+};
+
+// Smart property getter: tries dot notation first, then auto-detection
+const getProperty = (obj, path) => {
+  if (!path) return obj;
+
+  // Try dot notation first
+  const dotNotationResult = getNestedProperty(obj, path);
+  if (dotNotationResult !== undefined) return dotNotationResult;
+};
+
 const CustomSelectControl = (props) => {
   const { t } = useTranslation();
   const { core } = useJsonForms();
@@ -72,8 +87,8 @@ const CustomSelectControl = (props) => {
         const res = await apiCall(entity);
         if (res.length > 0) {
           const newOptions = res.map((item) => ({
-            label: value ? String(item[value]) : String(item),
-            value: key ? item[key] : item,
+            label: value ? String(getProperty(item, value)) : String(item),
+            value: key ? getProperty(item, key) : item,
             raw: item,
           }));
           setOptions(newOptions);

@@ -582,7 +582,6 @@ const FormBuilder = ({
     borderColor: 'divider',
     display: 'flex',
     gap: 2,
-    boxShadow: '0 -2px 10px rgba(0,0,0,0.1)',
     position: 'sticky',
     bottom: 0,
     zIndex: 10,

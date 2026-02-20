@@ -47,6 +47,10 @@ const FormResponsivePreview = ({
 
     const { clientWidth, clientHeight } = viewportRef.current;
     MAX_WIDTH_BEFORE_SCALE = clientWidth;
+    if (deviceId === 'responsive') {
+      screenResolutions[0].width = clientWidth;
+      screenResolutions[0].height = clientHeight;
+    }
     if (deviceWidth <= MAX_WIDTH_BEFORE_SCALE) {
       setScale(1);
       return;
@@ -61,7 +65,7 @@ const FormResponsivePreview = ({
     flexDirection: 'column',
     alignItems: 'center',
     p: 2,
-    height: 650,
+    height: '100vh',
   };
 
   const viewportSx = {
@@ -70,7 +74,7 @@ const FormResponsivePreview = ({
     display: 'flex',
     borderRadius: 2,
     overflow: 'hidden',
-    alignItems: 'center',
+    alignItems: 'start',
     justifyContent: 'center',
     borderColor: 'transparent',
   };
