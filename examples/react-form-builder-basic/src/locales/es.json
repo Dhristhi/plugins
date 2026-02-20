@@ -253,5 +253,8 @@
     "deleteDialogAccept": "Eliminar",
     "deleteDialogDecline": "Cancelar"
   },
-  "rules": "Reglas"
+  "rules": "Reglas",
+  "showResponsiveLayout": "Mostrar barra de herramientas adaptable",
+  "showRotateOption": "Mostrar opción de rotación",
+  "responsiveUi": "Interfaz adaptable"
 }
