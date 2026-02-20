@@ -163,7 +163,7 @@ const CustomTextControl = (props) => {
           disabled={isLoading}
           required={required}
           error={errors && errors.length > 0}
-          helperText={errors && errors.length > 0 ? errors[0].message : description || ''}
+          helperText={errors && errors.length > 0 ? errors : description || ''}
           fullWidth
           variant="outlined"
           InputProps={{
