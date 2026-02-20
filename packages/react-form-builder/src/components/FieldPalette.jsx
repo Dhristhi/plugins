@@ -234,11 +234,13 @@ const FieldPalette = ({
   };
 
   const handleSettingsCancel = () => {
+    setIsScreenChanged(false);
     setTempVisibleFields(visibleFields);
     setIsSettingsDrawerOpen(false);
   };
 
   const handleAccordionChange = (panel) => (_, isExpanded) => {
+    setIsScreenChanged(true);
     setExpandedAccordions((prev) => ({
       ...prev,
       [panel]: isExpanded,
@@ -253,6 +255,7 @@ const FieldPalette = ({
   };
 
   const handleLayoutsToggle = () => {
+    setIsScreenChanged(true);
     const allTypes = getFieldTypes();
     const layoutFieldIds = allTypes
       .filter((ft) => ft.isLayout && ft.id !== 'object')
@@ -272,6 +275,7 @@ const FieldPalette = ({
   };
 
   const handleFormFieldsToggle = () => {
+    setIsScreenChanged(true);
     const allTypes = getFieldTypes();
     const formFieldIds = allTypes
       .filter(
