@@ -13,6 +13,7 @@ export const DeviceToolbar = ({
   setIsFullscreen,
   screenResolutions,
   responsiveState,
+  toolbarVisibility = {},
 }) => {
   const isResponsive = selectedId !== 'responsive';
   const { t } = useTranslation();
@@ -70,11 +71,13 @@ export const DeviceToolbar = ({
           </IconButton>
         </Tooltip>
       )}
-      <Tooltip title={isFullscreen ? t('exitFullscreen') : t('fullscreen')}>
-        <IconButton onClick={() => setIsFullscreen(!isFullscreen)}>
-          {isFullscreen ? <IconMinimize /> : <IconMaximize />}
-        </IconButton>
-      </Tooltip>
+      {toolbarVisibility.showFullscreen !== false && (
+        <Tooltip title={isFullscreen ? t('exitFullscreen') : t('fullscreen')}>
+          <IconButton onClick={() => setIsFullscreen(!isFullscreen)}>
+            {isFullscreen ? <IconMinimize /> : <IconMaximize />}
+          </IconButton>
+        </Tooltip>
+      )}
     </Box>
   );
 };

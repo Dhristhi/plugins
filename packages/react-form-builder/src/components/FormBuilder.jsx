@@ -62,6 +62,7 @@ const FormBuilder = ({
   const [confirmDialog, setConfirmDialog] = useState({ open: false, schemaId: null });
   const [loadedSchemaId, setLoadedSchemaId] = useState('');
   const [visibleFields, setVisibleFields] = useState({});
+  const [toolbarVisibility, setToolbarVisibility] = useState({});
   const [screens, setScreens] = useState(screenResolutions);
   const [responsiveState, setResponsiveState] = useState({
     showResplayout: false,
@@ -675,6 +676,8 @@ const FormBuilder = ({
                 screenResolutions={screens}
                 onScreenChanged={screenChanged}
                 responsiveState={responsiveState}
+                toolbarVisibility={toolbarVisibility}
+                onToolbarVisibilityChange={setToolbarVisibility}
               />
             </Box>
 
@@ -691,6 +694,7 @@ const FormBuilder = ({
                   setShowSchemaEditor={setShowSchemaEditor}
                   exportForm={exportForm}
                   onExport={onExport}
+                  toolbarVisibility={toolbarVisibility}
                 />
               )}
 
@@ -710,6 +714,7 @@ const FormBuilder = ({
                       currencyIcon={currencyIcon}
                       screenResolutions={screens}
                       responsiveState={responsiveState}
+                      toolbarVisibility={toolbarVisibility}
                     />
                   ) : (
                     /* Form Structure Mode */
@@ -737,6 +742,7 @@ const FormBuilder = ({
                       hasOriginalSchema={!!loadedSchemaId}
                       onClearAll={handleClearAll}
                       propertiesDrawerOpen={propertiesDrawerOpen}
+                      toolbarVisibility={toolbarVisibility}
                     />
                   )}
                 </Box>

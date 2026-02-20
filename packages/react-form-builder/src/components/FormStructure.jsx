@@ -445,6 +445,7 @@ const FormStructure = ({
   hasOriginalSchema,
   onClearAll,
   propertiesDrawerOpen,
+  toolbarVisibility = {},
 }) => {
   const { t } = useTranslation();
   const moveField = (fieldId, direction, parentId) => {
@@ -551,6 +552,7 @@ const FormStructure = ({
         showSchemaEditor={showSchemaEditor}
         setShowSchemaEditor={setShowSchemaEditor}
         exportForm={exportForm}
+        toolbarVisibility={toolbarVisibility}
       />
 
       <Box sx={nestedBox}>

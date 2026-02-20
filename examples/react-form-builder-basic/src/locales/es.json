@@ -254,7 +254,14 @@
     "deleteDialogDecline": "Cancelar"
   },
   "rules": "Reglas",
+  "responsiveScreens": "Resoluciones de pantalla",
   "showResponsiveLayout": "Mostrar barra de herramientas adaptable",
   "showRotateOption": "Mostrar opción de rotación",
-  "responsiveUi": "Interfaz adaptable"
+  "responsiveUi": "Interfaz adaptable",
+  "featureToggles": "Alternar funciones",
+  "showFormPreview": "Mostrar vista previa del formulario",
+  "showSchema": "Mostrar esquema",
+  "showFullscreen": "Mostrar pantalla completa",
+  "showValidate": "Mostrar validar",
+  "addResolution": "Añadir resolución"
 }
