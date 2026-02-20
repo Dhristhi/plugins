@@ -16,6 +16,7 @@ const FormResponsivePreview = ({
   setIsFullscreen,
   screenResolutions,
   responsiveState,
+  toolbarVisibility = {},
   children,
 }) => {
   const [deviceId, setDeviceId] = useState('responsive');
@@ -172,6 +173,7 @@ const FormResponsivePreview = ({
           setIsFullscreen={setIsFullscreen}
           screenResolutions={screenResolutions}
           responsiveState={responsiveState}
+          toolbarVisibility={toolbarVisibility}
         />
       )}
       <Box sx={viewportSx} ref={viewportRef}>
@@ -194,6 +196,7 @@ const FormPreview = ({
   currencyIcon = '$',
   screenResolutions,
   responsiveState,
+  toolbarVisibility = {},
 }) => {
   const formRef = useRef();
   const userActions = useRef(false);
@@ -581,6 +584,7 @@ const FormPreview = ({
           showSchemaEditor={showSchemaEditor}
           setShowSchemaEditor={setShowSchemaEditor}
           exportForm={exportForm}
+          toolbarVisibility={toolbarVisibility}
         />
       </Box>
       <Box sx={{ p: 2, paddingBottom: '80px' }}>
@@ -591,6 +595,7 @@ const FormPreview = ({
               setIsFullscreen={setIsFullscreen}
               screenResolutions={screenResolutions}
               responsiveState={responsiveState}
+              toolbarVisibility={toolbarVisibility}
             >
               <JsonForms
                 key={key}
@@ -637,13 +642,15 @@ const FormPreview = ({
           </Typography>
         )}
       </Box>
-      {formState.schema.properties && Object.keys(formState.schema.properties).length > 0 && (
-        <Box sx={validateBox}>
-          <Button onClick={toggleValidateButton} variant="contained">
-            {t('validate')}
-          </Button>
-        </Box>
-      )}
+      {formState.schema.properties &&
+        Object.keys(formState.schema.properties).length > 0 &&
+        toolbarVisibility.showValidate !== false && (
+          <Box sx={validateBox}>
+            <Button onClick={toggleValidateButton} variant="contained">
+              {t('validate')}
+            </Button>
+          </Box>
+        )}
     </Box>
   );
 };

@@ -133,11 +133,14 @@ const FieldPalette = ({
   screenResolutions,
   onScreenChanged,
   responsiveState,
+  toolbarVisibility = {},
+  onToolbarVisibilityChange,
 }) => {
   const { t } = useTranslation();
   const [selectedSchema, setSelectedSchema] = useState(loadedSchemaId);
   const [isSettingsDrawerOpen, setIsSettingsDrawerOpen] = useState(false);
   const [tempVisibleFields, setTempVisibleFields] = useState({});
+  const [tempToolbarVisibility, setTempToolbarVisibility] = useState({});
   const [expandedAccordions, setExpandedAccordions] = useState({
     layouts: false,
     formFields: false,
@@ -220,12 +223,16 @@ const FieldPalette = ({
 
   const handleSettingsClick = () => {
     setTempVisibleFields(visibleFields);
+    setTempToolbarVisibility(toolbarVisibility);
     setIsSettingsDrawerOpen(true);
   };
 
   const handleSettingsSave = () => {
     if (onVisibleFieldsChange) {
       onVisibleFieldsChange(tempVisibleFields);
+    }
+    if (onToolbarVisibilityChange) {
+      onToolbarVisibilityChange(tempToolbarVisibility);
     }
     if (hasChanges) {
       onScreenChanged({ rows: rows, layout: resonsiveLayoutState });
@@ -235,6 +242,7 @@ const FieldPalette = ({
 
   const handleSettingsCancel = () => {
     setTempVisibleFields(visibleFields);
+    setTempToolbarVisibility(toolbarVisibility);
     setIsSettingsDrawerOpen(false);
   };
 
@@ -441,8 +449,16 @@ const FieldPalette = ({
   const hasChanges = React.useMemo(() => {
     if (!isSettingsDrawerOpen) return false;
     if (JSON.stringify(tempVisibleFields) !== JSON.stringify(visibleFields)) return true;
+    if (JSON.stringify(tempToolbarVisibility) !== JSON.stringify(toolbarVisibility)) return true;
     if (isScreenChanged) return true;
-  }, [tempVisibleFields, visibleFields, isSettingsDrawerOpen, isScreenChanged]);
+  }, [
+    tempVisibleFields,
+    visibleFields,
+    tempToolbarVisibility,
+    toolbarVisibility,
+    isSettingsDrawerOpen,
+    isScreenChanged,
+  ]);
 
   const [resonsiveLayoutState, setResonsiveLayoutState] = useState(responsiveState || false);
   return (
@@ -714,24 +730,42 @@ const FieldPalette = ({
                             sx={{ mb: 2, display: 'block' }}
                           />
                           {resonsiveLayoutState.showResplayout && (
-                            <FormControlLabel
-                              control={
-                                <Switch
-                                  checked={resonsiveLayoutState.showRotateOption}
-                                  onChange={(e) => {
-                                    const status = e.target.checked;
-                                    setResonsiveLayoutState({
-                                      ...resonsiveLayoutState,
-                                      showRotateOption: status,
-                                    });
-                                    setIsScreenChanged(true);
-                                  }}
-                                  color="primary"
-                                />
-                              }
-                              label={t('showRotateOption')}
-                              sx={{ mb: 2, display: 'block' }}
-                            />
+                            <>
+                              <FormControlLabel
+                                control={
+                                  <Switch
+                                    checked={resonsiveLayoutState.showRotateOption}
+                                    onChange={(e) => {
+                                      const status = e.target.checked;
+                                      setResonsiveLayoutState({
+                                        ...resonsiveLayoutState,
+                                        showRotateOption: status,
+                                      });
+                                      setIsScreenChanged(true);
+                                    }}
+                                    color="primary"
+                                  />
+                                }
+                                label={t('showRotateOption')}
+                                sx={{ mb: 2, display: 'block' }}
+                              />
+                              <FormControlLabel
+                                control={
+                                  <Switch
+                                    checked={tempToolbarVisibility.showFullscreen ?? true}
+                                    onChange={(e) =>
+                                      setTempToolbarVisibility({
+                                        ...tempToolbarVisibility,
+                                        showFullscreen: e.target.checked,
+                                      })
+                                    }
+                                    color="primary"
+                                  />
+                                }
+                                label={t('showFullscreen')}
+                                sx={{ mb: 2, display: 'block' }}
+                              />
+                            </>
                           )}
                         </Box>
                         {resonsiveLayoutState.showResplayout && (
@@ -838,7 +872,7 @@ const FieldPalette = ({
                             ))}
 
                             <Button variant="outlined" onClick={handleAdd}>
-                              Add resolution
+                              {t('addResolution')}
                             </Button>
                           </Box>
                         )}
@@ -846,6 +880,65 @@ const FieldPalette = ({
                     </Accordion>
 
                     {/* Field Controls Accordion */}
+                  </Box>
+                </AccordionDetails>
+              </Accordion>
+              <Accordion defaultExpanded sx={accordionSx}>
+                <AccordionSummary expandIcon={<IconChevronDown />} sx={accordionSummarySx}>
+                  <Typography variant="subtitle1" fontWeight={600}>
+                    {t('toolbarOptions')}
+                  </Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <Box>
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          checked={tempToolbarVisibility.showFormPreview ?? true}
+                          onChange={(e) =>
+                            setTempToolbarVisibility({
+                              ...tempToolbarVisibility,
+                              showFormPreview: e.target.checked,
+                            })
+                          }
+                          color="primary"
+                        />
+                      }
+                      label={t('showFormPreview')}
+                      sx={{ mb: 2, display: 'block' }}
+                    />
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          checked={tempToolbarVisibility.showSchema ?? true}
+                          onChange={(e) =>
+                            setTempToolbarVisibility({
+                              ...tempToolbarVisibility,
+                              showSchema: e.target.checked,
+                            })
+                          }
+                          color="primary"
+                        />
+                      }
+                      label={t('showSchema')}
+                      sx={{ mb: 2, display: 'block' }}
+                    />
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          checked={tempToolbarVisibility.showValidate ?? true}
+                          onChange={(e) =>
+                            setTempToolbarVisibility({
+                              ...tempToolbarVisibility,
+                              showValidate: e.target.checked,
+                            })
+                          }
+                          color="primary"
+                        />
+                      }
+                      label={t('showValidate')}
+                      sx={{ mb: 2, display: 'block' }}
+                    />
                   </Box>
                 </AccordionDetails>
               </Accordion>
