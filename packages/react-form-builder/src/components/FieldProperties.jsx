@@ -1103,65 +1103,68 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
 
           <AccordionDetails>
             <Box>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={localField.uischema?.options?.readonly || false}
-                    onChange={(e) => {
-                      const updatedUISchema = {
-                        ...localField.uischema,
-                        options: {
-                          ...localField.uischema?.options,
-                          readonly: e.target.checked,
-                        },
-                      };
-
-                      if (e.target.checked) {
-                        const clearedSchema = {
-                          ...localField.schema,
-                          required: undefined,
-                          minLength: undefined,
-                          maxLength: undefined,
-                          pattern: undefined,
-                          minimum: undefined,
-                          maximum: undefined,
-                          formatMinimum: undefined,
-                          formatMaximum: undefined,
-                          minItems: undefined,
-                          maxItems: undefined,
+              {localField.type !== 'file' && (
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={localField.uischema?.options?.readonly || false}
+                      onChange={(e) => {
+                        const updatedUISchema = {
+                          ...localField.uischema,
+                          options: {
+                            ...localField.uischema?.options,
+                            readonly: e.target.checked,
+                          },
                         };
 
-                        if (clearedSchema.properties?.startDate) {
-                          clearedSchema.properties.startDate = {
-                            ...clearedSchema.properties.startDate,
+                        if (e.target.checked) {
+                          // Clear all validation rules when readonly is enabled
+                          const clearedSchema = {
+                            ...localField.schema,
+                            required: undefined,
+                            minLength: undefined,
+                            maxLength: undefined,
+                            pattern: undefined,
+                            minimum: undefined,
+                            maximum: undefined,
                             formatMinimum: undefined,
                             formatMaximum: undefined,
+                            minItems: undefined,
+                            maxItems: undefined,
                           };
-                        }
 
-                        if (clearedSchema.properties?.endDate) {
-                          clearedSchema.properties.endDate = {
-                            ...clearedSchema.properties.endDate,
-                            formatMinimum: undefined,
-                            formatMaximum: undefined,
-                          };
-                        }
+                          if (clearedSchema.properties?.startDate) {
+                            clearedSchema.properties.startDate = {
+                              ...clearedSchema.properties.startDate,
+                              formatMinimum: undefined,
+                              formatMaximum: undefined,
+                            };
+                          }
 
-                        handleUpdate({
-                          uischema: updatedUISchema,
-                          schema: clearedSchema,
-                          required: false,
-                        });
-                      } else {
-                        handleUpdate({ uischema: updatedUISchema });
-                      }
-                    }}
-                    color="primary"
-                  />
-                }
-                label={t('readOnly')}
-                sx={formControlLabelSx}
-              />
+                          if (clearedSchema.properties?.endDate) {
+                            clearedSchema.properties.endDate = {
+                              ...clearedSchema.properties.endDate,
+                              formatMinimum: undefined,
+                              formatMaximum: undefined,
+                            };
+                          }
+
+                          handleUpdate({
+                            uischema: updatedUISchema,
+                            schema: clearedSchema,
+                            required: false,
+                          });
+                        } else {
+                          handleUpdate({ uischema: updatedUISchema });
+                        }
+                      }}
+                      color="primary"
+                    />
+                  }
+                  label={t('readOnly')}
+                  sx={formControlLabelSx}
+                />
+              )}
 
               {/* Show label field only for non-layout and non-group fields */}
               {localField.type !== 'layout' && localField.type !== 'group' && (
@@ -1816,29 +1819,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                     <MenuItem value="object">{t('object')}</MenuItem>
                   </Select>
                 </FormControl>
-              )}
-
-              {/* Element Label field for array of objects */}
-              {localField.type === 'array' && localField.schema?.items?.type === 'object' && (
-                <TextField
-                  label={t('elementLabel')}
-                  fullWidth
-                  value={localField.uischema?.options?.elementLabelProp || ''}
-                  onChange={(e) => {
-                    const updatedUISchema = {
-                      ...localField.uischema,
-                      options: {
-                        ...localField.uischema?.options,
-                        elementLabelProp: e.target.value || undefined,
-                      },
-                    };
-                    handleUpdate({ uischema: updatedUISchema });
-                  }}
-                  margin="normal"
-                  variant="outlined"
-                  helperText={t('elementLabelHelp')}
-                  sx={outlinedTextFieldSx}
-                />
               )}
 
               <TextField

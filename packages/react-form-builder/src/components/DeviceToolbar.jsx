@@ -12,6 +12,8 @@ export const DeviceToolbar = ({
   isFullscreen,
   setIsFullscreen,
   screenResolutions,
+  responsiveState,
+  toolbarVisibility = {},
 }) => {
   const isResponsive = selectedId !== 'responsive';
   const { t } = useTranslation();
@@ -29,11 +31,13 @@ export const DeviceToolbar = ({
         onChange={(e) => onChangeDevice(e.target.value)}
         sx={{ minWidth: 160 }}
       >
-        {screenResolutions.map((d) => (
-          <MenuItem key={d.id} value={d.id}>
-            {d.label}
-          </MenuItem>
-        ))}
+        {screenResolutions
+          .filter((item) => item.enabled)
+          .map((d) => (
+            <MenuItem key={d.id} value={d.id}>
+              {d.label}
+            </MenuItem>
+          ))}
       </Select>
       <TextField
         type="number"
@@ -60,16 +64,20 @@ export const DeviceToolbar = ({
         }}
         sx={{ width: 80 }}
       />
-      <Tooltip title={t('rotate')}>
-        <IconButton onClick={onToggleOrientation} size="small">
-          <IconRefresh size={24} />
-        </IconButton>
-      </Tooltip>
-      <Tooltip title={isFullscreen ? t('exitFullscreen') : t('fullscreen')}>
-        <IconButton onClick={() => setIsFullscreen(!isFullscreen)}>
-          {isFullscreen ? <IconMinimize /> : <IconMaximize />}
-        </IconButton>
-      </Tooltip>
+      {responsiveState.showRotateOption && (
+        <Tooltip title={t('rotate')}>
+          <IconButton onClick={onToggleOrientation} size="small">
+            <IconRefresh size={24} />
+          </IconButton>
+        </Tooltip>
+      )}
+      {toolbarVisibility.showFullscreen !== false && (
+        <Tooltip title={isFullscreen ? t('exitFullscreen') : t('fullscreen')}>
+          <IconButton onClick={() => setIsFullscreen(!isFullscreen)}>
+            {isFullscreen ? <IconMinimize /> : <IconMaximize />}
+          </IconButton>
+        </Tooltip>
+      )}
     </Box>
   );
 };

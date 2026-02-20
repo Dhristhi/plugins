@@ -11,7 +11,14 @@ import { getRenderers, getCells, config } from '../controls/renders';
 
 let MAX_WIDTH_BEFORE_SCALE = 1376;
 
-const FormResponsivePreview = ({ isFullscreen, setIsFullscreen, screenResolutions, children }) => {
+const FormResponsivePreview = ({
+  isFullscreen,
+  setIsFullscreen,
+  screenResolutions,
+  responsiveState,
+  toolbarVisibility = {},
+  children,
+}) => {
   const [deviceId, setDeviceId] = useState('responsive');
   const preset = useMemo(
     () => screenResolutions.find((d) => d.id === deviceId) ?? screenResolutions[0],
@@ -150,20 +157,23 @@ const FormResponsivePreview = ({ isFullscreen, setIsFullscreen, screenResolution
     transform: `scale(${scale})`,
     transformOrigin: 'top',
   };
-
   return (
     <Box sx={outerSx}>
-      <DeviceToolbar
-        selectedId={deviceId}
-        onChangeDevice={setDeviceId}
-        width={deviceWidth}
-        height={deviceHeight}
-        onChangeSize={setSize}
-        onToggleOrientation={toggleOrientation}
-        isFullscreen={isFullscreen}
-        setIsFullscreen={setIsFullscreen}
-        screenResolutions={screenResolutions}
-      />
+      {responsiveState.showResplayout && (
+        <DeviceToolbar
+          selectedId={deviceId}
+          onChangeDevice={setDeviceId}
+          width={deviceWidth}
+          height={deviceHeight}
+          onChangeSize={setSize}
+          onToggleOrientation={toggleOrientation}
+          isFullscreen={isFullscreen}
+          setIsFullscreen={setIsFullscreen}
+          screenResolutions={screenResolutions}
+          responsiveState={responsiveState}
+          toolbarVisibility={toolbarVisibility}
+        />
+      )}
       <Box sx={viewportSx} ref={viewportRef}>
         <Box sx={deviceFrameSx}>
           <Box sx={innerSx}>{children}</Box>
@@ -183,6 +193,8 @@ const FormPreview = ({
   exportForm,
   currencyIcon = '$',
   screenResolutions,
+  responsiveState,
+  toolbarVisibility = {},
 }) => {
   const formRef = useRef();
   const userActions = useRef(false);
@@ -602,6 +614,7 @@ const FormPreview = ({
           showSchemaEditor={showSchemaEditor}
           setShowSchemaEditor={setShowSchemaEditor}
           exportForm={exportForm}
+          toolbarVisibility={toolbarVisibility}
         />
       </Box>
       <Box sx={{ p: 2, paddingBottom: '80px' }}>
@@ -611,6 +624,8 @@ const FormPreview = ({
               isFullscreen={isFullscreen}
               setIsFullscreen={setIsFullscreen}
               screenResolutions={screenResolutions}
+              responsiveState={responsiveState}
+              toolbarVisibility={toolbarVisibility}
             >
               <JsonForms
                 key={key}
@@ -656,13 +671,15 @@ const FormPreview = ({
           </Typography>
         )}
       </Box>
-      {formState.schema.properties && Object.keys(formState.schema.properties).length > 0 && (
-        <Box sx={validateBox}>
-          <Button onClick={toggleValidateButton} variant="contained">
-            {t('validate')}
-          </Button>
-        </Box>
-      )}
+      {formState.schema.properties &&
+        Object.keys(formState.schema.properties).length > 0 &&
+        toolbarVisibility.showValidate !== false && (
+          <Box sx={validateBox}>
+            <Button onClick={toggleValidateButton} variant="contained">
+              {t('validate')}
+            </Button>
+          </Box>
+        )}
     </Box>
   );
 };

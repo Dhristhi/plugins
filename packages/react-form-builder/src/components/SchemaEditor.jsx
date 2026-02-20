@@ -14,6 +14,7 @@ const SchemaEditor = ({
   setShowSchemaEditor,
   exportForm,
   onExport,
+  toolbarVisibility = {},
 }) => {
   const { t } = useTranslation();
   const [schemaText, setSchemaText] = useState('');
@@ -109,6 +110,7 @@ const SchemaEditor = ({
         exportForm={exportForm}
         onApplyChanges={handleExport}
         showApplyButton={true}
+        toolbarVisibility={toolbarVisibility}
       />
 
       <Box sx={contentContainerSx}>

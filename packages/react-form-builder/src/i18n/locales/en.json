@@ -245,7 +245,7 @@
     "operator": "Operator",
     "value": "Value"
   },
-  "acceptInteger": "Accept Whole Number",
+  "acceptInteger": "Allow numbers without decimals",
   "useAsCurrencyPrefix": "Use as Currency Prefix",
   "settings": "Settings",
   "fieldVisibility": "Field Visibility",
@@ -256,5 +256,15 @@
     "deleteDialogDecline": "Cancel"
   },
   "rules": "Rules",
-  "clear": "Clear"
+  "clear": "Clear",
+  "responsiveScreens": "Screen Resolutions",
+  "showResponsiveLayout": "Show Responsive Toolbar",
+  "showRotateOption": "Show Rotate Option",
+  "responsiveUi": "Responsive UI",
+  "featureToggles": "Feature Toggles",
+  "showFormPreview": "Show Form Preview",
+  "showSchema": "Show Schema",
+  "showFullscreen": "Show Fullscreen",
+  "showValidate": "Show Validate",
+  "addResolution": "Add Resolution"
 }

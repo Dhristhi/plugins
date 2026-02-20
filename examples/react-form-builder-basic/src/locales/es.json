@@ -243,7 +243,7 @@
     "operator": "Operador",
     "value": "Valor"
   },
-  "acceptInteger": "Aceptar número entero",
+  "acceptInteger": "Permitir números sin decimales",
   "useAsCurrencyPrefix": "Utilizar como prefijo de moneda",
   "settings": "Configuración",
   "fieldVisibility": "Visibilidad de Campos",
@@ -254,5 +254,15 @@
     "deleteDialogDecline": "Cancelar"
   },
   "rules": "Reglas",
-  "clear": "Limpiar"
+  "clear": "Limpiar",
+  "responsiveScreens": "Resoluciones de pantalla",
+  "showResponsiveLayout": "Mostrar barra de herramientas adaptable",
+  "showRotateOption": "Mostrar opción de rotación",
+  "responsiveUi": "Interfaz adaptable",
+  "featureToggles": "Alternar funciones",
+  "showFormPreview": "Mostrar vista previa del formulario",
+  "showSchema": "Mostrar esquema",
+  "showFullscreen": "Mostrar pantalla completa",
+  "showValidate": "Mostrar validar",
+  "addResolution": "Añadir resolución"
 }
