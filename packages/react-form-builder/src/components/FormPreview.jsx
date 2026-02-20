@@ -199,7 +199,6 @@ const FormPreview = ({
   const formRef = useRef();
   const userActions = useRef(false);
   const isProgrammaticUpdateRef = useRef(false);
-
   const { t, i18n } = useTranslation();
   const ajv = useMemo(() => {
     const ajvInstance = createAjv({ useDefaults: false });
@@ -287,8 +286,14 @@ const FormPreview = ({
         return 'validation.maxLength';
       case 'minimum':
         return 'validation.minimum';
+      case 'minItems':
+        return 'validation.minItems';
+      case 'maxItems':
+        return 'validation.maxItems';
       case 'maximum':
         return 'validation.maximum';
+      case 'uniqueItems':
+        return 'validation.uniqueItems';
       case 'formatMinimum':
       case 'formatMaximum':
         if (error.schemaPath) {
@@ -400,7 +405,11 @@ const FormPreview = ({
         const hasContent = hasFieldContent(fieldValue);
         const fieldSchema = formState.schema?.properties?.[fieldKey];
 
-        if (error.keyword === 'minLength' && fieldSchema?.minLength > 0) {
+        if (error.keyword === 'minLength' && fieldSchema?.minLength > 0 && hasContent) {
+          filteredErrors.push(error);
+        } else if (error.keyword === 'maxLength' && hasContent) {
+          filteredErrors.push(error);
+        } else if (error.keyword === 'pattern' && hasContent) {
           filteredErrors.push(error);
         } else if (
           (error.keyword === 'minimum' || error.keyword === 'maximum') &&
@@ -412,7 +421,12 @@ const FormPreview = ({
           if (hasNumericValue) {
             filteredErrors.push(error);
           }
-        } else if (hasContent) {
+        } else if (
+          hasContent &&
+          error.keyword !== 'minLength' &&
+          error.keyword !== 'maxLength' &&
+          error.keyword !== 'pattern'
+        ) {
           filteredErrors.push(error);
         }
       }
@@ -451,18 +465,12 @@ const FormPreview = ({
     Object.keys(validationData).forEach((key) => {
       const value = validationData[key];
       const prop = formState.schema?.properties?.[key];
-
       if (prop?.type === 'object' && prop.properties?.startDate && prop.properties?.endDate) {
         const dateRangeData = value || {};
         validationData[key] = {
           startDate: dateRangeData.startDate || undefined,
           endDate: dateRangeData.endDate || undefined,
         };
-      } else if (
-        value === '' &&
-        (prop?.type === 'string' || prop?.format === 'uri' || prop?.format === 'url')
-      ) {
-        validationData[key] = '';
       } else if (
         (prop?.type === 'number' || prop?.type === 'integer') &&
         typeof value === 'string' &&
@@ -476,12 +484,9 @@ const FormPreview = ({
         }
       } else if (
         value === null ||
+        value === '' ||
         (Array.isArray(value) && value.length === 0) ||
-        value === false ||
-        (value === '' &&
-          prop?.type !== 'string' &&
-          prop?.format !== 'uri' &&
-          prop?.format !== 'url')
+        value === false
       ) {
         delete validationData[key];
       }
@@ -490,7 +495,6 @@ const FormPreview = ({
     const validate = ajv.compile(formState.schema);
     const isValid = validate(validationData);
     let allErrors = [];
-
     if (!isValid && validate.errors) {
       const transformedErrors = validate.errors.map((error) => {
         const translationKey = mapAjvErrorToKey(error);
@@ -502,7 +506,12 @@ const FormPreview = ({
             message = t(translationKey, { min: error.params.limit });
           } else if (keyword === 'maxLength') {
             message = t(translationKey, { max: error.params.limit });
-          } else if (keyword === 'minimum' || keyword === 'maximum') {
+          } else if (
+            keyword === 'minimum' ||
+            keyword === 'maximum' ||
+            keyword === 'minItems' ||
+            keyword === 'maxItems'
+          ) {
             message = t(translationKey, { limit: error.params.limit });
           }
         }
