@@ -231,7 +231,10 @@
     "minLength": "Por favor, introduce al menos {{min}} caracteres",
     "maxLength": "Por favor, no introduzcas más de {{max}} caracteres",
     "minimum": "El valor debe ser al menos {{limit}}",
-    "maximum": "El valor debe ser como máximo {{limit}}"
+    "maximum": "El valor debe ser como máximo {{limit}}",
+    "minItems": "no debe tener menos de {{limit}} elementos",
+    "maxItems": "no debe tener más de {{limit}} elementos",
+    "uniqueItems": "no debe tener elementos duplicados"
   },
   "rotate": "Girar",
   "screen": "Pantalla",

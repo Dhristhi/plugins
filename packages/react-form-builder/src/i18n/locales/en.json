@@ -231,7 +231,10 @@
     "minLength": "Please enter at least {{min}} characters",
     "maxLength": "Please enter no more than {{max}} characters",
     "minimum": "Value must be at least {{limit}}",
-    "maximum": "Value must be at most {{limit}}"
+    "maximum": "Value must be at most {{limit}}",
+    "minItems": "must NOT have fewer than {{limit}} items",
+    "maxItems": "must NOT have more than {{limit}} items",
+    "uniqueItems": "must NOT have duplicate items"
   },
 
   "rotate": "Rotate",

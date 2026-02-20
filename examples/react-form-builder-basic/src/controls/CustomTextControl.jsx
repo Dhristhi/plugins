@@ -1,7 +1,7 @@
 import { useParams } from 'react-router-dom';
 import { useCallback, useEffect, useState } from 'react';
 import { Unwrapped } from '@jsonforms/material-renderers';
-import { CircularProgress, TextField } from '@mui/material';
+import { CircularProgress, TextField, FormHelperText } from '@mui/material';
 import { and, isControl, optionIs, rankWith } from '@jsonforms/core';
 import { useJsonForms, withJsonFormsControlProps } from '@jsonforms/react';
 
@@ -84,7 +84,7 @@ const CustomTextControl = (props) => {
   const handleCurrencyChange = (event) => {
     const inputValue = event.target.value;
     const cleanValue = inputValue.replace(/,/g, '');
-    const allowedCharsRegex = /^[0-9]*\.?[0-9]*$/;
+    const allowedCharsRegex = /^-?[0-9]*\.?[0-9]*$/;
     if (!allowedCharsRegex.test(cleanValue)) {
       return;
     }
@@ -163,7 +163,7 @@ const CustomTextControl = (props) => {
           disabled={isLoading}
           required={required}
           error={errors && errors.length > 0}
-          helperText={errors && errors.length > 0 ? errors : description || ''}
+          //helperText={description || ''}
           fullWidth
           variant="outlined"
           InputProps={{
@@ -172,6 +172,20 @@ const CustomTextControl = (props) => {
             ),
           }}
         />
+        {description && (
+          <FormHelperText className="MuiFormHelperText-sizeMedium" sx={{ marginLeft: '14px' }}>
+            {description}
+          </FormHelperText>
+        )}
+        {errors && errors.length > 0 && (
+          <FormHelperText
+            error
+            className="MuiFormHelperText-sizeMedium"
+            sx={{ mt: 0.5, mx: 0, marginLeft: '14px' }}
+          >
+            {errors}
+          </FormHelperText>
+        )}
       </div>
     );
   }
