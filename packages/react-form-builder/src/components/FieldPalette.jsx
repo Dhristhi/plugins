@@ -394,7 +394,13 @@ const FieldPalette = ({
       copy[index] = {
         ...copy[index],
         [field]:
-          field === 'width' || field === 'height' ? (value === '' ? '' : Number(value)) : value,
+          field === 'width' || field === 'height'
+            ? value === ''
+              ? ''
+              : Number(value) < 1
+                ? 1
+                : Number(value)
+            : value,
       };
       return copy;
     });
@@ -676,7 +682,7 @@ const FieldPalette = ({
               <Accordion defaultExpanded sx={accordionSx}>
                 <AccordionSummary expandIcon={<IconChevronDown />} sx={accordionSummarySx}>
                   <Typography variant="subtitle1" fontWeight={600}>
-                    {t('responsiveScreens')}
+                    {t('responsiveUi')}
                   </Typography>
                 </AccordionSummary>
                 <AccordionDetails>
@@ -730,7 +736,9 @@ const FieldPalette = ({
                         </Box>
                         {resonsiveLayoutState.showResplayout && (
                           <Box>
-                            <Typography variant="h6" sx={{ mb: 2 }}></Typography>
+                            <Typography variant="h6" sx={{ mb: 2 }}>
+                              {t('responsiveScreens')}
+                            </Typography>
 
                             {rows.map((row, index) => (
                               <Box
@@ -777,6 +785,7 @@ const FieldPalette = ({
                                     value={row.width}
                                     onChange={handleChange(index, 'width')}
                                     InputProps={{
+                                      inputProps: { min: 1 },
                                       sx: {
                                         '& input': {
                                           fontSize: '14px', // 14px
@@ -800,6 +809,7 @@ const FieldPalette = ({
                                     value={row.height}
                                     onChange={handleChange(index, 'height')}
                                     InputProps={{
+                                      inputProps: { min: 1 },
                                       sx: {
                                         '& input': {
                                           fontSize: '14px', // 14px
