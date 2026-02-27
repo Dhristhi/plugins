@@ -466,10 +466,6 @@ const FieldPalette = ({
     isScreenChanged,
   ]);
 
-  React.useEffect(() => {
-    setRows(screenResolutions);
-  }, [screenResolutions]);
-
   const [resonsiveLayoutState, setResonsiveLayoutState] = useState(responsiveState || false);
   return (
     <Box sx={sidebarContainerSx}>
@@ -482,7 +478,7 @@ const FieldPalette = ({
           {t('formTemplates')}
         </Typography>
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', ml: '84px' }}>
-          <Tooltip title="Settings" arrow>
+          <Tooltip title={t('settings')} arrow>
             <IconButton
               onClick={handleSettingsClick}
               size="small"
@@ -801,7 +797,7 @@ const FieldPalette = ({
                                 />
                                 {row.isNew ? (
                                   <TextField
-                                    label="Label"
+                                    label={t('label')}
                                     size="small"
                                     value={row.label}
                                     onChange={handleChange(index, 'label')}
@@ -823,7 +819,7 @@ const FieldPalette = ({
 
                                 {row.isNew ? (
                                   <TextField
-                                    label="Width"
+                                    label={t('width')}
                                     type="number"
                                     size="small"
                                     value={row.width}
@@ -847,7 +843,7 @@ const FieldPalette = ({
 
                                 {row.isNew ? (
                                   <TextField
-                                    label="Height"
+                                    label={t('height')}
                                     type="number"
                                     size="small"
                                     value={row.height}

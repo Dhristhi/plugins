@@ -35,7 +35,16 @@ const getProperty = (obj, path) => {
 
   // Try dot notation first
   const dotNotationResult = getNestedProperty(obj, path);
-  if (dotNotationResult !== undefined) return dotNotationResult;
+  if (dotNotationResult !== undefined) {
+    return dotNotationResult;
+  }
+  // Fallback: try direct property access (handles non-nested keys)
+  const directResult = obj?.[path];
+  if (directResult !== undefined) {
+    return directResult;
+  }
+  // Explicitly return null when no value is found to avoid implicit undefined
+  return null;
 };
 
 const CustomSelectControl = (props) => {
@@ -111,6 +120,9 @@ const CustomSelectControl = (props) => {
             raw: item,
           }));
           setOptions(newOptions);
+        } else {
+          // Clear options when API returns empty array or fails
+          setOptions([]);
         }
       } else {
         const newOptions =

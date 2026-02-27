@@ -22,7 +22,7 @@ const FormResponsivePreview = ({
   const [deviceId, setDeviceId] = useState('responsive');
   const preset = useMemo(
     () => screenResolutions.find((d) => d.id === deviceId) ?? screenResolutions[0],
-    [deviceId]
+    [deviceId, screenResolutions]
   );
 
   const [size, setSize] = useState({ width: preset.width, height: preset.height });
@@ -47,8 +47,8 @@ const FormResponsivePreview = ({
     const { clientWidth, clientHeight } = viewportRef.current;
     MAX_WIDTH_BEFORE_SCALE = clientWidth;
     if (deviceId === 'responsive') {
-      screenResolutions[0].width = clientWidth;
-      screenResolutions[0].height = clientHeight;
+      // Update local size state instead of mutating prop
+      setSize({ width: clientWidth, height: clientHeight });
     }
     if (deviceWidth <= MAX_WIDTH_BEFORE_SCALE) {
       setScale(1);
@@ -57,7 +57,7 @@ const FormResponsivePreview = ({
     const scaleToFit = Math.min(clientWidth / deviceWidth, clientHeight / deviceHeight);
 
     setScale(Math.min(1, scaleToFit));
-  }, [deviceWidth, deviceHeight]);
+  }, [deviceWidth, deviceHeight, deviceId]);
 
   const outerSx = {
     display: 'flex',
