@@ -83,7 +83,11 @@ export const buildSchemaFromFields = (fieldsArray, parentKey = null) => {
         objectSchema.properties?.startDate &&
         objectSchema.properties?.endDate
       ) {
-        objectSchema.required = ['startDate', 'endDate'];
+        const existingRequired = Array.isArray(objectSchema.required) ? objectSchema.required : [];
+        const dateRequired = ['startDate', 'endDate'].filter(
+          (key) => !existingRequired.includes(key)
+        );
+        objectSchema.required = [...existingRequired, ...dateRequired];
       }
 
       properties[field.key] = objectSchema;

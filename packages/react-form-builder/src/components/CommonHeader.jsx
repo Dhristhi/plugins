@@ -115,7 +115,8 @@ const CommonHeader = ({
                 onClick={() => {
                   const newShowPreview = !showFormPreview;
                   setShowFormPreview(newShowPreview);
-                  if (newShowPreview && toolbarVisibility.showSchema !== false) {
+                  // Always enforce mutual exclusivity regardless of button visibility
+                  if (newShowPreview) {
                     setShowSchemaEditor(false);
                   }
                 }}
@@ -131,7 +132,8 @@ const CommonHeader = ({
                 onClick={() => {
                   const newShowSchema = !showSchemaEditor;
                   setShowSchemaEditor(newShowSchema);
-                  if (newShowSchema && toolbarVisibility.showFormPreview !== false) {
+                  // Always enforce mutual exclusivity regardless of button visibility
+                  if (newShowSchema) {
                     setShowFormPreview(false);
                   }
                 }}
