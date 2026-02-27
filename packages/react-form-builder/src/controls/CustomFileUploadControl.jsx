@@ -238,21 +238,7 @@ const CustomFileUploadControl = (props) => {
                     e.stopPropagation();
                     handleDownload(item, idx);
                   }}
-                  sx={{
-                    mt: 0.5,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: 0.5,
-                    cursor: 'pointer',
-                    color: 'primary.main',
-                    textDecoration: 'none',
-                    fontSize: '0.75rem',
-                    '&:hover': {
-                      textDecoration: 'underline',
-                      color: 'primary.dark',
-                    },
-                  }}
+                  sx={downloadLinkSx}
                 >
                   <IconDownload size={14} />
                   {t('download')}
