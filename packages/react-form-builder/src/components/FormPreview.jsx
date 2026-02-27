@@ -6,22 +6,27 @@ import { Typography, Button, Box } from '@mui/material';
 import { useState, useMemo, useRef, useEffect, useLayoutEffect } from 'react';
 
 import CommonHeader from './CommonHeader';
-import { DeviceToolbar, DEVICE_PRESETS } from './DeviceToolbar';
+import { DeviceToolbar } from './DeviceToolbar';
 import { getRenderers, getCells, config } from '../controls/renders';
 
 let MAX_WIDTH_BEFORE_SCALE = 1376;
 
-const FormResponsivePreview = ({ isFullscreen, setIsFullscreen, children }) => {
+const FormResponsivePreview = ({
+  isFullscreen,
+  setIsFullscreen,
+  screenResolutions,
+  responsiveState,
+  toolbarVisibility = {},
+  children,
+}) => {
   const [deviceId, setDeviceId] = useState('responsive');
-  // const [orientation, setOrientation] = useState('portrait');
   const preset = useMemo(
-    () => DEVICE_PRESETS.find((d) => d.id === deviceId) ?? DEVICE_PRESETS[0],
-    [deviceId]
+    () => screenResolutions.find((d) => d.id === deviceId) ?? screenResolutions[0],
+    [deviceId, screenResolutions]
   );
 
   const [size, setSize] = useState({ width: preset.width, height: preset.height });
 
-  // keep size in sync when device changes
   useEffect(() => {
     setSize({ width: preset.width, height: preset.height });
   }, [preset]);
@@ -41,7 +46,10 @@ const FormResponsivePreview = ({ isFullscreen, setIsFullscreen, children }) => {
 
     const { clientWidth, clientHeight } = viewportRef.current;
     MAX_WIDTH_BEFORE_SCALE = clientWidth;
-
+    if (deviceId === 'responsive') {
+      // Update local size state instead of mutating prop
+      setSize({ width: clientWidth, height: clientHeight });
+    }
     if (deviceWidth <= MAX_WIDTH_BEFORE_SCALE) {
       setScale(1);
       return;
@@ -49,14 +57,14 @@ const FormResponsivePreview = ({ isFullscreen, setIsFullscreen, children }) => {
     const scaleToFit = Math.min(clientWidth / deviceWidth, clientHeight / deviceHeight);
 
     setScale(Math.min(1, scaleToFit));
-  }, [deviceWidth, deviceHeight]);
+  }, [deviceWidth, deviceHeight, deviceId]);
 
   const outerSx = {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     p: 2,
-    height: 650,
+    height: '100vh',
   };
 
   const viewportSx = {
@@ -65,7 +73,7 @@ const FormResponsivePreview = ({ isFullscreen, setIsFullscreen, children }) => {
     display: 'flex',
     borderRadius: 2,
     overflow: 'hidden',
-    alignItems: 'center',
+    alignItems: 'start',
     justifyContent: 'center',
     borderColor: 'transparent',
   };
@@ -136,6 +144,9 @@ const FormResponsivePreview = ({ isFullscreen, setIsFullscreen, children }) => {
     '& .MuiFormHelperText-root': {
       textAlign: 'left',
     },
+    '& p.MuiTypography-root.MuiTypography-body2.fileUploadLabel': {
+      textAlign: 'left',
+    },
   };
 
   const innerSx = {
@@ -146,19 +157,23 @@ const FormResponsivePreview = ({ isFullscreen, setIsFullscreen, children }) => {
     transform: `scale(${scale})`,
     transformOrigin: 'top',
   };
-
   return (
     <Box sx={outerSx}>
-      <DeviceToolbar
-        selectedId={deviceId}
-        onChangeDevice={setDeviceId}
-        width={deviceWidth}
-        height={deviceHeight}
-        onChangeSize={setSize}
-        onToggleOrientation={toggleOrientation}
-        isFullscreen={isFullscreen}
-        setIsFullscreen={setIsFullscreen}
-      />
+      {responsiveState.showResplayout && (
+        <DeviceToolbar
+          selectedId={deviceId}
+          onChangeDevice={setDeviceId}
+          width={deviceWidth}
+          height={deviceHeight}
+          onChangeSize={setSize}
+          onToggleOrientation={toggleOrientation}
+          isFullscreen={isFullscreen}
+          setIsFullscreen={setIsFullscreen}
+          screenResolutions={screenResolutions}
+          responsiveState={responsiveState}
+          toolbarVisibility={toolbarVisibility}
+        />
+      )}
       <Box sx={viewportSx} ref={viewportRef}>
         <Box sx={deviceFrameSx}>
           <Box sx={innerSx}>{children}</Box>
@@ -177,11 +192,13 @@ const FormPreview = ({
   setShowSchemaEditor,
   exportForm,
   currencyIcon = '$',
+  screenResolutions,
+  responsiveState,
+  toolbarVisibility = {},
 }) => {
   const formRef = useRef();
   const userActions = useRef(false);
   const isProgrammaticUpdateRef = useRef(false);
-
   const { t, i18n } = useTranslation();
   const ajv = useMemo(() => {
     const ajvInstance = createAjv({ useDefaults: false });
@@ -269,11 +286,16 @@ const FormPreview = ({
         return 'validation.maxLength';
       case 'minimum':
         return 'validation.minimum';
+      case 'minItems':
+        return 'validation.minItems';
+      case 'maxItems':
+        return 'validation.maxItems';
       case 'maximum':
         return 'validation.maximum';
+      case 'uniqueItems':
+        return 'validation.uniqueItems';
       case 'formatMinimum':
       case 'formatMaximum':
-        // For datetime fields, show time range in error message
         if (error.schemaPath) {
           const fieldKey = error.instancePath.replace(/^\//, '');
           const fieldSchema = formState.schema?.properties?.[fieldKey];
@@ -330,15 +352,12 @@ const FormPreview = ({
     if (value === undefined || value === null || value === '') {
       return false;
     }
-    // For arrays (multiselect), check if it has items
     if (Array.isArray(value)) {
       return value.length > 0;
     }
-    // For objects (like date-range), check if any property has content
     if (typeof value === 'object' && !Array.isArray(value)) {
       return Object.values(value).some((v) => v !== '' && v !== null && v !== undefined);
     }
-    // For boolean (checkbox), false is considered no content for required validation
     if (typeof value === 'boolean') {
       return value === true;
     }
@@ -348,23 +367,19 @@ const FormPreview = ({
   const filterErrors = (errors, data) => {
     const filteredErrors = [];
 
-    // Handle required field errors
     const requiredErrors = errors.filter((err) => err.keyword === 'required');
     requiredErrors.forEach((error) => {
       const instancePath = error.instancePath || '';
       const missingProperty = error.params?.missingProperty;
 
-      // For nested properties (like date-range fields)
       if (instancePath) {
         const pathParts = instancePath.replace(/^\//, '').split('/');
         let fieldValue = data;
 
-        // Navigate to the nested value
         for (const part of pathParts) {
           fieldValue = fieldValue?.[part];
         }
 
-        // Check the missing property within the nested object
         if (missingProperty) {
           const nestedValue = fieldValue?.[missingProperty];
           if (!nestedValue || nestedValue === '') {
@@ -372,7 +387,6 @@ const FormPreview = ({
           }
         }
       } else if (missingProperty) {
-        // Top-level property
         const fieldValue = data[missingProperty];
         const hasContent = hasFieldContent(fieldValue);
         if (!hasContent) {
@@ -381,7 +395,6 @@ const FormPreview = ({
       }
     });
 
-    // Handle field-specific validation errors (format, pattern, etc.)
     const fieldErrors = errors.filter((err) => err.keyword !== 'required');
     fieldErrors.forEach((error) => {
       const fieldPath = error.instancePath || '';
@@ -390,9 +403,30 @@ const FormPreview = ({
       if (fieldKey) {
         const fieldValue = data[fieldKey];
         const hasContent = hasFieldContent(fieldValue);
+        const fieldSchema = formState.schema?.properties?.[fieldKey];
 
-        // Only show validation errors if field has content
-        if (hasContent) {
+        if (error.keyword === 'minLength' && fieldSchema?.minLength > 0 && hasContent) {
+          filteredErrors.push(error);
+        } else if (error.keyword === 'maxLength' && hasContent) {
+          filteredErrors.push(error);
+        } else if (error.keyword === 'pattern' && hasContent) {
+          filteredErrors.push(error);
+        } else if (
+          (error.keyword === 'minimum' || error.keyword === 'maximum') &&
+          (fieldSchema?.type === 'number' || fieldSchema?.type === 'integer')
+        ) {
+          const hasNumericValue =
+            typeof fieldValue === 'number' ||
+            (typeof fieldValue === 'string' && fieldValue !== '' && !isNaN(Number(fieldValue)));
+          if (hasNumericValue) {
+            filteredErrors.push(error);
+          }
+        } else if (
+          hasContent &&
+          error.keyword !== 'minLength' &&
+          error.keyword !== 'maxLength' &&
+          error.keyword !== 'pattern'
+        ) {
           filteredErrors.push(error);
         }
       }
@@ -427,13 +461,10 @@ const FormPreview = ({
   };
 
   const performValidation = (data = formState.data) => {
-    // Create validation data where empty strings become undefined for required validation
     const validationData = { ...data };
     Object.keys(validationData).forEach((key) => {
       const value = validationData[key];
       const prop = formState.schema?.properties?.[key];
-
-      // For date-range objects, keep the structure but clean nested values
       if (prop?.type === 'object' && prop.properties?.startDate && prop.properties?.endDate) {
         const dateRangeData = value || {};
         validationData[key] = {
@@ -441,8 +472,19 @@ const FormPreview = ({
           endDate: dateRangeData.endDate || undefined,
         };
       } else if (
-        value === '' ||
+        (prop?.type === 'number' || prop?.type === 'integer') &&
+        typeof value === 'string' &&
+        value !== ''
+      ) {
+        const numValue = Number(value);
+        if (!isNaN(numValue)) {
+          validationData[key] = numValue;
+        } else {
+          validationData[key] = value;
+        }
+      } else if (
         value === null ||
+        value === '' ||
         (Array.isArray(value) && value.length === 0) ||
         value === false
       ) {
@@ -453,20 +495,39 @@ const FormPreview = ({
     const validate = ajv.compile(formState.schema);
     const isValid = validate(validationData);
     let allErrors = [];
-
     if (!isValid && validate.errors) {
-      const transformedErrors = validate.errors.map((error) => ({
-        instancePath: error.instancePath || error.dataPath || '',
-        schemaPath: error.schemaPath,
-        keyword: error.keyword,
-        params: error.params,
-        message: mapAjvErrorToKey(error),
-        data: error.data,
-      }));
+      const transformedErrors = validate.errors.map((error) => {
+        const translationKey = mapAjvErrorToKey(error);
+        let message = translationKey;
+
+        if (error.params && error.params.limit !== undefined) {
+          const { keyword } = error;
+          if (keyword === 'minLength') {
+            message = t(translationKey, { min: error.params.limit });
+          } else if (keyword === 'maxLength') {
+            message = t(translationKey, { max: error.params.limit });
+          } else if (
+            keyword === 'minimum' ||
+            keyword === 'maximum' ||
+            keyword === 'minItems' ||
+            keyword === 'maxItems'
+          ) {
+            message = t(translationKey, { limit: error.params.limit });
+          }
+        }
+
+        return {
+          instancePath: error.instancePath || error.dataPath || '',
+          schemaPath: error.schemaPath,
+          keyword: error.keyword,
+          params: error.params,
+          message: message,
+          data: error.data,
+        };
+      });
 
       const filteredErrors = filterErrors(transformedErrors, data);
 
-      // Deduplicate datetime errors - keep only one error per field for formatMinimum/formatMaximum
       const deduplicatedErrors = [];
       const datetimeErrorFields = new Set();
 
@@ -485,7 +546,6 @@ const FormPreview = ({
       allErrors = [...deduplicatedErrors];
     }
 
-    // Add password confirmation validation
     const passwordErrors = validatePasswordConfirmation(data, formState.schema);
     allErrors = [...allErrors, ...passwordErrors];
 
@@ -521,7 +581,6 @@ const FormPreview = ({
       ) {
         formState.data[key] = prop.default;
       }
-      // Handle date-range fields (object with startDate/endDate)
       if (prop.type === 'object' && prop.properties?.startDate && prop.properties?.endDate) {
         const existingData = formState.data[key] || {};
         const startDefault = prop.properties.startDate?.default;
@@ -564,12 +623,19 @@ const FormPreview = ({
           showSchemaEditor={showSchemaEditor}
           setShowSchemaEditor={setShowSchemaEditor}
           exportForm={exportForm}
+          toolbarVisibility={toolbarVisibility}
         />
       </Box>
       <Box sx={{ p: 2, paddingBottom: '80px' }}>
         {formState.schema.properties && Object.keys(formState.schema.properties).length > 0 ? (
           <div ref={formRef}>
-            <FormResponsivePreview isFullscreen={isFullscreen} setIsFullscreen={setIsFullscreen}>
+            <FormResponsivePreview
+              isFullscreen={isFullscreen}
+              setIsFullscreen={setIsFullscreen}
+              screenResolutions={screenResolutions}
+              responsiveState={responsiveState}
+              toolbarVisibility={toolbarVisibility}
+            >
               <JsonForms
                 key={key}
                 ajv={ajv}
@@ -601,7 +667,6 @@ const FormPreview = ({
                   if (data) {
                     onDataChange(data);
                   }
-                  // Perform real-time validation if validation mode is active
                   if (hasValidated) {
                     performValidation(data);
                   }
@@ -615,13 +680,15 @@ const FormPreview = ({
           </Typography>
         )}
       </Box>
-      {formState.schema.properties && Object.keys(formState.schema.properties).length > 0 && (
-        <Box sx={validateBox}>
-          <Button onClick={toggleValidateButton} variant="contained">
-            {t('validate')}
-          </Button>
-        </Box>
-      )}
+      {formState.schema.properties &&
+        Object.keys(formState.schema.properties).length > 0 &&
+        toolbarVisibility.showValidate !== false && (
+          <Box sx={validateBox}>
+            <Button onClick={toggleValidateButton} variant="contained">
+              {t('validate')}
+            </Button>
+          </Box>
+        )}
     </Box>
   );
 };

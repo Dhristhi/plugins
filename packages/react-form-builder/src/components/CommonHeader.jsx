@@ -67,6 +67,7 @@ const CommonHeader = ({
   setShowSchemaEditor,
   onApplyChanges,
   showApplyButton = false,
+  toolbarVisibility = {},
 }) => {
   const { t } = useTranslation();
 
@@ -104,34 +105,44 @@ const CommonHeader = ({
                 py: 0.75,
               }}
             >
-              {t('applyChanges')}
+              {t('exportSchema')}
             </Button>
           )}
 
           <ButtonGroup variant="outlined" size="small" sx={buttonGroupSx}>
-            <Button
-              onClick={() => {
-                const newShowPreview = !showFormPreview;
-                setShowFormPreview(newShowPreview);
-                if (newShowPreview) setShowSchemaEditor(false);
-              }}
-              variant={showFormPreview ? 'contained' : 'outlined'}
-              startIcon={<IconEye size={16} />}
-            >
-              {t('preview')}
-            </Button>
+            {toolbarVisibility.showFormPreview !== false && (
+              <Button
+                onClick={() => {
+                  const newShowPreview = !showFormPreview;
+                  setShowFormPreview(newShowPreview);
+                  // Always enforce mutual exclusivity regardless of button visibility
+                  if (newShowPreview) {
+                    setShowSchemaEditor(false);
+                  }
+                }}
+                variant={showFormPreview ? 'contained' : 'outlined'}
+                startIcon={<IconEye size={16} />}
+              >
+                {t('preview')}
+              </Button>
+            )}
 
-            <Button
-              onClick={() => {
-                const newShowSchema = !showSchemaEditor;
-                setShowSchemaEditor(newShowSchema);
-                if (newShowSchema) setShowFormPreview(false);
-              }}
-              variant={showSchemaEditor ? 'contained' : 'outlined'}
-              startIcon={<IconCode size={16} />}
-            >
-              {t('schema')}
-            </Button>
+            {toolbarVisibility.showSchema !== false && (
+              <Button
+                onClick={() => {
+                  const newShowSchema = !showSchemaEditor;
+                  setShowSchemaEditor(newShowSchema);
+                  // Always enforce mutual exclusivity regardless of button visibility
+                  if (newShowSchema) {
+                    setShowFormPreview(false);
+                  }
+                }}
+                variant={showSchemaEditor ? 'contained' : 'outlined'}
+                startIcon={<IconCode size={16} />}
+              >
+                {t('schema')}
+              </Button>
+            )}
           </ButtonGroup>
         </Box>
       </Box>

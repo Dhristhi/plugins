@@ -157,7 +157,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
 
   const removeRow = (index) => {
     const updated = rows.filter((_, i) => i !== index);
-    // setRows(updated);
     setRows(() => {
       const next = updated;
       handleUpdate({ visibility: next });
@@ -199,7 +198,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
     onFieldUpdate(updatedField);
   };
 
-  // Helper function to find parent array field
   const findParentArrayField = (fieldId, fieldsArray, parentField = null) => {
     for (const f of fieldsArray) {
       if (f.id === fieldId) {
@@ -213,7 +211,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
     return null;
   };
 
-  // Helper function to update elementLabelProp in parent array
   const updateParentArrayElementLabel = (arrayField, newElementLabelProp) => {
     const updatedArrayField = {
       ...arrayField,
@@ -225,11 +222,9 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
         },
       },
     };
-    // Update fields directly without changing selected field
     setFields((prev) => updateFieldById(prev, updatedArrayField));
   };
 
-  // Helper function to clear elementLabelProp from other fields in the same array
   const clearElementLabelFromSiblings = (arrayField, currentFieldKey) => {
     if (!arrayField?.children) return;
 
@@ -240,7 +235,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
             ...child,
             isElementLabel: false,
           };
-          // Update fields directly without changing selected field
           setFields((prev) => updateFieldById(prev, updatedChild));
           return updatedChild;
         }
@@ -264,7 +258,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
     );
   }, [localField?.schema?.default]);
 
-  // Helper function to convert value based on enum data type
   const convertEnumValue = (value, type) => {
     switch (type) {
       case 'number':
@@ -276,7 +269,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
 
   useEffect(() => {
     if (field && fields) {
-      // Check if field is inside an array of objects
       const parentArray = findParentArrayField(field.id, fields);
       setIsInsideArrayOfObjects(!!parentArray);
       setParentArrayField(parentArray);
@@ -310,7 +302,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
         setIsMultiCheckbox(true);
       }
 
-      // Ensure date fields have default dateTimeFormat in UI schema
       if (
         (field.schema?.format === 'date' ||
           field.schema?.format === 'datetime' ||
@@ -334,7 +325,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
         };
       }
 
-      // Ensure date range fields have default dateTimeFormat
       if (
         field.schema?.type === 'object' &&
         field.schema?.properties?.startDate &&
@@ -354,7 +344,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
         };
       }
 
-      // Detect file upload fields and correct their type for display
       if (
         updatedField.schema?.format === 'data-url' ||
         (updatedField.uischema?.options && updatedField.uischema.options['ui:widget'] === 'file')
@@ -370,7 +359,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
       }
       if (field.schema.enum) {
         setEnumOptions([...field.schema.enum]);
-        // Detect enum data type from first value
         const firstValue = field.schema.enum[0];
         if (typeof firstValue === 'number') {
           setEnumDataType('number');
@@ -379,7 +367,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
         }
       } else if (field.schema.items?.enum) {
         setEnumOptions([...field.schema.items.enum]);
-        // Detect enum data type from first value
         const firstValue = field.schema.items.enum[0];
         if (typeof firstValue === 'number') {
           setEnumDataType('number');
@@ -481,32 +468,30 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
   const handleFieldTypeChange = (newTypeId) => {
     const newFieldType = defaultFieldTypes.find((ft) => ft.id === newTypeId);
     if (newFieldType && !newFieldType.isLayout) {
+      // Generate new key based on field type
+      const keyParts = localField.key.split('_');
+      const newKey =
+        keyParts.length > 1 ? `${newTypeId}_${keyParts[1]}` : `${newTypeId}_${keyParts[0]}`;
+
       const updatedField = {
         ...localField,
         type: newFieldType.id,
-        schema: { ...newFieldType.schema, title: localField.label },
+        label: newFieldType.label,
+        key: newKey,
+        schema: { ...newFieldType.schema, title: newFieldType.label },
         uischema: {
           ...newFieldType.uischema,
-          scope: `#/properties/${localField.key}`,
+          scope: `#/properties/${newKey}`,
         },
       };
 
-      // Update isInteger state and key when switching between number and integer
+      // Update isInteger state when switching between number and integer
       if (newTypeId === 'integer') {
         setIsInteger(true);
-        const newKey = convertFieldKey(true, localField.key);
-        updatedField.key = newKey;
-        updatedField.label = 'Integer';
-        updatedField.uischema.scope = `#/properties/${newKey}`;
       } else if (newTypeId === 'number') {
         setIsInteger(false);
-        const newKey = convertFieldKey(false, localField.key);
-        updatedField.key = newKey;
-        updatedField.label = 'Number';
-        updatedField.uischema.scope = `#/properties/${newKey}`;
       }
 
-      // Preserve enum options and uischema options
       if (
         hasEnumOptions &&
         ['select', 'radio', 'multiselect', 'multicheckbox'].includes(newTypeId)
@@ -517,7 +502,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
             enum: enumOptions,
           };
           delete updatedField.schema.enum;
-          // Preserve existing uischema options for multiselect
           if (localField.uischema?.options) {
             updatedField.uischema.options = {
               ...updatedField.uischema.options,
@@ -527,7 +511,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
           }
         } else {
           updatedField.schema.enum = enumOptions;
-          // Set format for radio
           if (newTypeId === 'radio') {
             updatedField.uischema.options = {
               ...updatedField.uischema.options,
@@ -539,7 +522,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
       setLocalField(updatedField);
       onFieldUpdate(updatedField);
 
-      // Update enum options state for new type
       if (newFieldType.schema.enum) {
         setEnumOptions([...newFieldType.schema.enum]);
       } else if (newFieldType.schema.items?.enum) {
@@ -561,38 +543,32 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
           ? 'boolean'
           : localField.schema?.type;
 
-    // Check if this is a date range field
     const isDateRange =
       localField.schema?.type === 'object' &&
       localField.schema?.properties?.startDate &&
       localField.schema?.properties?.endDate;
 
-    // File upload fields should show file type option
     if (localField.type === 'file') {
       return availableFieldTypes.filter((ft) => ft.id === 'file');
     }
 
-    // Array fields with enum items (multiselect) can switch between multiselect types and array
     if (currentSchemaType === 'array' && localField.schema?.items?.enum) {
       return availableFieldTypes.filter(
         (ft) => ft.id === 'multiselect' || ft.id === 'multicheckbox' || ft.id === 'array'
       );
     }
 
-    // Array fields without enum can switch between array and multiselect types
     if (currentSchemaType === 'array' && localField.type !== 'file') {
       return availableFieldTypes.filter(
         (ft) => ft.id === 'array' || ft.id === 'multiselect' || ft.id === 'multicheckbox'
       );
     }
 
-    // Date range fields should show date type option
     if (isDateRange) {
       return availableFieldTypes.filter((ft) => ft.id === 'date');
     }
 
     return availableFieldTypes.filter((ft) => {
-      // Don't allow converting to array types from other types
       if (ft.id === 'array' || ft.id === 'multiselect' || ft.id === 'multicheckbox') return false;
 
       const targetSchemaType = ft.schema?.type;
@@ -600,7 +576,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
         if (targetSchemaType === 'number' || targetSchemaType === 'integer') return true;
       }
 
-      // Allow switching within same schema type
       if (currentSchemaType === targetSchemaType) {
         return true;
       }
@@ -612,12 +587,10 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
   const availableFieldTypes = defaultFieldTypes.filter((ft) => {
     if (ft.isLayout) return false;
 
-    // multiselect should depend on select field visibility
     if (ft.id === 'multiselect') {
       return visibleFields[ft.id] !== false && visibleFields['select'] !== false;
     }
 
-    // multicheckbox should depend on checkbox field visibility
     if (ft.id === 'multicheckbox') {
       return visibleFields[ft.id] !== false && visibleFields['checkbox'] !== false;
     }
@@ -669,7 +642,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
 
   const layoutSelectRuleSx = {
     borderRadius: 2,
-    //width: 110,
     fontSize: 13,
   };
 
@@ -700,7 +672,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
     },
     '&.Mui-expanded': {
       margin: '15px -15px',
-      boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
     },
     '&:hover': {
       borderRadius: 0,
@@ -759,12 +730,10 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
 
     function traverse(items) {
       for (const item of items) {
-        // Add current item's id and label
         if (!item.isLayout) {
           result.push(item);
         }
 
-        // If it has children, recursively traverse them
         if (item.children && Array.isArray(item.children)) {
           traverse(item.children);
         }
@@ -792,6 +761,14 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
     return ['select', 'radio'].includes(field.type)
       ? field.schema?.enum
       : field.schema?.items?.enum;
+  };
+
+  const fieldSelectionSx = {
+    display: 'flex',
+    gap: 1,
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    marginBottom: '5px',
   };
 
   return (
@@ -876,10 +853,17 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                       let updatedSchema = { ...localField.schema };
                       let updatedUISchema = { ...localField.uischema };
                       let type = '';
+                      let label = '';
+                      let newKey = '';
                       delete updatedSchema.default;
                       if (isMulti) {
-                        // Convert to multi-select
                         type = 'multiselect';
+                        label = 'Multi Select';
+                        const keyParts = localField.key.split('_');
+                        newKey =
+                          keyParts.length > 1
+                            ? `multiselect_${keyParts[1]}`
+                            : `multiselect_${keyParts[0]}`;
                         updatedSchema.type = 'array';
                         updatedSchema.items = {
                           type: 'string',
@@ -896,9 +880,13 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                             limitTags: 5,
                           },
                         };
+                        updatedUISchema.scope = `#/properties/${newKey}`;
                       } else {
-                        // Convert to single select
                         type = 'select';
+                        label = 'Select';
+                        const keyParts = localField.key.split('_');
+                        newKey =
+                          keyParts.length > 1 ? `select_${keyParts[1]}` : `select_${keyParts[0]}`;
                         updatedSchema.type = 'string';
                         updatedSchema.enum = enumOptions;
                         delete updatedSchema.items;
@@ -909,11 +897,14 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                         };
                         delete updatedUISchema.options.displayType;
                         delete updatedUISchema.options.autocompleteProps;
+                        updatedUISchema.scope = `#/properties/${newKey}`;
                       }
 
                       handleUpdate(
                         {
                           type,
+                          label,
+                          key: newKey,
                           schema: updatedSchema,
                           uischema: updatedUISchema,
                         },
@@ -958,7 +949,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                       color="primary"
                     />
                   }
-                  label={t('enableInteger')}
+                  label={t('acceptInteger')}
                   sx={{ mb: 2, display: 'block' }}
                 />
                 <FormControlLabel
@@ -981,7 +972,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                       color="primary"
                     />
                   }
-                  label={t('useAsCurrency')}
+                  label={t('useAsCurrencyPrefix')}
                   sx={{ mb: 2, display: 'block' }}
                 />
               </>
@@ -1000,8 +991,16 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                       let updatedUISchema = { ...localField.uischema };
                       delete updatedSchema.default;
                       let type = '';
+                      let label = '';
+                      let newKey = '';
                       if (isMulti) {
                         type = 'multicheckbox';
+                        label = 'Multi Checkbox';
+                        const keyParts = localField.key.split('_');
+                        newKey =
+                          keyParts.length > 1
+                            ? `multicheckbox_${keyParts[1]}`
+                            : `multicheckbox_${keyParts[0]}`;
                         const defaultEnumOptions =
                           enumOptions.length > 0
                             ? enumOptions
@@ -1018,12 +1017,19 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                           format: 'checkbox',
                           displayType: 'checkbox',
                         };
+                        updatedUISchema.scope = `#/properties/${newKey}`;
                         // Initialize enum options if not already set
                         if (enumOptions.length === 0) {
                           setEnumOptions(defaultEnumOptions);
                         }
                       } else {
                         type = 'checkbox';
+                        label = 'Checkbox';
+                        const keyParts = localField.key.split('_');
+                        newKey =
+                          keyParts.length > 1
+                            ? `checkbox_${keyParts[1]}`
+                            : `checkbox_${keyParts[0]}`;
                         // Convert to single checkbox (boolean)
                         updatedSchema.type = 'boolean';
                         delete updatedSchema.items;
@@ -1035,11 +1041,14 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                         };
                         delete updatedUISchema.options.format;
                         delete updatedUISchema.options.displayType;
+                        updatedUISchema.scope = `#/properties/${newKey}`;
                       }
 
                       handleUpdate(
                         {
                           type,
+                          label,
+                          key: newKey,
                           schema: updatedSchema,
                           uischema: updatedUISchema,
                         },
@@ -1129,360 +1138,69 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
           </AccordionSummary>
 
           <AccordionDetails>
-            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'nowrap' }}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={localField.parentVisibility || false}
-                    onChange={(e) => {
-                      setDependentState(e.target.checked);
-
-                      // handleUpdate({ uischema: updatedUISchema });
-                    }}
-                    color="primary"
-                  />
-                }
-                label={t('isDependent')}
-                sx={formControlLabelSx}
-              />
-            </Box>
-
-            {localField.parentVisibility && (
-              <>
-                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                  <FormControl fullWidth margin="normal" size="small">
-                    <InputLabel id="effect">{t('chooseEffect')}</InputLabel>
-                    <Select
-                      labelId="effect"
-                      label={t('chooseEffect')}
-                      size="small"
-                      value={localField.effect || ''}
-                      onChange={(e) => {
-                        updateEffect(e.target.value);
-                      }}
-                      sx={layoutSelectSx}
-                    >
-                      {['SHOW', 'HIDE', 'ENABLE', 'DISABLE'].map((v) => (
-                        <MenuItem key={v} value={v}>
-                          <Box sx={fieldTypeMenuItemSx}>{t(`effect_${v.toLowerCase()}`)}</Box>
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Box>
-                <Box sx={{ marginTop: '10px' }}>
-                  {rows.map((row, index) => {
-                    const dependsOnField = filteredFields.find((f) => f.key === row.dependsOn);
-                    return (
-                      <>
-                        <Typography
-                          variant="subtitle1"
-                          fontWeight={600}
-                          sx={{ textAlign: 'center' }}
-                        >
-                          {row.logical}
-                        </Typography>
-                        <Box
-                          key={index}
-                          sx={{
-                            display: 'flex',
-                            gap: 1,
-                            flexWrap: 'wrap',
-                            alignItems: 'center',
-                            marginBottom: '5px',
-                          }}
-                        >
-                          {/* Field selector */}
-                          <FormControl size="small" sx={{ minWidth: 100 }}>
-                            <InputLabel id={`depends-on-label-${index}`}>
-                              {t('conditionalLogic.field')}
-                            </InputLabel>
-                            <Select
-                              labelId={`depends-on-label-${index}`}
-                              size="small"
-                              label={t('conditionalLogic.field')}
-                              value={row.dependsOn || ''}
-                              onChange={
-                                (e) => updateCondition(index, 'dependsOn', e.target.value)
-                                // updateCurrentSelection(e.target.value)
-                              }
-                              sx={layoutSelectRuleSx}
-                            >
-                              {filteredFields
-                                .filter((f) => {
-                                  return f.id !== field.id && !excludedTypes.includes(f.type);
-                                })
-                                .map((f) => (
-                                  <MenuItem key={f.key} value={f.key}>
-                                    <Box sx={fieldTypeMenuItemSx}>{f.label}</Box>
-                                  </MenuItem>
-                                ))}
-                            </Select>
-                          </FormControl>
-                          {/* {<pre>{JSON.stringify(dependsOnField)}</pre>} */}
-                          {/* Operator selector */}
-                          {dependsOnField && (
-                            <>
-                              {/* operator */}
-                              <FormControl size="small" sx={{ minWidth: 110 }}>
-                                <InputLabel id={`operator-label-${index}`}>
-                                  {t('conditionalLogic.operator')}
-                                </InputLabel>
-                                <Select
-                                  labelId={`operator-label-${index}`}
-                                  label={t('conditionalLogic.operator')}
-                                  size="small"
-                                  value={row.operator || ''}
-                                  onChange={(e) =>
-                                    updateCondition(index, 'operator', e.target.value)
-                                  }
-                                  sx={layoutSelectRuleSx}
-                                >
-                                  {dependsOnField &&
-                                    dependsOnField?.schema?.enum &&
-                                    OPERATORS[dependsOnField.schema.type]?.map((op) => (
-                                      <MenuItem key={op.value} value={op.value}>
-                                        {op.label}
-                                      </MenuItem>
-                                    ))}
-
-                                  {dependsOnField &&
-                                    dependsOnField.schema?.type === 'array' &&
-                                    OPERATORS['array']?.map((op) => (
-                                      <MenuItem key={op.value} value={op.value}>
-                                        {op.label}
-                                      </MenuItem>
-                                    ))}
-
-                                  {dependsOnField &&
-                                    (dependsOnField.schema.type === 'number' ||
-                                      dependsOnField.schema.type === 'integer') &&
-                                    OPERATORS['number']?.map((op) => (
-                                      <MenuItem key={op.value} value={op.value}>
-                                        {op.label}
-                                      </MenuItem>
-                                    ))}
-
-                                  {!dependsOnField?.schema?.enum &&
-                                    dependsOnField.schema.type === 'string' &&
-                                    dependsOnField.type !== 'date' &&
-                                    OPERATORS['text']?.map((op) => (
-                                      <MenuItem key={op.value} value={op.value}>
-                                        {op.label}
-                                      </MenuItem>
-                                    ))}
-
-                                  {dependsOnField.type === 'date' &&
-                                    OPERATORS['date']?.map((op) => (
-                                      <MenuItem key={op.value} value={op.value}>
-                                        {op.label}
-                                      </MenuItem>
-                                    ))}
-                                  {dependsOnField.schema.type === 'boolean' &&
-                                    OPERATORS[dependsOnField.schema.type]?.map((op) => (
-                                      <MenuItem key={op.value} value={op.value}>
-                                        {op.label}
-                                      </MenuItem>
-                                    ))}
-                                </Select>
-                              </FormControl>
-
-                              {/* select or radio  */}
-                              {dependsOnField?.schema?.enum && (
-                                <FormControl size="small" sx={{ minWidth: 100 }}>
-                                  <InputLabel id={`value-label-${index}`}>
-                                    {t('conditionalLogic.value')}
-                                  </InputLabel>
-                                  <Select
-                                    labelId={`value-label-${index}`}
-                                    size="small"
-                                    disabled={!dependsOnField}
-                                    value={row.value ?? ''}
-                                    label={t('conditionalLogic.value')}
-                                    onChange={(e) => {
-                                      updateCondition(index, 'value', e.target.value);
-                                    }}
-                                    sx={layoutSelectRuleSx}
-                                  >
-                                    {dependsOnField?.schema?.enum?.map((opt) => (
-                                      <MenuItem key={opt} value={opt}>
-                                        {opt}
-                                      </MenuItem>
-                                    ))}
-                                  </Select>
-                                </FormControl>
-                              )}
-
-                              {dependsOnField.schema?.type === 'array' && (
-                                <FormControl size="small" sx={{ minWidth: 100 }}>
-                                  <InputLabel id={`value-label-${index}`}>
-                                    {t('conditionalLogic.value')}
-                                  </InputLabel>
-                                  <Select
-                                    labelId={`value-label-${index}`}
-                                    size="small"
-                                    disabled={!dependsOnField}
-                                    value={row.value ?? ''}
-                                    label={t('conditionalLogic.value')}
-                                    onChange={(e) => {
-                                      updateCondition(index, 'value', e.target.value);
-                                    }}
-                                    sx={layoutSelectRuleSx}
-                                  >
-                                    {dependsOnField?.schema?.items?.enum?.map((opt) => (
-                                      <MenuItem key={opt} value={opt}>
-                                        {opt}
-                                      </MenuItem>
-                                    ))}
-                                  </Select>
-                                </FormControl>
-                              )}
-
-                              {/* checkbox */}
-                              {dependsOnField?.schema.type === 'boolean' && (
-                                <FormControl size="small" sx={{ minWidth: 100 }}>
-                                  <InputLabel id={`value-label-${index}`}>
-                                    {t('conditionalLogic.value')}
-                                  </InputLabel>
-                                  <Select
-                                    labelId={`value-label-${index}`}
-                                    size="small"
-                                    disabled={!dependsOnField}
-                                    label={t('conditionalLogic.value')}
-                                    value={row.value ?? ''}
-                                    onChange={(e) => {
-                                      updateCondition(index, 'value', e.target.value);
-                                    }}
-                                    sx={layoutSelectRuleSx}
-                                  >
-                                    {['true', 'false'].map((v) => (
-                                      <MenuItem key={v} value={v}>
-                                        {v === 'true' ? 'True' : 'False'}
-                                      </MenuItem>
-                                    ))}
-                                  </Select>
-                                </FormControl>
-                              )}
-
-                              {/* number */}
-                              {(dependsOnField.schema.type === 'number' ||
-                                dependsOnField.schema.type === 'integer') && (
-                                <TextField
-                                  type="number"
-                                  size="small"
-                                  value={row.value ?? ''}
-                                  onChange={(e) => {
-                                    updateCondition(index, 'value', e.target.value);
-                                  }}
-                                  variant="outlined"
-                                  sx={{
-                                    ...outlinedTextFieldNumberSx,
-                                    '& input[type=number]': {
-                                      MozAppearance: 'textfield',
-                                    },
-                                    '& input[type=number]::-webkit-outer-spin-button': {
-                                      WebkitAppearance: 'none',
-                                      margin: 0,
-                                    },
-                                    '& input[type=number]::-webkit-inner-spin-button': {
-                                      WebkitAppearance: 'none',
-                                      margin: 0,
-                                    },
-                                  }}
-                                />
-                              )}
-
-                              {/* string type other than select */}
-                              {!dependsOnField?.schema?.enum &&
-                                dependsOnField.schema.type === 'string' &&
-                                dependsOnField.type !== 'date' && (
-                                  <TextField
-                                    size="small"
-                                    value={row.value ?? ''}
-                                    onChange={(e) => {
-                                      updateCondition(index, 'value', e.target.value);
-                                    }}
-                                    variant="outlined"
-                                    sx={outlinedTextFieldNumberSx}
-                                  />
-                                )}
-
-                              {dependsOnField.type === 'date' && (
-                                <TextField
-                                  size="small"
-                                  type="date"
-                                  value={row.value ?? ''}
-                                  onChange={(e) => {
-                                    updateCondition(index, 'value', e.target.value);
-                                  }}
-                                  variant="outlined"
-                                  sx={outlinedTextFieldSx}
-                                />
-                              )}
-                              {/* Delete row */}
-                              {rows.length > 1 && (
-                                <IconButton
-                                  size="small"
-                                  color="error"
-                                  onClick={() => removeRow(index)}
-                                >
-                                  <IconTrash size={19} />
-                                </IconButton>
-                              )}
-                            </>
-                          )}
-                        </Box>
-                      </>
-                    ); //return
-                  })}
-                </Box>
-                {/* Add More button */}
-                <Button variant="contained" onClick={showOperator} sx={{ width: 150 }}>
-                  {t('addMore')}
-                </Button>
-                {showLogical && (
-                  <FormControl sx={{ marginLeft: '10px', minWidth: 110 }} size="small">
-                    <InputLabel id={`condition-label`}>{t('condition')}</InputLabel>
-                    <Select
-                      labelId={`condition-label`}
-                      label={t('condition')}
-                      size="small"
-                      value={logical || ''}
-                      onChange={(e) => addRow(e.target.value)}
-                      sx={layoutSelectSx}
-                    >
-                      {['AND', 'OR'].map((v) => (
-                        <MenuItem key={v} value={v}>
-                          {v}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                )}
-              </>
-            )}
-
             <Box>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={localField.uischema?.options?.readonly || false}
-                    onChange={(e) => {
-                      const updatedUISchema = {
-                        ...localField.uischema,
-                        options: {
-                          ...localField.uischema?.options,
-                          readonly: e.target.checked,
-                        },
-                      };
-                      handleUpdate({ uischema: updatedUISchema });
-                    }}
-                    color="primary"
-                  />
-                }
-                label={t('readOnly')}
-                sx={formControlLabelSx}
-              />
+              {localField.type !== 'file' && (
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={localField.uischema?.options?.readonly || false}
+                      onChange={(e) => {
+                        const updatedUISchema = {
+                          ...localField.uischema,
+                          options: {
+                            ...localField.uischema?.options,
+                            readonly: e.target.checked,
+                          },
+                        };
+
+                        if (e.target.checked) {
+                          // Clear all validation rules when readonly is enabled
+                          const clearedSchema = {
+                            ...localField.schema,
+                            required: undefined,
+                            minLength: undefined,
+                            maxLength: undefined,
+                            pattern: undefined,
+                            minimum: undefined,
+                            maximum: undefined,
+                            formatMinimum: undefined,
+                            formatMaximum: undefined,
+                            minItems: undefined,
+                            maxItems: undefined,
+                          };
+
+                          if (clearedSchema.properties?.startDate) {
+                            clearedSchema.properties.startDate = {
+                              ...clearedSchema.properties.startDate,
+                              formatMinimum: undefined,
+                              formatMaximum: undefined,
+                            };
+                          }
+
+                          if (clearedSchema.properties?.endDate) {
+                            clearedSchema.properties.endDate = {
+                              ...clearedSchema.properties.endDate,
+                              formatMinimum: undefined,
+                              formatMaximum: undefined,
+                            };
+                          }
+
+                          handleUpdate({
+                            uischema: updatedUISchema,
+                            schema: clearedSchema,
+                            required: false,
+                          });
+                        } else {
+                          handleUpdate({ uischema: updatedUISchema });
+                        }
+                      }}
+                      color="primary"
+                    />
+                  }
+                  label={t('readOnly')}
+                  sx={formControlLabelSx}
+                />
+              )}
 
               {/* Show label field only for non-layout and non-group fields */}
               {localField.type !== 'layout' && localField.type !== 'group' && (
@@ -1533,7 +1251,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                           options: { ...localField.uischema?.options },
                         };
 
-                        // Reset values
                         updatedSchema.default = undefined;
                         updatedSchema.formatMinimum = undefined;
                         updatedSchema.formatMaximum = undefined;
@@ -1541,7 +1258,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                         delete updatedSchema.maximum;
 
                         if (type === 'date') {
-                          // Simple date
                           updatedSchema.type = 'string';
                           updatedSchema.format = 'date';
                           updatedUISchema.options.includeTime = false;
@@ -1550,7 +1266,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                           delete updatedSchema.properties;
                           delete updatedSchema.items;
                         } else if (type === 'datetime') {
-                          // Date with time
                           updatedSchema.type = 'string';
                           updatedSchema.format = 'date-time';
                           updatedUISchema.options.includeTime = true;
@@ -1559,7 +1274,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                           delete updatedSchema.properties;
                           delete updatedSchema.items;
                         } else if (type === 'range') {
-                          // Date range
                           updatedSchema.type = 'object';
                           updatedSchema.properties = {
                             startDate: {
@@ -1989,11 +1703,12 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                   onBlur={(e) => {
                     let defaultValue = e.target.value;
 
-                    // Convert to appropriate type
                     if (localField.type === 'number' || localField.type === 'integer') {
                       defaultValue = defaultValue ? Number(defaultValue) : undefined;
+                      handleSchemaUpdate({ default: defaultValue });
                     } else if (localField.type === 'checkbox') {
                       defaultValue = defaultValue.toLowerCase() === 'true';
+                      handleSchemaUpdate({ default: defaultValue });
                     } else {
                       handleSchemaUpdate({ default: defaultValue });
                     }
@@ -2019,18 +1734,62 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                 <FormControl fullWidth margin="normal">
                   <InputLabel>{t('defaultValue')}</InputLabel>
                   <Select
-                    value={localField.schema?.default || []}
+                    value={
+                      localField.schema?.default !== undefined && localField.schema.default !== null
+                        ? localField.schema.default
+                        : localField.type === 'multiselect' || localField.type === 'multicheckbox'
+                          ? []
+                          : '__CLEAR__'
+                    }
                     multiple={
                       localField.type === 'multiselect' || localField.type === 'multicheckbox'
                     }
                     label={t('defaultValue')}
                     onChange={(e) => {
-                      handleSchemaUpdate({
-                        default: e.target.value,
-                      });
+                      const newValue = e.target.value;
+                      if (
+                        !(
+                          localField.type === 'multiselect' || localField.type === 'multicheckbox'
+                        ) &&
+                        newValue === '__CLEAR__'
+                      ) {
+                        handleSchemaUpdate({
+                          default: undefined,
+                        });
+                      } else {
+                        handleSchemaUpdate({
+                          default: newValue,
+                        });
+                      }
                     }}
                     sx={layoutSelectSx}
+                    renderValue={(selected) => {
+                      if (
+                        localField.type === 'multiselect' ||
+                        localField.type === 'multicheckbox'
+                      ) {
+                        return Array.isArray(selected) && selected.length > 0
+                          ? selected.join(', ')
+                          : '';
+                      }
+                      if (
+                        selected === '__CLEAR__' ||
+                        selected === '' ||
+                        selected === null ||
+                        selected === undefined
+                      ) {
+                        return '';
+                      }
+                      return selected;
+                    }}
                   >
+                    {!(
+                      localField.type === 'multiselect' || localField.type === 'multicheckbox'
+                    ) && (
+                      <MenuItem value="__CLEAR__">
+                        <em style={{ fontStyle: 'italic', color: '#999' }}>— {t('clear')}</em>
+                      </MenuItem>
+                    )}
                     {getEnumData(localField).map((opt) => (
                       <MenuItem key={opt} value={opt}>
                         {opt}
@@ -2051,7 +1810,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                       let updatedSchema = { ...localField.schema };
 
                       if (itemType === 'object') {
-                        // For objects, set up the structure with detail layout
                         updatedSchema.items = {
                           type: 'object',
                           properties: {},
@@ -2073,7 +1831,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                           uischema: updatedUISchema,
                         });
                       } else {
-                        // For primitive types (string/number), remove object-specific properties
                         updatedSchema.items = { type: itemType };
 
                         const updatedUISchema = {
@@ -2098,29 +1855,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                     <MenuItem value="object">{t('object')}</MenuItem>
                   </Select>
                 </FormControl>
-              )}
-
-              {/* Element Label field for array of objects */}
-              {localField.type === 'array' && localField.schema?.items?.type === 'object' && (
-                <TextField
-                  label={t('elementLabel')}
-                  fullWidth
-                  value={localField.uischema?.options?.elementLabelProp || ''}
-                  onChange={(e) => {
-                    const updatedUISchema = {
-                      ...localField.uischema,
-                      options: {
-                        ...localField.uischema?.options,
-                        elementLabelProp: e.target.value || undefined,
-                      },
-                    };
-                    handleUpdate({ uischema: updatedUISchema });
-                  }}
-                  margin="normal"
-                  variant="outlined"
-                  helperText={t('elementLabelHelp')}
-                  sx={outlinedTextFieldSx}
-                />
               )}
 
               <TextField
@@ -2242,19 +1976,14 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                         const isChecked = e.target.checked;
 
                         if (isChecked && parentArrayField) {
-                          // Clear element label from other fields in the same array
                           clearElementLabelFromSiblings(parentArrayField, localField.key);
 
-                          // Set this field as element label
                           handleUpdate({ isElementLabel: true });
 
-                          // Update parent array's elementLabelProp
                           updateParentArrayElementLabel(parentArrayField, localField.key);
                         } else {
-                          // Remove element label from this field
                           handleUpdate({ isElementLabel: false });
 
-                          // Clear elementLabelProp from parent array if this was the selected field
                           if (
                             parentArrayField?.uischema?.options?.elementLabelProp === localField.key
                           ) {
@@ -2460,14 +2189,12 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                             const newType = e.target.value;
                             setEnumDataType(newType);
 
-                            // Reset to default options based on type
                             const defaultOptions =
                               newType === 'number'
                                 ? [1, 2, 3]
                                 : ['Option 1', 'Option 2', 'Option 3'];
                             setEnumOptions(defaultOptions);
                             setDefaultInput('');
-                            // Update schema with default options
                             if (localField.schema?.type === 'array' && localField.schema?.items) {
                               handleSchemaUpdate({
                                 default: undefined,
@@ -2536,9 +2263,9 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
           </AccordionDetails>
         </Accordion>
       )}
-      {/* Validation Rules */}
+      {/* Validations */}
       {!isLayout && !isGroup && (
-        <Accordion sx={accordionSx}>
+        <Accordion sx={accordionSx} disabled={localField.uischema?.options?.readonly || false}>
           <AccordionSummary expandIcon={<IconChevronDown />} sx={accordionSummarySx}>
             <Typography variant="subtitle1" fontWeight={600}>
               {t('validationRules')}
@@ -2552,6 +2279,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                   checked={localField.required || false}
                   onChange={(e) => handleUpdate({ required: e.target.checked })}
                   color="primary"
+                  disabled={localField.uischema?.options?.readonly || false}
                 />
               }
               label={t('requiredField')}
@@ -2582,6 +2310,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                         }}
                         margin="normal"
                         variant="outlined"
+                        disabled={localField.uischema?.options?.readonly || false}
                         inputProps={{
                           step: 1,
                           min: 0,
@@ -2607,6 +2336,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                         }}
                         margin="normal"
                         variant="outlined"
+                        disabled={localField.uischema?.options?.readonly || false}
                         inputProps={{
                           step: 1,
                           min: 0,
@@ -2627,6 +2357,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                     }
                     margin="normal"
                     variant="outlined"
+                    disabled={localField.uischema?.options?.readonly || false}
                     helperText={t('patternHelp')}
                     sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                   />
@@ -2645,6 +2376,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                   }
                   margin="normal"
                   variant="outlined"
+                  disabled={localField.uischema?.options?.readonly || false}
                   helperText={t('patternHelp')}
                   sx={outlinedTextFieldSx}
                 />
@@ -2664,6 +2396,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                       }
                       margin="normal"
                       variant="outlined"
+                      disabled={localField.uischema?.options?.readonly || false}
                       inputProps={localField.type === 'integer' ? { step: 1 } : {}}
                       sx={outlinedTextFieldSx}
                     />
@@ -2682,6 +2415,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                       }
                       margin="normal"
                       variant="outlined"
+                      disabled={localField.uischema?.options?.readonly || false}
                       inputProps={localField.type === 'integer' ? { step: 1 } : {}}
                       sx={outlinedTextFieldSx}
                     />
@@ -2730,10 +2464,8 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                           if (dateValue) {
                             const includeTime = localField.uischema?.options?.includeTime;
                             if (includeTime) {
-                              // Keep datetime in local timezone format (YYYY-MM-DDTHH:mm:ss)
                               dateValue = dateValue + ':00';
                             } else {
-                              // Ensure date-only format (YYYY-MM-DD)
                               dateValue = dateValue.split('T')[0];
                             }
                           } else {
@@ -2742,7 +2474,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
 
                           handleSchemaUpdate({ formatMinimum: dateValue });
 
-                          // Clear default if it's now invalid
                           const currentDefault = localField.schema?.default;
                           if (
                             currentDefault &&
@@ -2773,6 +2504,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                         }}
                         margin="normal"
                         variant="outlined"
+                        disabled={localField.uischema?.options?.readonly || false}
                         helperText={t('minDateHelp')}
                         InputLabelProps={{
                           shrink: true,
@@ -2784,6 +2516,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                                 size="small"
                                 onClick={() => handleSchemaUpdate({ formatMinimum: undefined })}
                                 edge="end"
+                                disabled={localField.uischema?.options?.readonly || false}
                                 sx={{
                                   color: 'text.secondary',
                                   '&:hover': { color: 'error.main' },
@@ -2827,10 +2560,8 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                           if (dateValue) {
                             const includeTime = localField.uischema?.options?.includeTime;
                             if (includeTime) {
-                              // Keep datetime in local timezone format (YYYY-MM-DDTHH:mm:ss)
                               dateValue = dateValue + ':00';
                             } else {
-                              // Ensure date-only format (YYYY-MM-DD)
                               dateValue = dateValue.split('T')[0];
                             }
                           } else {
@@ -2839,7 +2570,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
 
                           handleSchemaUpdate({ formatMaximum: dateValue });
 
-                          // Clear default if it's now invalid
                           const currentDefault = localField.schema?.default;
                           if (
                             currentDefault &&
@@ -2870,6 +2600,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                         }}
                         margin="normal"
                         variant="outlined"
+                        disabled={localField.uischema?.options?.readonly || false}
                         helperText={t('maxDateHelp')}
                         InputLabelProps={{
                           shrink: true,
@@ -2881,6 +2612,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                                 size="small"
                                 onClick={() => handleSchemaUpdate({ formatMaximum: undefined })}
                                 edge="end"
+                                disabled={localField.uischema?.options?.readonly || false}
                                 sx={{
                                   color: 'text.secondary',
                                   '&:hover': { color: 'error.main' },
@@ -2939,7 +2671,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                               },
                             };
 
-                            // Clear defaults if they become invalid
                             const defaultStartDate =
                               localField.schema?.properties?.startDate?.default;
                             const defaultEndDate = localField.schema?.properties?.endDate?.default;
@@ -2970,6 +2701,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                           }}
                           margin="normal"
                           variant="outlined"
+                          disabled={localField.uischema?.options?.readonly || false}
                           helperText={t('minDateRangeHelp')}
                           InputLabelProps={{
                             shrink: true,
@@ -2996,6 +2728,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                                     })
                                   }
                                   edge="end"
+                                  disabled={localField.uischema?.options?.readonly || false}
                                   sx={{
                                     color: 'text.secondary',
                                     '&:hover': { color: 'error.main' },
@@ -3043,7 +2776,6 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                               },
                             };
 
-                            // Clear defaults if they become invalid
                             const defaultStartDate =
                               localField.schema?.properties?.startDate?.default;
                             const defaultEndDate = localField.schema?.properties?.endDate?.default;
@@ -3074,6 +2806,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                           }}
                           margin="normal"
                           variant="outlined"
+                          disabled={localField.uischema?.options?.readonly || false}
                           helperText={t('maxDateRangeHelp')}
                           InputLabelProps={{
                             shrink: true,
@@ -3099,6 +2832,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                                     })
                                   }
                                   edge="end"
+                                  disabled={localField.uischema?.options?.readonly || false}
                                   sx={{
                                     color: 'text.secondary',
                                     '&:hover': { color: 'error.main' },
@@ -3131,6 +2865,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                       }
                       margin="normal"
                       variant="outlined"
+                      disabled={localField.uischema?.options?.readonly || false}
                       helperText={t('minItemsHelp')}
                       inputProps={{ min: 0 }}
                       sx={outlinedTextFieldSx}
@@ -3150,6 +2885,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                       }
                       margin="normal"
                       variant="outlined"
+                      disabled={localField.uischema?.options?.readonly || false}
                       helperText={t('maxItemsHelp')}
                       inputProps={{ min: 0 }}
                       sx={outlinedTextFieldSx}
@@ -3188,6 +2924,7 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                         }}
                         margin="normal"
                         variant="outlined"
+                        disabled={localField.uischema?.options?.readonly || false}
                         helperText={t('maxFileSizeHelp')}
                         inputProps={{
                           step: 0.1,
@@ -3200,6 +2937,338 @@ const FieldProperties = ({ field, onFieldUpdate, fields, setFields, visibleField
                 </>
               )}
             </Box>
+          </AccordionDetails>
+        </Accordion>
+      )}
+
+      {/* Rules */}
+      {!isLayout && !isGroup && (
+        <Accordion sx={accordionSx}>
+          <AccordionSummary expandIcon={<IconChevronDown />} sx={accordionSummarySx}>
+            <Typography variant="subtitle1" fontWeight={600}>
+              {t('rules')}
+            </Typography>
+          </AccordionSummary>
+
+          <AccordionDetails>
+            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'nowrap' }}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={localField.parentVisibility || false}
+                    onChange={(e) => {
+                      setDependentState(e.target.checked);
+                    }}
+                    color="primary"
+                  />
+                }
+                label={t('isDependent')}
+                sx={formControlLabelSx}
+              />
+            </Box>
+
+            {localField.parentVisibility && (
+              <>
+                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                  <FormControl fullWidth margin="normal" size="small">
+                    <InputLabel id="effect">{t('chooseEffect')}</InputLabel>
+                    <Select
+                      labelId="effect"
+                      label={t('chooseEffect')}
+                      size="small"
+                      value={localField.effect || ''}
+                      onChange={(e) => {
+                        updateEffect(e.target.value);
+                      }}
+                      sx={layoutSelectSx}
+                    >
+                      {['SHOW', 'HIDE', 'ENABLE', 'DISABLE'].map((v) => (
+                        <MenuItem key={v} value={v}>
+                          <Box sx={fieldTypeMenuItemSx}>{t(`effect_${v.toLowerCase()}`)}</Box>
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Box>
+                <Box sx={{ marginTop: '10px' }}>
+                  {rows.map((row, index) => {
+                    const dependsOnField = filteredFields.find((f) => f.key === row.dependsOn);
+                    return (
+                      <>
+                        <Typography
+                          variant="subtitle1"
+                          fontWeight={600}
+                          sx={{ textAlign: 'center' }}
+                        >
+                          {row.logical}
+                        </Typography>
+                        <Box key={index} sx={fieldSelectionSx}>
+                          {/* Field selector */}
+                          <FormControl size="small" sx={{ minWidth: 100 }}>
+                            <InputLabel id={`depends-on-label-${index}`}>
+                              {t('conditionalLogic.field')}
+                            </InputLabel>
+                            <Select
+                              labelId={`depends-on-label-${index}`}
+                              size="small"
+                              label={t('conditionalLogic.field')}
+                              value={row.dependsOn || ''}
+                              onChange={(e) => updateCondition(index, 'dependsOn', e.target.value)}
+                              sx={layoutSelectRuleSx}
+                            >
+                              {filteredFields
+                                .filter((f) => {
+                                  return f.id !== field.id && !excludedTypes.includes(f.type);
+                                })
+                                .map((f) => (
+                                  <MenuItem key={f.key} value={f.key}>
+                                    <Box sx={fieldTypeMenuItemSx}>{f.label}</Box>
+                                  </MenuItem>
+                                ))}
+                            </Select>
+                          </FormControl>
+                          {/* {<pre>{JSON.stringify(dependsOnField)}</pre>} */}
+                          {/* Operator selector */}
+                          {dependsOnField && (
+                            <>
+                              {/* operator */}
+                              <FormControl size="small" sx={{ minWidth: 110 }}>
+                                <InputLabel id={`operator-label-${index}`}>
+                                  {t('conditionalLogic.operator')}
+                                </InputLabel>
+                                <Select
+                                  labelId={`operator-label-${index}`}
+                                  label={t('conditionalLogic.operator')}
+                                  size="small"
+                                  value={row.operator || ''}
+                                  onChange={(e) =>
+                                    updateCondition(index, 'operator', e.target.value)
+                                  }
+                                  sx={layoutSelectRuleSx}
+                                >
+                                  {dependsOnField &&
+                                    dependsOnField?.schema?.enum &&
+                                    OPERATORS[dependsOnField.schema.type]?.map((op) => (
+                                      <MenuItem key={op.value} value={op.value}>
+                                        {op.label}
+                                      </MenuItem>
+                                    ))}
+
+                                  {dependsOnField &&
+                                    dependsOnField.schema?.type === 'array' &&
+                                    OPERATORS['array']?.map((op) => (
+                                      <MenuItem key={op.value} value={op.value}>
+                                        {op.label}
+                                      </MenuItem>
+                                    ))}
+
+                                  {dependsOnField &&
+                                    (dependsOnField.schema.type === 'number' ||
+                                      dependsOnField.schema.type === 'integer') &&
+                                    OPERATORS['number']?.map((op) => (
+                                      <MenuItem key={op.value} value={op.value}>
+                                        {op.label}
+                                      </MenuItem>
+                                    ))}
+
+                                  {!dependsOnField?.schema?.enum &&
+                                    dependsOnField.schema.type === 'string' &&
+                                    dependsOnField.type !== 'date' &&
+                                    OPERATORS['text']?.map((op) => (
+                                      <MenuItem key={op.value} value={op.value}>
+                                        {op.label}
+                                      </MenuItem>
+                                    ))}
+
+                                  {dependsOnField.type === 'date' &&
+                                    OPERATORS['date']?.map((op) => (
+                                      <MenuItem key={op.value} value={op.value}>
+                                        {op.label}
+                                      </MenuItem>
+                                    ))}
+                                  {dependsOnField.schema.type === 'boolean' &&
+                                    OPERATORS[dependsOnField.schema.type]?.map((op) => (
+                                      <MenuItem key={op.value} value={op.value}>
+                                        {op.label}
+                                      </MenuItem>
+                                    ))}
+                                </Select>
+                              </FormControl>
+
+                              {/* select or radio  */}
+                              {dependsOnField?.schema?.enum && (
+                                <FormControl size="small" sx={{ minWidth: 100 }}>
+                                  <InputLabel id={`value-label-${index}`}>
+                                    {t('conditionalLogic.value')}
+                                  </InputLabel>
+                                  <Select
+                                    labelId={`value-label-${index}`}
+                                    size="small"
+                                    disabled={!dependsOnField}
+                                    value={row.value ?? ''}
+                                    label={t('conditionalLogic.value')}
+                                    onChange={(e) => {
+                                      updateCondition(index, 'value', e.target.value);
+                                    }}
+                                    sx={layoutSelectRuleSx}
+                                  >
+                                    {dependsOnField?.schema?.enum?.map((opt) => (
+                                      <MenuItem key={opt} value={opt}>
+                                        {opt}
+                                      </MenuItem>
+                                    ))}
+                                  </Select>
+                                </FormControl>
+                              )}
+
+                              {dependsOnField.schema?.type === 'array' && (
+                                <FormControl size="small" sx={{ minWidth: 100 }}>
+                                  <InputLabel id={`value-label-${index}`}>
+                                    {t('conditionalLogic.value')}
+                                  </InputLabel>
+                                  <Select
+                                    labelId={`value-label-${index}`}
+                                    size="small"
+                                    disabled={!dependsOnField}
+                                    value={row.value ?? ''}
+                                    label={t('conditionalLogic.value')}
+                                    onChange={(e) => {
+                                      updateCondition(index, 'value', e.target.value);
+                                    }}
+                                    sx={layoutSelectRuleSx}
+                                  >
+                                    {dependsOnField?.schema?.items?.enum?.map((opt) => (
+                                      <MenuItem key={opt} value={opt}>
+                                        {opt}
+                                      </MenuItem>
+                                    ))}
+                                  </Select>
+                                </FormControl>
+                              )}
+
+                              {/* checkbox */}
+                              {dependsOnField?.schema.type === 'boolean' && (
+                                <FormControl size="small" sx={{ minWidth: 100 }}>
+                                  <InputLabel id={`value-label-${index}`}>
+                                    {t('conditionalLogic.value')}
+                                  </InputLabel>
+                                  <Select
+                                    labelId={`value-label-${index}`}
+                                    size="small"
+                                    disabled={!dependsOnField}
+                                    label={t('conditionalLogic.value')}
+                                    value={row.value ?? ''}
+                                    onChange={(e) => {
+                                      updateCondition(index, 'value', e.target.value);
+                                    }}
+                                    sx={layoutSelectRuleSx}
+                                  >
+                                    {['true', 'false'].map((v) => (
+                                      <MenuItem key={v} value={v}>
+                                        {v === 'true' ? 'True' : 'False'}
+                                      </MenuItem>
+                                    ))}
+                                  </Select>
+                                </FormControl>
+                              )}
+
+                              {/* number */}
+                              {(dependsOnField.schema.type === 'number' ||
+                                dependsOnField.schema.type === 'integer') && (
+                                <TextField
+                                  type="number"
+                                  size="small"
+                                  value={row.value ?? ''}
+                                  onChange={(e) => {
+                                    updateCondition(index, 'value', e.target.value);
+                                  }}
+                                  variant="outlined"
+                                  sx={{
+                                    ...outlinedTextFieldNumberSx,
+                                    '& input[type=number]': {
+                                      MozAppearance: 'textfield',
+                                    },
+                                    '& input[type=number]::-webkit-outer-spin-button': {
+                                      WebkitAppearance: 'none',
+                                      margin: 0,
+                                    },
+                                    '& input[type=number]::-webkit-inner-spin-button': {
+                                      WebkitAppearance: 'none',
+                                      margin: 0,
+                                    },
+                                  }}
+                                />
+                              )}
+
+                              {/* string type other than select */}
+                              {!dependsOnField?.schema?.enum &&
+                                dependsOnField.schema.type === 'string' &&
+                                dependsOnField.type !== 'date' && (
+                                  <TextField
+                                    size="small"
+                                    value={row.value ?? ''}
+                                    onChange={(e) => {
+                                      updateCondition(index, 'value', e.target.value);
+                                    }}
+                                    variant="outlined"
+                                    sx={outlinedTextFieldNumberSx}
+                                  />
+                                )}
+
+                              {dependsOnField.type === 'date' && (
+                                <TextField
+                                  size="small"
+                                  type="date"
+                                  value={row.value ?? ''}
+                                  onChange={(e) => {
+                                    updateCondition(index, 'value', e.target.value);
+                                  }}
+                                  variant="outlined"
+                                  sx={outlinedTextFieldSx}
+                                />
+                              )}
+                              {/* Delete row */}
+                              {rows.length > 1 && (
+                                <IconButton
+                                  size="small"
+                                  color="error"
+                                  onClick={() => removeRow(index)}
+                                >
+                                  <IconTrash size={19} />
+                                </IconButton>
+                              )}
+                            </>
+                          )}
+                        </Box>
+                      </>
+                    ); //return
+                  })}
+                </Box>
+                {/* Add More button */}
+                <Button variant="contained" onClick={showOperator} sx={{ width: 150 }}>
+                  {t('addMore')}
+                </Button>
+                {showLogical && (
+                  <FormControl sx={{ marginLeft: '10px', minWidth: 110 }} size="small">
+                    <InputLabel id={`condition-label`}>{t('condition')}</InputLabel>
+                    <Select
+                      labelId={`condition-label`}
+                      label={t('condition')}
+                      size="small"
+                      value={logical || ''}
+                      onChange={(e) => addRow(e.target.value)}
+                      sx={layoutSelectSx}
+                    >
+                      {['AND', 'OR'].map((v) => (
+                        <MenuItem key={v} value={v}>
+                          {v}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                )}
+              </>
+            )}
           </AccordionDetails>
         </Accordion>
       )}

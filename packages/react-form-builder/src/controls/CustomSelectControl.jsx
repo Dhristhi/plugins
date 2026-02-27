@@ -23,6 +23,30 @@ import { updateNestedValue } from '../utils';
 // Extract MaterialEnumControl from Unwrapped
 const { MaterialEnumControl } = Unwrapped;
 
+// Helper function to get nested property value using dot notation
+const getNestedProperty = (obj, path) => {
+  if (!path) return obj;
+  return path.split('.').reduce((acc, part) => acc?.[part], obj);
+};
+
+// Smart property getter: tries dot notation first, then auto-detection
+const getProperty = (obj, path) => {
+  if (!path) return obj;
+
+  // Try dot notation first
+  const dotNotationResult = getNestedProperty(obj, path);
+  if (dotNotationResult !== undefined) {
+    return dotNotationResult;
+  }
+  // Fallback: try direct property access (handles non-nested keys)
+  const directResult = obj?.[path];
+  if (directResult !== undefined) {
+    return directResult;
+  }
+  // Explicitly return null when no value is found to avoid implicit undefined
+  return null;
+};
+
 const CustomSelectControl = (props) => {
   const { t } = useTranslation();
   const { core } = useJsonForms();
@@ -57,8 +81,27 @@ const CustomSelectControl = (props) => {
       const response = await fetch(entity);
       const json = await response.json();
       setIsLoading(false);
-      // Handle nested data structure (e.g., {data: [...]} or direct array)
-      return Array.isArray(json) ? json : json.data || [];
+
+      // If response is already an array, return it
+      if (Array.isArray(json)) {
+        return json;
+      }
+
+      // Recursively find first array in nested object
+      const findArray = (obj) => {
+        for (const key in obj) {
+          if (Array.isArray(obj[key])) {
+            return obj[key];
+          }
+          if (obj[key] && typeof obj[key] === 'object') {
+            const result = findArray(obj[key]);
+            if (result) return result;
+          }
+        }
+        return null;
+      };
+
+      return findArray(json) || [];
     } catch (error) {
       console.error('API call failed:', error);
       setIsLoading(false);
@@ -72,11 +115,14 @@ const CustomSelectControl = (props) => {
         const res = await apiCall(entity);
         if (res.length > 0) {
           const newOptions = res.map((item) => ({
-            label: value ? String(item[value]) : String(item),
-            value: key ? item[key] : item,
+            label: value ? String(getProperty(item, value)) : String(item),
+            value: key ? getProperty(item, key) : item,
             raw: item,
           }));
           setOptions(newOptions);
+        } else {
+          // Clear options when API returns empty array or fails
+          setOptions([]);
         }
       } else {
         const newOptions =

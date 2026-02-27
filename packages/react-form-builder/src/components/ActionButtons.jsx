@@ -13,61 +13,29 @@ import {
   Button,
 } from '@mui/material';
 import {
-  IconPlus,
   IconEdit,
   IconTrash,
   IconDotsVertical,
-  IconChevronDown,
   IconArrowUp,
   IconArrowDown,
 } from '@tabler/icons-react';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { defaultFieldTypes } from '../types';
-
-const ActionButtons = ({
-  field,
-  level,
-  parentId,
-  onFieldSelect,
-  onAddFieldToLayout,
-  onAddLayoutToContainer,
-  moveField,
-  deleteField,
-}) => {
+const ActionButtons = ({ field, level, parentId, onFieldSelect, moveField, deleteField }) => {
   const { t } = useTranslation();
   const [anchorEl, setAnchorEl] = useState(null);
-  const [addMenuAnchor, setAddMenuAnchor] = useState(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
-
-  const isLayout = field.isLayout;
-  const layoutTypes = defaultFieldTypes.filter((ft) => ft.isLayout && ft.id !== 'object');
 
   const handleMoreClick = (event) => {
     event.stopPropagation();
     setAnchorEl(event.currentTarget);
   };
 
-  const handleAddClick = (event) => {
-    event.stopPropagation();
-    setAddMenuAnchor(event.currentTarget);
-  };
-
   const handleClose = () => {
     setAnchorEl(null);
-    setAddMenuAnchor(null);
   };
 
-  const handleAddField = () => {
-    onAddFieldToLayout(field.id);
-    handleClose();
-  };
-
-  const handleAddLayout = (layoutType) => {
-    onAddLayoutToContainer(field.id, layoutType);
-    handleClose();
-  };
   const openDeleteConfirm = (e) => {
     e.stopPropagation();
     setConfirmOpen(true);
@@ -99,15 +67,6 @@ const ActionButtons = ({
 
     iconButtonBase: (level) => ({
       p: level > 1 ? 0.25 : 0.5,
-    }),
-
-    successButton: (level) => ({
-      ...styles.iconButtonBase(level),
-      color: 'success.main',
-      '&:hover': {
-        color: 'success.dark',
-        backgroundColor: 'success.light',
-      },
     }),
 
     primaryButton: (level) => ({
@@ -176,15 +135,6 @@ const ActionButtons = ({
             <ListItemText primary={t('edit')} />
           </MenuItem>
 
-          {isLayout && (
-            <MenuItem onClick={handleAddField}>
-              <ListItemIcon>
-                <IconPlus size={18} />
-              </ListItemIcon>
-              <ListItemText primary={t('addField')} />
-            </MenuItem>
-          )}
-
           <MenuItem
             onClick={(e) => {
               e.stopPropagation();
@@ -234,25 +184,9 @@ const ActionButtons = ({
     );
   }
 
-  const iconContainerSx = {
-    display: 'flex',
-    alignItems: 'center',
-  };
-
   // For shallower nesting, show more buttons
   return (
     <Box sx={styles.actionContainer(level)}>
-      {isLayout && (
-        <Tooltip title={t('addFieldOrLayout')}>
-          <IconButton size="small" onClick={handleAddClick} sx={styles.successButton(level)}>
-            <Box sx={iconContainerSx}>
-              <IconPlus size={level > 1 ? 16 : 18} />
-              <IconChevronDown size={level > 1 ? 12 : 14} />
-            </Box>
-          </IconButton>
-        </Tooltip>
-      )}
-
       <Tooltip title={t('edit')}>
         <IconButton
           size="small"
@@ -277,46 +211,6 @@ const ActionButtons = ({
           <IconTrash size={level > 1 ? 16 : 18} />
         </IconButton>
       </Tooltip>
-
-      {/* Add Menu */}
-      <Menu
-        anchorEl={addMenuAnchor}
-        open={Boolean(addMenuAnchor)}
-        onClose={handleClose}
-        MenuListProps={{
-          dense: true,
-        }}
-      >
-        <MenuItem onClick={handleAddField}>
-          <ListItemIcon>
-            <IconEdit size={18} color={(theme) => theme.palette.primary.main} />
-          </ListItemIcon>
-          <ListItemText primary={t('addField')} secondary={t('addFormInput')} />
-        </MenuItem>
-
-        <Divider />
-
-        {layoutTypes.map((layoutType) => (
-          <MenuItem key={layoutType.id} onClick={() => handleAddLayout(layoutType)}>
-            <ListItemIcon>
-              {React.createElement(layoutType.icon, {
-                size: 18,
-                color: (theme) => theme.palette.grey[500],
-              })}
-            </ListItemIcon>
-            <ListItemText
-              primary={layoutType.labelKey ? t(layoutType.labelKey) : layoutType.label}
-              secondary={
-                layoutType.id === 'group'
-                  ? t('containerWithBorder')
-                  : layoutType.id === 'vertical-layout'
-                    ? t('stackVertically')
-                    : t('arrangeHorizontally')
-              }
-            />
-          </MenuItem>
-        ))}
-      </Menu>
 
       {/* More Options Menu */}
       <Menu

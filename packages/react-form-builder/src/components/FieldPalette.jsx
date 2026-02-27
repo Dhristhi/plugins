@@ -10,15 +10,29 @@ import {
   Select,
   MenuItem,
   IconButton,
-  Popover,
+  Drawer,
+  Button,
   FormControlLabel,
   Checkbox,
   List,
   ListItem,
   Tooltip,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  TextField,
+  Switch,
 } from '@mui/material';
 import { useDraggable } from '@dnd-kit/core';
-import { IconLayersLinked, IconForms, IconClipboard, IconSettings } from '@tabler/icons-react';
+import {
+  IconLayersLinked,
+  IconForms,
+  IconClipboard,
+  IconSettings,
+  IconChevronDown,
+  IconX,
+  IconTrash,
+} from '@tabler/icons-react';
 
 import '../lib/registry/init';
 import { getFieldTypes } from '../lib/registry/fieldRegistry';
@@ -116,10 +130,67 @@ const FieldPalette = ({
   loadedSchemaId = '',
   visibleFields = {},
   onVisibleFieldsChange,
+  screenResolutions,
+  onScreenChanged,
+  responsiveState,
+  toolbarVisibility = {},
+  onToolbarVisibilityChange,
 }) => {
   const { t } = useTranslation();
   const [selectedSchema, setSelectedSchema] = useState(loadedSchemaId);
-  const [settingsAnchorEl, setSettingsAnchorEl] = useState(null);
+  const [isSettingsDrawerOpen, setIsSettingsDrawerOpen] = useState(false);
+  const [tempVisibleFields, setTempVisibleFields] = useState({});
+  const [tempToolbarVisibility, setTempToolbarVisibility] = useState({});
+  const [expandedAccordions, setExpandedAccordions] = useState({
+    layouts: false,
+    formFields: false,
+  });
+
+  const accordionSx = {
+    mb: 2,
+    borderRadius: 0,
+    border: '1px solid',
+    borderColor: 'divider',
+    boxShadow: 'none',
+    mx: -2,
+    transition: 'all 0.2s ease-in-out',
+    '&:before': {
+      display: 'none',
+    },
+    '&.Mui-expanded': {
+      margin: '15px -15px',
+      boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
+    },
+    '&:hover': {
+      borderRadius: 0,
+      boxShadow: '0 4px 16px rgba(0,0,0,0.06)',
+    },
+  };
+
+  const accordionSummarySx = {
+    '& .MuiAccordionSummary-content': {
+      alignItems: 'center',
+    },
+    '&:hover': {
+      borderRadius: 0,
+      backgroundColor: 'action.hover',
+    },
+    borderRadius: 3,
+  };
+
+  const propertiesPanelFooter = {
+    p: '10px',
+    bgcolor: 'background.paper',
+    borderTop: 1,
+    borderColor: 'divider',
+    display: 'flex',
+    gap: 2,
+    boxShadow: '0 -2px 10px rgba(0,0,0,0.1)',
+    position: 'sticky',
+    bottom: 0,
+    zIndex: 10,
+    height: 64,
+  };
 
   React.useEffect(() => {
     setSelectedSchema(loadedSchemaId);
@@ -150,45 +221,71 @@ const FieldPalette = ({
     }
   };
 
-  const handleSettingsClick = (event) => {
-    setSettingsAnchorEl(event.currentTarget);
+  const handleSettingsClick = () => {
+    setTempVisibleFields(visibleFields);
+    setTempToolbarVisibility(toolbarVisibility);
+    setIsSettingsDrawerOpen(true);
   };
 
-  const handleSettingsClose = () => {
-    setSettingsAnchorEl(null);
+  const handleSettingsSave = () => {
+    if (onVisibleFieldsChange) {
+      onVisibleFieldsChange(tempVisibleFields);
+    }
+    if (onToolbarVisibilityChange) {
+      onToolbarVisibilityChange(tempToolbarVisibility);
+    }
+    if (hasChanges) {
+      onScreenChanged({ rows: rows, layout: resonsiveLayoutState });
+    }
+    setIsSettingsDrawerOpen(false);
+  };
+
+  const handleSettingsCancel = () => {
+    setIsScreenChanged(false);
+    setTempVisibleFields(visibleFields);
+    setTempToolbarVisibility(toolbarVisibility);
+    setRows(screenResolutions);
+    setResonsiveLayoutState(responsiveState || false);
+    setIsSettingsDrawerOpen(false);
+  };
+
+  const handleAccordionChange = (panel) => (_, isExpanded) => {
+    setIsScreenChanged(true);
+    setExpandedAccordions((prev) => ({
+      ...prev,
+      [panel]: isExpanded,
+    }));
   };
 
   const handleFieldVisibilityChange = (fieldId) => {
-    if (onVisibleFieldsChange) {
-      onVisibleFieldsChange((prev) => ({
-        ...prev,
-        [fieldId]: !prev[fieldId],
-      }));
-    }
+    setTempVisibleFields((prev) => ({
+      ...prev,
+      [fieldId]: !prev[fieldId],
+    }));
   };
 
   const handleLayoutsToggle = () => {
+    setIsScreenChanged(true);
     const allTypes = getFieldTypes();
     const layoutFieldIds = allTypes
       .filter((ft) => ft.isLayout && ft.id !== 'object')
       .map((ft) => ft.id);
-    const allLayoutsCurrentlyVisible = layoutFieldIds.every((id) => visibleFields[id]);
+    const allLayoutsCurrentlyVisible = layoutFieldIds.every((id) => tempVisibleFields[id]);
 
     // If all are visible, hide all. If some or none are visible, show all.
     const newVisibility = !allLayoutsCurrentlyVisible;
 
-    if (onVisibleFieldsChange) {
-      onVisibleFieldsChange((prev) => {
-        const updated = { ...prev };
-        layoutFieldIds.forEach((id) => {
-          updated[id] = newVisibility;
-        });
-        return updated;
+    setTempVisibleFields((prev) => {
+      const updated = { ...prev };
+      layoutFieldIds.forEach((id) => {
+        updated[id] = newVisibility;
       });
-    }
+      return updated;
+    });
   };
 
   const handleFormFieldsToggle = () => {
+    setIsScreenChanged(true);
     const allTypes = getFieldTypes();
     const formFieldIds = allTypes
       .filter(
@@ -199,23 +296,19 @@ const FieldPalette = ({
           ft.id !== 'multicheckbox'
       )
       .map((ft) => ft.id);
-    const allFormFieldsCurrentlyVisible = formFieldIds.every((id) => visibleFields[id]);
+    const allFormFieldsCurrentlyVisible = formFieldIds.every((id) => tempVisibleFields[id]);
 
     // If all are visible, hide all. If some or none are visible, show all.
     const newVisibility = !allFormFieldsCurrentlyVisible;
 
-    if (onVisibleFieldsChange) {
-      onVisibleFieldsChange((prev) => {
-        const updated = { ...prev };
-        formFieldIds.forEach((id) => {
-          updated[id] = newVisibility;
-        });
-        return updated;
+    setTempVisibleFields((prev) => {
+      const updated = { ...prev };
+      formFieldIds.forEach((id) => {
+        updated[id] = newVisibility;
       });
-    }
+      return updated;
+    });
   };
-
-  const isSettingsOpen = Boolean(settingsAnchorEl);
 
   const allTypes = getFieldTypes();
 
@@ -233,13 +326,15 @@ const FieldPalette = ({
     )
     .map((ft) => ft.id);
 
-  const allLayoutsVisible =
-    layoutFieldIds.length > 0 && layoutFieldIds.every((id) => visibleFields[id]);
-  const allFormFieldsVisible =
-    formFieldIds.length > 0 && formFieldIds.every((id) => visibleFields[id]);
+  const currentFields = isSettingsDrawerOpen ? tempVisibleFields : visibleFields;
 
-  const someLayoutsVisible = layoutFieldIds.some((id) => visibleFields[id]);
-  const someFormFieldsVisible = formFieldIds.some((id) => visibleFields[id]);
+  const allLayoutsVisible =
+    layoutFieldIds.length > 0 && layoutFieldIds.every((id) => currentFields[id]);
+  const allFormFieldsVisible =
+    formFieldIds.length > 0 && formFieldIds.every((id) => currentFields[id]);
+
+  const someLayoutsVisible = layoutFieldIds.some((id) => currentFields[id]);
+  const someFormFieldsVisible = formFieldIds.some((id) => currentFields[id]);
 
   const layoutTypes = allTypes.filter(
     (ft) => ft.isLayout && ft.id !== 'object' && visibleFields[ft.id]
@@ -299,6 +394,79 @@ const FieldPalette = ({
     fontWeight: 500,
   };
 
+  const [rows, setRows] = useState([]);
+
+  React.useEffect(() => {
+    setRows(screenResolutions);
+  }, [screenResolutions]);
+
+  const handleChange = (index, field) => (event) => {
+    setIsScreenChanged(true);
+    const value = event.target.value;
+    setRows((prev) => {
+      const copy = [...prev];
+      copy[index] = {
+        ...copy[index],
+        [field]:
+          field === 'width' || field === 'height'
+            ? value === ''
+              ? ''
+              : Number(value) < 1
+                ? 1
+                : Number(value)
+            : value,
+      };
+      return copy;
+    });
+  };
+
+  const handleToggleEnabled = (index) => (event) => {
+    setIsScreenChanged(true);
+    const checked = event.target.checked;
+    setRows((prev) => {
+      const copy = [...prev];
+      copy[index] = { ...copy[index], enabled: checked };
+      return copy;
+    });
+  };
+
+  const handleDelete = (index) => () => {
+    setIsScreenChanged(true);
+    setRows((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleAdd = () => {
+    setIsScreenChanged(true);
+    setRows((prev) => [
+      ...prev,
+      {
+        id: `custom-${Date.now()}`,
+        label: '',
+        width: '',
+        height: '',
+        enabled: true,
+        isNew: true,
+      },
+    ]);
+  };
+
+  const [isScreenChanged, setIsScreenChanged] = useState(false);
+  // Check if there are any changes to enable/disable save button
+  const hasChanges = React.useMemo(() => {
+    if (!isSettingsDrawerOpen) return false;
+    if (JSON.stringify(tempVisibleFields) !== JSON.stringify(visibleFields)) return true;
+    if (JSON.stringify(tempToolbarVisibility) !== JSON.stringify(toolbarVisibility)) return true;
+    if (isScreenChanged) return true;
+  }, [
+    tempVisibleFields,
+    visibleFields,
+    tempToolbarVisibility,
+    toolbarVisibility,
+    isSettingsDrawerOpen,
+    isScreenChanged,
+  ]);
+
+  const [resonsiveLayoutState, setResonsiveLayoutState] = useState(responsiveState || false);
   return (
     <Box sx={sidebarContainerSx}>
       {/* Schema Loader Section */}
@@ -310,7 +478,7 @@ const FieldPalette = ({
           {t('formTemplates')}
         </Typography>
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', ml: '84px' }}>
-          <Tooltip title="Settings" arrow>
+          <Tooltip title={t('settings')} arrow>
             <IconButton
               onClick={handleSettingsClick}
               size="small"
@@ -328,126 +496,475 @@ const FieldPalette = ({
           </Tooltip>
         </Box>
 
-        {/* Settings Popover */}
-        <Popover
-          open={isSettingsOpen}
-          anchorEl={settingsAnchorEl}
-          onClose={handleSettingsClose}
-          anchorOrigin={{
-            vertical: 'bottom',
-            horizontal: 'left',
-          }}
-          transformOrigin={{
-            vertical: 'top',
-            horizontal: 'left',
+        {/* Settings Drawer */}
+        <Drawer
+          anchor="left"
+          open={isSettingsDrawerOpen}
+          onClose={handleSettingsCancel}
+          sx={{
+            '& .MuiDrawer-paper': {
+              width: 500,
+              boxSizing: 'border-box',
+            },
           }}
         >
-          <Box sx={{ p: 2, minWidth: 250, maxHeight: 400, overflow: 'auto' }}>
-            <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
-              {t('fieldVisibility', 'Field Visibility')}
-            </Typography>
+          <Box sx={{ p: 0, height: '100%', display: 'flex', flexDirection: 'column' }}>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                mb: 1,
+                p: 3,
+              }}
+            >
+              <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                {t('settings')}
+              </Typography>
+              <IconButton
+                onClick={handleSettingsCancel}
+                size="small"
+                sx={{
+                  '&:hover': {
+                    backgroundColor: 'grey.100',
+                  },
+                }}
+              >
+                <IconX size={20} />
+              </IconButton>
+            </Box>
+            <Divider sx={{ mb: 2, width: '100%' }} />
+            <Box sx={{ flex: 1, overflow: 'auto', mb: 2 }} width={500} px={2}>
+              <Accordion defaultExpanded sx={accordionSx}>
+                <AccordionSummary expandIcon={<IconChevronDown />} sx={accordionSummarySx}>
+                  <Typography variant="subtitle1" fontWeight={600}>
+                    {t('fieldVisibility')}
+                  </Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <Box sx={{ overflow: 'auto' }}>
+                    {/* Layout Controls Accordion */}
+                    <Accordion
+                      expanded={expandedAccordions.layouts}
+                      onChange={handleAccordionChange('layouts')}
+                      sx={{ boxShadow: 'none', '&:before': { display: 'none' } }}
+                    >
+                      <AccordionSummary
+                        expandIcon={<IconChevronDown size={20} />}
+                        sx={{
+                          px: 0,
+                          minHeight: '48px',
+                          '& .MuiAccordionSummary-content': {
+                            margin: 0,
+                            alignItems: 'center',
+                          },
+                        }}
+                      >
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              checked={allLayoutsVisible}
+                              indeterminate={someLayoutsVisible && !allLayoutsVisible}
+                              onChange={(e) => {
+                                e.stopPropagation();
+                                handleLayoutsToggle();
+                              }}
+                              size="small"
+                              color="primary"
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                          }
+                          label={
+                            <Typography
+                              variant="body2"
+                              sx={{ fontWeight: 500, color: 'primary.main' }}
+                            >
+                              <IconLayersLinked
+                                size={16}
+                                style={{ marginRight: 4, verticalAlign: 'middle' }}
+                              />
+                              {t('layouts')}
+                            </Typography>
+                          }
+                          sx={{ m: 0 }}
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                      </AccordionSummary>
+                      <AccordionDetails sx={{ px: 0, pt: 0 }}>
+                        <List dense sx={{ pl: 2 }}>
+                          {allTypes
+                            .filter((ft) => ft.isLayout && ft.id !== 'object')
+                            .map((fieldType) => (
+                              <ListItem key={fieldType.id} sx={{ py: 0.5 }}>
+                                <FormControlLabel
+                                  control={
+                                    <Checkbox
+                                      checked={currentFields[fieldType.id] || false}
+                                      onChange={() => handleFieldVisibilityChange(fieldType.id)}
+                                      size="small"
+                                      color="primary"
+                                    />
+                                  }
+                                  label={
+                                    <Typography variant="body2">
+                                      {fieldType.labelKey ? t(fieldType.labelKey) : fieldType.label}
+                                    </Typography>
+                                  }
+                                  sx={{ m: 0 }}
+                                />
+                              </ListItem>
+                            ))}
+                        </List>
+                      </AccordionDetails>
+                    </Accordion>
 
-            <Divider sx={{ mb: 2 }} />
+                    {/* Field Controls Accordion */}
+                    <Accordion
+                      expanded={expandedAccordions.formFields}
+                      onChange={handleAccordionChange('formFields')}
+                      sx={{ boxShadow: 'none', '&:before': { display: 'none' } }}
+                    >
+                      <AccordionSummary
+                        expandIcon={<IconChevronDown size={20} />}
+                        sx={{
+                          px: 0,
+                          minHeight: '48px',
+                          '& .MuiAccordionSummary-content': {
+                            margin: 0,
+                            alignItems: 'center',
+                          },
+                        }}
+                      >
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              checked={allFormFieldsVisible}
+                              indeterminate={someFormFieldsVisible && !allFormFieldsVisible}
+                              onChange={(e) => {
+                                e.stopPropagation();
+                                handleFormFieldsToggle();
+                              }}
+                              size="small"
+                              color="primary"
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                          }
+                          label={
+                            <Typography
+                              variant="body2"
+                              sx={{ fontWeight: 500, color: 'primary.main' }}
+                            >
+                              <IconForms
+                                size={16}
+                                style={{ marginRight: 4, verticalAlign: 'middle' }}
+                              />
+                              {t('formFields')}
+                            </Typography>
+                          }
+                          sx={{ m: 0 }}
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                      </AccordionSummary>
+                      <AccordionDetails sx={{ px: 0, pt: 0 }}>
+                        <List dense sx={{ pl: 2 }}>
+                          {allTypes
+                            .filter(
+                              (ft) =>
+                                !ft.isLayout &&
+                                ft.type !== 'integer' &&
+                                ft.id !== 'multiselect' &&
+                                ft.id !== 'multicheckbox'
+                            )
+                            .map((fieldType) => (
+                              <ListItem key={fieldType.id} sx={{ py: 0.5 }}>
+                                <FormControlLabel
+                                  control={
+                                    <Checkbox
+                                      checked={currentFields[fieldType.id] || false}
+                                      onChange={() => handleFieldVisibilityChange(fieldType.id)}
+                                      size="small"
+                                      color="primary"
+                                    />
+                                  }
+                                  label={
+                                    <Typography variant="body2">
+                                      {fieldType.labelKey ? t(fieldType.labelKey) : fieldType.label}
+                                    </Typography>
+                                  }
+                                  sx={{ m: 0 }}
+                                />
+                              </ListItem>
+                            ))}
+                        </List>
+                      </AccordionDetails>
+                    </Accordion>
+                  </Box>
+                </AccordionDetails>
+              </Accordion>
+              <Accordion sx={accordionSx}>
+                <AccordionSummary expandIcon={<IconChevronDown />} sx={accordionSummarySx}>
+                  <Typography variant="subtitle1" fontWeight={600}>
+                    {t('responsiveUi')}
+                  </Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <Box sx={{ overflow: 'auto' }}>
+                    {/* Layout Controls Accordion */}
+                    <Accordion
+                      expanded={expandedAccordions.layouts}
+                      onChange={handleAccordionChange('layouts')}
+                      sx={{ boxShadow: 'none', '&:before': { display: 'none' } }}
+                    >
+                      <AccordionDetails sx={{ px: 0, pt: 0 }}>
+                        <Box>
+                          <FormControlLabel
+                            control={
+                              <Switch
+                                checked={resonsiveLayoutState.showResplayout}
+                                onChange={(e) => {
+                                  const status = e.target.checked;
+                                  setResonsiveLayoutState({
+                                    ...resonsiveLayoutState,
+                                    showResplayout: status,
+                                  });
+                                  setIsScreenChanged(true);
+                                }}
+                                color="primary"
+                              />
+                            }
+                            label={t('showResponsiveLayout')}
+                            sx={{ mb: 2, display: 'block' }}
+                          />
+                          {resonsiveLayoutState.showResplayout && (
+                            <>
+                              <FormControlLabel
+                                control={
+                                  <Switch
+                                    checked={resonsiveLayoutState.showRotateOption}
+                                    onChange={(e) => {
+                                      const status = e.target.checked;
+                                      setResonsiveLayoutState({
+                                        ...resonsiveLayoutState,
+                                        showRotateOption: status,
+                                      });
+                                      setIsScreenChanged(true);
+                                    }}
+                                    color="primary"
+                                  />
+                                }
+                                label={t('showRotateOption')}
+                                sx={{ mb: 2, display: 'block' }}
+                              />
+                              <FormControlLabel
+                                control={
+                                  <Switch
+                                    checked={tempToolbarVisibility.showFullscreen ?? true}
+                                    onChange={(e) =>
+                                      setTempToolbarVisibility({
+                                        ...tempToolbarVisibility,
+                                        showFullscreen: e.target.checked,
+                                      })
+                                    }
+                                    color="primary"
+                                  />
+                                }
+                                label={t('showFullscreen')}
+                                sx={{ mb: 2, display: 'block' }}
+                              />
+                            </>
+                          )}
+                        </Box>
+                        {resonsiveLayoutState.showResplayout && (
+                          <Box>
+                            <Typography variant="h6" sx={{ mb: 2 }}>
+                              {t('responsiveScreens')}
+                            </Typography>
 
-            {/* Layout Controls */}
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={allLayoutsVisible}
-                  indeterminate={someLayoutsVisible && !allLayoutsVisible}
-                  onChange={handleLayoutsToggle}
-                  size="small"
-                  color="primary"
-                />
-              }
-              label={
-                <Typography variant="body2" sx={{ fontWeight: 500, color: 'primary.main' }}>
-                  <IconLayersLinked size={16} style={{ marginRight: 4, verticalAlign: 'middle' }} />
-                  {t('layouts')}
-                </Typography>
-              }
-              sx={{ m: 0 }}
-            />
+                            {rows.map((row, index) => (
+                              <Box
+                                key={row.id}
+                                sx={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: 2,
+                                  mb: 1,
+                                }}
+                              >
+                                <Checkbox
+                                  checked={row.enabled}
+                                  onChange={handleToggleEnabled(index)}
+                                  disabled={index === 0}
+                                />
+                                {row.isNew ? (
+                                  <TextField
+                                    label={t('label')}
+                                    size="small"
+                                    value={row.label}
+                                    onChange={handleChange(index, 'label')}
+                                    InputProps={{
+                                      sx: {
+                                        '& input': {
+                                          fontSize: '14px', // 14px
+                                          paddingLeft: '8px',
+                                          paddingRight: '8px',
+                                        },
+                                      },
+                                    }}
+                                    disabled={index === 0}
+                                    sx={{ minWidth: 180 }}
+                                  />
+                                ) : (
+                                  <Typography sx={{ minWidth: 180 }}>{row.label}</Typography>
+                                )}
 
-            <List dense sx={{ pl: 2 }}>
-              {allTypes
-                .filter((ft) => ft.isLayout && ft.id !== 'object')
-                .map((fieldType) => (
-                  <ListItem key={fieldType.id} sx={{ py: 0.5 }}>
+                                {row.isNew ? (
+                                  <TextField
+                                    label={t('width')}
+                                    type="number"
+                                    size="small"
+                                    value={row.width}
+                                    onChange={handleChange(index, 'width')}
+                                    InputProps={{
+                                      inputProps: { min: 1 },
+                                      sx: {
+                                        '& input': {
+                                          fontSize: '14px', // 14px
+                                          paddingLeft: '8px',
+                                          paddingRight: '8px',
+                                        },
+                                      },
+                                    }}
+                                    disabled={index === 0}
+                                    sx={{ width: 120 }}
+                                  />
+                                ) : (
+                                  <Typography sx={{ width: 120 }}>{row.width}</Typography>
+                                )}
+
+                                {row.isNew ? (
+                                  <TextField
+                                    label={t('height')}
+                                    type="number"
+                                    size="small"
+                                    value={row.height}
+                                    onChange={handleChange(index, 'height')}
+                                    InputProps={{
+                                      inputProps: { min: 1 },
+                                      sx: {
+                                        '& input': {
+                                          fontSize: '14px', // 14px
+                                          paddingLeft: '8px',
+                                          paddingRight: '8px',
+                                        },
+                                      },
+                                    }}
+                                    disabled={index === 0}
+                                    sx={{ width: 120 }}
+                                  />
+                                ) : (
+                                  <Typography sx={{ width: 120 }}>{row.height}</Typography>
+                                )}
+
+                                {row.isNew && (
+                                  <IconButton
+                                    aria-label="delete"
+                                    color="error"
+                                    onClick={handleDelete(index)}
+                                  >
+                                    <IconTrash size={15} />
+                                  </IconButton>
+                                )}
+                              </Box>
+                            ))}
+
+                            <Button variant="outlined" onClick={handleAdd}>
+                              {t('addResolution')}
+                            </Button>
+                          </Box>
+                        )}
+                      </AccordionDetails>
+                    </Accordion>
+
+                    {/* Field Controls Accordion */}
+                  </Box>
+                </AccordionDetails>
+              </Accordion>
+              <Accordion sx={accordionSx}>
+                <AccordionSummary expandIcon={<IconChevronDown />} sx={accordionSummarySx}>
+                  <Typography variant="subtitle1" fontWeight={600}>
+                    {t('featureToggles')}
+                  </Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <Box>
                     <FormControlLabel
                       control={
-                        <Checkbox
-                          checked={visibleFields[fieldType.id] || false}
-                          onChange={() => handleFieldVisibilityChange(fieldType.id)}
-                          size="small"
+                        <Switch
+                          checked={tempToolbarVisibility.showFormPreview ?? true}
+                          onChange={(e) =>
+                            setTempToolbarVisibility({
+                              ...tempToolbarVisibility,
+                              showFormPreview: e.target.checked,
+                            })
+                          }
                           color="primary"
                         />
                       }
-                      label={
-                        <Typography variant="body2">
-                          {fieldType.labelKey ? t(fieldType.labelKey) : fieldType.label}
-                        </Typography>
-                      }
-                      sx={{ m: 0 }}
+                      label={t('showFormPreview')}
+                      sx={{ mb: 2, display: 'block' }}
                     />
-                  </ListItem>
-                ))}
-            </List>
-
-            <Divider sx={{ my: 1 }} />
-
-            {/* Field Controls */}
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={allFormFieldsVisible}
-                  indeterminate={someFormFieldsVisible && !allFormFieldsVisible}
-                  onChange={handleFormFieldsToggle}
-                  size="small"
-                  color="primary"
-                />
-              }
-              label={
-                <Typography variant="body2" sx={{ fontWeight: 500, color: 'primary.main' }}>
-                  <IconForms size={16} style={{ marginRight: 4, verticalAlign: 'middle' }} />
-                  {t('formFields')}
-                </Typography>
-              }
-              sx={{ m: 0 }}
-            />
-
-            <List dense sx={{ pl: 2 }}>
-              {allTypes
-                .filter(
-                  (ft) =>
-                    !ft.isLayout &&
-                    ft.type !== 'integer' &&
-                    ft.id !== 'multiselect' &&
-                    ft.id !== 'multicheckbox'
-                )
-                .map((fieldType) => (
-                  <ListItem key={fieldType.id} sx={{ py: 0.5 }}>
                     <FormControlLabel
                       control={
-                        <Checkbox
-                          checked={visibleFields[fieldType.id] || false}
-                          onChange={() => handleFieldVisibilityChange(fieldType.id)}
-                          size="small"
+                        <Switch
+                          checked={tempToolbarVisibility.showSchema ?? true}
+                          onChange={(e) =>
+                            setTempToolbarVisibility({
+                              ...tempToolbarVisibility,
+                              showSchema: e.target.checked,
+                            })
+                          }
                           color="primary"
                         />
                       }
-                      label={
-                        <Typography variant="body2">
-                          {fieldType.labelKey ? t(fieldType.labelKey) : fieldType.label}
-                        </Typography>
-                      }
-                      sx={{ m: 0 }}
+                      label={t('showSchema')}
+                      sx={{ mb: 2, display: 'block' }}
                     />
-                  </ListItem>
-                ))}
-            </List>
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          checked={tempToolbarVisibility.showValidate ?? true}
+                          onChange={(e) =>
+                            setTempToolbarVisibility({
+                              ...tempToolbarVisibility,
+                              showValidate: e.target.checked,
+                            })
+                          }
+                          color="primary"
+                        />
+                      }
+                      label={t('showValidate')}
+                      sx={{ mb: 2, display: 'block' }}
+                    />
+                  </Box>
+                </AccordionDetails>
+              </Accordion>
+            </Box>
+            {/* Fixed Action Buttons at Bottom */}
+            <Box sx={propertiesPanelFooter}>
+              <Button
+                fullWidth
+                variant="contained"
+                onClick={handleSettingsSave}
+                disabled={!hasChanges}
+              >
+                {t('save', 'Save')}
+              </Button>
+              <Button fullWidth onClick={handleSettingsCancel} variant="outlined">
+                {t('cancel', 'Cancel')}
+              </Button>
+            </Box>
           </Box>
-        </Popover>
+        </Drawer>
       </Box>
 
       <FormControl fullWidth size="small" sx={{ mb: 1 }}>
@@ -477,7 +994,7 @@ const FieldPalette = ({
         </Select>
       </FormControl>
 
-      <Divider sx={{ my: 2 }} />
+      <Divider sx={{ my: 2, width: '100%' }} />
 
       {/* Layout Elements Section */}
       {(someLayoutsVisible || allLayoutsVisible) && (
@@ -500,7 +1017,7 @@ const FieldPalette = ({
               <DraggableFieldItem key={fieldType.id} fieldType={fieldType} />
             ))}
           </Box>
-          <Divider sx={{ my: 2 }} />
+          <Divider sx={{ my: 2, width: '100%' }} />
         </Box>
       )}
 

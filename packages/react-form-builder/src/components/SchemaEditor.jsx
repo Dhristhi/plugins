@@ -13,7 +13,8 @@ const SchemaEditor = ({
   showSchemaEditor,
   setShowSchemaEditor,
   exportForm,
-  onSave,
+  onExport,
+  toolbarVisibility = {},
 }) => {
   const { t } = useTranslation();
   const [schemaText, setSchemaText] = useState('');
@@ -25,7 +26,7 @@ const SchemaEditor = ({
     setUischemaText(JSON.stringify(formState.uischema, null, 2));
   }, [formState]);
 
-  const handleApply = () => {
+  const handleExport = () => {
     try {
       const newSchema = JSON.parse(schemaText);
       const newUischema = JSON.parse(uischemaText);
@@ -36,8 +37,8 @@ const SchemaEditor = ({
         uischema: newUischema,
       });
 
-      if (onSave) {
-        onSave(newSchema, newUischema);
+      if (onExport) {
+        onExport(newSchema, newUischema);
       }
 
       setError(null);
@@ -107,8 +108,9 @@ const SchemaEditor = ({
         showSchemaEditor={showSchemaEditor}
         setShowSchemaEditor={setShowSchemaEditor}
         exportForm={exportForm}
-        onApplyChanges={handleApply}
+        onApplyChanges={handleExport}
         showApplyButton={true}
+        toolbarVisibility={toolbarVisibility}
       />
 
       <Box sx={contentContainerSx}>

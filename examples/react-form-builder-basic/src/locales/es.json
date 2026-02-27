@@ -69,7 +69,7 @@
   "enableTextarea": "Habilitar área de texto",
   "useDynamicData": "Usar datos dinámicos",
   "apiEntity": "Entidad de API",
-  "apiEntityHelp": "Nombre del endpoint de la API (p. ej., countries, cities)",
+  "apiEntityHelp": "URL del endpoint de la API (p. ej., https://api.example.com/products)",
   "valueFieldName": "Nombre del campo de valor",
   "valueFieldHelp": "Nombre del campo para el valor almacenado (p. ej., code, id). Déjalo vacío para arreglos primitivos.",
   "labelFieldName": "Nombre del campo de etiqueta",
@@ -77,7 +77,7 @@
   "enumDataType": "Tipo de datos del enum",
   "addEnum": "Añadir valor",
   "newOption": "Nueva opción",
-  "validationRules": "Reglas de validación",
+  "validationRules": "Validaciones",
   "requiredField": "Campo obligatorio",
   "minLength": "Longitud mínima",
   "maxLength": "Longitud máxima",
@@ -106,6 +106,7 @@
   "jsonSchema": "Esquema JSON",
   "uiSchema": "Esquema de UI",
   "applyChanges": "Aplicar cambios",
+  "exportSchema": "Exportar esquema",
   "invalidJson": "Formato JSON no válido",
   "preview": "Vista previa",
   "schema": "Esquema",
@@ -147,7 +148,7 @@
   "uploading": "Subiendo...",
   "dragAndDropOrClick": "Arrastra y suelta o haz clic para seleccionar",
   "fileUploadSuccess": "¡Archivo subido correctamente!",
-  "clickToChangeFile": "Haz clic para cambiar el archivo",
+  "clickToChangeFile": "Haz clic para agregar archivo",
   "showMore": "Ver más",
   "showLess": "Ver menos",
 
@@ -179,7 +180,7 @@
   "fileTypeNotAllowed": "El archivo seleccionado \"{{fileName}}\" no es un tipo de archivo permitido.",
   "fileSizeExceeded": "El archivo seleccionado \"{{fileName}}\" excede el tamaño máximo de {{maxSize}}MB.",
   "fileProcessingError": "Error inesperado al procesar los archivos.",
-
+  "download": "Descargar",
   "desktop": "Escritorio",
   "tablet": "Tableta",
   "mobile": "Móvil",
@@ -230,7 +231,10 @@
     "minLength": "Por favor, introduce al menos {{min}} caracteres",
     "maxLength": "Por favor, no introduzcas más de {{max}} caracteres",
     "minimum": "El valor debe ser al menos {{limit}}",
-    "maximum": "El valor debe ser como máximo {{limit}}"
+    "maximum": "El valor debe ser como máximo {{limit}}",
+    "minItems": "no debe tener menos de {{limit}} elementos",
+    "maxItems": "no debe tener más de {{limit}} elementos",
+    "uniqueItems": "no debe tener elementos duplicados"
   },
   "rotate": "Girar",
   "screen": "Pantalla",
@@ -242,12 +246,26 @@
     "operator": "Operador",
     "value": "Valor"
   },
-  "enableInteger": "Habilitar entero",
-  "useAsCurrency": "Usar como moneda",
+  "acceptInteger": "Permitir números sin decimales",
+  "useAsCurrencyPrefix": "Utilizar como prefijo de moneda",
+  "settings": "Configuración",
+  "fieldVisibility": "Visibilidad de Campos",
   "Array": {
     "deleteDialogTitle": "Eliminar elemento",
     "deleteDialogMessage": "Seguro que quieres eliminar este elemento?",
     "deleteDialogAccept": "Eliminar",
     "deleteDialogDecline": "Cancelar"
-  }
+  },
+  "rules": "Reglas",
+  "clear": "Limpiar",
+  "responsiveScreens": "Resoluciones de pantalla",
+  "showResponsiveLayout": "Mostrar barra de herramientas adaptable",
+  "showRotateOption": "Mostrar opción de rotación",
+  "responsiveUi": "Interfaz adaptable",
+  "featureToggles": "Alternar funciones",
+  "showFormPreview": "Mostrar vista previa del formulario",
+  "showSchema": "Mostrar esquema",
+  "showFullscreen": "Mostrar pantalla completa",
+  "showValidate": "Mostrar validar",
+  "addResolution": "Añadir resolución"
 }
